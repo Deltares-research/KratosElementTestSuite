@@ -10,7 +10,7 @@ requires-python = ">=3.10"
 # Use a list syntax:
 include = ["kratos_element_test/assets/**", 
            "kratos_element_test/test_triaxial/**",
-           "kratos_element_test/test_direct_shear/**"
+           "kratos_element_test/test_direct_shear/**"]
            
 [tool.poetry.dependencies]
 python = ">=3.10"
