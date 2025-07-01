@@ -19,7 +19,7 @@ pefile = "*"
 KratosGeoMechanicsApplication = ">=10.2.3"
 
 [tool.poetry.scripts]
-yourcommand = "kratos_element_test.main:main"
+startElementTest = "kratos_element_test.main:kratos_element_test_gui"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
