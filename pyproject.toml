@@ -2,28 +2,32 @@
 requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
 
-[project]
-name = "kratos_element_test"          # Must be unique on PyPI/TestPyPI
+[tool.poetry]
+name = "kratos_element_test"
 version = "0.1.0"
-description = "The Kratos Element Test Suite, a collection of programs and scripts designed to model the laboratory within the geotechnical laboratories. This repo also contains associated tooling providing additional analysis functionality, such as parameter estimation."
-readme = "README.md"
-requires-python = ">=3.10"
-license = { text = "Proprietary" }
+description = "The Kratos Element Test Suite..."
 authors = [
     { name="Deltares Geo Kratos Team", email="kratos@deltares.nl" }
 ]
+license = "Proprietary"
+readme = "README.md"
+requires-python = ">=3.10"
 
-# Optional: If you still have dependencies
-dependencies = [
-  "KratosGeoMechanicsApplication>=10.2.3",
-]
+homepage = "https://github.com/Deltares-research/KratosElementTestSuite"
 
-[project.urls]
-"Homepage" = "https://github.com/Deltares-research/KratosElementTestSuite"
+[tool.poetry.dependencies]
+python = ">=3.10"
+matplotlib = "*"
+pefile = "*"
+KratosGeoMechanicsApplication = ">=10.2.3"
 
-# If you include data files:
-[tool.setuptools]
-include-package-data = true
+[tool.poetry.scripts]
+yourcommand = "yourpackage.main:main"
 
-[tool.setuptools.packages.find]
-where = ["."]
+# If you need to include extra files
+[tool.poetry.include]
+# Not required unless you need to include non-Python files
+
+[tool.poetry.urls]
+homepage = "https://github.com/Deltares-research/KratosElementTestSuite"
+
