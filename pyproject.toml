@@ -1,19 +1,12 @@
-[build-system]
-requires = ["poetry-core>=1.0.0"]
-build-backend = "poetry.core.masonry.api"
-
 [tool.poetry]
 name = "kratos_element_test"
 version = "0.1.0"
 description = "The Kratos Element Test Suite..."
-authors = [
-    { name="Deltares Geo Kratos Team", email="kratos@deltares.nl" }
-]
+authors = ["Deltares Geo Kratos Team <kratos@deltares.nl>"]
 license = "Proprietary"
 readme = "README.md"
-requires-python = ">=3.10"
-
 homepage = "https://github.com/Deltares-research/KratosElementTestSuite"
+requires-python = ">=3.10"
 
 [tool.poetry.dependencies]
 python = ">=3.10"
@@ -21,13 +14,15 @@ matplotlib = "*"
 pefile = "*"
 KratosGeoMechanicsApplication = ">=10.2.3"
 
-[tool.poetry.scripts]
-yourcommand = "yourpackage.main:main"
-
-# If you need to include extra files
 [tool.poetry.include]
-# Not required unless you need to include non-Python files
+# Use a list syntax:
+include = ["kratos_element_test/assets/**", 
+           "kratos_element_test/test_triaxial/**",
+           "kratos_element_test/test_direct_shear/**"]
 
-[tool.poetry.urls]
-homepage = "https://github.com/Deltares-research/KratosElementTestSuite"
+[tool.poetry.scripts]
+yourcommand = "kratos_element_test.main:main"
 
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
