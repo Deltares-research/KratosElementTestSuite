@@ -1,0 +1,4 @@
+# MANIFEST.in
+recursive-include kratos_element_test/assets *
+recursive-include kratos_element_test/test_direct_shear *
+recursive-include kratos_element_test/test_triaxial *

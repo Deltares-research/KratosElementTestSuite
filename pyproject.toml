@@ -1,0 +1,29 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "kratos_element_test"          # Must be unique on PyPI/TestPyPI
+version = "0.1.0"
+description = "The Kratos Element Test Suite, a collection of programs and scripts designed to model the laboratory within the geotechnical laboratories. This repo also contains associated tooling providing additional analysis functionality, such as parameter estimation."
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "Proprietary" }
+authors = [
+    { name="Deltares Geo Kratos Team", email="kratos@deltares.nl" }
+]
+
+# Optional: If you still have dependencies
+dependencies = [
+  "KratosGeoMechanicsApplication>=10.2.3",
+]
+
+[project.urls]
+"Homepage" = "https://github.com/Deltares-research/KratosElementTestSuite"
+
+# If you include data files:
+[tool.setuptools]
+include-package-data = true
+
+[tool.setuptools.packages.find]
+where = ["."]
