@@ -7,18 +7,16 @@ license = "Proprietary"
 readme = "README.md"
 homepage = "https://github.com/Deltares-research/KratosElementTestSuite"
 requires-python = ">=3.10"
-
+# Use a list syntax:
+include = ["kratos_element_test/assets/**", 
+           "kratos_element_test/test_triaxial/**",
+           "kratos_element_test/test_direct_shear/**"
+           
 [tool.poetry.dependencies]
 python = ">=3.10"
 matplotlib = "*"
 pefile = "*"
 KratosGeoMechanicsApplication = ">=10.2.3"
-
-[tool.poetry.include]
-# Use a list syntax:
-include = ["kratos_element_test/assets/**", 
-           "kratos_element_test/test_triaxial/**",
-           "kratos_element_test/test_direct_shear/**"]
 
 [tool.poetry.scripts]
 yourcommand = "kratos_element_test.main:main"
