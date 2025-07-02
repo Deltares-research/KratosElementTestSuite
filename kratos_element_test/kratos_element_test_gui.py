@@ -4,7 +4,7 @@
 
 import os
 import sys
-from ui_menu import create_menu
+from kratos_element_test.ui_menu import create_menu
 
 
 def main():

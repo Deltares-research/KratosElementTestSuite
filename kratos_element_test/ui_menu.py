@@ -5,8 +5,8 @@
 import os
 import tkinter as tk
 from tkinter import filedialog, messagebox, ttk
-from ui_builder import GeotechTestUI
-from ui_udsm_parser import udsm_parser
+from kratos_element_test.ui_builder import GeotechTestUI
+from kratos_element_test.ui_udsm_parser import udsm_parser
 
 import ctypes
 ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID("deltares.triaxial.ui")

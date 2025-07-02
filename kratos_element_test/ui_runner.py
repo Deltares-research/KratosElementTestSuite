@@ -3,8 +3,8 @@
 # Contact kratos@deltares.nl
 
 import traceback
-from ui_logger import log_message
-from run_simulation import run_simulation
+from kratos_element_test.ui_logger import log_message
+from kratos_element_test.run_simulation import run_simulation
 
 def run_gui_builder(test_type, dll_path, index, umat_parameters, input_widgets, cohesion_phi_indices, axes):
     try:

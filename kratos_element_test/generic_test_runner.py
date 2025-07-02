@@ -9,7 +9,8 @@ import numpy as np
 
 import KratosMultiphysics as Kratos
 from KratosMultiphysics.GeoMechanicsApplication.geomechanics_analysis import GeoMechanicsAnalysis
-import test_helper
+
+from kratos_element_test import test_helper
 
 class GenericTestRunner:
     def __init__(self, output_file_paths, work_dir):

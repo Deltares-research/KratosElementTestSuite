@@ -3,12 +3,8 @@ from typing import Dict, Any
 import sys,os
 import math
 
-sys.path.append(os.path.join('..','..','..'))
-
 import KratosMultiphysics as Kratos
 import KratosMultiphysics.GeoMechanicsApplication as KratosGeo
-
-sys.path.append(os.path.join('..', 'python_scripts'))
 import KratosMultiphysics.GeoMechanicsApplication.geomechanics_analysis as analysis
 
 

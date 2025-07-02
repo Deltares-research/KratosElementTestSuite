@@ -11,9 +11,9 @@ from matplotlib.gridspec import GridSpec
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import threading
 
-from ui_runner import run_gui_builder
-from ui_logger import init_log_widget, log_message, clear_log
-from ui_udsm_parser import input_parameters_format_to_unicode
+from kratos_element_test.ui_runner import run_gui_builder
+from kratos_element_test.ui_logger import init_log_widget, log_message, clear_log
+from kratos_element_test.ui_udsm_parser import input_parameters_format_to_unicode
 import traceback
 
 

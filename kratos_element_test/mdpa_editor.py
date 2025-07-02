@@ -3,7 +3,7 @@
 # Contact kratos@deltares.nl
 
 import re
-from ui_logger import log_message
+from kratos_element_test.ui_logger import log_message
 
 
 class MdpaEditor:

@@ -7,11 +7,11 @@ import shutil
 import tempfile
 import numpy as np
 
-from material_editor import MaterialEditor
-from project_parameter_editor import ProjectParameterEditor
-from mdpa_editor import MdpaEditor
-from generic_test_runner import GenericTestRunner
-from plots import (
+from kratos_element_test.material_editor import MaterialEditor
+from kratos_element_test.project_parameter_editor import ProjectParameterEditor
+from kratos_element_test.mdpa_editor import MdpaEditor
+from kratos_element_test.generic_test_runner import GenericTestRunner
+from kratos_element_test.plots import (
     plot_delta_sigma_triaxial, plot_volumetric_vertical_strain_triaxial, plot_principal_stresses_triaxial,
     plot_p_q_triaxial, plot_mohr_coulomb_triaxial,
     plot_strain_stress_direct_shear, plot_principal_stresses_direct_shear,

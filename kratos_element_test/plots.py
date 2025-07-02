@@ -3,7 +3,7 @@
 # Contact kratos@deltares.nl
 
 import numpy as np
-from ui_logger import log_message
+from kratos_element_test.ui_logger import log_message
 
 
 def plot_principal_stresses_triaxial(ax, sigma_1, sigma_3):
