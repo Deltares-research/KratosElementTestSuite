@@ -22,6 +22,7 @@ fake-linux-marker = { version = "*", markers = "sys_platform == 'linux' and pyth
 
 matplotlib = "*"
 pefile = "*"
+platformdirs = "*"
 KratosGeoMechanicsApplication = ">=10.2.3"
 
 [tool.poetry.scripts]
