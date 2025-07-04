@@ -17,6 +17,7 @@ Create a virtual environment (Name of this Python environment is element_env)
 ```bash
 python -m venv element_env 
 ```
+_(If you have multiple Python versions, you can replace `python` with `py -3.12` in the command above —[see here](https://docs.python.org/3/using/windows.html#python-launcher-for-windows)— assuming Python 3.12 is available on your system.)_
 
 Activate the environment:
 ```bash
@@ -35,4 +36,4 @@ Once installed, you can run the Element Test Suite by:
 startElementTest
 ```
 
-**Note**: For this Alpha release, we are aware of some scaling issues. If you scale the window to a small size, or if the scale option of your display settings is set to a value higher than 125%, the tool is not usable.
+**Note**: For proper rendering of the user interface, your display scaling must be set to 125% or lower. The interface may not render correctly at higher scaling settings (e.g. 150% or above).
