@@ -118,13 +118,10 @@ def create_menu():
     root = tk.Tk()
     
     pixels_per_inch = root.winfo_fpixels('1i')
-    scaling_factor = pixels_per_inch / 96
+    scaling_factor = pixels_per_inch / 72
 
     if scaling_factor > 1.25:
         root.tk.call('tk', 'scaling', scaling_factor)
-
-    scaling = root.winfo_fpixels('1i') / 96
-    root.tk.call('tk', 'scaling', scaling)
 
     menubar = Menu(root)
     root.config(menu=menubar)
