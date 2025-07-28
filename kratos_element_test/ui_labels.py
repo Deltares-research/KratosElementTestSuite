@@ -6,13 +6,13 @@
 
 # Application data
 APP_TITLE = "Deltares Soil Element Test Suite"
-APP_VERSION = "Version 0.1.0 ~ Alpha Release"
+APP_VERSION = "Version 0.1.2 ~ Alpha Release"
 APP_NAME = "SoilElementSuite"
 APP_AUTHOR = "Deltares"
 
 # General test types
 TRIAXIAL = "Triaxial"
-DIRECT_SHEAR= "Direct Shear"
+DIRECT_SHEAR= "Direct Simple Shear"
 
 # Input labels
 MAX_STRAIN_LABEL = "Maximum Strain |εᵧᵧ|"
@@ -60,4 +60,5 @@ LEGEND_MC = "Mohr-Coulomb"
 LEGEND_MC_FAILURE = "Failure Criterion: τ = σ' tan(φ°) + c'"
 
 # Font labels
-FONT_SEGOE_UI = "Segoe UI"
+HELP_MENU_FONT = "Segoe UI"
+INPUT_SECTION_FONT = "Arial"
