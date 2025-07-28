@@ -1,3 +1,7 @@
+# ©Deltares 2025
+# This is a prototype version
+# Contact kratos@deltares.nl
+
 import os
 import math
 import tkinter as tk
@@ -10,10 +14,9 @@ from PIL import Image, ImageTk
 import threading
 import traceback
 
-from ui_runner import run_gui_builder
-from ui_logger import init_log_widget, log_message, clear_log
-
-from ui_labels import (
+from kratos_element_test.ui_runner import run_gui_builder
+from kratos_element_test.ui_logger import init_log_widget, log_message, clear_log
+from kratos_element_test.ui_labels import (
     TRIAXIAL, DIRECT_SHEAR,
     MAX_STRAIN_LABEL, INIT_PRESSURE_LABEL, STRESS_INC_LABEL, NUM_STEPS_LABEL, DURATION_LABEL,
     FL2_UNIT_LABEL, SECONDS_UNIT_LABEL, PERCENTAGE_UNIT_LABEL, WITHOUT_UNIT_LABEL,
