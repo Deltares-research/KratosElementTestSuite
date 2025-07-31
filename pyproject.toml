@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "kratos_element_test"
-version = "0.1.0"
+version = "0.1.1"
 description = "The Kratos Element Test Suite..."
 authors = ["Deltares Geo Kratos Team <kratos@deltares.nl>"]
 license = "Proprietary"
@@ -13,7 +13,7 @@ include = ["kratos_element_test/assets/**",
            "kratos_element_test/test_direct_shear/**"]
            
 [tool.poetry.dependencies]
-python = ">=3.10,<3.13"
+python = ">=3.10,<3.15"
 
 matplotlib = "*"
 pefile = "*"

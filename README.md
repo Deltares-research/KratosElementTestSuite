@@ -1,10 +1,10 @@
 # Kratos Element Test Suite
 The Kratos Element Test Suite, a collection of programs and scripts designed to model the laboratory within the geotechnical laboratories. This repository will be extended in the future with additional tooling to support advanced analysis workflows, such as parameter estimation.
 
-**Note**: Due to limitations with dependent packages, this suite can only be installed on machines with Python 3.10 - 3.12.
+**Note**: Due to limitations with dependent packages, this suite can only be installed on machines with Python 3.10 - 3.14.
 
 ## Requirements
-- Python 3.10 - 3.12
+- Python 3.10 - 3.14
 [Download for Windows](https://www.python.org/downloads/windows/)
 - Git
 [Download for Windows](https://git-scm.com/downloads/win)
@@ -17,7 +17,7 @@ Create a virtual environment (Name of this Python environment is element_env)
 ```bash
 python -m venv element_env 
 ```
-_(If you have multiple Python versions, you can replace `python` with `py -3.12` in the command above —[see here](https://docs.python.org/3/using/windows.html#python-launcher-for-windows)— assuming Python 3.12 is available on your system.)_
+_(If you have multiple Python versions, you can replace `python` with `py -3.13` in the command above —[see here](https://docs.python.org/3/using/windows.html#python-launcher-for-windows)— assuming Python 3.13 is available on your system.)_
 
 Activate the environment:
 ```bash
