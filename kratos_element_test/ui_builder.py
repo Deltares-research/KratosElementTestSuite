@@ -90,18 +90,7 @@ class GeotechTestUI:
         self.run_button = ttk.Button(self.button_frame, text="Run Calculation", command=self._start_simulation_thread)
         self.run_button.pack(pady=5, fill="x")
 
-        self.log_frame = ttk.Frame(self.left_panel, padding="5")
-        self.log_frame.pack(fill="x", padx=10, pady=(0, 10))
-
-        ttk.Label(self.log_frame, text="Log Output:", font=(INPUT_SECTION_FONT, 10, "bold")).pack(anchor="w")
-        self.log_widget = scrolledtext.ScrolledText(self.log_frame, height=6, width=40, state="disabled", wrap="word", font=("Courier", 9))
-        self.log_widget.pack(fill="x", expand=False)
-
-        self.log_widget.bind("<Key>", lambda e: "break")
-        self.log_widget.bind("<Button-1>", lambda e: "break")
-        self.log_widget.bind("<FocusIn>", lambda e: self.root.focus())
-
-        init_log_widget(self.log_widget)
+        self._init_log_section()
 
     def _init_plot_canvas(self, num_plots):
         self._destroy_existing_plot_canvas()
@@ -220,7 +209,7 @@ class GeotechTestUI:
         )
         self.mohr_checkbox_widget.pack(side="left")
 
-        self.c_label = ttk.Label(self.mohr_frame, text="Indexes (1-based): Cohesion")
+        self.c_label = ttk.Label(self.mohr_frame, text="Indices (1-based): Cohesion")
         self.c_dropdown = ttk.Combobox(self.mohr_frame, textvariable=self.cohesion_var,
                                        values=[str(i+1) for i in range(len(params))], state="readonly", width=2)
 
@@ -369,10 +358,18 @@ class GeotechTestUI:
 
     def _disable_gui(self):
         self._set_widget_state(self.left_frame, "disabled")
+        if hasattr(self, "scrollbar"):
+            self._original_scroll_cmd = self.scrollbar.cget("command")
+            self.scrollbar.config(command=lambda *args: None)
+        self.scroll_canvas.unbind_all("<MouseWheel>")
 
     def _enable_gui(self):
         self._set_widget_state(self.left_frame, "normal")
         self.run_button.config(state="normal")
+
+        if hasattr(self, "scrollbar") and hasattr(self, "_original_scroll_cmd"):
+            self.scrollbar.config(command=self._original_scroll_cmd)
+        self.scroll_canvas.bind_all("<MouseWheel>", self._on_mousewheel)
 
         if self.is_linear_elastic:
             self.mohr_checkbox_widget.configure(state="disabled")
@@ -396,7 +393,7 @@ class GeotechTestUI:
         self.scroll_canvas.yview_scroll(int(-1 * (event.delta / 120)), "units")
 
     def _init_log_section(self):
-        self.log_frame = ttk.Frame(self.left_frame, padding="5")
+        self.log_frame = ttk.Frame(self.left_panel, padding="5")
         self.log_frame.pack(fill="x", padx=10, pady=(0, 10))
 
         ttk.Label(self.log_frame, text="Log Output:", font=(INPUT_SECTION_FONT, 10, "bold")).pack(anchor="w")

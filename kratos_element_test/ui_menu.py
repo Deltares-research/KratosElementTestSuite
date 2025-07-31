@@ -13,13 +13,6 @@ from kratos_element_test.ui_labels import APP_TITLE, APP_VERSION, APP_NAME, APP_
 
 import ctypes
 ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID("deltares.ElementTestSuite.ui")
-try:
-    ctypes.windll.shcore.SetProcessDpiAwareness(1)
-except Exception:
-    try:
-        ctypes.windll.user32.SetProcessDPIAware()
-    except Exception:
-        pass
 
 data_dir = Path(user_data_dir(APP_NAME, APP_AUTHOR))
 data_dir.mkdir(parents=True, exist_ok=True)
@@ -176,7 +169,7 @@ def create_menu():
         model_dict = {
             "model_name": [LINEAR_ELASTIC],
             "num_params": [2],
-            "param_names": [["Young Modulus", "Poisson Ratio"]],
+            "param_names": [["Young's Modulus", "Poisson's Ratio"]],
             "param_units": [["kN/m²", "–"]]
         }
 
@@ -211,8 +204,6 @@ def create_menu():
     def refresh_plot_frame():
         root.update_idletasks()
         root.event_generate("<Configure>")
-
-    root.after(500, refresh_plot_frame)    
 
     root.protocol("WM_DELETE_WINDOW", on_close)
     root.mainloop()
