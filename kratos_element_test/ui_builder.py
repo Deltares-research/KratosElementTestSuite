@@ -352,12 +352,17 @@ class GeotechTestUI:
 
         for widget in self.external_widgets:
             if isinstance(widget, ttk.Combobox):
-                widget.configure(state="readonly")
+                widget.configure(state="readonly" if state == "normal" else "disabled")
             else:
                 widget.configure(state=state)
 
     def _disable_gui(self):
         self._set_widget_state(self.left_frame, "disabled")
+        self.model_menu.config(state="disabled")
+        self.test_type_menu.config(state="disabled")
+        self.c_dropdown.config(state="disabled")
+        self.phi_dropdown.config(state="disabled")
+        self._set_widget_state(self.button_frame, "disabled")
         if hasattr(self, "scrollbar"):
             self._original_scroll_cmd = self.scrollbar.cget("command")
             self.scrollbar.config(command=lambda *args: None)
