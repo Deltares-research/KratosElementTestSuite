@@ -9,7 +9,8 @@ from platformdirs import user_data_dir
 from pathlib import Path
 from kratos_element_test.ui_builder import GeotechTestUI
 from kratos_element_test.ui_udsm_parser import udsm_parser
-from kratos_element_test.ui_labels import APP_TITLE, APP_VERSION, APP_NAME, APP_AUTHOR, SELECT_UDSM, LINEAR_ELASTIC, HELP_MENU_FONT
+from kratos_element_test.ui_labels import (APP_TITLE, APP_VERSION, APP_NAME, APP_AUTHOR, SELECT_UDSM, LINEAR_ELASTIC,
+                                           HELP_MENU_FONT, DEFAULT_TKINTER_DPI)
 
 import ctypes
 ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID("deltares.ElementTestSuite.ui")
@@ -111,7 +112,7 @@ def create_menu():
     root = tk.Tk()
     
     pixels_per_inch = root.winfo_fpixels('1i')
-    scaling_factor = pixels_per_inch / 72
+    scaling_factor = pixels_per_inch / DEFAULT_TKINTER_DPI
 
     if scaling_factor > 1.25:
         root.tk.call('tk', 'scaling', scaling_factor)

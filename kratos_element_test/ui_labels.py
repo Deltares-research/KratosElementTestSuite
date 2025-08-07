@@ -62,3 +62,6 @@ LEGEND_MC_FAILURE = "Failure Criterion: τ = σ' tan(φ°) + c'"
 # Font labels
 HELP_MENU_FONT = "Segoe UI"
 INPUT_SECTION_FONT = "Arial"
+
+# Default values
+DEFAULT_TKINTER_DPI = 72
