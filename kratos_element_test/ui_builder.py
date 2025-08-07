@@ -6,19 +6,21 @@ import os
 import math
 import tkinter as tk
 from tkinter import ttk, scrolledtext
+import tkinter.font as tkFont
 import matplotlib.pyplot as plt
 from matplotlib.gridspec import GridSpec
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+from PIL import Image, ImageTk
 import threading
 import traceback
 
 from kratos_element_test.ui_runner import run_gui_builder
 from kratos_element_test.ui_logger import init_log_widget, log_message, clear_log
-from kratos_element_test.ui_udsm_parser import input_parameters_format_to_unicode
 from kratos_element_test.ui_labels import (
     TRIAXIAL, DIRECT_SHEAR,
     MAX_STRAIN_LABEL, INIT_PRESSURE_LABEL, STRESS_INC_LABEL, NUM_STEPS_LABEL, DURATION_LABEL,
-    FL2_UNIT_LABEL, SECONDS_UNIT_LABEL, PERCENTAGE_UNIT_LABEL, WITHOUT_UNIT_LABEL
+    FL2_UNIT_LABEL, SECONDS_UNIT_LABEL, PERCENTAGE_UNIT_LABEL, WITHOUT_UNIT_LABEL,
+    INPUT_SECTION_FONT, HELP_MENU_FONT
 )
 
 class GeotechTestUI:
@@ -53,9 +55,28 @@ class GeotechTestUI:
         threading.Thread(target=self._run_simulation, daemon=True).start()
 
     def _init_frames(self):
-        self.left_frame = ttk.Frame(self.parent, padding="10", width=615)
-        self.left_frame.pack_propagate(False)
-        self.left_frame.pack(side="left", fill="y", padx=10, pady=10)
+        self.left_panel = ttk.Frame(self.parent, width=555)
+        self.left_panel.pack_propagate(False)
+        self.left_panel.pack(side="left", fill="y", padx=10, pady=10)
+
+        self.scrollable_container = ttk.Frame(self.left_panel)
+        self.scrollable_container.pack(fill="both", expand=True)
+
+        self.scroll_canvas = tk.Canvas(self.scrollable_container, borderwidth=0, highlightthickness=0)
+        self.scroll_canvas.pack(side="left", fill="both", expand=True)
+
+        self.scrollbar = ttk.Scrollbar(self.scrollable_container, orient="vertical", command=self.scroll_canvas.yview)
+        self.scrollbar.pack(side="right", fill="y")
+        self.scroll_canvas.configure(yscrollcommand=self.scrollbar.set)
+
+        self.left_frame = ttk.Frame(self.scroll_canvas)
+        self.canvas_window = self.scroll_canvas.create_window((0, 0), window=self.left_frame, anchor="nw")
+
+        self.left_frame.bind(
+            "<Configure>",
+            lambda e: self.scroll_canvas.configure(scrollregion=self.scroll_canvas.bbox("all"))
+        )
+        self.scroll_canvas.bind_all("<MouseWheel>", self._on_mousewheel)
 
         self.dropdown_frame = ttk.Frame(self.left_frame)
         self.dropdown_frame.pack(fill="x")
@@ -63,11 +84,13 @@ class GeotechTestUI:
         self.param_frame = ttk.Frame(self.left_frame, padding="10")
         self.param_frame.pack(fill="both", expand=True, pady=10)
 
-        self.button_frame = ttk.Frame(self.left_frame, padding="10")
-        self.button_frame.pack(fill="x", pady=10)
+        self.button_frame = ttk.Frame(self.left_panel, padding="10")
+        self.button_frame.pack(fill="x", pady=(0, 5))
 
-        self.log_frame = ttk.Frame(self.left_frame, padding="5")
-        self.log_frame.pack(fill="x", padx=10, pady=(0, 10))
+        self.run_button = ttk.Button(self.button_frame, text="Run Calculation", command=self._start_simulation_thread)
+        self.run_button.pack(pady=5, fill="x")
+
+        self._init_log_section()
 
     def _init_plot_canvas(self, num_plots):
         self._destroy_existing_plot_canvas()
@@ -83,7 +106,7 @@ class GeotechTestUI:
         self.canvas.get_tk_widget().pack(fill="both", expand=True)
 
     def _init_dropdown_section(self):
-        ttk.Label(self.dropdown_frame, text="Select a Model:", font=("Arial", 12, "bold")).pack(anchor="w", padx=5, pady=5)
+        ttk.Label(self.dropdown_frame, text="Select a Model:", font=(INPUT_SECTION_FONT, 12, "bold")).pack(anchor="w", padx=5, pady=5)
         self.model_menu = ttk.Combobox(self.dropdown_frame, textvariable=self.model_var, values=self.model_dict["model_name"], state="readonly")
         self.model_menu.pack(side="top", fill="x", expand=True, padx=5)
         self.model_var.trace("w", lambda *args: self._create_input_fields())
@@ -92,16 +115,6 @@ class GeotechTestUI:
             self.model_menu.configure(state="disabled")
         else:
             self.model_menu.configure(state="readonly")
-
-        ttk.Label(self.log_frame, text="Log Output:", font=("Arial", 10, "bold")).pack(anchor="w")
-        self.log_widget = scrolledtext.ScrolledText(self.log_frame, height=6, width=40, state="disabled", wrap="word", font=("Courier", 9))
-        self.log_widget.pack(fill="x", expand=False)
-
-        self.log_widget.bind("<Key>", lambda e: "break")
-        self.log_widget.bind("<Button-1>", lambda e: "break")
-        self.log_widget.bind("<FocusIn>", lambda e: self.root.focus())
-
-        init_log_widget(self.log_widget)
 
     def _create_input_fields(self):
         for w in self.param_frame.winfo_children() + self.button_frame.winfo_children():
@@ -125,10 +138,22 @@ class GeotechTestUI:
         self.test_selector_frame.pack(fill="x", pady=(10, 5))
 
         self.test_buttons = {}
-        self.test_images = {
-            TRIAXIAL: tk.PhotoImage(file=os.path.join(os.path.dirname(__file__), "assets", "triaxial.png")),
-            DIRECT_SHEAR: tk.PhotoImage(file=os.path.join(os.path.dirname(__file__), "assets", "direct_shear.png"))
+
+        image_paths = {
+            TRIAXIAL: os.path.join(os.path.dirname(__file__), "assets", "Triaxial.png"),
+            DIRECT_SHEAR: os.path.join(os.path.dirname(__file__), "assets", "DSS.png")
         }
+
+        self.test_images = {}
+        for key, path in image_paths.items():
+            try:
+                img = Image.open(path)
+                img_resized = img.resize((85, 85), Image.LANCZOS)
+                self.test_images[key] = ImageTk.PhotoImage(img_resized)
+            except Exception as e:
+                log_message(f"Failed to load or resize image: {path} ({e})", "error")
+                self.test_images[key] = None
+
 
         for test_name in [TRIAXIAL, DIRECT_SHEAR]:
             btn = tk.Button(
@@ -136,7 +161,7 @@ class GeotechTestUI:
                 text=test_name,
                 image=self.test_images[test_name],
                 compound="top",
-                font=("Arial", 10, "bold"),
+                font=(HELP_MENU_FONT, 8, "bold"),
                 width=100,
                 height=100,
                 relief="raised",
@@ -155,16 +180,20 @@ class GeotechTestUI:
 
     def _create_entries(self, frame, title, labels, units, defaults):
         widgets = {}
+
+        default_font = tkFont.nametofont("TkDefaultFont").copy()
+        default_font.configure(size=11)
+
         ttk.Label(frame, text=title, font=("Arial", 12, "bold")).pack(anchor="w", padx=5, pady=5)
         for i, label in enumerate(labels):
             unit = units[i] if i < len(units) else ""
             row = ttk.Frame(frame)
             row.pack(fill="x", padx=10, pady=2)
-            ttk.Label(row, text=label).pack(side="left", padx=5)
-            entry = ttk.Entry(row)
+            ttk.Label(row, text=label, font=default_font).pack(side="left", padx=5)
+            entry = ttk.Entry(row, font=default_font, width= 20)
             entry.insert(0, defaults.get(label, ""))
             entry.pack(side="left", fill="x", expand=True)
-            ttk.Label(row, text=unit).pack(side="left", padx=5)
+            ttk.Label(row, text=unit, font=default_font).pack(side="left", padx=5)
             widgets[label] = entry
         return widgets
 
@@ -180,11 +209,11 @@ class GeotechTestUI:
         )
         self.mohr_checkbox_widget.pack(side="left")
 
-        self.c_label = ttk.Label(self.mohr_frame, text="Cohesion Index (1-based)")
+        self.c_label = ttk.Label(self.mohr_frame, text="Indices (1-based): Cohesion")
         self.c_dropdown = ttk.Combobox(self.mohr_frame, textvariable=self.cohesion_var,
                                        values=[str(i+1) for i in range(len(params))], state="readonly", width=2)
 
-        self.phi_label = ttk.Label(self.mohr_frame, text="Friction Angle Index (1-based)")
+        self.phi_label = ttk.Label(self.mohr_frame, text="Friction Angle")
         self.phi_dropdown = ttk.Combobox(self.mohr_frame, textvariable=self.phi_var,
                                          values=[str(i+1) for i in range(len(params))], state="readonly", width=2)
 
@@ -213,7 +242,7 @@ class GeotechTestUI:
 
         if test_name == TRIAXIAL:
             self._init_plot_canvas(num_plots=5)
-            ttk.Label(self.test_input_frame, text="Triaxial Input Data", font=("Arial", 12, "bold")).pack(anchor="w", padx=5, pady=(5, 0))
+            ttk.Label(self.test_input_frame, text="Triaxial Input Data", font=(INPUT_SECTION_FONT, 12, "bold")).pack(anchor="w", padx=5, pady=(5, 0))
             self._add_test_type_dropdown(self.test_input_frame)
             self.triaxial_widgets = self._create_entries(
                 self.test_input_frame,
@@ -226,7 +255,7 @@ class GeotechTestUI:
 
         elif test_name == DIRECT_SHEAR:
             self._init_plot_canvas(num_plots=4)
-            ttk.Label(self.test_input_frame, text="Direct Simple Shear Input Data", font=("Arial", 12, "bold")).pack(anchor="w", padx=5, pady=(5, 0))
+            ttk.Label(self.test_input_frame, text="Direct Simple Shear Input Data", font=(INPUT_SECTION_FONT, 12, "bold")).pack(anchor="w", padx=5, pady=(5, 0))
             self._add_test_type_dropdown(self.test_input_frame)
             self.shear_widgets = self._create_entries(
                 self.test_input_frame,
@@ -241,7 +270,7 @@ class GeotechTestUI:
 
 
     def _add_test_type_dropdown(self, parent):
-        ttk.Label(parent, text="Type of Test:", font=("Arial", 10, "bold")).pack(anchor="w", padx=5, pady=(5, 2))
+        ttk.Label(parent, text="Type of Test:", font=(INPUT_SECTION_FONT, 10, "bold")).pack(anchor="w", padx=5, pady=(5, 2))
 
         self.test_type_var = tk.StringVar(value="Drained")
         self.test_type_menu = ttk.Combobox(
@@ -312,7 +341,9 @@ class GeotechTestUI:
 
     def _set_widget_state(self, parent, state):
         for child in parent.winfo_children():
-            if isinstance(child, (ttk.Entry, ttk.Combobox, tk.Button, ttk.Button, tk.Checkbutton, ttk.Checkbutton)):
+            if isinstance(child, ttk.Combobox):
+                child.configure(state="readonly")
+            elif isinstance(child, (ttk.Entry, tk.Button, ttk.Button, tk.Checkbutton, ttk.Checkbutton)):
                 child.configure(state=state)
             elif isinstance(child, scrolledtext.ScrolledText):
                 child.config(state=state if state == "normal" else "disabled")
@@ -320,14 +351,30 @@ class GeotechTestUI:
                 self._set_widget_state(child, state)
 
         for widget in self.external_widgets:
-            widget.configure(state=state)
+            if isinstance(widget, ttk.Combobox):
+                widget.configure(state="readonly" if state == "normal" else "disabled")
+            else:
+                widget.configure(state=state)
 
     def _disable_gui(self):
         self._set_widget_state(self.left_frame, "disabled")
+        self.model_menu.config(state="disabled")
+        self.test_type_menu.config(state="disabled")
+        self.c_dropdown.config(state="disabled")
+        self.phi_dropdown.config(state="disabled")
+        self._set_widget_state(self.button_frame, "disabled")
+        if hasattr(self, "scrollbar"):
+            self._original_scroll_cmd = self.scrollbar.cget("command")
+            self.scrollbar.config(command=lambda *args: None)
+        self.scroll_canvas.unbind_all("<MouseWheel>")
 
     def _enable_gui(self):
         self._set_widget_state(self.left_frame, "normal")
         self.run_button.config(state="normal")
+
+        if hasattr(self, "scrollbar") and hasattr(self, "_original_scroll_cmd"):
+            self.scrollbar.config(command=self._original_scroll_cmd)
+        self.scroll_canvas.bind_all("<MouseWheel>", self._on_mousewheel)
 
         if self.is_linear_elastic:
             self.mohr_checkbox_widget.configure(state="disabled")
@@ -342,3 +389,24 @@ class GeotechTestUI:
         self.fig = None
         self.canvas = None
         self.axes = []
+
+    def _on_mousewheel(self, event):
+        if event.delta > 0:
+            first, _ = self.scroll_canvas.yview()
+            if first <= 0:
+                return
+        self.scroll_canvas.yview_scroll(int(-1 * (event.delta / 120)), "units")
+
+    def _init_log_section(self):
+        self.log_frame = ttk.Frame(self.left_panel, padding="5")
+        self.log_frame.pack(fill="x", padx=10, pady=(0, 10))
+
+        ttk.Label(self.log_frame, text="Log Output:", font=(INPUT_SECTION_FONT, 10, "bold")).pack(anchor="w")
+        self.log_widget = scrolledtext.ScrolledText(self.log_frame, height=6, width=40, state="disabled", wrap="word", font=("Courier", 9))
+        self.log_widget.pack(fill="x", expand=False)
+
+        self.log_widget.bind("<Key>", lambda e: "break")
+        self.log_widget.bind("<Button-1>", lambda e: "break")
+        self.log_widget.bind("<FocusIn>", lambda e: self.root.focus())
+
+        init_log_widget(self.log_widget)

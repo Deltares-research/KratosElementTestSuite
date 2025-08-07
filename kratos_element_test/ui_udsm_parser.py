@@ -81,6 +81,7 @@ def input_parameters_format_to_unicode(text: str) -> str:
     manual_map = {
         "phi": "ϕ",
         "PHI": "ϕ",
+        "Phi'": "ϕ",
         "PHI'": "ϕ",
         "f": "ϕ",
         "f_peak": "ϕₚₑₐₖ",

@@ -8,7 +8,6 @@ from kratos_element_test.run_simulation import run_simulation
 
 def run_gui_builder(test_type, dll_path, index, material_parameters, input_widgets, cohesion_phi_indices, axes):
     try:
-
         sigma_init = float(input_widgets["Initial effective cell pressure |σ'ₓₓ|"].get())
         eps_max = float(input_widgets["Maximum Strain |εᵧᵧ|"].get())
         n_steps = float(input_widgets["Number of steps"].get())
@@ -33,3 +32,4 @@ def run_gui_builder(test_type, dll_path, index, material_parameters, input_widge
     except Exception:
         log_message("Error during simulation:", "error")
         log_message(traceback.format_exc(), "error")
+        raise
