@@ -27,7 +27,8 @@ def run_gui_builder(test_type, dll_path, index, material_parameters, input_widge
             maximum_strain=eps_max,
             initial_effective_cell_pressure=sigma_init,
             cohesion_phi_indices=cohesion_phi_indices,
-            plotter=MatplotlibPlotter(axes)
+            plotter=MatplotlibPlotter(axes),
+            logger=log_message
         )
 
     except Exception:

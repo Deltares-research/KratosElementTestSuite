@@ -11,13 +11,13 @@ from kratos_element_test.material_editor import MaterialEditor
 from kratos_element_test.project_parameter_editor import ProjectParameterEditor
 from kratos_element_test.mdpa_editor import MdpaEditor
 from kratos_element_test.generic_test_runner import GenericTestRunner
-from kratos_element_test.plots import (
-    plot_delta_sigma_triaxial, plot_volumetric_vertical_strain_triaxial, plot_principal_stresses_triaxial,
-    plot_p_q_triaxial, plot_mohr_coulomb_triaxial,
-    plot_strain_stress_direct_shear, plot_principal_stresses_direct_shear,
-    plot_p_q_direct_shear, plot_mohr_coulomb_direct_shear,
-    MatplotlibPlotter
-)
+
+
+class _NoOpPlotter:
+    def triaxial(self, *args, **kwargs):
+        pass
+    def direct_shear(self, *args, **kwargs):
+        pass
 
 def setup_simulation_files(test_type, tmp_folder):
     base_dir = os.path.dirname(os.path.abspath(__file__))
@@ -79,36 +79,44 @@ def get_cohesion_phi(umat_parameters, indices):
         return float(umat_parameters[c_idx - 1]), float(umat_parameters[phi_idx - 1])
     return None, None
 
-def plot_results(test_type, axes, yy, vol, sigma1, sigma3, shear_xy, shear_strain_xy, mean_stress, von_mises, cohesion, phi):
+def _render_with_plotter(test_type, plotter, results):
+    if plotter is None:
+        return
     if test_type == "triaxial":
-        plot_delta_sigma_triaxial(axes[0], yy, abs(np.array(sigma1) - np.array(sigma3)))
-        plot_volumetric_vertical_strain_triaxial(axes[1], yy, vol)
-        plot_principal_stresses_triaxial(axes[2], sigma1, sigma3)
-        plot_p_q_triaxial(axes[3], mean_stress, von_mises)
-        plot_mohr_coulomb_triaxial(axes[4], sigma1[-1], sigma3[-1], cohesion, phi)
+        plotter.triaxial(
+            results["yy_strain"], results["vol_strain"],
+            results["sigma1"], results["sigma3"],
+            results["mean_stress"], results["von_mises"],
+            results["cohesion"], results["phi"]
+        )
     elif test_type == "direct_shear":
-        plot_strain_stress_direct_shear(axes[0], shear_strain_xy, shear_xy)
-        plot_principal_stresses_direct_shear(axes[1], sigma1, sigma3)
-        plot_p_q_direct_shear(axes[2], mean_stress, von_mises)
-        plot_mohr_coulomb_direct_shear(axes[3], sigma1[-1], sigma3[-1], cohesion, phi)
+        plotter.direct_shear(
+            results["shear_strain_xy"], results["shear_xy"],
+            results["sigma1"], results["sigma3"],
+            results["mean_stress"], results["von_mises"],
+            results["cohesion"], results["phi"]
+        )
     else:
         raise ValueError(f"Unsupported test_type: {test_type}")
 
-def run_simulation(test_type, dll_path=None, index=None, material_parameters=None,
-                   num_steps=100, end_time=10.0, maximum_strain=0.1,
-                   initial_effective_cell_pressure=0.0, cohesion_phi_indices=None,
-                   axes=None, plotter=None):
+def run_simulation(test_type, dll_path, index, material_parameters, num_steps, end_time, maximum_strain,
+                   initial_effective_cell_pressure, cohesion_phi_indices=None, axes=None,
+                   plotter=None,logger=None):
+    log = logger or (lambda msg, level="info": None)
     tmp_folder = tempfile.mkdtemp(prefix=f"{test_type}_")
 
     try:
+        log(f"Starting {test_type} simulation...", "info")
         json_path, project_path, mdpa_path = setup_simulation_files(test_type, tmp_folder)
 
         set_material_constitutive_law(json_path, dll_path, material_parameters, index)
         set_project_parameters(project_path, num_steps, end_time, initial_effective_cell_pressure)
         set_mdpa(mdpa_path, maximum_strain, initial_effective_cell_pressure, num_steps, end_time, test_type)
 
+        log("Running Kratos GeoMechanicsAnalysis...", "info")
         runner = GenericTestRunner([os.path.join(tmp_folder, 'gid_output', "output.post.res")], tmp_folder)
         tensors, yy_strain, vol_strain, von_mises, mean_stress, shear_xy, shear_strain_xy = runner.run()
+        log("Finished analysis; collecting results...", "info")
 
         sigma_1, sigma_3 = calculate_principal_stresses(tensors)
         cohesion, friction_angle = get_cohesion_phi(material_parameters, cohesion_phi_indices)
@@ -126,24 +134,15 @@ def run_simulation(test_type, dll_path=None, index=None, material_parameters=Non
              "phi": friction_angle
         }
 
-        if plotter is None and axes:
-            plotter = MatplotlibPlotter(axes)
+        if plotter is None:
+            if axes:
+                from kratos_element_test.plots import MatplotlibPlotter
+                plotter = MatplotlibPlotter(axes)
+            else:
+                plotter = _NoOpPlotter()
 
-        if plotter is not None:
-            if test_type == "triaxial":
-                plotter.triaxial(
-                    results["yy_strain"], results["vol_strain"],
-                    results["sigma1"], results["sigma3"],
-                    results["mean_stress"], results["von_mises"],
-                    results["cohesion"], results["phi"]
-                )
-        elif test_type == "direct_shear":
-            plotter.direct_shear(
-                results["shear_strain_xy"], results["shear_xy"],
-                results["sigma1"], results["sigma3"],
-                results["mean_stress"], results["von_mises"],
-                results["cohesion"], results["phi"]
-            )
+        _render_with_plotter(test_type, plotter, results)
+        log("Rendering complete.", "info")
         return results
 
     finally:
