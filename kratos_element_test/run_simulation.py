@@ -15,7 +15,8 @@ from kratos_element_test.plots import (
     plot_delta_sigma_triaxial, plot_volumetric_vertical_strain_triaxial, plot_principal_stresses_triaxial,
     plot_p_q_triaxial, plot_mohr_coulomb_triaxial,
     plot_strain_stress_direct_shear, plot_principal_stresses_direct_shear,
-    plot_p_q_direct_shear, plot_mohr_coulomb_direct_shear
+    plot_p_q_direct_shear, plot_mohr_coulomb_direct_shear,
+    MatplotlibPlotter
 )
 
 def setup_simulation_files(test_type, tmp_folder):
@@ -93,8 +94,10 @@ def plot_results(test_type, axes, yy, vol, sigma1, sigma3, shear_xy, shear_strai
     else:
         raise ValueError(f"Unsupported test_type: {test_type}")
 
-def run_simulation(test_type, dll_path, index, material_parameters, num_steps, end_time, maximum_strain,
-                   initial_effective_cell_pressure, cohesion_phi_indices=None, axes=None):
+def run_simulation(test_type, dll_path=None, index=None, material_parameters=None,
+                   num_steps=100, end_time=10.0, maximum_strain=0.1,
+                   initial_effective_cell_pressure=0.0, cohesion_phi_indices=None,
+                   axes=None, plotter=None):
     tmp_folder = tempfile.mkdtemp(prefix=f"{test_type}_")
 
     try:
@@ -110,12 +113,38 @@ def run_simulation(test_type, dll_path, index, material_parameters, num_steps, e
         sigma_1, sigma_3 = calculate_principal_stresses(tensors)
         cohesion, friction_angle = get_cohesion_phi(material_parameters, cohesion_phi_indices)
 
-        if axes:
-            for ax in axes:
-                ax.clear()
+        results = {
+            "yy_strain": yy_strain,
+             "vol_strain": vol_strain,
+             "sigma1": sigma_1,
+             "sigma3": sigma_3,
+             "shear_xy": shear_xy,
+             "shear_strain_xy": shear_strain_xy,
+             "mean_stress": mean_stress,
+             "von_mises": von_mises,
+             "cohesion": cohesion,
+             "phi": friction_angle
+        }
 
-        plot_results(test_type, axes, yy_strain, vol_strain, sigma_1, sigma_3,
-                     shear_xy, shear_strain_xy, mean_stress, von_mises, cohesion, friction_angle)
+        if plotter is None and axes:
+            plotter = MatplotlibPlotter(axes)
+
+        if plotter is not None:
+            if test_type == "triaxial":
+                plotter.triaxial(
+                    results["yy_strain"], results["vol_strain"],
+                    results["sigma1"], results["sigma3"],
+                    results["mean_stress"], results["von_mises"],
+                    results["cohesion"], results["phi"]
+                )
+        elif test_type == "direct_shear":
+            plotter.direct_shear(
+                results["shear_strain_xy"], results["shear_xy"],
+                results["sigma1"], results["sigma3"],
+                results["mean_stress"], results["von_mises"],
+                results["cohesion"], results["phi"]
+            )
+        return results
 
     finally:
         if os.path.exists(tmp_folder):

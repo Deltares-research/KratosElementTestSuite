@@ -5,6 +5,7 @@
 import traceback
 from kratos_element_test.ui_logger import log_message
 from kratos_element_test.run_simulation import run_simulation
+from kratos_element_test.plots import MatplotlibPlotter
 
 def run_gui_builder(test_type, dll_path, index, material_parameters, input_widgets, cohesion_phi_indices, axes):
     try:
@@ -26,7 +27,7 @@ def run_gui_builder(test_type, dll_path, index, material_parameters, input_widge
             maximum_strain=eps_max,
             initial_effective_cell_pressure=sigma_init,
             cohesion_phi_indices=cohesion_phi_indices,
-            axes=axes
+            plotter=MatplotlibPlotter(axes)
         )
 
     except Exception:

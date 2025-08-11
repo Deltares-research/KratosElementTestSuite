@@ -12,6 +12,40 @@ from kratos_element_test.ui_labels import (
     LEGEND_MC, LEGEND_MC_FAILURE
 )
 
+class MatplotlibPlotter:
+    def __init__(self, axes):
+        self.axes = list(axes or [])
+
+    def _clear(self):
+        for ax in self.axes:
+            try:
+                ax.clear()
+            except Exception:
+                pass
+
+    def triaxial(self, yy, vol, sigma1, sigma3, p_list, q_list, cohesion=None, phi=None):
+        self._clear()
+        # 0: |σ1-σ3| vs εyy
+        plot_delta_sigma_triaxial(self.axes[0], yy, np.abs(np.array(sigma1) - np.array(sigma3)))
+        # 1: εv vs εyy
+        plot_volumetric_vertical_strain_triaxial(self.axes[1], yy, vol)
+        # 2: σ1 vs σ3
+        plot_principal_stresses_triaxial(self.axes[2], sigma1, sigma3)
+        # 3: p' vs q
+        plot_p_q_triaxial(self.axes[3], p_list, q_list)
+        # 4: Mohr–Coulomb
+        plot_mohr_coulomb_triaxial(self.axes[4], sigma1[-1], sigma3[-1], cohesion, phi)
+
+    def direct_shear(self, gamma_xy, tau_xy, sigma1, sigma3, p_list, q_list, cohesion=None, phi=None):
+        self._clear()
+        # 0: τ vs γ
+        plot_strain_stress_direct_shear(self.axes[0], gamma_xy, tau_xy)
+        # 1: σ1 vs σ3
+        plot_principal_stresses_direct_shear(self.axes[1], sigma1, sigma3)
+        # 2: p' vs q
+        plot_p_q_direct_shear(self.axes[2], p_list, q_list)
+        # 3: Mohr–Coulomb
+        plot_mohr_coulomb_direct_shear(self.axes[3], sigma1[-1], sigma3[-1], cohesion, phi)
 
 def plot_principal_stresses_triaxial(ax, sigma_1, sigma_3):
     ax.plot(sigma_3, sigma_1, '-', color='blue', label=TITLE_SIGMA1_VS_SIGMA3)
@@ -69,7 +103,7 @@ def plot_mohr_coulomb_triaxial(ax, sigma_1, sigma_3, cohesion=None, friction_ang
         ax.plot(x_line, -y_line, 'r--', label=LEGEND_MC_FAILURE)
         ax.legend(loc='upper left')
 
-    ax.set_title(LEGEND_MC)
+    ax.set_title(TITLE_MOHR)
     ax.set_xlabel(EFFECTIVE_STRESS_LABEL)
     ax.set_ylabel(MOBILIZED_SHEAR_STRESS_LABEL)
     ax.grid(True)
