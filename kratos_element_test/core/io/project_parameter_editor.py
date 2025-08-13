@@ -4,12 +4,15 @@
 
 import re
 import json
-from tkinter import messagebox
 
+
+def _fallback_log(msg: str, level: str = "info"):
+    print(f"{level.upper()}: {msg}")
 
 class ProjectParameterEditor:
-    def __init__(self, json_path):
+    def __init__(self, json_path, logger=None):
         self.json_path = json_path
+        self._log = logger or _fallback_log
         with open(self.json_path, 'r') as f:
             self.raw_text = f.read()
 
@@ -17,7 +20,7 @@ class ProjectParameterEditor:
         with open(self.json_path, 'w') as f:
             f.write(self.raw_text)
 
-    def update_nested_value(self, module_name, key, new_list):
+    def update_nested_value(self, module_name, key, new_list) -> bool:
         try:
             data = json.loads(self.raw_text)
 
@@ -29,20 +32,22 @@ class ProjectParameterEditor:
                     process["Parameters"][key] = new_list
                     break
             else:
-                messagebox.showwarning("Warning", f"Could not find '{key}' under '{module_name}'.")
-                return
+                self._log(f"Could not find '{key}' under '{module_name}'.", "warn")
+                return False
 
             self.raw_text = json.dumps(data, indent=4)
             self._write_back()
+            return True
         except Exception as e:
-            messagebox.showerror("Error", f"Failed to update stress vector: {e}")
+            raise RuntimeError(f"Failed to update '{key}' under '{module_name}': {e}") from e
 
-    def update_property(self, property_name, new_value):
+    def update_property(self, property_name, new_value) -> int:
         pattern = rf'("{property_name}"\s*:\s*)([0-9eE+\.\-]+)'
         replacement = rf'\g<1>{new_value}'
         self.raw_text, count = re.subn(pattern, replacement, self.raw_text)
         if count == 0:
-            messagebox.showwarning("Warning", f"Could not find '{property_name}' to update.")
+            self._log(f"Could not find '{property_name}' to update.", "warn")
         elif count > 1:
-            messagebox.showwarning("Warning", f"Multiple occurrences of '{property_name}' found. Updated all {count}.")
+            self._log(f"Multiple occurrences of '{property_name}' found. Updated all {count}.", "warn")
         self._write_back()
+        return count

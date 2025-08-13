@@ -8,7 +8,7 @@ import tempfile
 import numpy as np
 
 from kratos_element_test.material_editor import MaterialEditor
-from kratos_element_test.project_parameter_editor import ProjectParameterEditor
+from kratos_element_test.core.io.project_parameter_editor import ProjectParameterEditor
 from kratos_element_test.core.io.mdpa_editor import MdpaEditor
 from kratos_element_test.generic_test_runner import GenericTestRunner
 
