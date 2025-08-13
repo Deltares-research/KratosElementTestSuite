@@ -3,7 +3,7 @@
 # Contact kratos@deltares.nl
 
 import numpy as np
-from kratos_element_test.core_labels import (
+from kratos_element_test.core.core_labels import (
     SIGMA1_LABEL, SIGMA3_LABEL, SIGMA1_SIGMA3_DIFF_LABEL, VERTICAL_STRAIN_LABEL,
     VOLUMETRIC_STRAIN_LABEL, SHEAR_STRAIN_LABEL, SHEAR_STRESS_LABEL, EFFECTIVE_STRESS_LABEL,
     MOBILIZED_SHEAR_STRESS_LABEL, P_STRESS_LABEL, Q_STRESS_LABEL,
