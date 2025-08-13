@@ -136,10 +136,11 @@ def run_simulation(test_type, dll_path, index, material_parameters, num_steps, e
 
         if plotter is None:
             if axes:
-                from kratos_element_test.plots import MatplotlibPlotter
-                plotter = MatplotlibPlotter(axes)
-            else:
-                plotter = _NoOpPlotter()
+                log('Axes were provided but no plotter object was passed. '
+                    'The core no longer creates a Matplotlib plotter automatically. '
+                    'Please construct a plotter in the UI layer and pass it via `plotter=`.',
+                    'warn')
+            plotter = _NoOpPlotter()
 
         _render_with_plotter(test_type, plotter, results)
         log("Rendering complete.", "info")
