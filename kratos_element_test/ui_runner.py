@@ -4,7 +4,7 @@
 
 import traceback
 from kratos_element_test.ui_logger import log_message
-from kratos_element_test.run_simulation import run_simulation
+from kratos_element_test.core.pipeline.run_simulation import run_simulation
 from kratos_element_test.plotters.matplotlib_plotter import MatplotlibPlotter
 
 
