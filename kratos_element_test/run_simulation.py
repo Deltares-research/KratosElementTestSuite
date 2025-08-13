@@ -101,7 +101,7 @@ def _render_with_plotter(test_type, plotter, results):
 
 def run_simulation(test_type, dll_path, index, material_parameters, num_steps, end_time, maximum_strain,
                    initial_effective_cell_pressure, cohesion_phi_indices=None, axes=None,
-                   plotter=None,logger=None):
+                   plotter=None, logger=None):
     log = logger or (lambda msg, level="info": None)
     tmp_folder = tempfile.mkdtemp(prefix=f"{test_type}_")
 
