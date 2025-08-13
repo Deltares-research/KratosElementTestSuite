@@ -2,15 +2,12 @@
 # This is a prototype version
 # Contact kratos@deltares.nl
 
-import sys
 import os
-import json
 import numpy as np
-
 import KratosMultiphysics as Kratos
 from KratosMultiphysics.GeoMechanicsApplication.geomechanics_analysis import GeoMechanicsAnalysis
+from kratos_element_test.core.io import gid_output_reader
 
-from kratos_element_test import test_helper
 
 class GenericTestRunner:
     def __init__(self, output_file_paths, work_dir):
@@ -53,7 +50,7 @@ class GenericTestRunner:
         stress, mean_stress, von_mises, displacement, strain = [], [], [], [], []
 
         for path in self.output_file_paths:
-            output = test_helper.GiDOutputFileReader().read_output_from(path)
+            output = gid_output_reader.GiDOutputFileReader().read_output_from(path)
             for result_name, items in output["results"].items():
                 for item in items:
                     self._categorize_result(result_name, item, stress, mean_stress, von_mises, displacement, strain)
