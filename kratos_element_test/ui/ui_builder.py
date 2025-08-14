@@ -2,26 +2,34 @@
 # This is a prototype version
 # Contact kratos@deltares.nl
 
-import os
 import math
+import threading
+import traceback
 import tkinter as tk
 from tkinter import ttk, scrolledtext
 import tkinter.font as tkFont
 import matplotlib.pyplot as plt
 from matplotlib.gridspec import GridSpec
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+from pathlib import Path
 from PIL import Image, ImageTk
-import threading
-import traceback
 
 from kratos_element_test.ui_runner import run_gui_builder
 from kratos_element_test.ui_logger import init_log_widget, log_message, clear_log
 from kratos_element_test.ui_labels import (
     TRIAXIAL, DIRECT_SHEAR,
-    MAX_STRAIN_LABEL, INIT_PRESSURE_LABEL, STRESS_INC_LABEL, NUM_STEPS_LABEL, DURATION_LABEL,
+    MAX_STRAIN_LABEL, INIT_PRESSURE_LABEL, NUM_STEPS_LABEL, DURATION_LABEL,
     FL2_UNIT_LABEL, SECONDS_UNIT_LABEL, PERCENTAGE_UNIT_LABEL, WITHOUT_UNIT_LABEL,
     INPUT_SECTION_FONT, HELP_MENU_FONT
 )
+
+
+def _asset_path(name: str) -> str:
+    ui_dir = Path(__file__).resolve().parent
+    for p in (ui_dir / "assets" / name, ui_dir.parent / "assets" / name):
+        if p.exists():
+            return str(p)
+    return str(ui_dir / "assets" / name)
 
 class GeotechTestUI:
     def __init__(self, root, parent_frame, test_name, dll_path, model_dict, external_widgets=None):
@@ -140,8 +148,8 @@ class GeotechTestUI:
         self.test_buttons = {}
 
         image_paths = {
-            TRIAXIAL: os.path.join(os.path.dirname(__file__), "assets", "Triaxial.png"),
-            DIRECT_SHEAR: os.path.join(os.path.dirname(__file__), "assets", "DSS.png")
+            TRIAXIAL:  _asset_path ("Triaxial.png"),
+            DIRECT_SHEAR: _asset_path ("DSS.png")
         }
 
         self.test_images = {}

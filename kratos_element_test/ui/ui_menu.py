@@ -7,7 +7,7 @@ import tkinter as tk
 from tkinter import filedialog, messagebox, ttk, scrolledtext, Menu
 from platformdirs import user_data_dir
 from pathlib import Path
-from kratos_element_test.ui_builder import GeotechTestUI
+from kratos_element_test.ui.ui_builder import GeotechTestUI
 from kratos_element_test.ui_udsm_parser import udsm_parser
 from kratos_element_test.ui_labels import (APP_TITLE, APP_VERSION, APP_NAME, APP_AUTHOR, SELECT_UDSM, LINEAR_ELASTIC,
                                            HELP_MENU_FONT, DEFAULT_TKINTER_DPI)
