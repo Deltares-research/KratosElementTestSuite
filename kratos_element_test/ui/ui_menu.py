@@ -21,9 +21,15 @@ data_dir.mkdir(parents=True, exist_ok=True)
 LICENSE_FLAG_PATH = data_dir / "license_accepted.flag"
 
 
-def show_license_agreement(readonly=False):
-    license_file_path = os.path.join(os.path.dirname(__file__), "assets", "license.txt")
+def _asset_path(name: str) -> str:
+    ui_dir = Path(__file__).resolve().parent
+    for p in (ui_dir / "assets" / name, ui_dir.parent / "assets" / name):
+        if p.exists():
+            return str(p)
+    return str((ui_dir / "assets" / name))
 
+def show_license_agreement(readonly=False):
+    license_file_path = _asset_path("license.txt")
     try:
         with open(license_file_path, "r", encoding="utf-8") as f:
             license_text = f.read()
@@ -87,8 +93,8 @@ def show_about_window():
     image_frame.pack(pady=10)
 
     try:
-        path1 = os.path.join(os.path.dirname(__file__), "assets", "kratos.png")
-        path2 = os.path.join(os.path.dirname(__file__), "assets", "deltares.png")
+        path1 = _asset_path("kratos.png")
+        path2 = _asset_path("deltares.png")
 
         photo1 = tk.PhotoImage(file=path1)
         photo2 = tk.PhotoImage(file=path2)
@@ -133,7 +139,7 @@ def create_menu():
         show_license_agreement()
 
     try:
-        icon_path = os.path.join(os.path.dirname(__file__), "assets", "icon.ico")
+        icon_path = _asset_path("icon.ico")
         root.iconbitmap(default=icon_path)
     except Exception as e:
         print(f"Could not set icon: {e}")
