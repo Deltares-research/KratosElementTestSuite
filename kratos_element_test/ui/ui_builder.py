@@ -15,7 +15,7 @@ from pathlib import Path
 from PIL import Image, ImageTk
 
 from kratos_element_test.ui.ui_runner import run_gui_builder
-from kratos_element_test.ui_logger import init_log_widget, log_message, clear_log
+from kratos_element_test.ui.ui_logger import init_log_widget, log_message, clear_log
 from kratos_element_test.ui_labels import (
     TRIAXIAL, DIRECT_SHEAR,
     MAX_STRAIN_LABEL, INIT_PRESSURE_LABEL, NUM_STEPS_LABEL, DURATION_LABEL,
