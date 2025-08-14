@@ -2,7 +2,7 @@
 # This is a prototype version
 # Contact kratos@deltares.nl
 
-#-----------------------Core labels---------------------------
+#-----------------------PLotter labels---------------------------
 
 # Axes labels
 SIGMA1_LABEL = "σ₁ (Principal Stress 1) [kN/m²]"

@@ -1,4 +1,3 @@
-from .core_labels import *
 from .io.mdpa_editor import MdpaEditor
 from .io.project_parameter_editor import ProjectParameterEditor
 from .io.material_editor import MaterialEditor
