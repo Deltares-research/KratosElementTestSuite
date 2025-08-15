@@ -6,6 +6,7 @@ from dataclasses import dataclass, field
 from typing import Optional, Tuple, Literal
 
 TestType = Literal["triaxial", "direct_shear"]
+Drainage = Literal["drained"]
 
 
 @dataclass
@@ -28,6 +29,7 @@ class SimulationInputs:
     stress_increment: float
     number_of_steps: int
     duration: float
+    drainage: Drainage = "drained"
     mohr_coulomb: MohrCoulombOptions = field(default_factory=MohrCoulombOptions)
 
     def validate(self) -> None:

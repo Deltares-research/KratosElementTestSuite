@@ -44,7 +44,14 @@ class GeotechTestUI:
 
         self.model_var = tk.StringVar(root)
         self.model_var.set(model_dict["model_name"][0])
-        self.current_test = tk.StringVar(value=TRIAXIAL)
+        self.current_test = tk.StringVar(value=test_name)
+
+        def _sync_test_type(*_):
+            value = self.current_test.get()
+            tt = "triaxial" if value == TRIAXIAL else "direct_shear"
+            self.controller.set_test_type(tt)
+            self.current_test.trace_add("write", lambda *_: _sync_test_type())
+            _sync_test_type()
 
         self._init_frames()
 
@@ -58,6 +65,8 @@ class GeotechTestUI:
             logger=log_message,
             plotter_factory=lambda axes: MatplotlibPlotter(axes, logger=log_message)
         )
+
+        self.controller.set_test_type("triaxial" if test_name == TRIAXIAL else "direct_shear")
 
         self._init_dropdown_section()
         self._create_input_fields()
@@ -192,6 +201,7 @@ class GeotechTestUI:
 
         self._switch_test(TRIAXIAL)
 
+        # self._init_drainage_section()
         self.run_button = ttk.Button(self.button_frame, text="Run Calculation", command=self._start_simulation_thread)
         self.run_button.pack(pady=5)
 
@@ -272,6 +282,7 @@ class GeotechTestUI:
     def _switch_test(self, test_name):
         clear_log()
         self.current_test.set(test_name)
+        self.controller.set_test_type("triaxial" if test_name == TRIAXIAL else "direct_shear")
 
         for name, button in self.test_buttons.items():
             if name == test_name:
@@ -326,7 +337,12 @@ class GeotechTestUI:
         )
         self.test_type_menu.pack(anchor="w", padx=10, pady=(0, 10))
 
-        self.test_type_menu.bind("<<ComboboxSelected>>")
+        def _sync_drainage_from_combobox(*_):
+            val = (self.test_type_var.get() or "").strip().lower()
+            self.controller.set_drainage("drained" if val.startswith("drained") else "undrained")
+
+        self.test_type_menu.bind("<<ComboboxSelected>>", lambda e: _sync_drainage_from_combobox())
+        _sync_drainage_from_combobox()
 
     def _run_simulation(self):
         try:

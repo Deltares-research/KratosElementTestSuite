@@ -15,6 +15,9 @@ class ElementTestController:
         self._mc_enabled: bool = False
         self._mc_indices: Tuple[Optional[int], Optional[int]] = (None, None)  # (c_idx, phi_idx)
 
+        self._test_type: Optional[str] = None
+        self._drainage: str = "drained"
+
     def set_mohr_enabled(self, enabled: bool) -> None:
         self._mc_enabled = bool(enabled)
         self._logger(f"Mohr-Coulomb {'enabled' if enabled else 'disabled'}.", "info")
@@ -30,10 +33,20 @@ class ElementTestController:
             return None
         return c_idx, phi_idx
 
+    def set_test_type(self, test_type: str) -> None:
+        if test_type not in ("triaxial", "direct_shear"):
+            self._logger(f"Unknown test type: {test_type}", "warn")
+        self._test_type = test_type
+
+    def set_drainage(self, drainage: str) -> None:
+        if drainage not in ("drained", "undrained"):
+            self._logger(f"Unknown drainage: {drainage}", "warn")
+        self._drainage = drainage
+
     def run(self,
             *,
             axes,
-            test_type: str,
+            test_type: Optional[str] = None,
             dll_path: str,
             index: Optional[int],
             material_parameters: List[float],
@@ -41,12 +54,24 @@ class ElementTestController:
             eps_max: float,
             n_steps: float,
             duration: float) -> None:
+
+
+
+        tt = test_type or self._test_type
+        if tt not in ("triaxial", "direct_shear"):
+            self._logger("Please select a test type.", "error")
+            return
+
+
+
         plotter = self._plotter_factory(axes)
 
         try:
             self._logger(f"MC indices: {self._mc_tuple()}", "info")
+
             run_simulation(
-                test_type=test_type,
+                test_type=tt,
+                drainage=self._drainage,
                 dll_path=dll_path or "",
                 index=index,
                 material_parameters=material_parameters,

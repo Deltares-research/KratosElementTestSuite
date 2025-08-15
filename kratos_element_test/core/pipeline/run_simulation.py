@@ -129,9 +129,9 @@ def _render_with_plotter(test_type, plotter, results):
     else:
         raise ValueError(f"Unsupported test_type: {test_type}")
 
-def run_simulation(test_type, dll_path, index, material_parameters, num_steps, end_time, maximum_strain,
-                   initial_effective_cell_pressure, cohesion_phi_indices=None, axes=None,
-                   plotter=None, logger=None):
+def run_simulation(*, test_type: str, dll_path: str, index, material_parameters, num_steps, end_time,
+                   maximum_strain, initial_effective_cell_pressure, cohesion_phi_indices=None, axes=None,
+                   plotter=None, logger=None, drainage: str | None=None):
     log = logger or (lambda msg, level="info": None)
     tmp_folder = tempfile.mkdtemp(prefix=f"{test_type}_")
 
@@ -143,7 +143,6 @@ def run_simulation(test_type, dll_path, index, material_parameters, num_steps, e
         set_project_parameters(project_path, num_steps, end_time, initial_effective_cell_pressure)
         set_mdpa(mdpa_path, maximum_strain, initial_effective_cell_pressure, num_steps, end_time, test_type)
 
-        log("Running Kratos GeoMechanicsAnalysis...", "info")
         runner = GenericTestRunner([os.path.join(tmp_folder, 'gid_output', "output.post.res")], tmp_folder)
         tensors, yy_strain, vol_strain, von_mises, mean_stress, shear_xy, shear_strain_xy = runner.run()
         log("Finished analysis; collecting results...", "info")
