@@ -3,12 +3,18 @@
 # Contact kratos@deltares.nl
 
 import traceback
+import warnings
 from kratos_element_test.ui.ui_logger import log_message
 from kratos_element_test.core.pipeline.run_simulation import run_simulation
 from kratos_element_test.plotters.matplotlib_plotter import MatplotlibPlotter
 
 
 def run_gui_builder(test_type, dll_path, index, material_parameters, input_widgets, cohesion_phi_indices, axes):
+
+    warnings.warn("ui_runner.run_gui_builder is deprecated. UI now uses ElementTestController "
+                  "to orchestrate runs. This shim will be removed in a future cleanup.",
+                  DeprecationWarning, stacklevel=2)
+
     try:
         sigma_init = float(input_widgets["Initial effective cell pressure |σ'ₓₓ|"].get())
         eps_max = float(input_widgets["Maximum Strain |εᵧᵧ|"].get())
