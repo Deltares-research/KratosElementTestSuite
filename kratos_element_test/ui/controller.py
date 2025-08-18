@@ -4,6 +4,7 @@
 
 from typing import Optional, Callable, List, Tuple
 from kratos_element_test.core.pipeline.run_simulation import run_simulation
+from kratos_element_test.core.models import SimulationInputs, MohrCoulombOptions
 
 
 class ElementTestController:
@@ -56,13 +57,32 @@ class ElementTestController:
             duration: float) -> None:
 
 
-
         tt = test_type or self._test_type
         if tt not in ("triaxial", "direct_shear"):
             self._logger("Please select a test type.", "error")
             return
 
 
+        inputs = SimulationInputs(
+            test_type = tt,
+            maximum_strain = eps_max,
+            initial_effective_cell_pressure = sigma_init,
+            stress_increment = 0.0,
+            number_of_steps = int(n_steps),
+            duration = duration,
+            drainage = self._drainage,
+            mohr_coulomb = MohrCoulombOptions(
+                enabled = self._mc_enabled,
+                c_index = self._mc_indices[0],
+                phi_index = self._mc_indices[1],
+            ),
+        )
+
+        try:
+            inputs.validate()
+        except ValueError as e:
+            self._logger(str(e), "error")
+            return
 
         plotter = self._plotter_factory(axes)
 
@@ -70,16 +90,16 @@ class ElementTestController:
             self._logger(f"MC indices: {self._mc_tuple()}", "info")
 
             run_simulation(
-                test_type=tt,
-                drainage=self._drainage,
+                test_type=inputs.test_type,
+                drainage=inputs.drainage,
                 dll_path=dll_path or "",
                 index=index,
                 material_parameters=material_parameters,
-                num_steps=n_steps,
-                end_time=duration,
-                maximum_strain=eps_max,
-                initial_effective_cell_pressure=sigma_init,
-                cohesion_phi_indices=self._mc_tuple(),
+                num_steps = inputs.number_of_steps,
+                end_time = inputs.duration,
+                maximum_strain = inputs.maximum_strain,
+                initial_effective_cell_pressure = inputs.initial_effective_cell_pressure,
+                cohesion_phi_indices = inputs.mohr_coulomb.to_indices(),
                 plotter=plotter,
                 logger=self._logger
             )
