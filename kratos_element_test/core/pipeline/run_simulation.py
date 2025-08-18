@@ -130,7 +130,7 @@ def _render_with_plotter(test_type, plotter, results):
         raise ValueError(f"Unsupported test_type: {test_type}")
 
 def run_simulation(*, test_type: str, dll_path: str, index, material_parameters, num_steps, end_time,
-                   maximum_strain, initial_effective_cell_pressure, cohesion_phi_indices=None, axes=None,
+                   maximum_strain, initial_effective_cell_pressure, cohesion_phi_indices=None,
                    plotter=None, logger=None, drainage: str | None=None):
     log = logger or (lambda msg, level="info": None)
     tmp_folder = tempfile.mkdtemp(prefix=f"{test_type}_")
@@ -164,11 +164,7 @@ def run_simulation(*, test_type: str, dll_path: str, index, material_parameters,
         }
 
         if plotter is None:
-            if axes:
-                log('Axes were provided but no plotter object was passed. '
-                    'The core no longer creates a Matplotlib plotter automatically. '
-                    'Please construct a plotter in the UI layer and pass it via `plotter=`.',
-                    'warn')
+            log('No plotter was provided; using a no-op plotter (headless run).', 'info')
             plotter = _NoOpPlotter()
 
         _render_with_plotter(test_type, plotter, results)
