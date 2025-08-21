@@ -14,7 +14,7 @@ from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from pathlib import Path
 from PIL import Image, ImageTk
 
-from kratos_element_test.ui.controller import ElementTestController
+from kratos_element_test.ui.element_test_controller import ElementTestController
 from kratos_element_test.plotters.matplotlib_plotter import MatplotlibPlotter
 from kratos_element_test.ui.ui_logger import init_log_widget, log_message, clear_log
 from kratos_element_test.ui.ui_labels import (
@@ -201,7 +201,6 @@ class GeotechTestUI:
 
         self._switch_test(TRIAXIAL)
 
-        # self._init_drainage_section()
         self.run_button = ttk.Button(self.button_frame, text="Run Calculation", command=self._start_simulation_thread)
         self.run_button.pack(pady=5)
 
@@ -257,7 +256,6 @@ class GeotechTestUI:
     def _toggle_mohr_options(self):
         widgets = [self.c_label, self.c_dropdown, self.phi_label, self.phi_dropdown]
         if self.mohr_checkbox.get():
-            log_message("Mohr-Coulomb model is selected.", "info")
 
             self.controller.set_mohr_enabled(True)
 
@@ -355,7 +353,6 @@ class GeotechTestUI:
             index = self.model_dict["model_name"].index(self.model_var.get()) + 1 if self.dll_path else None
             test_type = self.current_test.get()
 
-            log_message("Calculating...", "info")
             self.root.update_idletasks()
 
             if test_type == TRIAXIAL:

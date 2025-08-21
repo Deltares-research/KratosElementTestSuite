@@ -10,6 +10,9 @@ def _fallback_log(msg: str, level: str = "info"):
 
 class MdpaEditor:
     def __init__(self, mdpa_path, logger=None):
+        # logger :  Optional logger function to log messages.
+        #    Callable with signature ``logger(message: str, level: str = 'info') -> None``.
+        #    If not provided, a no-op logger is used.
         self.mdpa_path = mdpa_path
         self._log = logger or _fallback_log
         try:
@@ -37,7 +40,6 @@ class MdpaEditor:
             self._log("Could not update maximum strain.", "warn")
         else:
             self.raw_text = new_text
-            MdpaEditor.save(self)
             self.save()
 
     def update_initial_effective_cell_pressure(self, initial_effective_cell_pressure):

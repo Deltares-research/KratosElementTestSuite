@@ -11,6 +11,9 @@ def _fallback_log(msg: str, level: str = "info"):
 
 class ProjectParameterEditor:
     def __init__(self, json_path, logger=None):
+        # logger :  Optional logger function to log messages.
+        #    Callable with signature ``logger(message: str, level: str = 'info') -> None``.
+        #    If not provided, a no-op logger is used.
         self.json_path = json_path
         self._log = logger or _fallback_log
         with open(self.json_path, 'r') as f:
