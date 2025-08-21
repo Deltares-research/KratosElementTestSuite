@@ -17,7 +17,7 @@ from PIL import Image, ImageTk
 from kratos_element_test.ui.element_test_controller import ElementTestController
 from kratos_element_test.plotters.matplotlib_plotter import MatplotlibPlotter
 from kratos_element_test.ui.ui_logger import init_log_widget, log_message, clear_log
-from kratos_element_test.ui.ui_labels import (
+from kratos_element_test.ui.ui_constants import (
     TRIAXIAL, DIRECT_SHEAR,
     MAX_STRAIN_LABEL, INIT_PRESSURE_LABEL, NUM_STEPS_LABEL, DURATION_LABEL,
     FL2_UNIT_LABEL, SECONDS_UNIT_LABEL, PERCENTAGE_UNIT_LABEL, WITHOUT_UNIT_LABEL,
