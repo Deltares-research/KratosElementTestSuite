@@ -3,16 +3,11 @@
 # Contact kratos@deltares.nl
 
 import re
+from kratos_element_test.core.utils import _fallback_log
 
-
-def _fallback_log(msg: str, level: str = "info"):
-    print(f"{level.upper()}: {msg}")
 
 class MdpaEditor:
     def __init__(self, mdpa_path, logger=None):
-        # logger :  Optional logger function to log messages.
-        #    Callable with signature ``logger(message: str, level: str = 'info') -> None``.
-        #    If not provided, a no-op logger is used.
         self.mdpa_path = mdpa_path
         self._log = logger or _fallback_log
         try:
@@ -51,7 +46,6 @@ class MdpaEditor:
             self._log("Could not update initial effective cell pressure.", "warn")
         else:
             self.raw_text = new_text
-            MdpaEditor.save(self)
             self.save()
 
     def update_first_timestep(self, num_steps, end_time):
@@ -64,7 +58,6 @@ class MdpaEditor:
             self._log("Could not apply the first time step.", "warn")
         else:
             self.raw_text = new_text
-            MdpaEditor.save(self)
             self.save()
 
     def update_end_time(self, end_time):
@@ -77,7 +70,6 @@ class MdpaEditor:
             self._log("Could not update the end time.", "warn")
         else:
             self.raw_text = new_text
-            MdpaEditor.save(self)
             self.save()
 
     def update_middle_maximum_strain(self, maximum_strain):
@@ -90,5 +82,4 @@ class MdpaEditor:
             self._log("Could not update middle maximum strain.", "warn")
         else:
             self.raw_text = new_text
-            MdpaEditor.save(self)
             self.save()

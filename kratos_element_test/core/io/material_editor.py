@@ -3,12 +3,14 @@
 # Contact kratos@deltares.nl
 
 import json
+from kratos_element_test.core.utils import _fallback_log
 
 
 class MaterialEditor:
-    def __init__(self, json_path):
+    def __init__(self, json_path, logger=None):
         self.json_path = json_path
         self.data = self.load_json()
+        self._log = logger or _fallback_log
 
     def _convert_type(self, value_string):
         try:
