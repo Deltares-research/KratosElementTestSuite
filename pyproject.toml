@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "kratos_element_test"
-version = "0.1.1"
+version = "0.1.2"
 description = "The Kratos Element Test Suite..."
 authors = ["Deltares Geo Kratos Team <kratos@deltares.nl>"]
 license = "Proprietary"
@@ -22,7 +22,7 @@ Pillow = "*"
 KratosGeoMechanicsApplication = ">=10.2.3"
 
 [tool.poetry.scripts]
-startElementTest = "kratos_element_test.kratos_element_test_gui:main"
+startElementTest = "kratos_element_test.ui.kratos_element_test_gui:main"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
