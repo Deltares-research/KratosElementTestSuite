@@ -21,7 +21,7 @@ class ElementTestController:
 
     def set_mohr_enabled(self, enabled: bool) -> None:
         self._mc_enabled = bool(enabled)
-        self._logger(f"Mohr-Coulomb {'enabled' if enabled else 'disabled'}.", "info")
+        self._logger(f"Mohr-Coulomb model {'enabled' if enabled else 'disabled'}.", "info")
 
     def set_mohr_mapping(self, c_index: Optional[int], phi_index: Optional[int]) -> None:
         self._mc_indices = (c_index, phi_index)
