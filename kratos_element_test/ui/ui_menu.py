@@ -9,6 +9,7 @@ from platformdirs import user_data_dir
 from pathlib import Path
 from kratos_element_test.ui.ui_builder import GeotechTestUI
 from kratos_element_test.core.io.udsm_parser import udsm_parser
+from kratos_element_test.ui.ui_utils import _asset_path
 from kratos_element_test.ui.ui_constants import (APP_TITLE, APP_VERSION, APP_NAME, APP_AUTHOR, SELECT_UDSM, LINEAR_ELASTIC,
                                                  HELP_MENU_FONT, DEFAULT_TKINTER_DPI)
 
@@ -20,13 +21,6 @@ data_dir.mkdir(parents=True, exist_ok=True)
 
 LICENSE_FLAG_PATH = data_dir / "license_accepted.flag"
 
-
-def _asset_path(name: str) -> str:
-    ui_dir = Path(__file__).resolve().parent
-    for p in (ui_dir / "assets" / name, ui_dir.parent / "assets" / name):
-        if p.exists():
-            return str(p)
-    return str((ui_dir / "assets" / name))
 
 def show_license_agreement(readonly=False):
     license_file_path = _asset_path("license.txt")

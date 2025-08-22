@@ -17,20 +17,13 @@ from PIL import Image, ImageTk
 from kratos_element_test.ui.element_test_controller import ElementTestController
 from kratos_element_test.plotters.matplotlib_plotter import MatplotlibPlotter
 from kratos_element_test.ui.ui_logger import init_log_widget, log_message, clear_log
+from kratos_element_test.ui.ui_utils import _asset_path
 from kratos_element_test.ui.ui_constants import (
     TRIAXIAL, DIRECT_SHEAR, TEST_NAME_TO_TYPE,
     MAX_STRAIN_LABEL, INIT_PRESSURE_LABEL, NUM_STEPS_LABEL, DURATION_LABEL,
     FL2_UNIT_LABEL, SECONDS_UNIT_LABEL, PERCENTAGE_UNIT_LABEL, WITHOUT_UNIT_LABEL,
     INPUT_SECTION_FONT, HELP_MENU_FONT
 )
-
-
-def _asset_path(name: str) -> str:
-    ui_dir = Path(__file__).resolve().parent
-    for p in (ui_dir / "assets" / name, ui_dir.parent / "assets" / name):
-        if p.exists():
-            return str(p)
-    return str(ui_dir / "assets" / name)
 
 
 class GeotechTestUI:
