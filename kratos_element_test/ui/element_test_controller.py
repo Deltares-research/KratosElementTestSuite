@@ -6,6 +6,8 @@ from typing import Optional, Callable, List, Tuple
 from kratos_element_test.core.pipeline.run_simulation import run_simulation
 from kratos_element_test.core.models import SimulationInputs, MohrCoulombOptions
 
+VALID_TEST_TYPES: tuple[str, ...] = ("triaxial", "direct_shear")
+
 
 class ElementTestController:
     def __init__(self, logger: Callable[[str, str], None], plotter_factory: Callable[[object], object]):
@@ -18,6 +20,12 @@ class ElementTestController:
 
         self._test_type: Optional[str] = None
         self._drainage: str = "drained"
+
+    def _is_valid_test_type(self, test_type: Optional[str]) -> bool:
+        if test_type in VALID_TEST_TYPES:
+            return True
+        self._logger(f"Unknown test type: {test_type}", "warn")
+        return False
 
     def set_mohr_enabled(self, enabled: bool) -> None:
         self._mc_enabled = bool(enabled)
@@ -35,8 +43,8 @@ class ElementTestController:
         return c_idx, phi_idx
 
     def set_test_type(self, test_type: str) -> None:
-        if test_type not in ("triaxial", "direct_shear"):
-            self._logger(f"Unknown test type: {test_type}", "warn")
+        if not self._is_valid_test_type(test_type):
+            return
         self._test_type = test_type
 
     def set_drainage(self, drainage: str) -> None:
@@ -58,7 +66,7 @@ class ElementTestController:
 
 
         tt = test_type or self._test_type
-        if tt not in ("triaxial", "direct_shear"):
+        if not self._is_valid_test_type(tt):
             self._logger("Please select a test type.", "error")
             return
 
