@@ -5,8 +5,7 @@
 from typing import Optional, Callable, List, Tuple
 from kratos_element_test.core.pipeline.run_simulation import run_simulation
 from kratos_element_test.core.models import SimulationInputs, MohrCoulombOptions
-
-VALID_TEST_TYPES: tuple[str, ...] = ("triaxial", "direct_shear")
+from kratos_element_test.ui.ui_constants import VALID_TEST_TYPES, VALID_DRAINAGE_TYPES
 
 
 class ElementTestController:
@@ -48,7 +47,7 @@ class ElementTestController:
         self._test_type = test_type
 
     def set_drainage(self, drainage: str) -> None:
-        if drainage not in ("drained", "undrained"):
+        if drainage not in VALID_DRAINAGE_TYPES:
             self._logger(f"Unknown drainage: {drainage}", "warn")
         self._drainage = drainage
 

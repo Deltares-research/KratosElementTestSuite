@@ -66,8 +66,6 @@ class GeotechTestUI:
             plotter_factory=lambda axes: MatplotlibPlotter(axes, logger=log_message)
         )
 
-        self.controller.set_test_type("triaxial" if test_name == TRIAXIAL else "direct_shear")
-
         self._init_dropdown_section()
         self._create_input_fields()
 
@@ -282,7 +280,6 @@ class GeotechTestUI:
     def _switch_test(self, test_name):
         clear_log()
         self.current_test.set(test_name)
-        self.controller.set_test_type("triaxial" if test_name == TRIAXIAL else "direct_shear")
 
         for name, button in self.test_buttons.items():
             if name == test_name:

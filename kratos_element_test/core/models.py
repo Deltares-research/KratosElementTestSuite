@@ -3,10 +3,8 @@
 # Contact kratos@deltares.nl
 
 from dataclasses import dataclass, field
-from typing import Optional, Tuple, Literal
-
-TestType = Literal["triaxial", "direct_shear"]
-Drainage = Literal["drained"]
+from typing import Optional, Tuple
+from kratos_element_test.ui.ui_constants import VALID_TEST_TYPES, VALID_DRAINAGE_TYPES
 
 
 @dataclass
@@ -23,13 +21,13 @@ class MohrCoulombOptions:
 
 @dataclass
 class SimulationInputs:
-    test_type: TestType
+    test_type: VALID_TEST_TYPES
     maximum_strain: float
     initial_effective_cell_pressure: float
     stress_increment: float
     number_of_steps: int
     duration: float
-    drainage: Drainage = "drained"
+    drainage: VALID_DRAINAGE_TYPES = "drained"
     mohr_coulomb: MohrCoulombOptions = field(default_factory=MohrCoulombOptions)
 
     def validate(self) -> None:
