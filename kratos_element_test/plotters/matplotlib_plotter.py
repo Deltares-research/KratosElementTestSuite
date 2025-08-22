@@ -3,7 +3,7 @@
 # Contact kratos@deltares.nl
 
 import numpy as np
-from kratos_element_test.core.utils import _fallback_log
+from kratos_element_test.core.core_utils import _fallback_log
 from kratos_element_test.plotters.plotter_labels import (
     SIGMA1_LABEL, SIGMA3_LABEL, SIGMA1_SIGMA3_DIFF_LABEL, VERTICAL_STRAIN_LABEL,
     VOLUMETRIC_STRAIN_LABEL, SHEAR_STRAIN_LABEL, SHEAR_STRESS_LABEL, EFFECTIVE_STRESS_LABEL,

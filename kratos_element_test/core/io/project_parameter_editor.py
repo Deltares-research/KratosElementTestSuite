@@ -4,7 +4,7 @@
 
 import re
 import json
-from kratos_element_test.core.utils import _fallback_log
+from kratos_element_test.core.core_utils import _fallback_log
 
 
 class ProjectParameterEditor:

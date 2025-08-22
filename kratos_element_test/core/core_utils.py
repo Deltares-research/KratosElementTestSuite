@@ -2,6 +2,9 @@
 # This is a prototype version
 # Contact kratos@deltares.nl
 
-# Fallback logging function that prints messages to the console.
+
 def _fallback_log(msg: str, level: str = "info") -> None:
+    """
+        Fallback logging function that prints messages to the console.
+    """
     print(f"{level.upper()}: {msg}")
