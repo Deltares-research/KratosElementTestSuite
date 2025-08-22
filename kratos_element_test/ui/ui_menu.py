@@ -10,8 +10,8 @@ from pathlib import Path
 from kratos_element_test.ui.ui_builder import GeotechTestUI
 from kratos_element_test.core.io.udsm_parser import udsm_parser
 from kratos_element_test.ui.ui_utils import _asset_path
-from kratos_element_test.ui.ui_constants import (APP_TITLE, APP_VERSION, APP_NAME, APP_AUTHOR, SELECT_UDSM, LINEAR_ELASTIC,
-                                                 HELP_MENU_FONT, DEFAULT_TKINTER_DPI)
+from kratos_element_test.ui.ui_constants import (APP_TITLE, APP_VERSION, APP_NAME, APP_AUTHOR, SELECT_UDSM,
+                                                 LINEAR_ELASTIC, HELP_MENU_FONT, DEFAULT_TKINTER_DPI)
 
 import ctypes
 ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID("deltares.ElementTestSuite.ui")
@@ -208,6 +208,7 @@ def create_menu():
 
     root.protocol("WM_DELETE_WINDOW", on_close)
     root.mainloop()
+
 
 if __name__ == "__main__":
     create_menu()

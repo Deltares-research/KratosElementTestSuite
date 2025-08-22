@@ -13,7 +13,7 @@ APP_AUTHOR = "Deltares"
 
 # General test types
 TRIAXIAL = "Triaxial"
-DIRECT_SHEAR= "Direct Simple Shear"
+DIRECT_SHEAR = "Direct Simple Shear"
 
 TEST_NAME_TO_TYPE = {
     TRIAXIAL: "triaxial",
@@ -24,7 +24,7 @@ TEST_NAME_TO_TYPE = {
 VALID_TEST_TYPES: tuple[str, ...] = ("triaxial", "direct_shear")
 
 # Valid drainage types
-VALID_DRAINAGE_TYPES : tuple[str, ...] = ("drained", "undrained")
+VALID_DRAINAGE_TYPES: tuple[str, ...] = ("drained", "undrained")
 
 # Input labels
 MAX_STRAIN_LABEL = "Maximum Strain |εᵧᵧ|"

@@ -21,6 +21,7 @@ except Exception:
 class _NoOpPlotter:
     def triaxial(self, *args, **kwargs):
         pass
+
     def direct_shear(self, *args, **kwargs):
         pass
 
@@ -131,7 +132,7 @@ def _render_with_plotter(test_type, plotter, results):
 
 def run_simulation(*, test_type: str, dll_path: str, index, material_parameters, num_steps, end_time,
                    maximum_strain, initial_effective_cell_pressure, cohesion_phi_indices=None,
-                   plotter=None, logger=None, drainage: str | None=None):
+                   plotter=None, logger=None, drainage: str | None = None):
     log = logger or (lambda msg, level="info": None)
     tmp_folder = tempfile.mkdtemp(prefix=f"{test_type}_")
 
@@ -152,15 +153,15 @@ def run_simulation(*, test_type: str, dll_path: str, index, material_parameters,
 
         results = {
             "yy_strain": yy_strain,
-             "vol_strain": vol_strain,
-             "sigma1": sigma_1,
-             "sigma3": sigma_3,
-             "shear_xy": shear_xy,
-             "shear_strain_xy": shear_strain_xy,
-             "mean_stress": mean_stress,
-             "von_mises": von_mises,
-             "cohesion": cohesion,
-             "phi": friction_angle
+            "vol_strain": vol_strain,
+            "sigma1": sigma_1,
+            "sigma3": sigma_3,
+            "shear_xy": shear_xy,
+            "shear_strain_xy": shear_strain_xy,
+            "mean_stress": mean_stress,
+            "von_mises": von_mises,
+            "cohesion": cohesion,
+            "phi": friction_angle
         }
 
         if plotter is None:

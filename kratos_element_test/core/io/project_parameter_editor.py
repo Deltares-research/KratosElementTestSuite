@@ -24,7 +24,8 @@ class ProjectParameterEditor:
 
             loads_list = data.get("processes", {}).get("loads_process_list", [])
             for process in loads_list:
-                if (process.get("python_module") == module_name
+                if (
+                    process.get("python_module") == module_name
                     and key in process.get("Parameters", {})
                 ):
                     process["Parameters"][key] = new_list

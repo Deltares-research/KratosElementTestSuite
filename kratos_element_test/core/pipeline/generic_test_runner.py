@@ -71,7 +71,8 @@ class GenericTestRunner:
             strain.append(item)
 
     def _is_tri3_element_gp(self, values):
-        return isinstance(values, list) and all("value" in v and isinstance(v["value"], list) and len(v["value"]) == 3 for v in values)
+        return isinstance(values, list) and all("value" in v and isinstance(v["value"], list) and
+                                                len(v["value"]) == 3 for v in values)
 
     def _extract_stress_tensors(self, stress_results):
         reshaped = {}

@@ -112,8 +112,8 @@ class MatplotlibPlotter:
         ax.set_ylabel(MOBILIZED_SHEAR_STRESS_LABEL)
         ax.grid(True)
         ax.invert_xaxis()
-        ax.set_xlim(left=0, right= 1.2*np.max(sigma_1))
-        ax.set_ylim(bottom=0, top = -0.6*np.max(sigma_1))
+        ax.set_xlim(left=0, right=1.2*np.max(sigma_1))
+        ax.set_ylim(bottom=0, top=-0.6*np.max(sigma_1))
         ax.minorticks_on()
 
     def plot_p_q_triaxial(self, ax, p_list, q_list):
@@ -185,16 +185,15 @@ class MatplotlibPlotter:
 
         if relative_diff < epsilon:
             ax.set_xlim(center - (1.2 * radius), center + (1.2 * radius))
-            ax.set_ylim(bottom=0, top = -0.9*(np.max(sigma_1) - np.max(sigma_3)))
+            ax.set_ylim(bottom=0, top=-0.9*(np.max(sigma_1) - np.max(sigma_3)))
 
         else:
             if sigma_1 > 0 or sigma_3 > 0:
                 ax.set_xlim(left=1.2*np.max(sigma_3), right=1.2*np.max(sigma_1))
-                ax.set_ylim(bottom=0, top = -0.9*(np.max(sigma_1) - np.max(sigma_3)))
+                ax.set_ylim(bottom=0, top=-0.9*(np.max(sigma_1) - np.max(sigma_3)))
             else:
                 ax.set_xlim(left=0, right=1.2*np.max(sigma_1))
-                ax.set_ylim(bottom=0, top = -0.9*np.max(sigma_1))
-
+                ax.set_ylim(bottom=0, top=-0.9*np.max(sigma_1))
 
         ax.minorticks_on()
 

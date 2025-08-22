@@ -11,7 +11,6 @@ import tkinter.font as tkFont
 import matplotlib.pyplot as plt
 from matplotlib.gridspec import GridSpec
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
-from pathlib import Path
 from PIL import Image, ImageTk
 
 from kratos_element_test.ui.element_test_controller import ElementTestController
@@ -381,8 +380,8 @@ class GeotechTestUI:
             self.is_running = False
 
     def _enable_run_button(self):
-            self.run_button.config(state="normal")
-            self.is_running = False
+        self.run_button.config(state="normal")
+        self.is_running = False
 
     def _set_widget_state(self, parent, state):
         for child in parent.winfo_children():

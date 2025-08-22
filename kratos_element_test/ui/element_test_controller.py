@@ -63,25 +63,23 @@ class ElementTestController:
             n_steps: float,
             duration: float) -> None:
 
-
         tt = test_type or self._test_type
         if not self._is_valid_test_type(tt):
             self._logger("Please select a test type.", "error")
             return
 
-
         inputs = SimulationInputs(
-            test_type = tt,
-            maximum_strain = eps_max,
-            initial_effective_cell_pressure = sigma_init,
-            stress_increment = 0.0,
-            number_of_steps = int(n_steps),
-            duration = duration,
-            drainage = self._drainage,
-            mohr_coulomb = MohrCoulombOptions(
-                enabled = self._mc_enabled,
-                c_index = self._mc_indices[0],
-                phi_index = self._mc_indices[1],
+            test_type=tt,
+            maximum_strain=eps_max,
+            initial_effective_cell_pressure=sigma_init,
+            stress_increment=0.0,
+            number_of_steps=int(n_steps),
+            duration=duration,
+            drainage=self._drainage,
+            mohr_coulomb=MohrCoulombOptions(
+                enabled=self._mc_enabled,
+                c_index=self._mc_indices[0],
+                phi_index=self._mc_indices[1],
             ),
         )
 
@@ -102,11 +100,11 @@ class ElementTestController:
                 dll_path=dll_path or "",
                 index=index,
                 material_parameters=material_parameters,
-                num_steps = inputs.number_of_steps,
-                end_time = inputs.duration,
-                maximum_strain = inputs.maximum_strain,
-                initial_effective_cell_pressure = inputs.initial_effective_cell_pressure,
-                cohesion_phi_indices = inputs.mohr_coulomb.to_indices(),
+                num_steps=inputs.number_of_steps,
+                end_time=inputs.duration,
+                maximum_strain=inputs.maximum_strain,
+                initial_effective_cell_pressure=inputs.initial_effective_cell_pressure,
+                cohesion_phi_indices=inputs.mohr_coulomb.to_indices(),
                 plotter=plotter,
                 logger=self._logger
             )
