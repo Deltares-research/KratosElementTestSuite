@@ -18,7 +18,7 @@ class ProjectParameterEditor:
         with open(self.json_path, 'w') as f:
             f.write(self.raw_text)
 
-    def update_nested_value(self, module_name, key, new_list) -> bool:
+    def update_nested_value(self, module_name, key, new_list):
         try:
             data = json.loads(self.raw_text)
 
@@ -35,11 +35,11 @@ class ProjectParameterEditor:
 
             self.raw_text = json.dumps(data, indent=4)
             self._write_back()
-            return True
+            return None
         except Exception as e:
             raise RuntimeError(f"Failed to update '{key}' under '{module_name}': {e}") from e
 
-    def update_property(self, property_name, new_value) -> int:
+    def update_property(self, property_name, new_value):
         pattern = rf'("{property_name}"\s*:\s*)([0-9eE+\.\-]+)'
         replacement = rf'\g<1>{new_value}'
         self.raw_text, count = re.subn(pattern, replacement, self.raw_text)
@@ -48,4 +48,4 @@ class ProjectParameterEditor:
         elif count > 1:
             self._log(f"Multiple occurrences of '{property_name}' found. Updated all {count}.", "warn")
         self._write_back()
-        return count
+        return None
