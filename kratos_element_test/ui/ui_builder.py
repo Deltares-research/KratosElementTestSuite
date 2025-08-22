@@ -18,7 +18,7 @@ from kratos_element_test.ui.element_test_controller import ElementTestController
 from kratos_element_test.plotters.matplotlib_plotter import MatplotlibPlotter
 from kratos_element_test.ui.ui_logger import init_log_widget, log_message, clear_log
 from kratos_element_test.ui.ui_constants import (
-    TRIAXIAL, DIRECT_SHEAR,
+    TRIAXIAL, DIRECT_SHEAR, TEST_NAME_TO_TYPE,
     MAX_STRAIN_LABEL, INIT_PRESSURE_LABEL, NUM_STEPS_LABEL, DURATION_LABEL,
     FL2_UNIT_LABEL, SECONDS_UNIT_LABEL, PERCENTAGE_UNIT_LABEL, WITHOUT_UNIT_LABEL,
     INPUT_SECTION_FONT, HELP_MENU_FONT
@@ -48,7 +48,7 @@ class GeotechTestUI:
 
         def _sync_test_type(*_):
             value = self.current_test.get()
-            tt = "triaxial" if value == TRIAXIAL else "direct_shear"
+            tt = TEST_NAME_TO_TYPE.get(value, "triaxial")
             self.controller.set_test_type(tt)
             self.current_test.trace_add("write", lambda *_: _sync_test_type())
             _sync_test_type()
@@ -356,10 +356,9 @@ class GeotechTestUI:
 
             if test_type == TRIAXIAL:
                 w = self.triaxial_widgets
-                tt = "triaxial"
             elif test_type == DIRECT_SHEAR:
                 w = self.shear_widgets
-                tt = "direct_shear"
+            tt = TEST_NAME_TO_TYPE.get(test_type, "triaxial")
 
             sigma_init = float(w["Initial effective cell pressure |σ'ₓₓ|"].get())
             eps_max = float(w["Maximum Strain |εᵧᵧ|"].get())
