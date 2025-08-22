@@ -244,8 +244,7 @@ class GeotechTestUI:
                                          values=[str(i+1) for i in range(len(params))], state="readonly", width=2)
 
         def _sync_mapping(*_):
-            c_idx = int(self.cohesion_var.get()) if self.cohesion_var.get() else None
-            phi_idx = int(self.phi_var.get()) if self.phi_var.get() else None
+            c_idx, phi_idx = self._parse_mc_indices()
             self.controller.set_mohr_mapping(c_idx, phi_idx)
 
         self.c_dropdown.bind("<<ComboboxSelected>>", _sync_mapping)
@@ -253,18 +252,21 @@ class GeotechTestUI:
 
         _sync_mapping()
 
+    def _parse_mc_indices(self):
+        try:
+            c_idx = int(self.cohesion_var.get()) if self.cohesion_var.get() else None
+            phi_idx = int(self.phi_var.get()) if self.phi_var.get() else None
+        except ValueError:
+            c_idx, phi_idx = None, None
+
+        return c_idx, phi_idx
+
     def _toggle_mohr_options(self):
         widgets = [self.c_label, self.c_dropdown, self.phi_label, self.phi_dropdown]
         if self.mohr_checkbox.get():
 
             self.controller.set_mohr_enabled(True)
-
-            try:
-                c_idx = int(self.cohesion_var.get()) if self.cohesion_var.get() else None
-                phi_idx = int(self.phi_var.get()) if self.phi_var.get() else None
-
-            except ValueError:
-                c_idx, phi_idx = None, None
+            c_idx, phi_idx = self._parse_mc_indices()
             self.controller.set_mohr_mapping(c_idx, phi_idx)
 
             for w in widgets:
