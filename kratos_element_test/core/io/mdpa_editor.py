@@ -8,6 +8,18 @@ from kratos_element_test.core.core_utils import _fallback_log
 
 class MdpaEditor:
     def __init__(self, mdpa_path, logger=None):
+        """
+        Initialize the MdpaEditor
+
+        Parameters
+        ----------
+        mdpa_path : str
+            Path to the mdpa file containing the model mesh and definitions.
+        logger : Callable[[str, str], None], optional
+            A logging function that takes (message: str, level: str).
+            Expected levels are "info", "warn", and "error".
+            If not provided, a simple console-printing fallback is used.
+        """
         self.mdpa_path = mdpa_path
         self._log = logger or _fallback_log
         try:

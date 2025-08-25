@@ -9,6 +9,18 @@ from kratos_element_test.core.core_utils import _fallback_log
 
 class ProjectParameterEditor:
     def __init__(self, json_path, logger=None):
+        """
+        Initialize the ProjectParameterEditor
+
+        Parameters
+        ----------
+        json_path : str
+            Path to the JSON file containing project properties.
+        logger : Callable[[str, str], None], optional
+            A logging function that takes (message: str, level: str).
+            Expected levels are "info", "warn", and "error".
+            If not provided, a simple console-printing fallback is used.
+        """
         self.json_path = json_path
         self._log = logger or _fallback_log
         with open(self.json_path, 'r') as f:
