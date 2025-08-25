@@ -41,14 +41,13 @@ class ProjectParameterEditor:
                     and key in process.get("Parameters", {})
                 ):
                     process["Parameters"][key] = new_list
-                    break
-            else:
-                self._log(f"Could not find '{key}' under '{module_name}'.", "warn")
-                return False
+                    self.raw_text = json.dumps(data, indent=4)
+                    self._write_back()
+                    return
 
-            self.raw_text = json.dumps(data, indent=4)
-            self._write_back()
-            return None
+            self._log(f"Could not find '{key}' under '{module_name}'.", "warn")
+            return
+
         except Exception as e:
             raise RuntimeError(f"Failed to update '{key}' under '{module_name}': {e}") from e
 
