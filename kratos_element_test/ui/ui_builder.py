@@ -2,8 +2,9 @@
 # This is a prototype version
 # Contact kratos@deltares.nl
 
-import os
 import math
+import threading
+import traceback
 import tkinter as tk
 from tkinter import ttk, scrolledtext
 import tkinter.font as tkFont
@@ -11,17 +12,18 @@ import matplotlib.pyplot as plt
 from matplotlib.gridspec import GridSpec
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from PIL import Image, ImageTk
-import threading
-import traceback
 
-from kratos_element_test.ui_runner import run_gui_builder
-from kratos_element_test.ui_logger import init_log_widget, log_message, clear_log
-from kratos_element_test.ui_labels import (
-    TRIAXIAL, DIRECT_SHEAR,
-    MAX_STRAIN_LABEL, INIT_PRESSURE_LABEL, STRESS_INC_LABEL, NUM_STEPS_LABEL, DURATION_LABEL,
+from kratos_element_test.ui.element_test_controller import ElementTestController
+from kratos_element_test.plotters.matplotlib_plotter import MatplotlibPlotter
+from kratos_element_test.ui.ui_logger import init_log_widget, log_message, clear_log
+from kratos_element_test.ui.ui_utils import _asset_path
+from kratos_element_test.ui.ui_constants import (
+    TRIAXIAL, DIRECT_SHEAR, TEST_NAME_TO_TYPE,
+    MAX_STRAIN_LABEL, INIT_PRESSURE_LABEL, NUM_STEPS_LABEL, DURATION_LABEL,
     FL2_UNIT_LABEL, SECONDS_UNIT_LABEL, PERCENTAGE_UNIT_LABEL, WITHOUT_UNIT_LABEL,
     INPUT_SECTION_FONT, HELP_MENU_FONT
 )
+
 
 class GeotechTestUI:
     def __init__(self, root, parent_frame, test_name, dll_path, model_dict, external_widgets=None):
@@ -34,7 +36,14 @@ class GeotechTestUI:
 
         self.model_var = tk.StringVar(root)
         self.model_var.set(model_dict["model_name"][0])
-        self.current_test = tk.StringVar(value=TRIAXIAL)
+        self.current_test = tk.StringVar(value=test_name)
+
+        def _sync_test_type(*_):
+            value = self.current_test.get()
+            tt = TEST_NAME_TO_TYPE.get(value, "triaxial")
+            self.controller.set_test_type(tt)
+            self.current_test.trace_add("write", lambda *_: _sync_test_type())
+            _sync_test_type()
 
         self._init_frames()
 
@@ -43,6 +52,11 @@ class GeotechTestUI:
 
         self.is_running = False
         self.external_widgets = external_widgets if external_widgets else []
+
+        self.controller = ElementTestController(
+            logger=log_message,
+            plotter_factory=lambda axes: MatplotlibPlotter(axes, logger=log_message)
+        )
 
         self._init_dropdown_section()
         self._create_input_fields()
@@ -106,8 +120,10 @@ class GeotechTestUI:
         self.canvas.get_tk_widget().pack(fill="both", expand=True)
 
     def _init_dropdown_section(self):
-        ttk.Label(self.dropdown_frame, text="Select a Model:", font=(INPUT_SECTION_FONT, 12, "bold")).pack(anchor="w", padx=5, pady=5)
-        self.model_menu = ttk.Combobox(self.dropdown_frame, textvariable=self.model_var, values=self.model_dict["model_name"], state="readonly")
+        ttk.Label(self.dropdown_frame, text="Select a Model:",
+                  font=(INPUT_SECTION_FONT, 12, "bold")).pack(anchor="w", padx=5, pady=5)
+        self.model_menu = ttk.Combobox(self.dropdown_frame, textvariable=self.model_var,
+                                       values=self.model_dict["model_name"], state="readonly")
         self.model_menu.pack(side="top", fill="x", expand=True, padx=5)
         self.model_var.trace("w", lambda *args: self._create_input_fields())
 
@@ -125,7 +141,8 @@ class GeotechTestUI:
         units = self.model_dict.get("param_units", [[]])[index]
 
         default_values = {}
-        self.entry_widgets = self._create_entries(self.param_frame, "Soil Input Parameters", params, units, default_values)
+        self.entry_widgets = self._create_entries(self.param_frame, "Soil Input Parameters",
+                                                  params, units, default_values)
 
         self.mohr_checkbox = tk.BooleanVar()
         self.cohesion_var = tk.StringVar(value="3")
@@ -140,8 +157,8 @@ class GeotechTestUI:
         self.test_buttons = {}
 
         image_paths = {
-            TRIAXIAL: os.path.join(os.path.dirname(__file__), "assets", "Triaxial.png"),
-            DIRECT_SHEAR: os.path.join(os.path.dirname(__file__), "assets", "DSS.png")
+            TRIAXIAL:  _asset_path("Triaxial.png"),
+            DIRECT_SHEAR: _asset_path("DSS.png")
         }
 
         self.test_images = {}
@@ -153,7 +170,6 @@ class GeotechTestUI:
             except Exception as e:
                 log_message(f"Failed to load or resize image: {path} ({e})", "error")
                 self.test_images[key] = None
-
 
         for test_name in [TRIAXIAL, DIRECT_SHEAR]:
             btn = tk.Button(
@@ -190,7 +206,7 @@ class GeotechTestUI:
             row = ttk.Frame(frame)
             row.pack(fill="x", padx=10, pady=2)
             ttk.Label(row, text=label, font=default_font).pack(side="left", padx=5)
-            entry = ttk.Entry(row, font=default_font, width= 20)
+            entry = ttk.Entry(row, font=default_font, width=20)
             entry.insert(0, defaults.get(label, ""))
             entry.pack(side="left", fill="x", expand=True)
             ttk.Label(row, text=unit, font=default_font).pack(side="left", padx=5)
@@ -217,13 +233,39 @@ class GeotechTestUI:
         self.phi_dropdown = ttk.Combobox(self.mohr_frame, textvariable=self.phi_var,
                                          values=[str(i+1) for i in range(len(params))], state="readonly", width=2)
 
+        def _sync_mapping(*_):
+            c_idx, phi_idx = self._parse_mc_indices()
+            self.controller.set_mohr_mapping(c_idx, phi_idx)
+
+        self.c_dropdown.bind("<<ComboboxSelected>>", _sync_mapping)
+        self.phi_dropdown.bind("<<ComboboxSelected>>", _sync_mapping)
+
+        _sync_mapping()
+
+    def _parse_mc_indices(self):
+        try:
+            c_idx = int(self.cohesion_var.get()) if self.cohesion_var.get() else None
+            phi_idx = int(self.phi_var.get()) if self.phi_var.get() else None
+        except ValueError:
+            c_idx, phi_idx = None, None
+
+        return c_idx, phi_idx
+
     def _toggle_mohr_options(self):
         widgets = [self.c_label, self.c_dropdown, self.phi_label, self.phi_dropdown]
         if self.mohr_checkbox.get():
-            log_message("Mohr-Coulomb model is selected.", "info")
+
+            self.controller.set_mohr_enabled(True)
+            c_idx, phi_idx = self._parse_mc_indices()
+            self.controller.set_mohr_mapping(c_idx, phi_idx)
+
             for w in widgets:
                 w.pack(side="left", padx=5)
+
         else:
+            self.controller.set_mohr_enabled(False)
+            self.controller.set_mohr_mapping(None, None)
+
             for w in widgets:
                 w.pack_forget()
 
@@ -242,7 +284,8 @@ class GeotechTestUI:
 
         if test_name == TRIAXIAL:
             self._init_plot_canvas(num_plots=5)
-            ttk.Label(self.test_input_frame, text="Triaxial Input Data", font=(INPUT_SECTION_FONT, 12, "bold")).pack(anchor="w", padx=5, pady=(5, 0))
+            ttk.Label(self.test_input_frame, text="Triaxial Input Data",
+                      font=(INPUT_SECTION_FONT, 12, "bold")).pack(anchor="w", padx=5, pady=(5, 0))
             self._add_test_type_dropdown(self.test_input_frame)
             self.triaxial_widgets = self._create_entries(
                 self.test_input_frame,
@@ -255,7 +298,8 @@ class GeotechTestUI:
 
         elif test_name == DIRECT_SHEAR:
             self._init_plot_canvas(num_plots=4)
-            ttk.Label(self.test_input_frame, text="Direct Simple Shear Input Data", font=(INPUT_SECTION_FONT, 12, "bold")).pack(anchor="w", padx=5, pady=(5, 0))
+            ttk.Label(self.test_input_frame, text="Direct Simple Shear Input Data",
+                      font=(INPUT_SECTION_FONT, 12, "bold")).pack(anchor="w", padx=5, pady=(5, 0))
             self._add_test_type_dropdown(self.test_input_frame)
             self.shear_widgets = self._create_entries(
                 self.test_input_frame,
@@ -268,9 +312,9 @@ class GeotechTestUI:
 
         log_message(f"{test_name} test selected.", "info")
 
-
     def _add_test_type_dropdown(self, parent):
-        ttk.Label(parent, text="Type of Test:", font=(INPUT_SECTION_FONT, 10, "bold")).pack(anchor="w", padx=5, pady=(5, 2))
+        ttk.Label(parent, text="Type of Test:",
+                  font=(INPUT_SECTION_FONT, 10, "bold")).pack(anchor="w", padx=5, pady=(5, 2))
 
         self.test_type_var = tk.StringVar(value="Drained")
         self.test_type_menu = ttk.Combobox(
@@ -282,7 +326,12 @@ class GeotechTestUI:
         )
         self.test_type_menu.pack(anchor="w", padx=10, pady=(0, 10))
 
-        self.test_type_menu.bind("<<ComboboxSelected>>")
+        def _sync_drainage_from_combobox(*_):
+            val = (self.test_type_var.get() or "").strip().lower()
+            self.controller.set_drainage("drained" if val.startswith("drained") else "undrained")
+
+        self.test_type_menu.bind("<<ComboboxSelected>>", lambda e: _sync_drainage_from_combobox())
+        _sync_drainage_from_combobox()
 
     def _run_simulation(self):
         try:
@@ -292,37 +341,32 @@ class GeotechTestUI:
 
             material_params = [e.get() for e in self.entry_widgets.values()]
 
-            cohesion_phi_indices = None
-            if not self.is_linear_elastic and self.mohr_checkbox.get():
-                cohesion_phi_indices = (int(self.cohesion_var.get()), int(self.phi_var.get()))
-
             index = self.model_dict["model_name"].index(self.model_var.get()) + 1 if self.dll_path else None
             test_type = self.current_test.get()
 
-            log_message("Calculating...", "info")
             self.root.update_idletasks()
 
             if test_type == TRIAXIAL:
-                run_gui_builder(
-                    test_type="triaxial",
-                    dll_path=self.dll_path or "",
-                    index=index,
-                    material_parameters=[float(x) for x in material_params],
-                    input_widgets=self.triaxial_widgets,
-                    cohesion_phi_indices=cohesion_phi_indices,
-                    axes=self.axes
-                )
-
+                w = self.triaxial_widgets
             elif test_type == DIRECT_SHEAR:
-                run_gui_builder(
-                    test_type="direct_shear",
-                    dll_path=self.dll_path or "",
-                    index=index,
-                    material_parameters=[float(x) for x in material_params],
-                    input_widgets=self.shear_widgets,
-                    cohesion_phi_indices=cohesion_phi_indices,
-                    axes=self.axes
-                )
+                w = self.shear_widgets
+            tt = TEST_NAME_TO_TYPE.get(test_type, "triaxial")
+
+            sigma_init = float(w["Initial effective cell pressure |σ'ₓₓ|"].get())
+            eps_max = float(w["Maximum Strain |εᵧᵧ|"].get())
+            n_steps = float(w["Number of steps"].get())
+            duration = float(w["Duration"].get())
+
+            self.controller.run(
+                axes=self.axes,
+                test_type=tt,
+                dll_path=self.dll_path or "",
+                index=index,
+                material_parameters=[float(x) for x in material_params],
+                sigma_init=sigma_init,
+                eps_max=eps_max,
+                n_steps=n_steps,
+                duration=duration)
 
             self.canvas.draw()
             log_message(f"{test_type} test completed successfully.", "info")
@@ -336,8 +380,8 @@ class GeotechTestUI:
             self.is_running = False
 
     def _enable_run_button(self):
-            self.run_button.config(state="normal")
-            self.is_running = False
+        self.run_button.config(state="normal")
+        self.is_running = False
 
     def _set_widget_state(self, parent, state):
         for child in parent.winfo_children():
@@ -402,7 +446,8 @@ class GeotechTestUI:
         self.log_frame.pack(fill="x", padx=10, pady=(0, 10))
 
         ttk.Label(self.log_frame, text="Log Output:", font=(INPUT_SECTION_FONT, 10, "bold")).pack(anchor="w")
-        self.log_widget = scrolledtext.ScrolledText(self.log_frame, height=6, width=40, state="disabled", wrap="word", font=("Courier", 9))
+        self.log_widget = scrolledtext.ScrolledText(self.log_frame, height=6, width=40, state="disabled",
+                                                    wrap="word", font=("Courier", 9))
         self.log_widget.pack(fill="x", expand=False)
 
         self.log_widget.bind("<Key>", lambda e: "break")

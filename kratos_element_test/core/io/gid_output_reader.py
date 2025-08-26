@@ -1,10 +1,4 @@
-from typing import Dict, Any
-import sys,os
 import math
-
-import KratosMultiphysics as Kratos
-import KratosMultiphysics.GeoMechanicsApplication as KratosGeo
-import KratosMultiphysics.GeoMechanicsApplication.geomechanics_analysis as analysis
 
 
 class GiDOutputFileReader:

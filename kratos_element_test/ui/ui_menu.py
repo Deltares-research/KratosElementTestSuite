@@ -7,10 +7,11 @@ import tkinter as tk
 from tkinter import filedialog, messagebox, ttk, scrolledtext, Menu
 from platformdirs import user_data_dir
 from pathlib import Path
-from kratos_element_test.ui_builder import GeotechTestUI
-from kratos_element_test.ui_udsm_parser import udsm_parser
-from kratos_element_test.ui_labels import (APP_TITLE, APP_VERSION, APP_NAME, APP_AUTHOR, SELECT_UDSM, LINEAR_ELASTIC,
-                                           HELP_MENU_FONT, DEFAULT_TKINTER_DPI)
+from kratos_element_test.ui.ui_builder import GeotechTestUI
+from kratos_element_test.core.io.udsm_parser import udsm_parser
+from kratos_element_test.ui.ui_utils import _asset_path
+from kratos_element_test.ui.ui_constants import (APP_TITLE, APP_VERSION, APP_NAME, APP_AUTHOR, SELECT_UDSM,
+                                                 LINEAR_ELASTIC, HELP_MENU_FONT, DEFAULT_TKINTER_DPI)
 
 import ctypes
 ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID("deltares.ElementTestSuite.ui")
@@ -22,8 +23,7 @@ LICENSE_FLAG_PATH = data_dir / "license_accepted.flag"
 
 
 def show_license_agreement(readonly=False):
-    license_file_path = os.path.join(os.path.dirname(__file__), "assets", "license.txt")
-
+    license_file_path = _asset_path("license.txt")
     try:
         with open(license_file_path, "r", encoding="utf-8") as f:
             license_text = f.read()
@@ -87,8 +87,8 @@ def show_about_window():
     image_frame.pack(pady=10)
 
     try:
-        path1 = os.path.join(os.path.dirname(__file__), "assets", "kratos.png")
-        path2 = os.path.join(os.path.dirname(__file__), "assets", "deltares.png")
+        path1 = _asset_path("kratos.png")
+        path2 = _asset_path("deltares.png")
 
         photo1 = tk.PhotoImage(file=path1)
         photo2 = tk.PhotoImage(file=path2)
@@ -133,7 +133,7 @@ def create_menu():
         show_license_agreement()
 
     try:
-        icon_path = os.path.join(os.path.dirname(__file__), "assets", "icon.ico")
+        icon_path = _asset_path("icon.ico")
         root.iconbitmap(default=icon_path)
     except Exception as e:
         print(f"Could not set icon: {e}")
@@ -208,6 +208,7 @@ def create_menu():
 
     root.protocol("WM_DELETE_WINDOW", on_close)
     root.mainloop()
+
 
 if __name__ == "__main__":
     create_menu()

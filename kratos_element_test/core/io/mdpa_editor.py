@@ -3,12 +3,25 @@
 # Contact kratos@deltares.nl
 
 import re
-from kratos_element_test.ui_logger import log_message
+from kratos_element_test.core.core_utils import _fallback_log
 
 
 class MdpaEditor:
-    def __init__(self, mdpa_path):
+    def __init__(self, mdpa_path, logger=None):
+        """
+        Initialize the MdpaEditor
+
+        Parameters
+        ----------
+        mdpa_path : str
+            Path to the mdpa file containing the model mesh and definitions.
+        logger : Callable[[str, str], None], optional
+            A logging function that takes (message: str, level: str).
+            Expected levels are "info", "warn", and "error".
+            If not provided, a simple console-printing fallback is used.
+        """
         self.mdpa_path = mdpa_path
+        self._log = logger or _fallback_log
         try:
             with open(self.mdpa_path, 'r') as f:
                 self.raw_text = f.read()
@@ -31,10 +44,10 @@ class MdpaEditor:
         replacer = self._replacer_factory(prescribed_displacement)
         new_text, count = re.subn(pattern, replacer, self.raw_text)
         if count == 0:
-            log_message("Could not update maximum strain.", "warn")
+            self._log("Could not update maximum strain.", "warn")
         else:
             self.raw_text = new_text
-            MdpaEditor.save(self)
+            self.save()
 
     def update_initial_effective_cell_pressure(self, initial_effective_cell_pressure):
         pattern = r'\$initial_effective_cell_pressure\b'
@@ -42,10 +55,10 @@ class MdpaEditor:
         replacer = self._replacer_factory(initial_effective_cell_pressure)
         new_text, count = re.subn(pattern, replacer, self.raw_text)
         if count == 0:
-            log_message("Could not update initial effective cell pressure.", "warn")
+            self._log("Could not update initial effective cell pressure.", "warn")
         else:
             self.raw_text = new_text
-            MdpaEditor.save(self)
+            self.save()
 
     def update_first_timestep(self, num_steps, end_time):
         first_timestep = end_time / num_steps
@@ -54,10 +67,10 @@ class MdpaEditor:
         replacer = self._replacer_factory(first_timestep)
         new_text, count = re.subn(pattern, replacer, self.raw_text)
         if count == 0:
-            log_message("Could not apply the first time step.", "warn")
+            self._log("Could not apply the first time step.", "warn")
         else:
             self.raw_text = new_text
-            MdpaEditor.save(self)
+            self.save()
 
     def update_end_time(self, end_time):
         pattern = r'\$end_time\b'
@@ -66,10 +79,10 @@ class MdpaEditor:
         new_text, count = re.subn(pattern, replacement, self.raw_text)
 
         if count == 0:
-            log_message("Could not update the end time.", "warn")
+            self._log("Could not update the end time.", "warn")
         else:
             self.raw_text = new_text
-            MdpaEditor.save(self)
+            self.save()
 
     def update_middle_maximum_strain(self, maximum_strain):
         pattern = r'\$middle_maximum_strain\b'
@@ -78,7 +91,7 @@ class MdpaEditor:
         replacer = self._replacer_factory(prescribed_middle_displacement)
         new_text, count = re.subn(pattern, replacer, self.raw_text)
         if count == 0:
-            log_message("Could not update middle maximum strain.", "warn")
+            self._log("Could not update middle maximum strain.", "warn")
         else:
             self.raw_text = new_text
-            MdpaEditor.save(self)
+            self.save()

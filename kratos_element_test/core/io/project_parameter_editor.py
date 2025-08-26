@@ -1,0 +1,61 @@
+# ©Deltares 2025
+# This is a prototype version
+# Contact kratos@deltares.nl
+
+import re
+import json
+from kratos_element_test.core.core_utils import _fallback_log
+
+
+class ProjectParameterEditor:
+    def __init__(self, json_path, logger=None):
+        """
+        Initialize the ProjectParameterEditor
+
+        Parameters
+        ----------
+        json_path : str
+            Path to the JSON file containing project properties.
+        logger : Callable[[str, str], None], optional
+            A logging function that takes (message: str, level: str).
+            Expected levels are "info", "warn", and "error".
+            If not provided, a simple console-printing fallback is used.
+        """
+        self.json_path = json_path
+        self._log = logger or _fallback_log
+        with open(self.json_path, 'r') as f:
+            self.raw_text = f.read()
+
+    def _write_back(self):
+        with open(self.json_path, 'w') as f:
+            f.write(self.raw_text)
+
+    def update_nested_value(self, module_name, key, new_list):
+        try:
+            data = json.loads(self.raw_text)
+
+            loads_list = data.get("processes", {}).get("loads_process_list", [])
+            for process in loads_list:
+                if (
+                    process.get("python_module") == module_name
+                    and key in process.get("Parameters", {})
+                ):
+                    process["Parameters"][key] = new_list
+                    self.raw_text = json.dumps(data, indent=4)
+                    self._write_back()
+                    return
+
+            self._log(f"Could not find '{key}' under '{module_name}'.", "warn")
+
+        except Exception as e:
+            raise RuntimeError(f"Failed to update '{key}' under '{module_name}': {e}") from e
+
+    def update_property(self, property_name, new_value):
+        pattern = rf'("{property_name}"\s*:\s*)([0-9eE+\.\-]+)'
+        replacement = rf'\g<1>{new_value}'
+        self.raw_text, count = re.subn(pattern, replacement, self.raw_text)
+        if count == 0:
+            self._log(f"Could not find '{property_name}' to update.", "warn")
+        elif count > 1:
+            self._log(f"Multiple occurrences of '{property_name}' found. Updated all {count}.", "warn")
+        self._write_back()

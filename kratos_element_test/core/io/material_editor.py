@@ -3,12 +3,26 @@
 # Contact kratos@deltares.nl
 
 import json
+from kratos_element_test.core.core_utils import _fallback_log
 
 
 class MaterialEditor:
-    def __init__(self, json_path):
+    def __init__(self, json_path, logger=None):
+        """
+        Initialize the MaterialEditor
+
+        Parameters
+        ----------
+        json_path : str
+            Path to the JSON file containing material properties.
+        logger : Callable[[str, str], None], optional
+            A logging function that takes (message: str, level: str).
+            Expected levels are "info", "warn", and "error".
+            If not provided, a simple console-printing fallback is used.
+        """
         self.json_path = json_path
         self.data = self.load_json()
+        self._log = logger or _fallback_log
 
     def _convert_type(self, value_string):
         try:
