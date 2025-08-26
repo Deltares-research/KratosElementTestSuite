@@ -16,8 +16,7 @@ from kratos_element_test.plotters.plotter_labels import (
 
 class MatplotlibPlotter:
     def __init__(self, axes, logger=None):
-        if logger is not None:
-            self._log = logger or _fallback_log
+        self._log = logger or _fallback_log
         self.axes = list(axes or [])
 
     def _clear(self):
