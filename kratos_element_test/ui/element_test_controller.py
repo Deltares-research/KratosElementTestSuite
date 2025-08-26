@@ -20,12 +20,6 @@ class ElementTestController:
         self._test_type: Optional[str] = None
         self._drainage: str = "drained"
 
-    def _is_valid_test_type(self, test_type: Optional[str]) -> bool:
-        if test_type in VALID_TEST_TYPES:
-            return True
-        self._logger(f"Unknown test type: {test_type}", "warn")
-        return False
-
     def set_mohr_enabled(self, enabled: bool) -> None:
         self._mc_enabled = bool(enabled)
         self._logger(f"Mohr-Coulomb model {'enabled' if enabled else 'disabled'}.", "info")
@@ -41,14 +35,26 @@ class ElementTestController:
             return None
         return c_idx, phi_idx
 
+    def _is_valid_test_type(self, test_type: Optional[str]) -> bool:
+        if test_type in VALID_TEST_TYPES:
+            return True
+        self._logger(f"Unknown test type: {test_type}", "warn")
+        return False
+
     def set_test_type(self, test_type: str) -> None:
         if not self._is_valid_test_type(test_type):
             return
         self._test_type = test_type
 
+    def _is_valid_drainage(self, drainage: Optional[str]) -> bool:
+        if drainage in VALID_DRAINAGE_TYPES:
+            return True
+        self._logger(f"Unknown drainage: {drainage}", "warn")
+        return False
+
     def set_drainage(self, drainage: str) -> None:
-        if drainage not in VALID_DRAINAGE_TYPES:
-            self._logger(f"Unknown drainage: {drainage}", "warn")
+        if not self._is_valid_drainage(drainage):
+            return
         self._drainage = drainage
 
     def run(self,
