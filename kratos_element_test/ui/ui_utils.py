@@ -15,7 +15,9 @@ def _asset_path(name: str) -> str:
        Falls back to <this_dir>/assets/<name> if not found.
        """
     ui_dir = Path(__file__).resolve().parent
-    for p in (ui_dir / "assets" / name, ui_dir.parent / "assets" / name):
+    candidates = [ui_dir / "assets" / name, ui_dir.parent / "assets" / name]
+    for p in candidates:
         if p.exists():
             return str(p)
-    return str(ui_dir / "assets" / name)
+    raise FileNotFoundError(
+        f"Asset '{name}' not found. Tried: {', '.join(str(p) for p in candidates)}")
