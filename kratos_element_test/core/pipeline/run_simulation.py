@@ -42,13 +42,12 @@ def _candidate_template_dirs(test_type: str):
     return candidates
 
 def _find_template_dir(test_type: str) -> Path:
-    tried = []
     for p in _candidate_template_dirs(test_type):
-        tried.append(str(p))
         if p.exists():
             return p
     raise FileNotFoundError(
-        f"Could not locate templates for '{test_type}'. Tried:\n  - " + "\n  - ".join(tried)
+        f"Could not locate templates for'{test_type}'."
+        f"Tried:\n  - " + "\n  - ".join(_candidate_template_dirs(test_type))
     )
 
 def setup_simulation_files(test_type, tmp_folder):
