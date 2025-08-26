@@ -46,7 +46,6 @@ class ProjectParameterEditor:
                     return
 
             self._log(f"Could not find '{key}' under '{module_name}'.", "warn")
-            return
 
         except Exception as e:
             raise RuntimeError(f"Failed to update '{key}' under '{module_name}': {e}") from e
@@ -60,4 +59,3 @@ class ProjectParameterEditor:
         elif count > 1:
             self._log(f"Multiple occurrences of '{property_name}' found. Updated all {count}.", "warn")
         self._write_back()
-        return None
