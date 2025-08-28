@@ -18,7 +18,8 @@ from kratos_element_test.plotters.matplotlib_plotter import MatplotlibPlotter
 from kratos_element_test.ui.ui_logger import init_log_widget, log_message, clear_log
 from kratos_element_test.ui.ui_utils import _asset_path
 from kratos_element_test.ui.ui_constants import (
-    TRIAXIAL, DIRECT_SHEAR, TEST_NAME_TO_TYPE,
+    TRIAXIAL, DIRECT_SHEAR, CRS,
+    TEST_NAME_TO_TYPE, TEST_IMAGE_FILES,
     MAX_STRAIN_LABEL, INIT_PRESSURE_LABEL, NUM_STEPS_LABEL, DURATION_LABEL,
     FL2_UNIT_LABEL, SECONDS_UNIT_LABEL, PERCENTAGE_UNIT_LABEL, WITHOUT_UNIT_LABEL,
     INPUT_SECTION_FONT, HELP_MENU_FONT
@@ -156,10 +157,7 @@ class GeotechTestUI:
 
         self.test_buttons = {}
 
-        image_paths = {
-            TRIAXIAL:  _asset_path("Triaxial.png"),
-            DIRECT_SHEAR: _asset_path("DSS.png")
-        }
+        image_paths = {name: _asset_path(filename) for name, filename in TEST_IMAGE_FILES.items()}
 
         self.test_images = {}
         for key, path in image_paths.items():
@@ -171,7 +169,7 @@ class GeotechTestUI:
                 log_message(f"Failed to load or resize image: {path} ({e})", "error")
                 self.test_images[key] = None
 
-        for test_name in [TRIAXIAL, DIRECT_SHEAR]:
+        for test_name in TEST_NAME_TO_TYPE.keys():
             btn = tk.Button(
                 self.test_selector_frame,
                 text=test_name,
