@@ -126,6 +126,8 @@ def _render_with_plotter(test_type, plotter, results):
             results["mean_stress"], results["von_mises"],
             results["cohesion"], results["phi"]
         )
+    elif test_type == "crs":
+        return
     else:
         raise ValueError(f"Unsupported test_type: {test_type}")
 

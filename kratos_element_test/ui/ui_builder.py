@@ -308,6 +308,19 @@ class GeotechTestUI:
                  NUM_STEPS_LABEL: "100", DURATION_LABEL: "1.0"}
             )
 
+        elif test_name == CRS:
+            self._init_plot_canvas(num_plots=3)
+            ttk.Label(self.test_input_frame, text="Constant Rate of Strain Input Data",
+                      font=(INPUT_SECTION_FONT, 12, "bold")).pack(anchor="w", padx=5, pady=(5, 0))
+            self._add_test_type_dropdown(self.test_input_frame)
+            self.crs_widgets = self._create_entries(
+                self.test_input_frame,
+                "",
+                [MAX_STRAIN_LABEL, NUM_STEPS_LABEL, DURATION_LABEL],
+                [PERCENTAGE_UNIT_LABEL, WITHOUT_UNIT_LABEL, SECONDS_UNIT_LABEL],
+                {MAX_STRAIN_LABEL: "20", NUM_STEPS_LABEL: "100", DURATION_LABEL: "1.0"}
+            )
+
         log_message(f"{test_name} test selected.", "info")
 
     def _add_test_type_dropdown(self, parent):
@@ -348,6 +361,8 @@ class GeotechTestUI:
                 w = self.triaxial_widgets
             elif test_type == DIRECT_SHEAR:
                 w = self.shear_widgets
+            elif test_type == CRS:
+                w = None
             tt = TEST_NAME_TO_TYPE.get(test_type, "triaxial")
 
             sigma_init = float(w["Initial effective cell pressure |σ'ₓₓ|"].get())
