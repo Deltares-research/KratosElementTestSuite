@@ -3,6 +3,7 @@
 # Contact kratos@deltares.nl
 
 import os
+import json
 import shutil
 import tempfile
 import numpy as np
@@ -52,12 +53,28 @@ def _find_template_dir(test_type: str) -> Path:
 
 def setup_simulation_files(test_type, tmp_folder):
     src_dir = _find_template_dir(test_type)
-    for filename in ["MaterialParameters.json", "ProjectParameters.json", "mesh.mdpa"]:
-        shutil.copy(os.path.join(src_dir, filename), tmp_folder)
+    copied = {}
+    for filename in ["MaterialParameters.json", "mesh.mdpa",
+                     "ProjectParameters.json", "ProjectParametersOrchestrator.json"]:
+        src_file = os.path.join(src_dir, filename)
+        dst_file = os.path.join(tmp_folder, filename)
+        if os.path.exists(src_file):
+            shutil.copy(src_file, dst_file)
+            copied[filename] = dst_file
+
+        # Determine which project file was actually copied
+    if "ProjectParametersOrchestrator.json" in copied:
+        project_file = copied["ProjectParametersOrchestrator.json"]
+    elif "ProjectParameters.json" in copied:
+        project_file = copied["ProjectParameters.json"]
+    else:
+        raise FileNotFoundError(
+            "Neither ProjectParametersOrchestrator.json nor ProjectParameters.json found in template.")
+
     return (
-        os.path.join(tmp_folder, "MaterialParameters.json"),
-        os.path.join(tmp_folder, "ProjectParameters.json"),
-        os.path.join(tmp_folder, "mesh.mdpa")
+        copied.get("MaterialParameters.json"),
+        project_file,
+        copied.get("mesh.mdpa")
     )
 
 def set_material_constitutive_law(json_file_path, dll_path, material_parameters, index):
@@ -78,11 +95,25 @@ def set_material_constitutive_law(json_file_path, dll_path, material_parameters,
         editor.set_constitutive_law("GeoLinearElasticPlaneStrain2DLaw")
 
 def set_project_parameters(project_path, num_steps, end_time, initial_stress):
+    with open(project_path, 'r') as f:
+        data = json.load(f)
+
     editor = ProjectParameterEditor(project_path)
-    editor.update_property('time_step', end_time / num_steps)
-    editor.update_property('end_time', end_time)
+    if "stages" in data:
+        num_stages = len(data["stages"])
+        editor.update_stage_timings([end_time] * num_stages, num_steps)
+    else:
+        editor.update_property('time_step', end_time / num_steps)
+        editor.update_property('end_time', end_time)
+
     stress_vector = [-initial_stress] * 3 + [0.0]
     editor.update_nested_value("apply_initial_uniform_stress_field", "value", stress_vector)
+
+    # editor = ProjectParameterEditor(project_path)
+    # editor.update_property('time_step', end_time / num_steps)
+    # editor.update_property('end_time', end_time)
+    # stress_vector = [-initial_stress] * 3 + [0.0]
+    # editor.update_nested_value("apply_initial_uniform_stress_field", "value", stress_vector)
 
 def set_mdpa(mdpa_path, max_strain, init_pressure, num_steps, end_time, test_type):
     editor = MdpaEditor(mdpa_path)
@@ -139,7 +170,12 @@ def run_simulation(*, test_type: str, dll_path: str, index, material_parameters,
 
     try:
         log(f"Starting {test_type} simulation...", "info")
-        json_path, project_path, mdpa_path = setup_simulation_files(test_type, tmp_folder)
+        json_path, orchestrator_path, mdpa_path = setup_simulation_files(test_type, tmp_folder)
+
+        if os.path.exists(orchestrator_path):
+            project_path = orchestrator_path
+        else:
+            raise FileNotFoundError(f"Expected project parameters file not found at: {orchestrator_path}")
 
         set_material_constitutive_law(json_path, dll_path, material_parameters, index)
         set_project_parameters(project_path, num_steps, end_time, initial_effective_cell_pressure)
