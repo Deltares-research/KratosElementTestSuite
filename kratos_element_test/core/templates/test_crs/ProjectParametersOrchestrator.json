@@ -28,6 +28,7 @@
             "start_time":           0.0,
             "end_time":             1.0,
             "echo_level":           1,
+            "parallel_type":        "OpenMP",
             "number_of_threads":    1
         },
         "solver_settings": {
@@ -80,12 +81,12 @@
                 "process_name": "GiDOutputProcess",
                 "Parameters":    {
                     "model_part_name": "PorousDomain.porous_computational_model_part",
-                    "output_name": "output_stage1",
+                    "output_name": "gid_output/output_stage1",
                     "postprocess_parameters": {
                         "result_file_configuration": {
                             "gidpost_flags":       {
-                                "WriteDeformedMeshFlag": "WriteUndeformed",
-                                "WriteConditionsFlag":   "WriteElementsOnly",
+                                "WriteDeformedMeshFlag": "WriteDeformed",
+                                "WriteConditionsFlag":   "WriteConditions",
                                 "GiDPostMode":           "GiD_PostAscii",
                                 "MultiFileFlag":         "SingleFile"
                             },
@@ -164,7 +165,15 @@
             "table":                0
             }
         }],
-        "loads_process_list"       : []
+        "loads_process_list"       : [{
+              "python_module": "apply_initial_uniform_stress_field",
+              "kratos_module": "KratosMultiphysics.GeoMechanicsApplication",
+              "process_name": "ApplyInitialUniformStressField",
+              "Parameters": {
+                "model_part_name": "PorousDomain.Soil",
+                "value": [-100, -100.0, -100, 0.0]
+              }
+            }]
         }
     }
     },
@@ -187,6 +196,7 @@
             "start_time":           1.0,
             "end_time":             2.0,
             "echo_level":           1,
+            "parallel_type":        "OpenMP",
             "number_of_threads":    1
         },
         "solver_settings": {
@@ -239,12 +249,12 @@
                 "process_name": "GiDOutputProcess",
                 "Parameters":    {
                     "model_part_name": "PorousDomain.porous_computational_model_part",
-                    "output_name": "output_stage1",
+                    "output_name": "gid_output/output_stage2",
                     "postprocess_parameters": {
                         "result_file_configuration": {
                             "gidpost_flags":       {
-                                "WriteDeformedMeshFlag": "WriteUndeformed",
-                                "WriteConditionsFlag":   "WriteElementsOnly",
+                                "WriteDeformedMeshFlag": "WriteDeformed",
+                                "WriteConditionsFlag":   "WriteConditions",
                                 "GiDPostMode":           "GiD_PostAscii",
                                 "MultiFileFlag":         "SingleFile"
                             },
@@ -323,7 +333,15 @@
             "table":                0
             }
         }],
-        "loads_process_list"       : []
+        "loads_process_list"       : [{
+              "python_module": "apply_initial_uniform_stress_field",
+              "kratos_module": "KratosMultiphysics.GeoMechanicsApplication",
+              "process_name": "ApplyInitialUniformStressField",
+              "Parameters": {
+                "model_part_name": "PorousDomain.Soil",
+                "value": [-100, -100.0, -100, 0.0]
+              }
+            }]
         }
     }
     }
