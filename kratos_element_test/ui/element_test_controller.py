@@ -67,7 +67,11 @@ class ElementTestController:
             sigma_init: float,
             eps_max: float,
             n_steps: float,
-            duration: float) -> None:
+            duration: float,
+            # stage_durations: Optional[List[float]] = None,
+            # strain_incs: Optional[List[float]] = None,
+            # step_counts: Optional[List[int]] = None
+            ) -> None:
 
         tt = test_type or self._test_type
         if not self._is_valid_test_type(tt):
@@ -112,7 +116,10 @@ class ElementTestController:
                 initial_effective_cell_pressure=inputs.initial_effective_cell_pressure,
                 cohesion_phi_indices=inputs.mohr_coulomb.to_indices(),
                 plotter=plotter,
-                logger=self._logger
+                logger=self._logger,
+                stage_durations=getattr(self, "stage_durations", None),
+                # strain_incs=strain_incs,
+                # step_counts=step_counts
             )
 
         except Exception as e:

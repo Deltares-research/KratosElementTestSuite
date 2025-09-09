@@ -171,24 +171,13 @@
               "process_name": "ApplyInitialUniformStressField",
               "Parameters": {
                 "model_part_name": "PorousDomain.Soil",
-                "value": [-100, -100.0, -100, 0.0]
+                "value": [0, 0, 0, 0.0]
               }
             }]
         }
     }
     },
     "stage_2" : {
-        "stage_preprocess": {
-            "modelers": [
-                {
-                    "name": "KratosMultiphysics.modelers.import_mdpa_modeler.ImportMDPAModeler",
-                    "Parameters": {
-                        "input_filename": "mesh",
-                        "model_part_name": "PorousDomain"
-                    }
-                }
-            ]
-        },
         "stage_settings" : {
             "analysis_stage": "Stages.KratosMultiphysics.GeoMechanicsApplication.GeoMechanicsAnalysis",
             "problem_data": {
@@ -339,7 +328,7 @@
               "process_name": "ApplyInitialUniformStressField",
               "Parameters": {
                 "model_part_name": "PorousDomain.Soil",
-                "value": [-100, -100.0, -100, 0.0]
+                "value": [0, 0, 0, 0.0]
               }
             }]
         }
