@@ -38,60 +38,25 @@ class ProjectParameterEditor:
 
     def update_nested_value(self, module_name, key, new_list):
         try:
-            data = self._load_json()
+            data = json.loads(self.raw_text)
 
-            def _update_in_loads(loads_list):
-                for process in loads_list:
-                    if process.get("python_module") == module_name and key in process.get("Parameters", {}):
-                        process["Parameters"][key] = new_list
-                        return True
-                return False
+            loads_list = data.get("processes", {}).get("loads_process_list", [])
+            for process in loads_list:
+                if (
+                    process.get("python_module") == module_name
+                    and key in process.get("Parameters", {})
+                ):
+                    process["Parameters"][key] = new_list
+                    self.raw_text = json.dumps(data, indent=4)
+                    self._write_back()
+                    return
 
-            updated = False
-
-            if "stages" in data:
-                for stage in data["stages"].values():
-                    loads = stage.get("processes", {}).get("loads_process_list", [])
-                    if _update_in_loads(loads):
-                        updated = True
-            else:
-                loads = data.get("processes", {}).get("loads_process_list", [])
-                if _update_in_loads(loads):
-                    updated = True
-
-            if not updated:
-                self._log(f"Could not find '{key}' under '{module_name}'.", "warn")
-            else:
-                self.raw_text = json.dumps(data, indent=4)
-                self._write_back()
+            self._log(f"Could not find '{key}' under '{module_name}'.", "warn")
 
         except Exception as e:
             raise RuntimeError(f"Failed to update '{key}' under '{module_name}': {e}") from e
 
     def update_property(self, property_name, new_value):
-        data = self._load_json()
-
-        if "stages" in data:  # New orchestrator-based structure
-            count = 0
-            for stage_name, stage in data["stages"].items():
-                pd = stage.get("stage_settings", {}).get("problem_data", {})
-                if property_name in pd and not (
-                        property_name == "start_time" and pd.get("start_time") == 0.0 and stage_name == "stage_1"):
-                    pd[property_name] = new_value
-                    count += 1
-
-                ts = stage.get("stage_settings", {}).get("solver_settings", {}).get("time_stepping", {})
-                if property_name in ts:
-                    ts[property_name] = new_value
-                    count += 1
-
-            if count == 0:
-                self._log(f"Could not find '{property_name}' inside stages.", "warn")
-            else:
-                self.raw_text = json.dumps(data, indent=4)
-                self._write_back()
-            return
-
         pattern = rf'("{property_name}"\s*:\s*)([0-9eE+\.\-]+)'
         replacement = rf'\g<1>{new_value}'
         self.raw_text, count = re.subn(pattern, replacement, self.raw_text)
@@ -100,6 +65,50 @@ class ProjectParameterEditor:
         elif count > 1:
             self._log(f"Multiple occurrences of '{property_name}' found. Updated all {count}.", "warn")
         self._write_back()
+
+    def update_strain_increments(self, strain_increments: list[float]):
+        """
+        Updates the strain increments for Top_displacement and Middle_displacement in each stage.
+        Top_displacement gets the cumulative strain up to that stage.
+        Middle_displacement gets the average of all strains (cumulative / N).
+        """
+        try:
+            data = self._load_json()
+            if "stages" not in data:
+                self._log("update_strain_increments is only supported in orchestrator-based files.", "error")
+                return
+
+            stage_names = list(data["stages"].keys())
+            if len(strain_increments) != len(stage_names):
+                raise ValueError(f"Provided {len(strain_increments)} strain values but found {len(stage_names)} stages.")
+
+            cumulative_strains = []
+            total = 0.0
+
+            for i, stage_name in enumerate(stage_names):
+                total += strain_increments[i]
+                cumulative_strains.append(total)
+
+            avg_strain = total / len(stage_names) if stage_names else 0.0
+
+            for i, stage_name in enumerate(stage_names):
+                stage = data["stages"][stage_name]
+                processes = stage.get("processes", {})
+                loads = processes.get("constraints_process_list", [])
+
+                for process in loads:
+                    if process.get("python_module") == "apply_vector_constraint_table_process":
+                        mp_name = process.get("Parameters", {}).get("model_part_name", "")
+                        if mp_name.endswith("Top_displacement"):
+                            process["Parameters"]["value"] = [0.0, cumulative_strains[i], 0.0]
+                        elif mp_name.endswith("Middle_displacement"):
+                            process["Parameters"]["value"] = [0.0, avg_strain, 0.0]
+
+            self.raw_text = json.dumps(data, indent=4)
+            self._write_back()
+
+        except Exception as e:
+            raise RuntimeError(f"Failed to update strain increments: {e}") from e
 
     def update_stage_timings(self, end_times: list[float], num_steps: int):
         """
