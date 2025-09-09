@@ -62,7 +62,6 @@ def setup_simulation_files(test_type, tmp_folder):
             shutil.copy(src_file, dst_file)
             copied[filename] = dst_file
 
-        # Determine which project file was actually copied
     if "ProjectParametersOrchestrator.json" in copied:
         project_file = copied["ProjectParametersOrchestrator.json"]
     elif "ProjectParameters.json" in copied:
@@ -94,26 +93,28 @@ def set_material_constitutive_law(json_file_path, dll_path, material_parameters,
         })
         editor.set_constitutive_law("GeoLinearElasticPlaneStrain2DLaw")
 
-def set_project_parameters(project_path, num_steps, end_time, initial_stress):
+def set_project_parameters(project_path, num_steps, end_time, initial_stress, stage_durations=None):
     with open(project_path, 'r') as f:
         data = json.load(f)
 
     editor = ProjectParameterEditor(project_path)
     if "stages" in data:
         num_stages = len(data["stages"])
-        editor.update_stage_timings([end_time] * num_stages, num_steps)
+        if stage_durations:
+            cumulative_end_times = []
+            total = 0.0
+            for d in stage_durations:
+                total += d
+                cumulative_end_times.append(total)
+            editor.update_stage_timings(cumulative_end_times, num_steps)
+        else:
+            editor.update_stage_timings([end_time] * num_stages, num_steps)
     else:
         editor.update_property('time_step', end_time / num_steps)
         editor.update_property('end_time', end_time)
 
     stress_vector = [-initial_stress] * 3 + [0.0]
     editor.update_nested_value("apply_initial_uniform_stress_field", "value", stress_vector)
-
-    # editor = ProjectParameterEditor(project_path)
-    # editor.update_property('time_step', end_time / num_steps)
-    # editor.update_property('end_time', end_time)
-    # stress_vector = [-initial_stress] * 3 + [0.0]
-    # editor.update_nested_value("apply_initial_uniform_stress_field", "value", stress_vector)
 
 def set_mdpa(mdpa_path, max_strain, init_pressure, num_steps, end_time, test_type):
     editor = MdpaEditor(mdpa_path)
@@ -123,6 +124,8 @@ def set_mdpa(mdpa_path, max_strain, init_pressure, num_steps, end_time, test_typ
     if test_type == "triaxial":
         editor.update_initial_effective_cell_pressure(init_pressure)
     if test_type == "direct_shear":
+        editor.update_middle_maximum_strain(max_strain)
+    if test_type == "crs":
         editor.update_middle_maximum_strain(max_strain)
 
 def calculate_principal_stresses(tensors):
@@ -158,13 +161,18 @@ def _render_with_plotter(test_type, plotter, results):
             results["cohesion"], results["phi"]
         )
     elif test_type == "crs":
-        return
+        plotter.direct_shear(
+            results["shear_strain_xy"], results["shear_xy"],
+            results["sigma1"], results["sigma3"],
+            results["mean_stress"], results["von_mises"],
+            results["cohesion"], results["phi"]
+        )
     else:
         raise ValueError(f"Unsupported test_type: {test_type}")
 
 def run_simulation(*, test_type: str, dll_path: str, index, material_parameters, num_steps, end_time,
                    maximum_strain, initial_effective_cell_pressure, cohesion_phi_indices=None,
-                   plotter=None, logger=None, drainage: str | None = None):
+                   plotter=None, logger=None, drainage: str | None = None, stage_durations: list[float] | None = None):
     log = logger or (lambda msg, level="info": None)
     tmp_folder = tempfile.mkdtemp(prefix=f"{test_type}_")
 
@@ -178,10 +186,22 @@ def run_simulation(*, test_type: str, dll_path: str, index, material_parameters,
             raise FileNotFoundError(f"Expected project parameters file not found at: {orchestrator_path}")
 
         set_material_constitutive_law(json_path, dll_path, material_parameters, index)
-        set_project_parameters(project_path, num_steps, end_time, initial_effective_cell_pressure)
+        set_project_parameters(project_path, num_steps, end_time, initial_effective_cell_pressure, stage_durations)
         set_mdpa(mdpa_path, maximum_strain, initial_effective_cell_pressure, num_steps, end_time, test_type)
 
-        runner = GenericTestRunner([os.path.join(tmp_folder, 'gid_output', "output.post.res")], tmp_folder)
+        # runner = GenericTestRunner([os.path.join(tmp_folder, 'gid_output', "output.post.res")], tmp_folder)
+        with open(project_path, 'r') as f:
+            project_json = json.load(f)
+
+        if "stages" in project_json:
+            output_files = [
+                os.path.join(tmp_folder, "gid_output", f"output_stage{i + 1}.post.res")
+                for i in range(len(project_json["stages"]))
+            ]
+        else:
+            output_files = [os.path.join(tmp_folder, "gid_output", "output.post.res")]
+
+        runner = GenericTestRunner(output_files, tmp_folder)
         tensors, yy_strain, vol_strain, von_mises, mean_stress, shear_xy, shear_strain_xy = runner.run()
         log("Finished analysis; collecting results...", "info")
 
@@ -211,4 +231,5 @@ def run_simulation(*, test_type: str, dll_path: str, index, material_parameters,
 
     finally:
         if os.path.exists(tmp_folder):
-            shutil.rmtree(tmp_folder)
+            #TODO:# shutil.rmtree(tmp_folder)
+            print(f"[Info] Temporary folder retained at: {tmp_folder}")
