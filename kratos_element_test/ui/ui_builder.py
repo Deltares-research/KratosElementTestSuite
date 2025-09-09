@@ -309,17 +309,18 @@ class GeotechTestUI:
             )
 
         elif test_name == CRS:
-            self._init_plot_canvas(num_plots=3)
+            self._init_plot_canvas(num_plots=4)
             ttk.Label(self.test_input_frame, text="Constant Rate of Strain Input Data",
                       font=(INPUT_SECTION_FONT, 12, "bold")).pack(anchor="w", padx=5, pady=(5, 0))
             self._add_test_type_dropdown(self.test_input_frame)
-            self.crs_widgets = self._create_entries(
-                self.test_input_frame,
-                "",
-                [MAX_STRAIN_LABEL, NUM_STEPS_LABEL, DURATION_LABEL],
-                [PERCENTAGE_UNIT_LABEL, WITHOUT_UNIT_LABEL, SECONDS_UNIT_LABEL],
-                {MAX_STRAIN_LABEL: "20", NUM_STEPS_LABEL: "100", DURATION_LABEL: "1.0"}
-            )
+
+            self.crs_table_frame = ttk.Frame(self.test_input_frame)
+            self.crs_table_frame.pack(fill="x", padx=10, pady=5)
+
+            self.crs_rows = []
+            self._add_crs_row()  # start with one row
+
+            ttk.Button(self.test_input_frame, text="Add Row", command=self._add_crs_row).pack(pady=5)
 
         log_message(f"{test_name} test selected.", "info")
 
@@ -347,28 +348,31 @@ class GeotechTestUI:
     def _run_simulation(self):
         try:
             log_message("Starting calculation... Please wait...", "info")
-            log_message("Validating input...", "info")
             self.root.update_idletasks()
 
             material_params = [e.get() for e in self.entry_widgets.values()]
-
             index = self.model_dict["model_name"].index(self.model_var.get()) + 1 if self.dll_path else None
             test_type = self.current_test.get()
-
-            self.root.update_idletasks()
-
-            if test_type == TRIAXIAL:
-                w = self.triaxial_widgets
-            elif test_type == DIRECT_SHEAR:
-                w = self.shear_widgets
-            elif test_type == CRS:
-                w = None
             tt = TEST_NAME_TO_TYPE.get(test_type, "triaxial")
 
-            sigma_init = float(w["Initial effective cell pressure |σ'ₓₓ|"].get())
-            eps_max = float(w["Maximum Strain |εᵧᵧ|"].get())
-            n_steps = float(w["Number of steps"].get())
-            duration = float(w["Duration"].get())
+            if test_type in [TRIAXIAL, DIRECT_SHEAR]:
+                widgets = self.triaxial_widgets if test_type == TRIAXIAL else self.shear_widgets
+                sigma_init, eps_max, n_steps, duration = self._extract_classic_inputs(widgets)
+
+                self.controller.stage_durations = None
+                self.controller.strain_incs = None
+                self.controller.step_counts = None
+
+            elif test_type == CRS:
+                sigma_init = 0.0
+                stage_durations, strain_incs, step_counts, eps_max, n_steps, duration = self._extract_staged_inputs()
+
+                self.controller.stage_durations = stage_durations
+                self.controller.strain_incs = strain_incs
+                self.controller.step_counts = step_counts
+
+            else:
+                raise ValueError(f"Unsupported test type: {test_type}")
 
             self.controller.run(
                 axes=self.axes,
@@ -379,7 +383,11 @@ class GeotechTestUI:
                 sigma_init=sigma_init,
                 eps_max=eps_max,
                 n_steps=n_steps,
-                duration=duration)
+                duration=duration,
+                # stage_durations=stage_durations,
+                # strain_incs=strain_incs,
+                # step_counts=step_counts
+            )
 
             self.canvas.draw()
             log_message(f"{test_type} test completed successfully.", "info")
@@ -387,10 +395,58 @@ class GeotechTestUI:
         except Exception:
             log_message("An error occurred during simulation:", "error")
             log_message(traceback.format_exc(), "error")
-
+            print(traceback.format_exc())
         finally:
             self.root.after(0, self._enable_gui)
             self.is_running = False
+
+        #     log_message("Starting calculation... Please wait...", "info")
+        #     # log_message("Validating input...", "info")
+        #     self.root.update_idletasks()
+        #
+        #     material_params = [e.get() for e in self.entry_widgets.values()]
+        #
+        #     index = self.model_dict["model_name"].index(self.model_var.get()) + 1 if self.dll_path else None
+        #     test_type = self.current_test.get()
+        #
+        #     self.root.update_idletasks()
+        #
+        #     if test_type == TRIAXIAL:
+        #         w = self.triaxial_widgets
+        #     elif test_type == DIRECT_SHEAR:
+        #         w = self.shear_widgets
+        #     elif test_type == CRS:
+        #         w = None  #self.crs_widgets = {}
+        #     tt = TEST_NAME_TO_TYPE.get(test_type, "triaxial")
+        #
+        #
+        #     sigma_init = float(w["Initial effective cell pressure |σ'ₓₓ|"].get())
+        #     eps_max = float(w["Maximum Strain |εᵧᵧ|"].get())
+        #     n_steps = float(w["Number of steps"].get())
+        #     duration = float(w["Duration"].get())
+        #
+        #     self.controller.run(
+        #         axes=self.axes,
+        #         test_type=tt,
+        #         dll_path=self.dll_path or "",
+        #         index=index,
+        #         material_parameters=[float(x) for x in material_params],
+        #         sigma_init=sigma_init,
+        #         eps_max=eps_max,
+        #         n_steps=n_steps,
+        #         duration=duration)
+        #
+        #     self.canvas.draw()
+        #     log_message(f"{test_type} test completed successfully.", "info")
+        #
+        # except Exception:
+        #     log_message("An error occurred during simulation:", "error")
+        #     log_message(traceback.format_exc(), "error")
+        #     print(traceback.format_exc())
+        #
+        # finally:
+        #     self.root.after(0, self._enable_gui)
+        #     self.is_running = False
 
     def _enable_run_button(self):
         self.run_button.config(state="normal")
@@ -447,6 +503,20 @@ class GeotechTestUI:
         self.canvas = None
         self.axes = []
 
+    def _add_crs_row(self):
+        row = {}
+        row_frame = ttk.Frame(self.crs_table_frame)
+        row_frame.pack(fill="x", pady=2)
+
+        for label, width, unit in zip(["Duration", "Strain inc.", "Steps"], [10, 15, 8], ["day", "%", ""]):
+            ttk.Label(row_frame, text=label).pack(side="left", padx=5)
+            entry = ttk.Entry(row_frame, width=width)
+            entry.pack(side="left", padx=2)
+            ttk.Label(row_frame, text=unit).pack(side="left", padx=5)
+            row[label] = entry
+
+        self.crs_rows.append(row)
+
     def _on_mousewheel(self, event):
         if event.delta > 0:
             first, _ = self.scroll_canvas.yview()
@@ -468,3 +538,34 @@ class GeotechTestUI:
         self.log_widget.bind("<FocusIn>", lambda e: self.root.focus())
 
         init_log_widget(self.log_widget)
+
+    def _extract_classic_inputs(self, widgets):
+        try:
+            sigma_init = float(widgets[INIT_PRESSURE_LABEL].get())
+            eps_max = float(widgets[MAX_STRAIN_LABEL].get())
+            n_steps = float(widgets[NUM_STEPS_LABEL].get())
+            duration = float(widgets[DURATION_LABEL].get())
+            return sigma_init, eps_max, n_steps, duration
+        except Exception as e:
+            raise ValueError(f"Failed to extract classic inputs: {e}")
+
+    def _extract_staged_inputs(self):
+        durations = []
+        strains = []
+        steps = []
+
+        for row in self.crs_rows:
+            try:
+                d = float(row["Duration"].get())
+                s = float(row["Strain inc."].get())
+                n = int(row["Steps"].get())
+            except Exception as e:
+                raise ValueError(f"Failed to extract CRS inputs: {e}")
+            durations.append(d)
+            strains.append(s)
+            steps.append(n)
+
+        eps_max = sum(strains)
+        n_steps = sum(steps)
+        duration = sum(durations)
+        return durations, strains, steps, eps_max, n_steps, duration
