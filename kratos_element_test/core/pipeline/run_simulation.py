@@ -154,6 +154,7 @@ def _render_with_plotter(test_type, plotter, results):
     if test_type == "triaxial":
         plotter.triaxial(
             results["yy_strain"], results["vol_strain"],
+            results["sigma_yy"], results["sigma_xx"],
             results["sigma1"], results["sigma3"],
             results["mean_stress"], results["von_mises"],
             results["cohesion"], results["phi"]
@@ -166,10 +167,11 @@ def _render_with_plotter(test_type, plotter, results):
             results["cohesion"], results["phi"]
         )
     elif test_type == "crs":
-        plotter.direct_shear(
-            results["shear_strain_xy"], results["shear_xy"],
-            results["sigma1"], results["sigma3"],
+        plotter.crs(
+            results["yy_strain"], results["time_steps"],
+            results["sigma_yy"], results["sigma_xx"],
             results["mean_stress"], results["von_mises"],
+            results["sigma1"], results["sigma3"],
             results["cohesion"], results["phi"]
         )
     else:
@@ -207,7 +209,8 @@ def run_simulation(*, test_type: str, dll_path: str, index, material_parameters,
             output_files = [os.path.join(tmp_folder, "gid_output", "output.post.res")]
 
         runner = GenericTestRunner(output_files, tmp_folder)
-        tensors, yy_strain, vol_strain, von_mises, mean_stress, shear_xy, shear_strain_xy = runner.run()
+        (tensors, yy_strain, vol_strain, von_mises, mean_stress, shear_xy, shear_strain_xy,
+         sigma_xx, sigma_yy, time_steps) = runner.run()
         log("Finished analysis; collecting results...", "info")
 
         sigma_1, sigma_3 = calculate_principal_stresses(tensors)
@@ -225,7 +228,10 @@ def run_simulation(*, test_type: str, dll_path: str, index, material_parameters,
             "mean_stress": mean_stress,
             "von_mises": von_mises,
             "cohesion": cohesion,
-            "phi": friction_angle
+            "phi": friction_angle,
+            "sigma_xx": sigma_xx,
+            "sigma_yy": sigma_yy,
+            "time_steps": time_steps,
         }
 
         if plotter is None:

@@ -309,7 +309,7 @@ class GeotechTestUI:
             )
 
         elif test_name == CRS:
-            self._init_plot_canvas(num_plots=4)
+            self._init_plot_canvas(num_plots=5)
             ttk.Label(self.test_input_frame, text="Constant Rate of Strain Input Data",
                       font=(INPUT_SECTION_FONT, 12, "bold")).pack(anchor="w", padx=5, pady=(5, 0))
             self._add_test_type_dropdown(self.test_input_frame)
@@ -399,54 +399,6 @@ class GeotechTestUI:
         finally:
             self.root.after(0, self._enable_gui)
             self.is_running = False
-
-        #     log_message("Starting calculation... Please wait...", "info")
-        #     # log_message("Validating input...", "info")
-        #     self.root.update_idletasks()
-        #
-        #     material_params = [e.get() for e in self.entry_widgets.values()]
-        #
-        #     index = self.model_dict["model_name"].index(self.model_var.get()) + 1 if self.dll_path else None
-        #     test_type = self.current_test.get()
-        #
-        #     self.root.update_idletasks()
-        #
-        #     if test_type == TRIAXIAL:
-        #         w = self.triaxial_widgets
-        #     elif test_type == DIRECT_SHEAR:
-        #         w = self.shear_widgets
-        #     elif test_type == CRS:
-        #         w = None  #self.crs_widgets = {}
-        #     tt = TEST_NAME_TO_TYPE.get(test_type, "triaxial")
-        #
-        #
-        #     sigma_init = float(w["Initial effective cell pressure |σ'ₓₓ|"].get())
-        #     eps_max = float(w["Maximum Strain |εᵧᵧ|"].get())
-        #     n_steps = float(w["Number of steps"].get())
-        #     duration = float(w["Duration"].get())
-        #
-        #     self.controller.run(
-        #         axes=self.axes,
-        #         test_type=tt,
-        #         dll_path=self.dll_path or "",
-        #         index=index,
-        #         material_parameters=[float(x) for x in material_params],
-        #         sigma_init=sigma_init,
-        #         eps_max=eps_max,
-        #         n_steps=n_steps,
-        #         duration=duration)
-        #
-        #     self.canvas.draw()
-        #     log_message(f"{test_type} test completed successfully.", "info")
-        #
-        # except Exception:
-        #     log_message("An error occurred during simulation:", "error")
-        #     log_message(traceback.format_exc(), "error")
-        #     print(traceback.format_exc())
-        #
-        # finally:
-        #     self.root.after(0, self._enable_gui)
-        #     self.is_running = False
 
     def _enable_run_button(self):
         self.run_button.config(state="normal")
