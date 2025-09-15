@@ -130,11 +130,16 @@ def set_mdpa(mdpa_path, max_strain, init_pressure, num_steps, end_time, test_typ
 
 def calculate_principal_stresses(tensors):
     sigma_1, sigma_3 = [], []
-    for tensors_at_time in tensors.values():
-        for sigma in tensors_at_time:
+    for time in sorted(tensors.keys()):
+        for sigma in tensors[time]:
             eigenvalues, _ = np.linalg.eigh(sigma)
             sigma_1.append(np.min(eigenvalues))
             sigma_3.append(np.max(eigenvalues))
+    # for tensors_at_time in tensors.values():
+    #     for sigma in tensors_at_time:
+    #         eigenvalues, _ = np.linalg.eigh(sigma)
+    #         sigma_1.append(np.min(eigenvalues))
+    #         sigma_3.append(np.max(eigenvalues))
     return sigma_1, sigma_3
 
 def get_cohesion_phi(umat_parameters, indices):
@@ -206,6 +211,8 @@ def run_simulation(*, test_type: str, dll_path: str, index, material_parameters,
         log("Finished analysis; collecting results...", "info")
 
         sigma_1, sigma_3 = calculate_principal_stresses(tensors)
+        log(f"Principal stress count: sigma_1={len(sigma_1)}, sigma_3={len(sigma_3)}", "info")
+
         cohesion, friction_angle = get_cohesion_phi(material_parameters, cohesion_phi_indices)
 
         results = {

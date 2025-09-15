@@ -68,48 +68,36 @@ class GenericTestRunner:
 
     def _collect_results(self):
         stress, mean_stress, von_mises, displacement, strain = [], [], [], [], []
-        all_results = {}
         base_path = Path(self.work_dir)
 
-        stage_dirs = [base_path / "gid_output"]
-        stage_dirs += sorted(base_path.glob("gid_output_stage*"), key=lambda p: int(re.search(r"\d+", p.name).group()))
-
-        for stage_dir in stage_dirs:
-            result_file = stage_dir / "output.post.res"
-            if not result_file.exists():
-                self._log(f"Missing result file: {result_file}", "warn")
+        all_results = []
+        for result_path in self.output_file_paths:
+            result_path = Path(result_path)
+            if not result_path.exists():
+                self._log(f"Missing result file: {result_path}", "warn")
                 continue
 
-            output = gid_output_reader.GiDOutputFileReader().read_output_from(result_file)
+            output = gid_output_reader.GiDOutputFileReader().read_output_from(result_path)
+            self._log(f"Available result keys in {result_path.name}: {list(output.get('results', {}).keys())}", "info")
+            self._log(f"Loaded {sum(len(v) for v in output.get('results', {}).values())} entries from: {result_path}",
+                      "info")
 
-            if "results" not in output:
-                self._log(f"No 'results' key in: {result_file}", "warn")
-                continue
+            for result_name, items in output.get("results", {}).items():
+                for item in items:
+                    self._categorize_result(result_name, item, stress, mean_stress, von_mises, displacement, strain)
 
-            for key, values in output["results"].items():
-                if key not in all_results:
-                    all_results[key] = []
-                all_results[key].extend(values)
+        self._log(f"Collected {len(stress)} stress, {len(mean_stress)} mean stress, "
+                  f"{len(von_mises)} von mises, {len(strain)} strain entries", "info")
 
-        if not all_results:
-            raise RuntimeError("No valid results found in any stage output.")
-
-        stress = all_results.get("stress", [])
-        mean_stress = all_results.get("mean_stress", [])
-        von_mises = all_results.get("von_mises", [])
-        shear_xy = all_results.get("shear_xy", [])
-        shear_strain_xy = all_results.get("shear_strain_xy", [])
-        strain = all_results.get("strain", [])
-
-        return stress, mean_stress, von_mises, shear_xy, strain
+        return stress, mean_stress, von_mises, displacement, strain
 
     def _categorize_result(self, result_name, item, stress, mean_stress, von_mises, displacement, strain):
         values = item["values"]
         if result_name == "CAUCHY_STRESS_TENSOR":
             stress.append(item)
-        elif result_name == "MEAN_EFFECTIVE_STRESS" and self._is_tri3_element_gp(values):
+        elif result_name == "MEAN_EFFECTIVE_STRESS": #and self._is_tri3_element_gp(values):
             mean_stress.append(item)
-        elif result_name == "VON_MISES_STRESS" and self._is_tri3_element_gp(values):
+        elif result_name == "VON_MISES_STRESS": #and self._is_tri3_element_gp(values):
             von_mises.append(item)
         elif result_name == "DISPLACEMENT":
             displacement.append(item)
@@ -133,7 +121,10 @@ class GenericTestRunner:
                 [sublist[3], sublist[1], sublist[4]],
                 [sublist[5], sublist[4], sublist[2]],
             ])
-            reshaped[time_step] = [tensor]
+            if time_step not in reshaped:
+                reshaped[time_step] = []
+            reshaped[time_step].append(tensor)
+            # reshaped[time_step] = [tensor]
         return reshaped
 
     def _extract_shear_stress_xy(self, stress_results):
