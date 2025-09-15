@@ -5,11 +5,12 @@
 import numpy as np
 from kratos_element_test.core.core_utils import _fallback_log
 from kratos_element_test.plotters.plotter_labels import (
-    SIGMA1_LABEL, SIGMA3_LABEL, SIGMA1_SIGMA3_DIFF_LABEL, VERTICAL_STRAIN_LABEL,
-    VOLUMETRIC_STRAIN_LABEL, SHEAR_STRAIN_LABEL, SHEAR_STRESS_LABEL, EFFECTIVE_STRESS_LABEL,
-    MOBILIZED_SHEAR_STRESS_LABEL, P_STRESS_LABEL, Q_STRESS_LABEL,
+    SIGMA1_LABEL, SIGMA3_LABEL, SIGMA1_SIGMA3_DIFF_LABEL, HORIZONTAL_STRESS_LABEL, VERTICAL_STRESS_LABEL,
+    VERTICAL_STRAIN_LABEL, VOLUMETRIC_STRAIN_LABEL, SHEAR_STRAIN_LABEL, SHEAR_STRESS_LABEL, EFFECTIVE_STRESS_LABEL,
+    MOBILIZED_SHEAR_STRESS_LABEL, P_STRESS_LABEL, Q_STRESS_LABEL, TIME_LABEL,
     TITLE_SIGMA1_VS_SIGMA3, TITLE_DIFF_PRINCIPAL_SIGMA_VS_STRAIN, TITLE_VOL_VS_VERT_STRAIN,
-    TITLE_MOHR, TITLE_P_VS_Q, TITLE_SHEAR_VS_STRAIN,
+    TITLE_MOHR, TITLE_P_VS_Q, TITLE_SHEAR_VS_STRAIN, TITLE_VERTICAL_STRAIN_VS_TIME,
+    TITLE_VERTICAL_STRESS_VS_VERTICAL_STRAIN,
     LEGEND_MC, LEGEND_MC_FAILURE
 )
 
@@ -49,6 +50,19 @@ class MatplotlibPlotter:
         self.plot_p_q_direct_shear(self.axes[2], p_list, q_list)
         # 3: Mohr–Coulomb
         self.plot_mohr_coulomb_direct_shear(self.axes[3], sigma1[-1], sigma3[-1], cohesion, phi)
+
+    def crs(self, time_steps, yy_strain, sigma_yy, sigma_xx, p_list, q_list, sigma1, sigma3, cohesion=None, phi=None):
+        self._clear()
+        # 0: σýy vs εyy
+        self.plot_vertical_stress_vs_vertical_strain(self.axes[0], sigma_yy, yy_strain)
+        # 1: σ'yy vs σ'xx
+        self.plot_vertical_stress_vs_horizontal_stress(self.axes[1], sigma_xx, sigma_yy)
+        # 2: p' vs q
+        self.plot_p_q_direct_shear(self.axes[2], p_list, q_list)
+        # 3: Mohr–Coulomb
+        self.plot_mohr_coulomb_direct_shear(self.axes[3], sigma1[-1], sigma3[-1], cohesion, phi)
+        # 4: εyy vs time
+        self.plot_vertical_strain_vs_time_crs(self.axes[4], time_steps, yy_strain)
 
     def plot_principal_stresses_triaxial(self, ax, sigma_1, sigma_3):
         ax.plot(sigma_3, sigma_1, '-', color='blue', label=TITLE_SIGMA1_VS_SIGMA3)
@@ -204,5 +218,34 @@ class MatplotlibPlotter:
         ax.grid(True)
         ax.invert_xaxis()
         ax.set_xlim(left=0, right=1.2*np.max(p_list))
+        ax.locator_params(nbins=8)
+        ax.minorticks_on()
+
+    def plot_vertical_strain_vs_time_crs(self, ax, time_steps, yy_strain):
+        ax.plot(time_steps, yy_strain, '-', color='blue', label=TITLE_VERTICAL_STRAIN_VS_TIME)
+        ax.set_title(TITLE_VERTICAL_STRAIN_VS_TIME)
+        ax.set_xlabel(TIME_LABEL)
+        ax.set_ylabel(VERTICAL_STRAIN_LABEL)
+        ax.grid(True)
+        ax.locator_params(nbins=8)
+        ax.minorticks_on()
+
+    def plot_vertical_stress_vs_vertical_strain(self, ax, vertical_strain, sigma_yy):
+        ax.plot(vertical_strain, sigma_yy, '-', color='blue', label=TITLE_VERTICAL_STRESS_VS_VERTICAL_STRAIN)
+        ax.set_title(TITLE_VERTICAL_STRESS_VS_VERTICAL_STRAIN)
+        ax.set_xlabel(VERTICAL_STRAIN_LABEL)
+        ax.set_ylabel(VERTICAL_STRESS_LABEL)
+        ax.grid(True)
+        ax.invert_xaxis()
+        ax.locator_params(nbins=8)
+        ax.minorticks_on()
+
+    def plot_vertical_stress_vs_horizontal_stress(self, ax, sigma_xx, sigma_yy):
+        ax.plot(sigma_xx, sigma_yy, '-', color='blue', label=TITLE_VERTICAL_STRESS_VS_VERTICAL_STRAIN)
+        ax.set_title(TITLE_VERTICAL_STRESS_VS_VERTICAL_STRAIN)
+        ax.set_xlabel(HORIZONTAL_STRESS_LABEL)
+        ax.set_ylabel(VERTICAL_STRESS_LABEL)
+        ax.grid(True)
+        ax.invert_xaxis()
         ax.locator_params(nbins=8)
         ax.minorticks_on()
