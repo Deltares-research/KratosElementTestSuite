@@ -223,8 +223,8 @@ class MatplotlibPlotter:
 
     def plot_vertical_strain_vs_time_crs(self, ax, yy_strain, time_steps):
         ax.plot(time_steps, yy_strain, '-', color='blue', label=TITLE_VERTICAL_STRAIN_VS_TIME)
-        # print("time_steps:", time_steps)
-        # print("yy_strain:", yy_strain)
+        print("time_steps:", time_steps)
+        print("yy_strain:", yy_strain)
         # print("time", len(time_steps), "strain", len(yy_strain))
         # assert len(time_steps) == len(yy_strain),  "Mismatch between time and strain lengths"
         ax.set_title(TITLE_VERTICAL_STRAIN_VS_TIME)
@@ -234,8 +234,10 @@ class MatplotlibPlotter:
         ax.locator_params(nbins=8)
         ax.minorticks_on()
 
-    def plot_vertical_stress_vs_vertical_strain(self, ax, vertical_strain, sigma_yy):
-        ax.plot(vertical_strain, sigma_yy, '-', color='blue', label=TITLE_VERTICAL_STRESS_VS_VERTICAL_STRAIN)
+    def plot_vertical_stress_vs_vertical_strain(self, ax, yy_strain, sigma_yy):
+        ax.plot(yy_strain, sigma_yy, '-', color='blue', label=TITLE_VERTICAL_STRESS_VS_VERTICAL_STRAIN)
+        print("yy_strain: ", yy_strain)
+        print("sigma_yy: ", sigma_yy)
         ax.set_title(TITLE_VERTICAL_STRESS_VS_VERTICAL_STRAIN)
         ax.set_xlabel(VERTICAL_STRAIN_LABEL)
         ax.set_ylabel(VERTICAL_STRESS_LABEL)
@@ -246,6 +248,8 @@ class MatplotlibPlotter:
 
     def plot_vertical_stress_vs_horizontal_stress(self, ax, sigma_xx, sigma_yy):
         ax.plot(sigma_xx, sigma_yy, '-', color='blue', label=TITLE_VERTICAL_STRESS_VS_VERTICAL_STRAIN)
+        print("sigma_yy: ", sigma_yy)
+        print("sigma_xx: ", sigma_xx)
         ax.set_title(TITLE_VERTICAL_STRESS_VS_VERTICAL_STRAIN)
         ax.set_xlabel(HORIZONTAL_STRESS_LABEL)
         ax.set_ylabel(VERTICAL_STRESS_LABEL)
