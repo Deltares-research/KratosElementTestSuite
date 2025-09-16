@@ -51,7 +51,7 @@ class MatplotlibPlotter:
         # 3: Mohr–Coulomb
         self.plot_mohr_coulomb_direct_shear(self.axes[3], sigma1[-1], sigma3[-1], cohesion, phi)
 
-    def crs(self, time_steps, yy_strain, sigma_yy, sigma_xx, p_list, q_list, sigma1, sigma3, cohesion=None, phi=None):
+    def crs(self, yy_strain, time_steps, sigma_yy, sigma_xx, p_list, q_list, sigma1, sigma3, cohesion=None, phi=None):
         self._clear()
         # 0: σýy vs εyy
         self.plot_vertical_stress_vs_vertical_strain(self.axes[0], sigma_yy, yy_strain)
@@ -62,7 +62,7 @@ class MatplotlibPlotter:
         # 3: Mohr–Coulomb
         self.plot_mohr_coulomb_direct_shear(self.axes[3], sigma1[-1], sigma3[-1], cohesion, phi)
         # 4: εyy vs time
-        self.plot_vertical_strain_vs_time_crs(self.axes[4], time_steps, yy_strain)
+        self.plot_vertical_strain_vs_time_crs(self.axes[4], yy_strain, time_steps)
 
     def plot_principal_stresses_triaxial(self, ax, sigma_1, sigma_3):
         ax.plot(sigma_3, sigma_1, '-', color='blue', label=TITLE_SIGMA1_VS_SIGMA3)
@@ -221,8 +221,12 @@ class MatplotlibPlotter:
         ax.locator_params(nbins=8)
         ax.minorticks_on()
 
-    def plot_vertical_strain_vs_time_crs(self, ax, time_steps, yy_strain):
+    def plot_vertical_strain_vs_time_crs(self, ax, yy_strain, time_steps):
         ax.plot(time_steps, yy_strain, '-', color='blue', label=TITLE_VERTICAL_STRAIN_VS_TIME)
+        # print("time_steps:", time_steps)
+        # print("yy_strain:", yy_strain)
+        # print("time", len(time_steps), "strain", len(yy_strain))
+        # assert len(time_steps) == len(yy_strain),  "Mismatch between time and strain lengths"
         ax.set_title(TITLE_VERTICAL_STRAIN_VS_TIME)
         ax.set_xlabel(TIME_LABEL)
         ax.set_ylabel(VERTICAL_STRAIN_LABEL)

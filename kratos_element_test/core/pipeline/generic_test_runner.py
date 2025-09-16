@@ -35,10 +35,11 @@ class GenericTestRunner:
         stress, mean_stress, von_mises, _, strain = self._collect_results()
         tensors = self._extract_stress_tensors(stress)
         shear_stress_xy = self._extract_shear_stress_xy(stress)
-        yy_strain, vol_strain, shear_strain_xy, times = self._compute_strains(strain)
+        yy_strain, vol_strain, shear_strain_xy = self._compute_strains(strain)
         von_mises_values = self._compute_scalar_stresses(von_mises)
         mean_stress_values = self._compute_scalar_stresses(mean_stress)
-        sigma_xx, sigma_yy, time_steps = self._extract_sigma_xx_yy(stress)
+        sigma_xx, sigma_yy = self._extract_sigma_xx_yy(stress)
+        time_steps = self._extract_time_steps(strain)
 
         return (tensors, yy_strain, vol_strain, von_mises_values, mean_stress_values, shear_stress_xy, shear_strain_xy,
                 sigma_xx, sigma_yy, time_steps)
@@ -140,6 +141,15 @@ class GenericTestRunner:
             shear_stress_xy.append(shear_xy)
         return shear_stress_xy
 
+    def _extract_time_steps(self, strain_results):
+        times = []
+        for result in strain_results:
+            values = result["values"]
+            if not values:
+                continue
+            times.append(result["time"])
+        return times
+
     def _compute_strains(self, strain_results):
         yy, vol, shear_xy = [], [], []
         for result in strain_results:
@@ -150,15 +160,13 @@ class GenericTestRunner:
             vol.append(eps_xx + eps_yy + eps_zz)
             yy.append(eps_yy)
             shear_xy.append(eps_xy)
-        return yy, vol, shear_xy, [r["time"] for r in strain_results if r["values"]]
+        return yy, vol, shear_xy
 
     def _compute_scalar_stresses(self, results):
         return [r["values"][0]["value"][1] for r in results if r["values"]]
 
     def _extract_sigma_xx_yy(self, stress_results):
-        sigma_xx = []
-        sigma_yy = []
-        time_steps = []
+        sigma_xx, sigma_yy= [], []
 
         for result in stress_results:
             values = result["values"]
@@ -167,9 +175,8 @@ class GenericTestRunner:
             stress_vec = values[0]["value"][0]
             sigma_xx.append(stress_vec[0])
             sigma_yy.append(stress_vec[1])
-            time_steps.append(result["time"])
 
-        return sigma_xx, sigma_yy, time_steps
+        return sigma_xx, sigma_yy
 
     def _has_orchestrator(self):
         orch_candidates = [
