@@ -100,15 +100,20 @@ def set_project_parameters(project_path, num_steps, end_time, initial_stress, st
     editor = ProjectParameterEditor(project_path)
     if "stages" in data:
         num_stages = len(data["stages"])
-        if stage_durations:
+        if stage_durations and isinstance(num_steps, list):
             cumulative_end_times = []
             total = 0.0
             for d in stage_durations:
                 total += d
                 cumulative_end_times.append(total)
+
+            print("[DEBUG] cumulative_end_times =", cumulative_end_times)
+            print("[DEBUG] num_steps per stage =", num_steps)
+
             editor.update_stage_timings(cumulative_end_times, num_steps)
         else:
-            editor.update_stage_timings([end_time] * num_stages, num_steps)
+            editor.update_stage_timings([end_time], num_steps)
+
     else:
         editor.update_property('time_step', end_time / num_steps)
         editor.update_property('end_time', end_time)
@@ -116,11 +121,11 @@ def set_project_parameters(project_path, num_steps, end_time, initial_stress, st
     stress_vector = [-initial_stress] * 3 + [0.0]
     editor.update_nested_value("apply_initial_uniform_stress_field", "value", stress_vector)
 
-def set_mdpa(mdpa_path, max_strain, init_pressure, num_steps, end_time, test_type):
+def set_mdpa(mdpa_path, max_strain, init_pressure, num_steps, first_timestep, end_time, test_type):
     editor = MdpaEditor(mdpa_path)
     editor.update_maximum_strain(max_strain)
     editor.update_end_time(end_time)
-    editor.update_first_timestep(num_steps, end_time)
+    editor.update_first_timestep(first_timestep)
     if test_type == "triaxial":
         editor.update_initial_effective_cell_pressure(init_pressure)
     if test_type == "direct_shear":
@@ -193,8 +198,18 @@ def run_simulation(*, test_type: str, dll_path: str, index, material_parameters,
             raise FileNotFoundError(f"Expected project parameters file not found at: {orchestrator_path}")
 
         set_material_constitutive_law(json_path, dll_path, material_parameters, index)
+
+        print("[DEBUG] run_simulation(): num_steps =", num_steps)
+        print("[DEBUG] stage_durations =", stage_durations)
+
         set_project_parameters(project_path, num_steps, end_time, initial_effective_cell_pressure, stage_durations)
-        set_mdpa(mdpa_path, maximum_strain, initial_effective_cell_pressure, num_steps, end_time, test_type)
+        # set_mdpa(mdpa_path, maximum_strain, initial_effective_cell_pressure, num_steps, end_time, test_type)
+        if isinstance(num_steps, list) and stage_durations:
+            first_timestep = stage_durations[0] / num_steps[0]
+        else:
+            first_timestep = end_time / num_steps
+
+        set_mdpa(mdpa_path, maximum_strain, initial_effective_cell_pressure, num_steps, first_timestep, end_time, test_type)
 
         # runner = GenericTestRunner([os.path.join(tmp_folder, 'gid_output', "output.post.res")], tmp_folder)
         with open(project_path, 'r') as f:

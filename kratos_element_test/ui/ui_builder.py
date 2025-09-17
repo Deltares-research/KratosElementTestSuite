@@ -520,4 +520,10 @@ class GeotechTestUI:
         eps_max = sum(strains)
         n_steps = sum(steps)
         duration = sum(durations)
+        
+        print("[DEBUG] CRS Durations:", durations)
+        print("[DEBUG] CRS Steps:", steps)
+        print("[DEBUG] CRS Total Duration:", duration)
+        print("[DEBUG] CRS Total Steps:", n_steps)
+
         return durations, strains, steps, eps_max, n_steps, duration

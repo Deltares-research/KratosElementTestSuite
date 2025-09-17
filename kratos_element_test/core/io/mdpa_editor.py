@@ -60,8 +60,8 @@ class MdpaEditor:
             self.raw_text = new_text
             self.save()
 
-    def update_first_timestep(self, num_steps, end_time):
-        first_timestep = end_time / num_steps
+    def update_first_timestep(self, first_timestep):
+
         pattern = r'\$first_timestep\b'
 
         replacer = self._replacer_factory(first_timestep)

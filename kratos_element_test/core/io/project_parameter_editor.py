@@ -110,12 +110,15 @@ class ProjectParameterEditor:
         except Exception as e:
             raise RuntimeError(f"Failed to update strain increments: {e}") from e
 
-    def update_stage_timings(self, end_times: list[float], num_steps: int):
+    def update_stage_timings(self, end_times: list[float], step_counts: list[int]):
         """
         Applies staged start/end time logic. Assumes stage_1.start_time = 0.0.
         end_times: List of end_time values for each stage.
         num_steps: Number of steps (uniform across stages).
         """
+        print(f"[DEBUG] update_stage_timings(): Received end_times = {end_times}")
+        print(f"[DEBUG] update_stage_timings(): Received num_steps = {step_counts}")
+
         try:
             data = self._load_json()
 
@@ -129,6 +132,10 @@ class ProjectParameterEditor:
 
             start_time = 0.0
             for i, stage_name in enumerate(stage_names):
+
+                print(
+                    f"Stage {stage_name}: start={start_time}, end={end_times[i]}, step={(end_times[i] - start_time) / step_counts[i]}")
+
                 stage = data["stages"][stage_name]
                 settings = stage.get("stage_settings", {})
 
@@ -136,7 +143,7 @@ class ProjectParameterEditor:
                 settings.setdefault("problem_data", {})["start_time"] = start_time
                 settings["problem_data"]["end_time"] = end_times[i]
 
-                delta_t = (end_times[i] - start_time) / num_steps
+                delta_t = (end_times[i] - start_time) / step_counts[i]
                 settings.setdefault("solver_settings", {}).setdefault("time_stepping", {})["time_step"] = delta_t
 
                 self._log(
