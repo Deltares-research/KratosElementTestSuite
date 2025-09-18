@@ -156,3 +156,47 @@ class ProjectParameterEditor:
 
         except Exception as e:
             raise RuntimeError(f"Failed to update staged timings: {e}") from e
+
+    def append_crs_stage(self, duration: float, steps: int):
+        """
+        Appends a new CRS stage by copying the structure of the last existing stage.
+        It automatically sets the correct start_time, end_time, and time_step.
+        """
+        data = self._load_json()
+
+        if "stages" not in data:
+            self._log("append_crs_stage is only supported in orchestrator-based files.", "error")
+            return
+
+        stage_names = list(data["stages"].keys())
+        if not stage_names:
+            self._log("No existing stage to clone.", "error")
+            return
+
+        last_stage_key = stage_names[-1]
+        new_stage_index = len(stage_names) + 1
+        new_stage_key = f"stage_{new_stage_index}"
+
+        # Clone the last stage
+        new_stage = json.loads(json.dumps(data["stages"][last_stage_key]))  # deep copy
+
+        # Set start_time, end_time, and time_step
+        last_end_time = data["stages"][last_stage_key]["stage_settings"]["problem_data"]["end_time"]
+        new_end_time = last_end_time + duration
+        time_step = duration / steps
+
+        new_stage["stage_settings"]["problem_data"]["start_time"] = last_end_time
+        new_stage["stage_settings"]["problem_data"]["end_time"] = new_end_time
+        new_stage["stage_settings"]["solver_settings"]["time_stepping"]["time_step"] = time_step
+
+        # Update gid_output name to avoid overwriting
+        new_stage["stage_settings"]["output_processes"]["gid_output"][0]["Parameters"][
+            "output_name"] = f"gid_output/output_stage{new_stage_index}"
+
+        data["stages"][new_stage_key] = new_stage
+        data["orchestrator"]["settings"]["execution_list"].append(new_stage_key)
+
+        self.raw_text = json.dumps(data, indent=4)
+        self._write_back()
+        self._log(f"Appended new CRS stage: {new_stage_key}", "info")
+

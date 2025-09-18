@@ -123,7 +123,7 @@ class ElementTestController:
                 logger=self._logger,
                 stage_durations=getattr(self, "stage_durations", None),
                 # strain_incs=strain_incs,
-                # step_counts=step_counts
+                step_counts=getattr(self, "step_counts", None)
             )
 
         except Exception as e:

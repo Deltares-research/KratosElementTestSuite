@@ -184,7 +184,9 @@ def _render_with_plotter(test_type, plotter, results):
 
 def run_simulation(*, test_type: str, dll_path: str, index, material_parameters, num_steps, end_time,
                    maximum_strain, initial_effective_cell_pressure, cohesion_phi_indices=None,
-                   plotter=None, logger=None, drainage: str | None = None, stage_durations: list[float] | None = None):
+                   plotter=None, logger=None, drainage: str | None = None, stage_durations: list[float] | None = None,
+                   step_counts=list[int] | None):
+
     log = logger or (lambda msg, level="info": None)
     tmp_folder = tempfile.mkdtemp(prefix=f"{test_type}_")
 
@@ -196,6 +198,11 @@ def run_simulation(*, test_type: str, dll_path: str, index, material_parameters,
             project_path = orchestrator_path
         else:
             raise FileNotFoundError(f"Expected project parameters file not found at: {orchestrator_path}")
+
+        if test_type == "crs" and stage_durations and step_counts:
+            editor = ProjectParameterEditor(project_path)
+            for d, s in zip(stage_durations[2:], step_counts[2:]):
+                editor.append_crs_stage(duration=d, steps=s)
 
         set_material_constitutive_law(json_path, dll_path, material_parameters, index)
 
