@@ -66,50 +66,6 @@ class ProjectParameterEditor:
             self._log(f"Multiple occurrences of '{property_name}' found. Updated all {count}.", "warn")
         self._write_back()
 
-    def update_strain_increments(self, strain_increments: list[float]):
-        """
-        Updates the strain increments for Top_displacement and Middle_displacement in each stage.
-        Top_displacement gets the cumulative strain up to that stage.
-        Middle_displacement gets the average of all strains (cumulative / N).
-        """
-        try:
-            data = self._load_json()
-            if "stages" not in data:
-                self._log("update_strain_increments is only supported in orchestrator-based files.", "error")
-                return
-
-            stage_names = list(data["stages"].keys())
-            if len(strain_increments) != len(stage_names):
-                raise ValueError(f"Provided {len(strain_increments)} strain values but found {len(stage_names)} stages.")
-
-            cumulative_strains = []
-            total = 0.0
-
-            for i, stage_name in enumerate(stage_names):
-                total += strain_increments[i]
-                cumulative_strains.append(total)
-
-            avg_strain = total / len(stage_names) if stage_names else 0.0
-
-            for i, stage_name in enumerate(stage_names):
-                stage = data["stages"][stage_name]
-                processes = stage.get("processes", {})
-                loads = processes.get("constraints_process_list", [])
-
-                for process in loads:
-                    if process.get("python_module") == "apply_vector_constraint_table_process":
-                        mp_name = process.get("Parameters", {}).get("model_part_name", "")
-                        if mp_name.endswith("Top_displacement"):
-                            process["Parameters"]["value"] = [0.0, cumulative_strains[i], 0.0]
-                        elif mp_name.endswith("Middle_displacement"):
-                            process["Parameters"]["value"] = [0.0, avg_strain, 0.0]
-
-            self.raw_text = json.dumps(data, indent=4)
-            self._write_back()
-
-        except Exception as e:
-            raise RuntimeError(f"Failed to update strain increments: {e}") from e
-
     def update_stage_timings(self, end_times: list[float], step_counts: list[int]):
         """
         Applies staged start/end time logic. Assumes stage_1.start_time = 0.0.
@@ -199,4 +155,3 @@ class ProjectParameterEditor:
         self.raw_text = json.dumps(data, indent=4)
         self._write_back()
         self._log(f"Appended new CRS stage: {new_stage_key}", "info")
-
