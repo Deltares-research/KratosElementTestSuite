@@ -107,6 +107,7 @@ class ElementTestController:
             print("[DEBUG] controller.run(): n_steps =", n_steps)
             print("[DEBUG] stage_durations:", getattr(self, "stage_durations", None))
             print("[DEBUG] step_counts:", getattr(self, "step_counts", None))
+            print("[DEBUG] controller.run(): strain_incs =", getattr(self, "strain_incs", None))
 
             run_simulation(
                 test_type=inputs.test_type,
@@ -122,8 +123,8 @@ class ElementTestController:
                 plotter=plotter,
                 logger=self._logger,
                 stage_durations=getattr(self, "stage_durations", None),
-                # strain_incs=strain_incs,
-                step_counts=getattr(self, "step_counts", None)
+                step_counts=getattr(self, "step_counts", None),
+                strain_incs=getattr(self, "strain_incs", None)
             )
 
         except Exception as e:

@@ -185,7 +185,7 @@ def _render_with_plotter(test_type, plotter, results):
 def run_simulation(*, test_type: str, dll_path: str, index, material_parameters, num_steps, end_time,
                    maximum_strain, initial_effective_cell_pressure, cohesion_phi_indices=None,
                    plotter=None, logger=None, drainage: str | None = None, stage_durations: list[float] | None = None,
-                   step_counts=list[int] | None):
+                   step_counts=list[int] | None , strain_incs: list[float] | None = None):
 
     log = logger or (lambda msg, level="info": None)
     tmp_folder = tempfile.mkdtemp(prefix=f"{test_type}_")
@@ -208,6 +208,7 @@ def run_simulation(*, test_type: str, dll_path: str, index, material_parameters,
 
         print("[DEBUG] run_simulation(): num_steps =", num_steps)
         print("[DEBUG] stage_durations =", stage_durations)
+        print("[DEBUG] run_simulation(): strain_incs =", strain_incs)
 
         set_project_parameters(project_path, num_steps, end_time, initial_effective_cell_pressure, stage_durations)
         # set_mdpa(mdpa_path, maximum_strain, initial_effective_cell_pressure, num_steps, end_time, test_type)
@@ -216,7 +217,8 @@ def run_simulation(*, test_type: str, dll_path: str, index, material_parameters,
         else:
             first_timestep = end_time / num_steps
 
-        set_mdpa(mdpa_path, maximum_strain, initial_effective_cell_pressure, num_steps, first_timestep, end_time, test_type)
+        set_mdpa(mdpa_path, maximum_strain, initial_effective_cell_pressure, num_steps, first_timestep, end_time,
+                 test_type, strain_incs, stage_durations)
 
         # runner = GenericTestRunner([os.path.join(tmp_folder, 'gid_output', "output.post.res")], tmp_folder)
         with open(project_path, 'r') as f:
