@@ -1,14 +1,3 @@
-Begin Table 1 TIME DISPLACEMENT_X
-  0.0 0.0
-  $first_timestep 0.0
-  $end_time $maximum_strain
-End Table
-
-Begin Table 2 TIME DISPLACEMENT_X
-  0.0 0.0
-  $first_timestep 0.0
-  $end_time $middle_maximum_strain
-End Table
 
 Begin Properties 0
 End Properties
@@ -72,7 +61,6 @@ End SubModelPart
 
 Begin SubModelPart Top_displacement // Group Top_displacement // Subtree Top_displacement
     Begin SubModelPartTables
-            1
     End SubModelPartTables
     Begin SubModelPartNodes
             1
@@ -83,7 +71,6 @@ End SubModelPart
 
 Begin SubModelPart Middle_displacement // Group Middle_displacement // Subtree Middle_displacement
     Begin SubModelPartTables
-            2
     End SubModelPartTables
     Begin SubModelPartNodes
             3
@@ -92,3 +79,18 @@ Begin SubModelPart Middle_displacement // Group Middle_displacement // Subtree M
     End SubModelPartNodes
 End SubModelPart
 
+Begin SubModelPart Water_base // Group Water_base // Subtree WATER_PRESSURE
+    Begin SubModelPartNodes
+            5
+            8
+            9
+    End SubModelPartNodes
+End SubModelPart
+
+Begin SubModelPart Water_top // Group Water_top // Subtree WATER_PRESSURE
+    Begin SubModelPartNodes
+            1
+            2
+            6
+    End SubModelPartNodes
+End SubModelPart
