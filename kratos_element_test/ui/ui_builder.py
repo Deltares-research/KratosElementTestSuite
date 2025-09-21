@@ -312,13 +312,12 @@ class GeotechTestUI:
             self._init_plot_canvas(num_plots=5)
             ttk.Label(self.test_input_frame, text="Constant Rate of Strain Input Data",
                       font=(INPUT_SECTION_FONT, 12, "bold")).pack(anchor="w", padx=5, pady=(5, 0))
-            self._add_test_type_dropdown(self.test_input_frame)
 
             self.crs_table_frame = ttk.Frame(self.test_input_frame)
             self.crs_table_frame.pack(fill="x", padx=10, pady=5)
 
             self.crs_rows = []
-            self._add_crs_row()  # start with one row
+            self._add_crs_row()
 
             ttk.Button(self.test_input_frame, text="Add Row", command=self._add_crs_row).pack(pady=5)
 
@@ -424,13 +423,14 @@ class GeotechTestUI:
     def _disable_gui(self):
         self._set_widget_state(self.left_frame, "disabled")
         self.model_menu.config(state="disabled")
-        self.test_type_menu.config(state="disabled")
         self.c_dropdown.config(state="disabled")
         self.phi_dropdown.config(state="disabled")
         self._set_widget_state(self.button_frame, "disabled")
         if hasattr(self, "scrollbar"):
             self._original_scroll_cmd = self.scrollbar.cget("command")
             self.scrollbar.config(command=lambda *args: None)
+        if hasattr(self, "test_type_menu") and self.test_type_menu.winfo_exists():
+            self.test_type_menu.config(state="disabled")
         self.scroll_canvas.unbind_all("<MouseWheel>")
 
     def _enable_gui(self):
