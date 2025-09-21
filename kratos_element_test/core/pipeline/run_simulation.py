@@ -207,9 +207,23 @@ def run_simulation(*, test_type: str, dll_path: str, index, material_parameters,
 
         if test_type == "crs" and stage_durations and step_counts:
             editor = ProjectParameterEditor(project_path)
-            for d, s in zip(stage_durations[2:], step_counts[2:]):
+
+            required_stages = len(stage_durations)
+            current_stages = len(json.load(open(project_path))["stages"])
+            missing_stages = required_stages - current_stages
+
+            for d, s in zip(stage_durations[current_stages:], step_counts[current_stages:]):
                 editor.append_crs_stage(duration=d, steps=s)
-            # editor.reload()
+
+            cumulative_end_times = []
+            total = 0.0
+            for d in stage_durations:
+                total += d
+                cumulative_end_times.append(total)
+
+            editor.update_stage_timings(cumulative_end_times, step_counts)
+
+            editor.update_top_displacement_table_numbers()
 
         set_material_constitutive_law(json_path, dll_path, material_parameters, index)
 

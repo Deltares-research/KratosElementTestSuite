@@ -133,10 +133,11 @@ class ProjectParameterEditor:
         new_stage_index = len(stage_names) + 1
         new_stage_key = f"stage_{new_stage_index}"
 
-        # Clone the last stage
-        new_stage = json.loads(json.dumps(data["stages"][last_stage_key]))  # deep copy
+        new_stage = json.loads(json.dumps(data["stages"][last_stage_key]))
 
-        # Set start_time, end_time, and time_step
+        if "stage_preprocess" in new_stage:
+            del new_stage["stage_preprocess"]
+
         last_end_time = data["stages"][last_stage_key]["stage_settings"]["problem_data"]["end_time"]
         new_end_time = last_end_time + duration
         time_step = duration / steps
@@ -145,7 +146,6 @@ class ProjectParameterEditor:
         new_stage["stage_settings"]["problem_data"]["end_time"] = new_end_time
         new_stage["stage_settings"]["solver_settings"]["time_stepping"]["time_step"] = time_step
 
-        # Update gid_output name to avoid overwriting
         new_stage["stage_settings"]["output_processes"]["gid_output"][0]["Parameters"][
             "output_name"] = f"gid_output/output_stage{new_stage_index}"
 
