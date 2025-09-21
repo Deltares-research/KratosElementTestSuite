@@ -121,7 +121,8 @@ def set_project_parameters(project_path, num_steps, end_time, initial_stress, st
     stress_vector = [-initial_stress] * 3 + [0.0]
     editor.update_nested_value("apply_initial_uniform_stress_field", "value", stress_vector)
 
-def set_mdpa(mdpa_path, max_strain, init_pressure, num_steps, first_timestep, end_time, test_type):
+def set_mdpa(mdpa_path, max_strain, init_pressure, num_steps, first_timestep, end_time, test_type,
+             strain_incs, stage_durations):
     editor = MdpaEditor(mdpa_path)
     editor.update_maximum_strain(max_strain)
     editor.update_end_time(end_time)

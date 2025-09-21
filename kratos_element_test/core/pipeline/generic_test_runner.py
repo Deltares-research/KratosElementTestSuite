@@ -32,17 +32,74 @@ class GenericTestRunner:
             parameters = self._load_stage_parameters()
             self._execute_analysis_stages(parameters)
 
-        stress, mean_stress, von_mises, _, strain = self._collect_results()
-        tensors = self._extract_stress_tensors(stress)
-        shear_stress_xy = self._extract_shear_stress_xy(stress)
-        yy_strain, vol_strain, shear_strain_xy = self._compute_strains(strain)
-        von_mises_values = self._compute_scalar_stresses(von_mises)
-        mean_stress_values = self._compute_scalar_stresses(mean_stress)
-        sigma_xx, sigma_yy = self._extract_sigma_xx_yy(stress)
-        time_steps = self._extract_time_steps(strain)
+        # Initialize all result containers
+        all_tensors = {}
+        all_shear_stress_xy = []
+        all_yy_strain = []
+        all_vol_strain = []
+        all_shear_strain_xy = []
+        all_von_mises = []
+        all_mean_stress = []
+        all_sigma_xx = []
+        all_sigma_yy = []
+        all_time_steps = []
 
-        return (tensors, yy_strain, vol_strain, von_mises_values, mean_stress_values, shear_stress_xy, shear_strain_xy,
-                sigma_xx, sigma_yy, time_steps)
+        cumulative_yy_strain = 0.0  # Shift amount for the next stage
+
+        for result_path in self.output_file_paths:
+            s, ms, vm, d, e = self._collect_results(result_path)
+
+            tensors = self._extract_stress_tensors(s)
+            shear_stress_xy = self._extract_shear_stress_xy(s)
+            yy_strain, vol_strain, shear_strain_xy = self._compute_strains(e)
+            von_mises_values = self._compute_scalar_stresses(vm)
+            mean_stress_values = self._compute_scalar_stresses(ms)
+            sigma_xx, sigma_yy = self._extract_sigma_xx_yy(s)
+            time_steps = self._extract_time_steps(e)
+
+            # Adjust sigma_yy for cumulative behavior for CRS test
+            if all_yy_strain:  # only apply offset if this is NOT the first stage
+                yy_strain = [val + cumulative_yy_strain for val in yy_strain]
+
+            # Update the cumulative offset (for next stage)
+            if yy_strain:
+                cumulative_yy_strain = yy_strain[-1]
+
+            for time, tensor_list in tensors.items():
+                all_tensors.setdefault(time, []).extend(tensor_list)
+
+            all_shear_stress_xy.extend(shear_stress_xy)
+            all_yy_strain.extend(yy_strain)
+            all_vol_strain.extend(vol_strain)
+            all_shear_strain_xy.extend(shear_strain_xy)
+            all_von_mises.extend(von_mises_values)
+            all_mean_stress.extend(mean_stress_values)
+            all_sigma_xx.extend(sigma_xx)
+            all_sigma_yy.extend(sigma_yy)
+            all_time_steps.extend(time_steps)
+        # stress, mean_stress, von_mises, _, strain = self._collect_results()
+        # tensors = self._extract_stress_tensors(stress)
+        # shear_stress_xy = self._extract_shear_stress_xy(stress)
+        # yy_strain, vol_strain, shear_strain_xy = self._compute_strains(strain)
+        # von_mises_values = self._compute_scalar_stresses(von_mises)
+        # mean_stress_values = self._compute_scalar_stresses(mean_stress)
+        # sigma_xx, sigma_yy = self._extract_sigma_xx_yy(stress)
+        # time_steps = self._extract_time_steps(strain)
+
+        # return (tensors, yy_strain, vol_strain, von_mises_values, mean_stress_values, shear_stress_xy, shear_strain_xy,
+        #         sigma_xx, sigma_yy, time_steps)
+        return (
+            all_tensors,
+            all_yy_strain,
+            all_vol_strain,
+            all_von_mises,
+            all_mean_stress,
+            all_shear_stress_xy,
+            all_shear_strain_xy,
+            all_sigma_xx,
+            all_sigma_yy,
+            all_time_steps
+        )
 
     def _load_stage_parameters(self):
         orch_path = os.path.join(self.work_dir, "ProjectParametersOrchestrator.json")
@@ -69,27 +126,45 @@ class GenericTestRunner:
         finally:
             os.chdir(original_cwd)
 
-    def _collect_results(self):
+    def _collect_results(self, result_path=None):
         stress, mean_stress, von_mises, displacement, strain = [], [], [], [], []
-        base_path = Path(self.work_dir)
+        # base_path = Path(self.work_dir)
 
-        all_results = []
-        for result_path in self.output_file_paths:
-            result_path = Path(result_path)
-            if not result_path.exists():
-                self._log(f"Missing result file: {result_path}", "warn")
-                continue
+        # for result_path in self.output_file_paths:
+        #     result_path = Path(result_path)
+        #     if not result_path.exists():
+        #         self._log(f"Missing result file: {result_path}", "warn")
+        #         continue
+        #
+        #     output = gid_output_reader.GiDOutputFileReader().read_output_from(result_path)
+        #     self._log(f"Available result keys in {result_path.name}: {list(output.get('results', {}).keys())}", "info")
+        #     self._log(f"Loaded {sum(len(v) for v in output.get('results', {}).values())} entries from: {result_path}",
+        #               "info")
+        #
+        #     for result_name, items in output.get("results", {}).items():
+        #         for item in items:
+        #             self._categorize_result(result_name, item, stress, mean_stress, von_mises, displacement, strain)
+        #
+        # self._log(f"Collected {len(stress)} stress, {len(mean_stress)} mean stress, "
+        #           f"{len(von_mises)} von mises, {len(strain)} strain entries", "info")
+        #
+        # return stress, mean_stress, von_mises, displacement, strain
 
-            output = gid_output_reader.GiDOutputFileReader().read_output_from(result_path)
-            self._log(f"Available result keys in {result_path.name}: {list(output.get('results', {}).keys())}", "info")
-            self._log(f"Loaded {sum(len(v) for v in output.get('results', {}).values())} entries from: {result_path}",
-                      "info")
+        result_path = Path(result_path)
+        if not result_path.exists():
+            self._log(f"Missing result file: {result_path}", "warn")
+            return stress, mean_stress, von_mises, displacement, strain
 
-            for result_name, items in output.get("results", {}).items():
-                for item in items:
-                    self._categorize_result(result_name, item, stress, mean_stress, von_mises, displacement, strain)
+        output = gid_output_reader.GiDOutputFileReader().read_output_from(result_path)
+        self._log(f"Available result keys in {result_path.name}: {list(output.get('results', {}).keys())}", "info")
+        self._log(f"Loaded {sum(len(v) for v in output.get('results', {}).values())} entries from: {result_path}",
+                  "info")
 
-        self._log(f"Collected {len(stress)} stress, {len(mean_stress)} mean stress, "
+        for result_name, items in output.get("results", {}).items():
+            for item in items:
+                self._categorize_result(result_name, item, stress, mean_stress, von_mises, displacement, strain)
+
+        self._log(f"[{result_path.name}] Collected {len(stress)} stress, {len(mean_stress)} mean stress, "
                   f"{len(von_mises)} von mises, {len(strain)} strain entries", "info")
 
         return stress, mean_stress, von_mises, displacement, strain
