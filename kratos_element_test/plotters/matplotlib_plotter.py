@@ -10,7 +10,7 @@ from kratos_element_test.plotters.plotter_labels import (
     MOBILIZED_SHEAR_STRESS_LABEL, P_STRESS_LABEL, Q_STRESS_LABEL, TIME_LABEL,
     TITLE_SIGMA1_VS_SIGMA3, TITLE_DIFF_PRINCIPAL_SIGMA_VS_STRAIN, TITLE_VOL_VS_VERT_STRAIN,
     TITLE_MOHR, TITLE_P_VS_Q, TITLE_SHEAR_VS_STRAIN, TITLE_VERTICAL_STRAIN_VS_TIME,
-    TITLE_VERTICAL_STRESS_VS_VERTICAL_STRAIN,
+    TITLE_VERTICAL_STRESS_VS_VERTICAL_STRAIN, TITLE_VERTICAL_STRESS_VS_HORIZONTAL_STRESS,
     LEGEND_MC, LEGEND_MC_FAILURE
 )
 
@@ -236,10 +236,10 @@ class MatplotlibPlotter:
         ax.minorticks_on()
 
     def plot_vertical_stress_vs_horizontal_stress(self, ax, sigma_xx, sigma_yy):
-        ax.plot(sigma_xx, sigma_yy, '-', color='blue', label=TITLE_VERTICAL_STRESS_VS_VERTICAL_STRAIN)
+        ax.plot(sigma_xx, sigma_yy, '-', color='blue', label=TITLE_VERTICAL_STRESS_VS_HORIZONTAL_STRESS)
         print("sigma_yy: ", sigma_yy)
         print("sigma_xx: ", sigma_xx)
-        ax.set_title(TITLE_VERTICAL_STRESS_VS_VERTICAL_STRAIN)
+        ax.set_title(TITLE_VERTICAL_STRESS_VS_HORIZONTAL_STRESS)
         ax.set_xlabel(HORIZONTAL_STRESS_LABEL)
         ax.set_ylabel(VERTICAL_STRESS_LABEL)
         ax.grid(True)
