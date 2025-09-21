@@ -95,3 +95,61 @@ class MdpaEditor:
         else:
             self.raw_text = new_text
             self.save()
+
+    def insert_displacement_tables(self, durations: list[float], strains: list[float]):
+        """
+        Inserts displacement tables into the .mdpa file, one per stage.
+        Each table uses cumulative time and strain.
+        """
+        tables = []
+        cumulative_time = 0.0
+        cumulative_strain = 0.0
+
+        for i, (duration, strain) in enumerate(zip(durations, strains)):
+            start_time = cumulative_time
+            end_time = cumulative_time + duration
+            displacement = -(strain / 100)
+
+            table = (
+                f"Begin Table {i + 1} TIME DISPLACEMENT_Y\n"
+                f"  {start_time:.1f} 0.0\n"
+                f"  {end_time:.1f} {displacement :.6f}\n"
+                f"End Table\n"
+            )
+            tables.append(table)
+
+            cumulative_time = end_time
+            cumulative_strain += strain
+
+        if not tables:
+            self._log("No tables to insert.", "warn")
+            return
+
+        table_block = "\n".join(tables) + "\n\n"
+        self.raw_text = table_block + self.raw_text
+        self.save()
+
+    def update_top_displacement_tables(self, num_tables: int):
+        """
+        Replaces the content of the SubModelPartTables section in Top_displacement
+        with the correct number of table indices (1-based).
+        """
+        indent = " " * 12
+        new_lines = "\n".join(f"{indent}{i}" for i in range(1, num_tables + 1))
+
+        pattern = (
+            r"(Begin SubModelPart Top_displacement\b(?:.|\n)*?Begin SubModelPartTables\s*\n)"
+            r"(.*?)"
+            r"(\s*End SubModelPartTables)"
+        )
+
+        def replacer(match):
+            return f"{match.group(1)}{new_lines}\n{match.group(3)}"
+
+        updated_text, count = re.subn(pattern, replacer, self.raw_text, flags=re.DOTALL)
+
+        if count == 0:
+            self._log("Could not update SubModelPartTables for Top_displacement.", "warn")
+        else:
+            self.raw_text = updated_text
+            self.save()

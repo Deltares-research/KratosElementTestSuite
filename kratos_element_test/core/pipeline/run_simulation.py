@@ -131,8 +131,9 @@ def set_mdpa(mdpa_path, max_strain, init_pressure, num_steps, first_timestep, en
         editor.update_initial_effective_cell_pressure(init_pressure)
     if test_type == "direct_shear":
         editor.update_middle_maximum_strain(max_strain)
-    if test_type == "crs":
-        editor.update_middle_maximum_strain(max_strain)
+    if test_type == "crs" and strain_incs and stage_durations:
+        editor.insert_displacement_tables(stage_durations, strain_incs)
+        editor.update_top_displacement_tables(len(stage_durations))
 
 def calculate_principal_stresses(tensors):
     sigma_1, sigma_3 = [], []
