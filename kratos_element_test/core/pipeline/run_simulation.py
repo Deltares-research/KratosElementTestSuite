@@ -111,6 +111,10 @@ def set_project_parameters(project_path, num_steps, end_time, initial_stress, st
             print("[DEBUG] num_steps per stage =", num_steps)
 
             editor.update_stage_timings(cumulative_end_times, num_steps)
+
+            if len(cumulative_end_times) > 1:
+                editor.update_top_displacement_table_numbers()
+
         else:
             editor.update_stage_timings([end_time], num_steps)
 
@@ -205,6 +209,7 @@ def run_simulation(*, test_type: str, dll_path: str, index, material_parameters,
             editor = ProjectParameterEditor(project_path)
             for d, s in zip(stage_durations[2:], step_counts[2:]):
                 editor.append_crs_stage(duration=d, steps=s)
+            # editor.reload()
 
         set_material_constitutive_law(json_path, dll_path, material_parameters, index)
 

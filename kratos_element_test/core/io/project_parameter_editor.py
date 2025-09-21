@@ -155,3 +155,58 @@ class ProjectParameterEditor:
         self.raw_text = json.dumps(data, indent=4)
         self._write_back()
         self._log(f"Appended new CRS stage: {new_stage_key}", "info")
+
+    def update_top_displacement_table_numbers(self):
+        """
+        Updates the 'table' field in each stage for 'PorousDomain.Top_displacement'
+        so that its Y-direction (index 1) matches the stage number (starting from 1).
+        Only applies for multi-stage tests.
+        """
+        try:
+            data = self._load_json()
+
+            if "stages" not in data:
+                self._log("[DEBUG] No 'stages' key found.", "warn")
+                return
+
+            stage_names = list(data["stages"].keys())
+            self._log(f"[DEBUG] Found stages: {stage_names}", "info")
+
+            if len(stage_names) < 2:
+                self._log("[DEBUG] Single-stage simulation — skipping Top_displacement table update.", "info")
+                return
+
+            for i, stage_name in enumerate(stage_names):
+                self._log(f"[DEBUG] Processing {stage_name}", "info")
+
+                stage = data["stages"][stage_name]
+                processes = stage.get("stage_settings", {}).get("processes", {})
+                constraints = processes.get("constraints_process_list", [])
+
+                self._log(f"[DEBUG] Number of constraints in {stage_name}: {len(constraints)}", "info")
+
+                for p_idx, process in enumerate(constraints):
+                    params = process.get("Parameters", {})
+                    module = process.get("python_module")
+                    model_part = params.get("model_part_name")
+                    table_before = params.get("table")
+
+                    self._log(
+                        f"[DEBUG] Process {p_idx}: module={module}, model_part={model_part}, table_before={table_before}",
+                        "info")
+
+                    if (
+                            module == "apply_vector_constraint_table_process"
+                            and model_part == "PorousDomain.Top_displacement"
+                    ):
+                        new_table = [0, i + 1, 0]
+                        self._log(f"[DEBUG] --> MATCH. Updating table to {new_table}", "info")
+                        process["Parameters"]["table"] = new_table
+
+            self.raw_text = json.dumps(data, indent=4)
+            self._write_back()
+            self._log("[DEBUG] Finished updating Top_displacement table numbers.", "info")
+
+        except Exception as e:
+            self._log(f"[ERROR] Exception: {e}", "error")
+            raise
