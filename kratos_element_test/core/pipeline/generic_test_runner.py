@@ -164,18 +164,15 @@ class GenericTestRunner:
             for item in items:
                 self._categorize_result(result_name, item, stress, mean_stress, von_mises, displacement, strain)
 
-        self._log(f"[{result_path.name}] Collected {len(stress)} stress, {len(mean_stress)} mean stress, "
-                  f"{len(von_mises)} von mises, {len(strain)} strain entries", "info")
-
         return stress, mean_stress, von_mises, displacement, strain
 
     def _categorize_result(self, result_name, item, stress, mean_stress, von_mises, displacement, strain):
         values = item["values"]
         if result_name == "CAUCHY_STRESS_TENSOR":
             stress.append(item)
-        elif result_name == "MEAN_EFFECTIVE_STRESS": #and self._is_tri3_element_gp(values):
+        elif result_name == "MEAN_EFFECTIVE_STRESS" and self._is_tri3_element_gp(values):
             mean_stress.append(item)
-        elif result_name == "VON_MISES_STRESS": #and self._is_tri3_element_gp(values):
+        elif result_name == "VON_MISES_STRESS" and self._is_tri3_element_gp(values):
             von_mises.append(item)
         elif result_name == "DISPLACEMENT":
             displacement.append(item)
