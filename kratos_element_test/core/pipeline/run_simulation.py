@@ -165,7 +165,6 @@ def _render_with_plotter(test_type, plotter, results):
     if test_type == "triaxial":
         plotter.triaxial(
             results["yy_strain"], results["vol_strain"],
-            results["sigma_yy"], results["sigma_xx"],
             results["sigma1"], results["sigma3"],
             results["mean_stress"], results["von_mises"],
             results["cohesion"], results["phi"]
@@ -227,10 +226,6 @@ def run_simulation(*, test_type: str, dll_path: str, index, material_parameters,
 
         set_material_constitutive_law(json_path, dll_path, material_parameters, index)
 
-        print("[DEBUG] run_simulation(): num_steps =", num_steps)
-        print("[DEBUG] stage_durations =", stage_durations)
-        print("[DEBUG] run_simulation(): strain_incs =", strain_incs)
-
         set_project_parameters(project_path, num_steps, end_time, initial_effective_cell_pressure, stage_durations)
         # set_mdpa(mdpa_path, maximum_strain, initial_effective_cell_pressure, num_steps, end_time, test_type)
         if isinstance(num_steps, list) and stage_durations:
@@ -259,8 +254,6 @@ def run_simulation(*, test_type: str, dll_path: str, index, material_parameters,
         log("Finished analysis; collecting results...", "info")
 
         sigma_1, sigma_3 = calculate_principal_stresses(tensors)
-        log(f"Principal stress count: sigma_1={len(sigma_1)}, sigma_3={len(sigma_3)}", "info")
-
         cohesion, friction_angle = get_cohesion_phi(material_parameters, cohesion_phi_indices)
 
         results = {
