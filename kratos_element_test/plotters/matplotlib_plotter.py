@@ -58,7 +58,7 @@ class MatplotlibPlotter:
         # 1: σ'yy vs σ'xx
         self.plot_vertical_stress_vs_horizontal_stress(self.axes[1], sigma_xx, sigma_yy)
         # 2: p' vs q
-        self.plot_p_q_crs(self.axes[2], p_list, q_list)
+        self.plot_p_q_triaxial(self.axes[2], p_list, q_list)
         # 3: Mohr–Coulomb
         self.plot_mohr_coulomb_direct_shear(self.axes[3], sigma1[-1], sigma3[-1], cohesion, phi)
         # 4: εyy vs time
@@ -224,8 +224,6 @@ class MatplotlibPlotter:
     def plot_vertical_stress_vs_vertical_strain(self, ax, yy_strain, sigma_yy):
         # ax.plot(yy_strain, sigma_yy, '-', color='blue', label=TITLE_VERTICAL_STRESS_VS_VERTICAL_STRAIN)
         ax.plot(yy_strain, sigma_yy, '-', color='blue', label=TITLE_VERTICAL_STRESS_VS_VERTICAL_STRAIN)
-        print("yy_strain: ", yy_strain)
-        print("sigma_yy: ", sigma_yy)
         ax.set_title(TITLE_VERTICAL_STRESS_VS_VERTICAL_STRAIN)
         ax.set_xlabel(VERTICAL_STRAIN_LABEL)
         ax.set_ylabel(VERTICAL_STRESS_LABEL)
@@ -237,8 +235,6 @@ class MatplotlibPlotter:
 
     def plot_vertical_stress_vs_horizontal_stress(self, ax, sigma_xx, sigma_yy):
         ax.plot(sigma_xx, sigma_yy, '-', color='blue', label=TITLE_VERTICAL_STRESS_VS_HORIZONTAL_STRESS)
-        print("sigma_yy: ", sigma_yy)
-        print("sigma_xx: ", sigma_xx)
         ax.set_title(TITLE_VERTICAL_STRESS_VS_HORIZONTAL_STRESS)
         ax.set_xlabel(HORIZONTAL_STRESS_LABEL)
         ax.set_ylabel(VERTICAL_STRESS_LABEL)
@@ -250,10 +246,6 @@ class MatplotlibPlotter:
 
     def plot_vertical_strain_vs_time_crs(self, ax, yy_strain, time_steps):
         ax.plot(time_steps, yy_strain, '-', color='blue', label=TITLE_VERTICAL_STRAIN_VS_TIME)
-        print("time_steps:", time_steps)
-        print("yy_strain:", yy_strain)
-        # print("time", len(time_steps), "strain", len(yy_strain))
-        # assert len(time_steps) == len(yy_strain),  "Mismatch between time and strain lengths"
         ax.set_title(TITLE_VERTICAL_STRAIN_VS_TIME)
         ax.set_xlabel(TIME_LABEL)
         ax.set_ylabel(VERTICAL_STRAIN_LABEL)
@@ -261,13 +253,3 @@ class MatplotlibPlotter:
         ax.locator_params(nbins=8)
         ax.minorticks_on()
 
-    def plot_p_q_crs(self, ax, p_list, q_list):
-        ax.plot(p_list, q_list, '-', color='blue', label=TITLE_P_VS_Q)
-        ax.set_title(TITLE_P_VS_Q)
-        ax.set_xlabel(P_STRESS_LABEL)
-        ax.set_ylabel(Q_STRESS_LABEL)
-        ax.grid(True)
-        ax.invert_xaxis()
-        # ax.set_xlim(left=0, right=1.2*np.max(p_list))
-        ax.locator_params(nbins=8)
-        ax.minorticks_on()
