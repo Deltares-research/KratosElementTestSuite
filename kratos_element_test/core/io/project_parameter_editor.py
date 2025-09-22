@@ -72,9 +72,6 @@ class ProjectParameterEditor:
         end_times: List of end_time values for each stage.
         num_steps: Number of steps (uniform across stages).
         """
-        print(f"[DEBUG] update_stage_timings(): Received end_times = {end_times}")
-        print(f"[DEBUG] update_stage_timings(): Received num_steps = {step_counts}")
-
         try:
             data = self._load_json()
 
@@ -88,14 +85,9 @@ class ProjectParameterEditor:
 
             start_time = 0.0
             for i, stage_name in enumerate(stage_names):
-
-                print(
-                    f"Stage {stage_name}: start={start_time}, end={end_times[i]}, step={(end_times[i] - start_time) / step_counts[i]}")
-
                 stage = data["stages"][stage_name]
                 settings = stage.get("stage_settings", {})
 
-                # Always set start_time based on previous end_time
                 settings.setdefault("problem_data", {})["start_time"] = start_time
                 settings["problem_data"]["end_time"] = end_times[i]
 
@@ -164,48 +156,27 @@ class ProjectParameterEditor:
         """
         try:
             data = self._load_json()
-
-            if "stages" not in data:
-                self._log("[DEBUG] No 'stages' key found.", "warn")
-                return
-
             stage_names = list(data["stages"].keys())
-            self._log(f"[DEBUG] Found stages: {stage_names}", "info")
-
-            if len(stage_names) < 2:
-                self._log("[DEBUG] Single-stage simulation — skipping Top_displacement table update.", "info")
-                return
 
             for i, stage_name in enumerate(stage_names):
-                self._log(f"[DEBUG] Processing {stage_name}", "info")
-
                 stage = data["stages"][stage_name]
                 processes = stage.get("stage_settings", {}).get("processes", {})
                 constraints = processes.get("constraints_process_list", [])
-
-                self._log(f"[DEBUG] Number of constraints in {stage_name}: {len(constraints)}", "info")
 
                 for p_idx, process in enumerate(constraints):
                     params = process.get("Parameters", {})
                     module = process.get("python_module")
                     model_part = params.get("model_part_name")
-                    table_before = params.get("table")
-
-                    self._log(
-                        f"[DEBUG] Process {p_idx}: module={module}, model_part={model_part}, table_before={table_before}",
-                        "info")
 
                     if (
                             module == "apply_vector_constraint_table_process"
                             and model_part == "PorousDomain.Top_displacement"
                     ):
                         new_table = [0, i + 1, 0]
-                        self._log(f"[DEBUG] --> MATCH. Updating table to {new_table}", "info")
                         process["Parameters"]["table"] = new_table
 
             self.raw_text = json.dumps(data, indent=4)
             self._write_back()
-            self._log("[DEBUG] Finished updating Top_displacement table numbers.", "info")
 
         except Exception as e:
             self._log(f"[ERROR] Exception: {e}", "error")
