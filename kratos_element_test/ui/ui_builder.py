@@ -196,7 +196,7 @@ class GeotechTestUI:
         widgets = {}
 
         default_font = tkFont.nametofont("TkDefaultFont").copy()
-        default_font.configure(size=11)
+        default_font.configure(size=10)
 
         ttk.Label(frame, text=title, font=("Arial", 12, "bold")).pack(anchor="w", padx=5, pady=5)
         for i, label in enumerate(labels):
@@ -462,7 +462,10 @@ class GeotechTestUI:
         row_frame = ttk.Frame(self.crs_table_frame)
         row_frame.pack(fill="x", pady=2)
 
-        for label, width, unit in zip(["Duration", "Strain inc.", "Steps"], [10, 15, 8], ["day", "%", ""]):
+        default_font = tkFont.nametofont("TkDefaultFont").copy()
+        default_font.configure(size=10)
+
+        for label, width, unit in zip(["Duration", "Strain inc.", "Steps"], [10, 10, 10], ["day ,", "% ,", ""]):
             ttk.Label(row_frame, text=label).pack(side="left", padx=5)
             entry = ttk.Entry(row_frame, width=width)
             entry.pack(side="left", padx=2)
