@@ -104,18 +104,13 @@ class ElementTestController:
         try:
             self._logger(f"MC indices: {self._mc_tuple()}", "info")
 
-            print("[DEBUG] controller.run(): n_steps =", n_steps)
-            print("[DEBUG] stage_durations:", getattr(self, "stage_durations", None))
-            print("[DEBUG] step_counts:", getattr(self, "step_counts", None))
-            print("[DEBUG] controller.run(): strain_incs =", getattr(self, "strain_incs", None))
-
             run_simulation(
                 test_type=inputs.test_type,
                 drainage=inputs.drainage,
                 dll_path=dll_path or "",
                 index=index,
                 material_parameters=material_parameters,
-                num_steps=getattr(self, "step_counts", inputs.number_of_steps),
+                num_steps=inputs.number_of_steps if not hasattr(self, "step_counts") or self.step_counts is None else self.step_counts,
                 end_time=inputs.duration,
                 maximum_strain=inputs.maximum_strain,
                 initial_effective_cell_pressure=inputs.initial_effective_cell_pressure,
