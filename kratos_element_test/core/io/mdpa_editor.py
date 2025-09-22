@@ -108,7 +108,7 @@ class MdpaEditor:
         for i, (duration, strain) in enumerate(zip(durations, strains)):
             start_time = cumulative_time
             end_time = cumulative_time + duration
-            displacement = -(strain / 100)
+            displacement = (strain / 100)
 
             table = (
                 f"Begin Table {i + 1} TIME DISPLACEMENT_Y\n"
