@@ -312,6 +312,8 @@ class GeotechTestUI:
             self._init_plot_canvas(num_plots=5)
             ttk.Label(self.test_input_frame, text="Constant Rate of Strain Input Data",
                       font=(INPUT_SECTION_FONT, 12, "bold")).pack(anchor="w", padx=5, pady=(5, 0))
+            tk.Label(self.test_input_frame, text="(For Strain increment, compression is negative)",
+                font=(INPUT_SECTION_FONT, 9)).pack(anchor="w", padx=5, pady=(0, 5))
 
             self.crs_table_frame = ttk.Frame(self.test_input_frame)
             self.crs_table_frame.pack(fill="x", padx=10, pady=5)
