@@ -33,7 +33,7 @@ class GenericTestRunner:
         # Initialize all result containers
         all_tensors = {}
         all_shear_stress_xy = []
-        all_yy_strain = []
+        yy_strain_stages = []
         all_vol_strain = []
         all_shear_strain_xy = []
         all_von_mises = []
@@ -55,19 +55,11 @@ class GenericTestRunner:
             sigma_xx, sigma_yy = self._extract_sigma_xx_yy(s)
             time_steps = t
 
-            # Adjust sigma_yy for cumulative behavior for CRS test
-            if all_yy_strain:  # only apply offset if this is NOT the first stage
-                yy_strain = [val + cumulative_yy_strain for val in yy_strain]
-
-            # Update the cumulative offset (for next stage)
-            if yy_strain:
-                cumulative_yy_strain = yy_strain[-1]
-
             for time, tensor_list in tensors.items():
                 all_tensors.setdefault(time, []).extend(tensor_list)
 
             all_shear_stress_xy.extend(shear_stress_xy)
-            all_yy_strain.extend(yy_strain)
+            yy_strain_stages.append(yy_strain)
             all_vol_strain.extend(vol_strain)
             all_shear_strain_xy.extend(shear_strain_xy)
             all_von_mises.extend(von_mises_values)
@@ -75,6 +67,8 @@ class GenericTestRunner:
             all_sigma_xx.extend(sigma_xx)
             all_sigma_yy.extend(sigma_yy)
             all_time_steps.extend(time_steps)
+
+            all_yy_strain = self._apply_cumulative_strain_offset(yy_strain_stages)
 
         return (
             all_tensors,
@@ -214,6 +208,18 @@ class GenericTestRunner:
                 sigma_yy.append(stress_vec[1])
 
         return sigma_xx, sigma_yy
+
+    def _apply_cumulative_strain_offset(self, strain_stages: list[list[float]]) -> list[float]:
+        cumulative = 0.0
+        combined = []
+
+        for stage in strain_stages:
+            adjusted = [val + cumulative for val in stage]
+            if adjusted:
+                cumulative = adjusted[-1]
+            combined.extend(adjusted)
+
+        return combined
 
     def _has_orchestrator(self):
         orch_candidates = [
