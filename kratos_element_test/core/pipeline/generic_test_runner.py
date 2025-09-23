@@ -2,7 +2,6 @@
 # This is a prototype version
 # Contact kratos@deltares.nl
 
-import re
 import os
 import json
 import importlib
@@ -24,8 +23,7 @@ class GenericTestRunner:
 
     def run(self):
         use_orchestrator = self._has_orchestrator()
-        print(
-        f"[GenericTestRunner] work_dir={os.path.abspath(self.work_dir)} | orchestrator={use_orchestrator}")
+        self._log(f"work_dir={os.path.abspath(self.work_dir)} | orchestrator={use_orchestrator}", "info")
         if use_orchestrator:
             self._run_orchestrator()
         else:
@@ -116,18 +114,22 @@ class GenericTestRunner:
         finally:
             os.chdir(original_cwd)
 
-    def _collect_results(self, result_path=None):
-        stress, mean_stress, von_mises, displacement, strain, time_steps = [], [], [], [], [], []
-
-        result_path = Path(result_path)
-        if not result_path.exists():
-            self._log(f"Missing result file: {result_path}", "warn")
-            return stress, mean_stress, von_mises, displacement, strain, time_steps
-
+    def _read_output(self, result_path: Path) -> dict:
         output = gid_output_reader.GiDOutputFileReader().read_output_from(result_path)
         self._log(f"Available result keys in {result_path.name}: {list(output.get('results', {}).keys())}", "info")
         self._log(f"Loaded {sum(len(v) for v in output.get('results', {}).values())} entries from: {result_path}",
                   "info")
+        return output
+
+    def _collect_results(self, result_path: Path):
+        result_path = Path(result_path)
+        stress, mean_stress, von_mises, displacement, strain, time_steps = [], [], [], [], [], []
+
+        if not result_path.exists():
+            self._log(f"Missing result file: {result_path}", "warn")
+            return stress, mean_stress, von_mises, displacement, strain, time_steps
+
+        output = self._read_output(result_path)
 
         for result_name, items in output.get("results", {}).items():
             for item in items:
@@ -154,6 +156,11 @@ class GenericTestRunner:
         return isinstance(values, list) and all("value" in v and isinstance(v["value"], list) and
                                                 len(v["value"]) == 3 for v in values)
 
+    def _first_value_or_none(self, result: dict):
+        if result.get("values"):
+            return result["values"][0]["value"][0]
+        return None
+
     def _extract_stress_tensors(self, stress_results):
         reshaped = {}
         for result in stress_results:
@@ -161,7 +168,7 @@ class GenericTestRunner:
             values = result["values"]
             if not values:
                 continue
-            sublist = values[0]["value"][0]
+            sublist = self._first_value_or_none(result)
             tensor = np.array([
                 [sublist[0], sublist[3], sublist[5]],
                 [sublist[3], sublist[1], sublist[4]],
@@ -170,7 +177,6 @@ class GenericTestRunner:
             if time_step not in reshaped:
                 reshaped[time_step] = []
             reshaped[time_step].append(tensor)
-            # reshaped[time_step] = [tensor]
         return reshaped
 
     def _extract_shear_stress_xy(self, stress_results):
@@ -179,7 +185,7 @@ class GenericTestRunner:
             values = result["values"]
             if not values:
                 continue
-            stress_components = values[0]["value"][0]
+            stress_components = self._first_value_or_none(result)
             shear_xy = stress_components[3]
             shear_stress_xy.append(shear_xy)
         return shear_stress_xy
@@ -190,7 +196,7 @@ class GenericTestRunner:
             values = result["values"]
             if not values:
                 continue
-            eps_xx, eps_yy, eps_zz, eps_xy = values[0]["value"][0][:4]
+            eps_xx, eps_yy, eps_zz, eps_xy = self._first_value_or_none(result)[:4]
             vol.append(eps_xx + eps_yy + eps_zz)
             yy.append(eps_yy)
             shear_xy.append(eps_xy)
@@ -200,15 +206,12 @@ class GenericTestRunner:
         return [r["values"][0]["value"][1] for r in results if r["values"]]
 
     def _extract_sigma_xx_yy(self, stress_results):
-        sigma_xx, sigma_yy= [], []
-
+        sigma_xx, sigma_yy = [], []
         for result in stress_results:
-            values = result["values"]
-            if not values:
-                continue
-            stress_vec = values[0]["value"][0]
-            sigma_xx.append(stress_vec[0])
-            sigma_yy.append(stress_vec[1])
+            stress_vec = self._first_value_or_none(result)
+            if stress_vec is not None:
+                sigma_xx.append(stress_vec[0])
+                sigma_yy.append(stress_vec[1])
 
         return sigma_xx, sigma_yy
 
