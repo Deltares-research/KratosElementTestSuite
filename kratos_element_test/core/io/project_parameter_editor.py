@@ -105,15 +105,15 @@ class ProjectParameterEditor:
         except Exception as e:
             raise RuntimeError(f"Failed to update staged timings: {e}") from e
 
-    def append_crs_stage(self, duration: float, steps: int):
+    def append_stage(self, duration: float, steps: int):
         """
-        Appends a new CRS stage by copying the structure of the last existing stage.
+        Appends a new stage by copying the structure of the last existing stage.
         It automatically sets the correct start_time, end_time, and time_step.
         """
         data = self._load_json()
 
         if "stages" not in data:
-            self._log("append_crs_stage is only supported in orchestrator-based files.", "error")
+            self._log("append_stage is only supported in orchestrator-based files.", "error")
             return
 
         stage_names = list(data["stages"].keys())
@@ -146,7 +146,7 @@ class ProjectParameterEditor:
 
         self.raw_text = json.dumps(data, indent=4)
         self._write_back()
-        self._log(f"Appended new CRS stage: {new_stage_key}", "info")
+        self._log(f"Appended a new stage: {new_stage_key}", "info")
 
     def update_top_displacement_table_numbers(self):
         """

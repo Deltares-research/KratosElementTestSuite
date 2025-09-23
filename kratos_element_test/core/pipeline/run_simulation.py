@@ -194,7 +194,7 @@ class RunSimulation:
 
         if required_stages > current_stages:
             for d, s in zip(self.stage_durations[current_stages:], self.step_counts[current_stages:]):
-                editor.append_crs_stage(duration=d, steps=s)
+                editor.append_stage(duration=d, steps=s)
 
         cumulative_end_times = []
         total = 0.0
@@ -298,7 +298,7 @@ class RunSimulation:
 
     @staticmethod
     def _get_cohesion_phi(umat_parameters: List[float], indices: Optional[Tuple[int, int]]) -> Tuple[
-        Optional[float], Optional[float]]:
+            Optional[float], Optional[float]]:
         if not indices:
             return None, None
         c_idx, phi_idx = indices

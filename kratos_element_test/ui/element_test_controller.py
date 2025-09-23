@@ -13,9 +13,8 @@ class ElementTestController:
         self._logger = logger
         self._plotter_factory = plotter_factory
 
-        # Mohr–Coulomb state
         self._mc_enabled: bool = False
-        self._mc_indices: Tuple[Optional[int], Optional[int]] = (None, None)  # (c_idx, phi_idx)
+        self._mc_indices: Tuple[Optional[int], Optional[int]] = (None, None)
 
         self._test_type: Optional[str] = None
         self._drainage: str = "drained"
@@ -68,9 +67,6 @@ class ElementTestController:
             eps_max: float,
             n_steps: float,
             duration: float,
-            # stage_durations: Optional[List[float]] = None,
-            # strain_incs: Optional[List[float]] = None,
-            # step_counts: Optional[List[int]] = None
             ) -> None:
 
         tt = test_type or self._test_type

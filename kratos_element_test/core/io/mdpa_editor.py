@@ -99,7 +99,6 @@ class MdpaEditor:
     def insert_displacement_tables(self, durations: list[float], strains: list[float]):
         """
         Inserts displacement tables into the .mdpa file, one per stage.
-        Each table uses cumulative time and strain.
         """
         tables = []
         cumulative_time = 0.0
