@@ -17,7 +17,6 @@ class GenericTestRunner:
     def __init__(self, output_file_paths, work_dir, logger=None, plotter=None):
         self.output_file_paths = output_file_paths
         self.work_dir = work_dir
-        self._orchestrator_params_path = None
         self._plotter = plotter
         self._log = logger or (lambda msg, lvl="info": print(f"[{lvl.upper()}] {msg}"))
 
@@ -146,16 +145,16 @@ class GenericTestRunner:
         elif result_name == "ENGINEERING_STRAIN_TENSOR":
             strain.append(item)
 
-    def _is_tri3_element_gp(self, values):
+    def _is_tri3_element_gp(self, values: list) -> bool:
         return isinstance(values, list) and all("value" in v and isinstance(v["value"], list) and
                                                 len(v["value"]) == 3 for v in values)
 
-    def _first_value_or_none(self, result: dict):
+    def _first_value_or_none(self, result: dict) -> list | None:
         if result.get("values"):
             return result["values"][0]["value"][0]
         return None
 
-    def _extract_stress_tensors(self, stress_results):
+    def _extract_stress_tensors(self, stress_results: list[dict]) -> dict:
         reshaped = {}
         for result in stress_results:
             time_step = result["time"]
@@ -173,7 +172,7 @@ class GenericTestRunner:
             reshaped[time_step].append(tensor)
         return reshaped
 
-    def _extract_shear_stress_xy(self, stress_results):
+    def _extract_shear_stress_xy(self, stress_results: list[dict]) -> list[float]:
         shear_stress_xy = []
         for result in stress_results:
             values = result["values"]
@@ -184,7 +183,7 @@ class GenericTestRunner:
             shear_stress_xy.append(shear_xy)
         return shear_stress_xy
 
-    def _compute_strains(self, strain_results):
+    def _compute_strains(self, strain_results: list[dict]) -> tuple[list[float], list[float], list[float]]:
         yy, vol, shear_xy = [], [], []
         for result in strain_results:
             values = result["values"]
@@ -199,7 +198,7 @@ class GenericTestRunner:
     def _compute_scalar_stresses(self, results):
         return [r["values"][0]["value"][1] for r in results if r["values"]]
 
-    def _extract_sigma_xx_yy(self, stress_results):
+    def _extract_sigma_xx_yy(self, stress_results: list[dict]) -> tuple[list[float], list[float]]:
         sigma_xx, sigma_yy = [], []
         for result in stress_results:
             stress_vec = self._first_value_or_none(result)
