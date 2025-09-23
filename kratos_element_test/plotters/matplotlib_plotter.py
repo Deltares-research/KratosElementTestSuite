@@ -222,7 +222,6 @@ class MatplotlibPlotter:
         ax.minorticks_on()
 
     def plot_vertical_stress_vs_vertical_strain(self, ax, yy_strain, sigma_yy):
-        # ax.plot(yy_strain, sigma_yy, '-', color='blue', label=TITLE_VERTICAL_STRESS_VS_VERTICAL_STRAIN)
         ax.plot(yy_strain, sigma_yy, '-', color='blue', label=TITLE_VERTICAL_STRESS_VS_VERTICAL_STRAIN)
         ax.set_title(TITLE_VERTICAL_STRESS_VS_VERTICAL_STRAIN)
         ax.set_xlabel(VERTICAL_STRAIN_LABEL)

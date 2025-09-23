@@ -313,7 +313,7 @@ class GeotechTestUI:
             ttk.Label(self.test_input_frame, text="Constant Rate of Strain Input Data",
                       font=(INPUT_SECTION_FONT, 12, "bold")).pack(anchor="w", padx=5, pady=(5, 0))
             tk.Label(self.test_input_frame, text="(For Strain increment, compression is negative)",
-                font=(INPUT_SECTION_FONT, 9)).pack(anchor="w", padx=5, pady=(0, 5))
+                     font=(INPUT_SECTION_FONT, 9)).pack(anchor="w", padx=5, pady=(0, 5))
 
             self.crs_table_frame = ttk.Frame(self.test_input_frame)
             self.crs_table_frame.pack(fill="x", padx=10, pady=5)
@@ -385,9 +385,6 @@ class GeotechTestUI:
                 eps_max=eps_max,
                 n_steps=n_steps,
                 duration=duration,
-                # stage_durations=stage_durations,
-                # strain_incs=strain_incs,
-                # step_counts=step_counts
             )
 
             self.canvas.draw()
@@ -525,10 +522,5 @@ class GeotechTestUI:
         eps_max = sum(strains)
         n_steps = sum(steps)
         duration = sum(durations)
-        
-        print("[DEBUG] CRS Durations:", durations)
-        print("[DEBUG] CRS Steps:", steps)
-        print("[DEBUG] CRS Total Duration:", duration)
-        print("[DEBUG] CRS Total Steps:", n_steps)
 
         return durations, strains, steps, eps_max, n_steps, duration

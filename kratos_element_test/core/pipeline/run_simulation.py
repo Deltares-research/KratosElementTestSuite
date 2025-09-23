@@ -26,6 +26,7 @@ REQUIRED_FILES = [
     "ProjectParametersOrchestrator.json",
 ]
 
+
 class _NoOpPlotter:
     def triaxial(self, *args, **kwargs):
         pass
@@ -238,9 +239,6 @@ class RunSimulation:
                 for d in self.stage_durations:
                     total += d
                     cumulative_end_times.append(total)
-
-                self.log(f"[DEBUG] cumulative_end_times = {cumulative_end_times}", "info")
-                self.log(f"[DEBUG] num_steps per stage = {self.num_steps}", "info")
 
                 editor.update_stage_timings(cumulative_end_times, self.num_steps)
 
