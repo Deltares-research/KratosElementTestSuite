@@ -107,9 +107,6 @@ class GenericTestRunner:
 
     def _read_output(self, result_path: Path) -> dict:
         output = gid_output_reader.GiDOutputFileReader().read_output_from(result_path)
-        self._log(f"Available result keys in {result_path.name}: {list(output.get('results', {}).keys())}", "info")
-        self._log(f"Loaded {sum(len(v) for v in output.get('results', {}).values())} entries from: {result_path}",
-                  "info")
         return output
 
     def _collect_results(self, result_path: Path):
