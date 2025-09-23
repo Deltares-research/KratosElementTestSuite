@@ -29,10 +29,10 @@ class GenericTestRunner:
             parameters = self._load_stage_parameters()
             self._execute_analysis_stages(parameters)
 
-        # Initialize all result containers
+        yy_strain_stages = []
         all_tensors = {}
         all_shear_stress_xy = []
-        yy_strain_stages = []
+        all_yy_strain = []
         all_vol_strain = []
         all_shear_strain_xy = []
         all_von_mises = []
@@ -40,8 +40,6 @@ class GenericTestRunner:
         all_sigma_xx = []
         all_sigma_yy = []
         all_time_steps = []
-
-        cumulative_yy_strain = 0.0  # Shift amount for the next stage
 
         for result_path in self.output_file_paths:
             s, ms, vm, d, e, t = self._collect_results(result_path)
