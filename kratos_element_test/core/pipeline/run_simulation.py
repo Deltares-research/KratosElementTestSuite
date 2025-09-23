@@ -8,6 +8,7 @@ import tempfile
 import numpy as np
 from pathlib import Path
 from typing import Callable, Dict, List, Optional, Tuple
+from kratos_element_test.core.core_utils import _fallback_log
 from kratos_element_test.core.io.material_editor import MaterialEditor
 from kratos_element_test.core.io.project_parameter_editor import ProjectParameterEditor
 from kratos_element_test.core.io.mdpa_editor import MdpaEditor
@@ -18,6 +19,12 @@ try:
 except Exception:
     _res_files = None
 
+REQUIRED_FILES = [
+    "MaterialParameters.json",
+    "mesh.mdpa",
+    "ProjectParameters.json",
+    "ProjectParametersOrchestrator.json",
+]
 
 class _NoOpPlotter:
     def triaxial(self, *args, **kwargs):
@@ -61,7 +68,7 @@ class RunSimulation:
         self.initial_effective_cell_pressure = initial_effective_cell_pressure
         self.cohesion_phi_indices = cohesion_phi_indices
         self.plotter = plotter or _NoOpPlotter()
-        self.log = logger or (lambda msg, level="info": None)
+        self.log = logger or _fallback_log
         self.drainage = drainage
         self.stage_durations = stage_durations
         self.step_counts = step_counts
@@ -157,12 +164,7 @@ class RunSimulation:
     def _setup_simulation_files(self) -> None:
         src_dir = self._find_template_dir(self.test_type)
         copied = {}
-        for filename in [
-            "MaterialParameters.json",
-            "mesh.mdpa",
-            "ProjectParameters.json",
-            "ProjectParametersOrchestrator.json",
-        ]:
+        for filename in REQUIRED_FILES:
             src_file = src_dir / filename
             dst_file = self.tmp_dir / filename
             if src_file.exists():
