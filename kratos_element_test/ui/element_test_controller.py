@@ -3,7 +3,7 @@
 # Contact kratos@deltares.nl
 
 from typing import Optional, Callable, List, Tuple
-from kratos_element_test.core.pipeline.run_simulation import run_simulation
+from kratos_element_test.core.pipeline.run_simulation import RunSimulation
 from kratos_element_test.core.models import SimulationInputs, MohrCoulombOptions
 from kratos_element_test.ui.ui_constants import VALID_TEST_TYPES, VALID_DRAINAGE_TYPES
 
@@ -104,7 +104,7 @@ class ElementTestController:
         try:
             self._logger(f"MC indices: {self._mc_tuple()}", "info")
 
-            run_simulation(
+            RunSimulation.run_simulation(
                 test_type=inputs.test_type,
                 drainage=inputs.drainage,
                 dll_path=dll_path or "",
