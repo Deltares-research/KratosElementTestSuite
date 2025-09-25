@@ -12,16 +12,12 @@ Begin Nodes
     9   1.0000000000   0.0000000000   0.0000000000
 End Nodes
 
-Begin Elements SmallStrainUPwDiffOrderElement2D6N// GUI group identifier: Soil
+Begin Elements SmallStrainUPwDiffOrderElement2D6N// GUI group identifier: soil
         1          0     1     5     9     3     8     4 
         2          0     9     6     1     7     2     4 
 End Elements
 
-Begin Conditions LineNormalLoadDiffOrderCondition2D3N// GUI group identifier: Top_load
-    1 0 6 1 2
-End Conditions
-
-Begin SubModelPart Fixed_base // Group Fixed_base // Subtree DISPLACEMENT
+Begin SubModelPart fixed_base // Group fixed_base // Subtree DISPLACEMENT
     Begin SubModelPartNodes
             5
             8
@@ -29,7 +25,7 @@ Begin SubModelPart Fixed_base // Group Fixed_base // Subtree DISPLACEMENT
     End SubModelPartNodes
 End SubModelPart
 
-Begin SubModelPart Fixed_sides // Group Fixed_sides // Subtree DISPLACEMENT
+Begin SubModelPart fixed_sides // Group fixed_sides // Subtree DISPLACEMENT
     Begin SubModelPartNodes
             1
             3
@@ -40,7 +36,7 @@ Begin SubModelPart Fixed_sides // Group Fixed_sides // Subtree DISPLACEMENT
     End SubModelPartNodes
 End SubModelPart
 
-Begin SubModelPart Soil // Group Soil // Subtree Parts_Soil
+Begin SubModelPart soil // Group soil // Subtree Parts_Soil
     Begin SubModelPartNodes
             1
             2
@@ -58,25 +54,9 @@ Begin SubModelPart Soil // Group Soil // Subtree Parts_Soil
     End SubModelPartElements
 End SubModelPart
 
-Begin SubModelPart Top_displacement // Group Top_displacement // Subtree Top_displacement
+Begin SubModelPart top_displacement // Group top_displacement // Subtree top_displacement
     Begin SubModelPartTables
     End SubModelPartTables
-    Begin SubModelPartNodes
-            1
-            2
-            6
-    End SubModelPartNodes
-End SubModelPart
-
-Begin SubModelPart Water_base // Group Water_base // Subtree WATER_PRESSURE
-    Begin SubModelPartNodes
-            5
-            8
-            9
-    End SubModelPartNodes
-End SubModelPart
-
-Begin SubModelPart Water_top // Group Water_top // Subtree WATER_PRESSURE
     Begin SubModelPartNodes
             1
             2

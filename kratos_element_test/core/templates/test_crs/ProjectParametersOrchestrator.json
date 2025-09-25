@@ -55,7 +55,7 @@
             "block_builder":                      true,
             "solution_type":                      "Quasi-Static",
             "scheme_type":                        "Backward_Euler",
-            "reset_displacements":                true,
+            "reset_displacements":                false,
             "strategy_type":                      "newton_raphson",
             "convergence_criterion":              "residual_criterion",
             "residual_relative_tolerance":        1.0E-3,
@@ -63,16 +63,16 @@
             "min_iterations":                     6,
             "max_iterations":                     15,
             "number_cycles":                      1,
-            "reduction_factor":                   0.5,
-            "increase_factor":                    2.0,
+            "reduction_factor":                   1.0,
+            "increase_factor":                    1.0,
             "calculate_reactions":                true,
             "rotation_dofs":                      false,
             "linear_solver_settings":             {
                 "solver_type":         "LinearSolversApplication.sparse_lu"
             },
-            "problem_domain_sub_model_part_list": ["Soil"],
-            "processes_sub_model_part_list":      ["Fixed_base","Fixed_sides","Soil","Top_displacement","Water_top","Water_base"],
-            "body_domain_sub_model_part_list":    ["Soil"]
+            "problem_domain_sub_model_part_list": ["soil"],
+            "processes_sub_model_part_list":      ["fixed_base","fixed_sides","soil","top_displacement"],
+            "body_domain_sub_model_part_list":    ["soil"]
         },
         "output_processes": {
             "gid_output": [{
@@ -109,7 +109,7 @@
             "kratos_module" : "KratosMultiphysics.GeoMechanicsApplication",
             "process_name"  : "ApplyVectorConstraintTableProcess",
             "Parameters"    : {
-                "model_part_name" : "PorousDomain.Fixed_base",
+                "model_part_name" : "PorousDomain.fixed_base",
                 "variable_name"   : "DISPLACEMENT",
                 "active"          : [true,true,false],
                 "is_fixed"        : [true,true,false],
@@ -121,7 +121,7 @@
             "kratos_module" : "KratosMultiphysics.GeoMechanicsApplication",
             "process_name"  : "ApplyVectorConstraintTableProcess",
             "Parameters"    : {
-                "model_part_name" : "PorousDomain.Fixed_sides",
+                "model_part_name" : "PorousDomain.fixed_sides",
                 "variable_name"   : "DISPLACEMENT",
                 "active"          : [true,false,false],
                 "is_fixed"        : [true,false,false],
@@ -133,31 +133,19 @@
             "kratos_module" : "KratosMultiphysics.GeoMechanicsApplication",
             "process_name"  : "ApplyVectorConstraintTableProcess",
             "Parameters"    : {
-                "model_part_name" : "PorousDomain.Top_displacement",
+                "model_part_name" : "PorousDomain.top_displacement",
                 "variable_name"   : "DISPLACEMENT",
                 "active"          : [false,true,false],
                 "is_fixed"        : [false,true,false],
                 "value"           : [0.0,0.0,0.0],
-                "table"           : [0,0,0]
+                "table"           : [0,1,0]
             }
         },{
         "python_module": "apply_scalar_constraint_table_process",
         "kratos_module": "KratosMultiphysics.GeoMechanicsApplication",
         "process_name":  "ApplyScalarConstraintTableProcess",
         "Parameters":    {
-            "model_part_name":      "PorousDomain.Water_top",
-            "variable_name":        "WATER_PRESSURE",
-            "is_fixed":             true,
-            "fluid_pressure_type": "Uniform",
-            "value":                0.0,
-            "table":                0
-            }
-        },{
-        "python_module": "apply_scalar_constraint_table_process",
-        "kratos_module": "KratosMultiphysics.GeoMechanicsApplication",
-        "process_name":  "ApplyScalarConstraintTableProcess",
-        "Parameters":    {
-            "model_part_name":      "PorousDomain.Water_base",
+            "model_part_name":      "PorousDomain.soil",
             "variable_name":        "WATER_PRESSURE",
             "is_fixed":             true,
             "fluid_pressure_type": "Uniform",
