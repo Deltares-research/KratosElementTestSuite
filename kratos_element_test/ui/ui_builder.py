@@ -335,7 +335,7 @@ class GeotechTestUI:
             self.crs_table_frame.pack(fill="x", padx=10, pady=5)
 
             self.crs_rows = []
-            self._add_crs_row()
+            self._add_crs_row(duration=1.0, strain_inc=0.0, steps=10)
 
         log_message(f"{test_name} test selected.", "info")
 
@@ -468,7 +468,7 @@ class GeotechTestUI:
         self.canvas = None
         self.axes = []
 
-    def _add_crs_row(self):
+    def _add_crs_row(self, duration=1.0, strain_inc=0.0, steps=10):
         row = {}
         row_frame = ttk.Frame(self.crs_table_frame)
         row_frame.pack(fill="x", pady=2)
@@ -476,11 +476,16 @@ class GeotechTestUI:
         default_font = tkFont.nametofont("TkDefaultFont").copy()
         default_font.configure(size=10)
 
-        for label, width, unit in zip(["Duration", "Strain inc.", "Steps"], [10, 10, 10], ["day ,", "% ,", ""]):
+        for label, width, unit, default in zip(
+                ["Duration", "Strain inc.", "Steps"],
+                [10, 10, 10],
+                ["day ,", "% ,", ""],
+                [duration, strain_inc, steps]):
             ttk.Label(row_frame, text=label).pack(side="left", padx=5)
             entry = ttk.Entry(row_frame, width=width)
+            entry.insert(0, str(default))
             entry.pack(side="left", padx=2)
-            ttk.Label(row_frame, text=unit).pack(side="left", padx=5)
+            ttk.Label(row_frame, text=unit).pack(side="left", padx=0)
             row[label] = entry
 
         self.crs_rows.append(row)
