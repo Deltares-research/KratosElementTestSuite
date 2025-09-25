@@ -319,9 +319,16 @@ class GeotechTestUI:
             self.crs_table_frame.pack(fill="x", padx=10, pady=5)
 
             self.crs_rows = []
-            self._add_crs_row()
 
-            ttk.Button(self.test_input_frame, text="Add Row", command=self._add_crs_row).pack(pady=5)
+            self.add_row_button = (
+                ttk.Button(self.test_input_frame, text="Add Row", command=self._add_crs_row))
+            self.add_row_button.pack(side="left",padx=100)
+            self.remove_row_button = (
+                ttk.Button(self.test_input_frame, text="Remove Row", command=self._remove_crs_row))
+            self.remove_row_button.pack(side="left", padx=5)
+
+            self._add_crs_row()
+            self.remove_row_button.config(state="normal" if len(self.crs_rows) > 1 else "disabled")
 
         log_message(f"{test_name} test selected.", "info")
 
@@ -470,6 +477,22 @@ class GeotechTestUI:
             row[label] = entry
 
         self.crs_rows.append(row)
+
+        if len(self.crs_rows) > 1:
+            self.remove_row_button.config(state="normal")
+
+    def _remove_crs_row(self):
+        if len(self.crs_rows) <= 1:
+            self.remove_row_button.config(state="disabled")
+            return
+
+        if self.crs_rows:
+            row = self.crs_rows.pop()
+            row_frame = next(iter(row.values())).master
+            row_frame.destroy()
+
+        if len(self.crs_rows) <= 1:
+            self.remove_row_button.config(state="disabled")
 
     def _on_mousewheel(self, event):
         if event.delta > 0:
