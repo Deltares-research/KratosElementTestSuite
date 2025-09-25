@@ -335,7 +335,8 @@ class GeotechTestUI:
             self.crs_table_frame.pack(fill="x", padx=10, pady=5)
 
             self.crs_rows = []
-            self._add_crs_row(duration=1.0, strain_inc=0.0, steps=10)
+            for _ in range(5):
+                self._add_crs_row(duration=1.0, strain_inc=0.0, steps=10)
 
         log_message(f"{test_name} test selected.", "info")
 
