@@ -130,14 +130,14 @@ class MdpaEditor:
 
     def update_top_displacement_tables(self, num_tables: int):
         """
-        Replaces the content of the SubModelPartTables section in Top_displacement
+        Replaces the content of the SubModelPartTables section in top_displacement
         with the correct number of table indices (1-based).
         """
         indent = " " * 12
         new_lines = "\n".join(f"{indent}{i}" for i in range(1, num_tables + 1))
 
         pattern = (
-            r"(Begin SubModelPart Top_displacement\b(?:.|\n)*?Begin SubModelPartTables\s*\n)"
+            r"(Begin SubModelPart top_displacement\b(?:.|\n)*?Begin SubModelPartTables\s*\n)"
             r"(.*?)"
             r"(\s*End SubModelPartTables)"
         )
@@ -148,7 +148,7 @@ class MdpaEditor:
         updated_text, count = re.subn(pattern, replacer, self.raw_text, flags=re.DOTALL)
 
         if count == 0:
-            self._log("Could not update SubModelPartTables for Top_displacement.", "warn")
+            self._log("Could not update SubModelPartTables for top_displacement.", "warn")
         else:
             self.raw_text = updated_text
             self.save()

@@ -150,7 +150,7 @@ class ProjectParameterEditor:
 
     def update_top_displacement_table_numbers(self):
         """
-        Updates the 'table' field in each stage for 'PorousDomain.Top_displacement'
+        Updates the 'table' field in each stage for 'PorousDomain.top_displacement'
         so that its Y-direction (index 1) matches the stage number (starting from 1).
         Only applies for multi-stage tests.
         """
@@ -170,7 +170,7 @@ class ProjectParameterEditor:
 
                     if (
                             module == "apply_vector_constraint_table_process"
-                            and model_part == "PorousDomain.Top_displacement"
+                            and model_part == "PorousDomain.top_displacement"
                     ):
                         new_table = [0, i + 1, 0]
                         process["Parameters"]["table"] = new_table
