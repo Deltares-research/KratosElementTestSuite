@@ -315,20 +315,27 @@ class GeotechTestUI:
             tk.Label(self.test_input_frame, text="(For Strain increment, compression is negative)",
                      font=(INPUT_SECTION_FONT, 9)).pack(anchor="w", padx=5, pady=(0, 5))
 
+            self.crs_button_frame = ttk.Frame(self.test_input_frame)
+            self.crs_button_frame.pack(fill="x", padx=10, pady=(5, 5))
+
+            add_row_button = ttk.Button(
+                self.crs_button_frame,
+                text="Add Row",
+                command=self._add_crs_row)
+            add_row_button.pack(side="left", padx=5)
+
+            self.remove_row_button = ttk.Button(
+                self.crs_button_frame,
+                text="Remove Row",
+                command=self._remove_crs_row,
+                state="disabled")
+            self.remove_row_button.pack(side="left", padx=5)
+
             self.crs_table_frame = ttk.Frame(self.test_input_frame)
             self.crs_table_frame.pack(fill="x", padx=10, pady=5)
 
             self.crs_rows = []
-
-            self.add_row_button = (
-                ttk.Button(self.test_input_frame, text="Add Row", command=self._add_crs_row))
-            self.add_row_button.pack(side="left",padx=100)
-            self.remove_row_button = (
-                ttk.Button(self.test_input_frame, text="Remove Row", command=self._remove_crs_row))
-            self.remove_row_button.pack(side="left", padx=5)
-
             self._add_crs_row()
-            self.remove_row_button.config(state="normal" if len(self.crs_rows) > 1 else "disabled")
 
         log_message(f"{test_name} test selected.", "info")
 
