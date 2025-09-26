@@ -109,6 +109,7 @@ def show_about_window():
 
 
 def create_menu():
+    last_model_source = LINEAR_ELASTIC
     root = tk.Tk()
 
     root.bind_class("TCombobox", "<MouseWheel>", lambda e: "break")
@@ -152,16 +153,20 @@ def create_menu():
     main_frame.pack(side="top", fill="both", expand=True)
 
     def load_dll():
+        nonlocal last_model_source
         dll_path = filedialog.askopenfilename(title=SELECT_UDSM, filetypes=[("DLL files", "*.dll")])
         if not dll_path:
             messagebox.showerror("Error", "No DLL file selected.")
+            model_source_var.set(last_model_source)
             return
 
         try:
             model_dict = udsm_parser(dll_path)
         except Exception as e:
             messagebox.showerror("DLL Error", f"Failed to parse DLL: {e}")
+            model_source_var.set(last_model_source)
             return
+        last_model_source = SELECT_UDSM
 
         for widget in main_frame.winfo_children():
             widget.destroy()
@@ -170,12 +175,14 @@ def create_menu():
                       external_widgets=[model_source_menu])
 
     def load_linear_elastic():
+        nonlocal last_model_source
         model_dict = {
             "model_name": [LINEAR_ELASTIC],
             "num_params": [2],
             "param_names": [["Young's Modulus", "Poisson's Ratio"]],
             "param_units": [["kN/m²", "–"]]
         }
+        last_model_source = LINEAR_ELASTIC
 
         for widget in main_frame.winfo_children():
             widget.destroy()
