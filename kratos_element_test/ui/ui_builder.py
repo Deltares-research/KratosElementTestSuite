@@ -38,6 +38,7 @@ class GeotechTestUI:
         self.model_var = tk.StringVar(root)
         self.model_var.set(model_dict["model_name"][0])
         self.current_test = tk.StringVar(value=test_name)
+        self.test_input_history = {}
 
         def _sync_test_type(*_):
             value = self.current_test.get()
@@ -268,6 +269,9 @@ class GeotechTestUI:
                 w.pack_forget()
 
     def _switch_test(self, test_name):
+
+        self._save_current_inputs()
+
         clear_log()
         self.current_test.set(test_name)
 
@@ -293,6 +297,8 @@ class GeotechTestUI:
                 {INIT_PRESSURE_LABEL: "100", MAX_STRAIN_LABEL: "20",
                  NUM_STEPS_LABEL: "100", DURATION_LABEL: "1.0"}
             )
+            self._restore_inputs(test_name)
+
 
         elif test_name == DIRECT_SHEAR:
             self._init_plot_canvas(num_plots=4)
@@ -307,6 +313,8 @@ class GeotechTestUI:
                 {INIT_PRESSURE_LABEL: "100", MAX_STRAIN_LABEL: "20",
                  NUM_STEPS_LABEL: "100", DURATION_LABEL: "1.0"}
             )
+            self._restore_inputs(test_name)
+
 
         elif test_name == CRS:
             self._init_plot_canvas(num_plots=5)
@@ -337,6 +345,8 @@ class GeotechTestUI:
             self.crs_rows = []
             for _ in range(5):
                 self._add_crs_row(duration=1.0, strain_inc=0.0, steps=10)
+
+            self._restore_inputs(test_name)
 
         log_message(f"{test_name} test selected.", "info")
 
@@ -560,3 +570,39 @@ class GeotechTestUI:
         duration = sum(durations)
 
         return durations, strains, steps, eps_max, n_steps, duration
+
+    def _save_current_inputs(self):
+        test = self.current_test.get()
+        if test == TRIAXIAL and hasattr(self, "triaxial_widgets"):
+            self.test_input_history[test] = {k: w.get() for k, w in self.triaxial_widgets.items()}
+        elif test == DIRECT_SHEAR and hasattr(self, "shear_widgets"):
+            self.test_input_history[test] = {k: w.get() for k, w in self.shear_widgets.items()}
+        elif test == CRS and hasattr(self, "crs_rows"):
+            rows = []
+            for row in self.crs_rows:
+                rows.append({k: w.get() for k, w in row.items()})
+            self.test_input_history[test] = rows
+
+    def _restore_inputs(self, test_name):
+        saved = self.test_input_history.get(test_name)
+        if not saved:
+            return
+        if test_name in (TRIAXIAL, DIRECT_SHEAR):
+            widgets = self.triaxial_widgets if test_name == TRIAXIAL else self.shear_widgets
+            for k, w in widgets.items():
+                if k in saved:
+                    w.delete(0, "end")
+                    w.insert(0, saved[k])
+        elif test_name == CRS and isinstance(saved, list):
+            # clear existing default rows
+            for row in self.crs_rows:
+                row_frame = next(iter(row.values())).master
+                row_frame.destroy()
+            self.crs_rows = []
+            # restore saved rows
+            for row_vals in saved:
+                self._add_crs_row(
+                    duration=float(row_vals.get("Duration", 1.0) or 1.0),
+                    strain_inc=float(row_vals.get("Strain inc.", 0.0) or 0.0),
+                    steps=int(row_vals.get("Steps", 10) or 10),
+                )
