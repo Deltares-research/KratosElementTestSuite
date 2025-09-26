@@ -110,7 +110,10 @@ def show_about_window():
 
 def create_menu():
     root = tk.Tk()
-    
+
+    root.bind_class("TCombobox", "<MouseWheel>", lambda e: "break")
+    root.bind_class("TCombobox", "<Shift-MouseWheel>", lambda e: "break")
+
     pixels_per_inch = root.winfo_fpixels('1i')
     scaling_factor = pixels_per_inch / DEFAULT_TKINTER_DPI
 
