@@ -569,6 +569,9 @@ class GeotechTestUI:
         n_steps = sum(steps)
         duration = sum(durations)
 
+        if abs(eps_max) >= 100:
+            raise ValueError("Sum of strain increments reaches or exceeds ±100%. Please revise your input.")
+
         return durations, strains, steps, eps_max, n_steps, duration
 
     def _save_current_inputs(self):
