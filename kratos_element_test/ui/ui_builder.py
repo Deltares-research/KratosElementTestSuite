@@ -530,15 +530,22 @@ class GeotechTestUI:
         self.log_frame.pack(fill="x", padx=10, pady=(0, 10))
 
         ttk.Label(self.log_frame, text="Log Output:", font=(INPUT_SECTION_FONT, 10, "bold")).pack(anchor="w")
-        self.log_widget = scrolledtext.ScrolledText(self.log_frame, height=6, width=40, state="disabled",
+        self.log_widget = scrolledtext.ScrolledText(self.log_frame, height=6, width=40, state="normal",
                                                     wrap="word", font=("Courier", 9))
         self.log_widget.pack(fill="x", expand=False)
 
         self.log_widget.bind("<Key>", lambda e: "break")
-        self.log_widget.bind("<Button-1>", lambda e: "break")
-        self.log_widget.bind("<FocusIn>", lambda e: self.root.focus())
+        self.log_widget.bind("<Control-c>", lambda e: self._copy_selection())
 
         init_log_widget(self.log_widget)
+
+    def _copy_selection(self):
+        try:
+            selection = self.log_widget.get("sel.first", "sel.last")
+            self.root.clipboard_clear()
+            self.root.clipboard_append(selection)
+        except tk.TclError:
+            pass
 
     def _extract_classic_inputs(self, widgets):
         try:
