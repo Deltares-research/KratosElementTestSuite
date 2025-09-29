@@ -101,12 +101,11 @@ class MdpaEditor:
         Inserts displacement tables into the .mdpa file, one per stage.
         """
         tables = []
-        cumulative_time = 0.0
+        start_time = 0.0
         cumulative_strain = 0.0
 
         for i, (duration, strain) in enumerate(zip(durations, strains)):
-            start_time = cumulative_time
-            end_time = cumulative_time + duration
+            end_time = start_time + duration
             displacement = (strain / 100)
 
             table = (
@@ -117,7 +116,7 @@ class MdpaEditor:
             )
             tables.append(table)
 
-            cumulative_time = end_time
+            start_time = end_time
             cumulative_strain += strain
 
         if not tables:
