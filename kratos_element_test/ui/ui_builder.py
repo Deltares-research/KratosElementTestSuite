@@ -344,7 +344,7 @@ class GeotechTestUI:
 
             self.crs_rows = []
             for _ in range(5):
-                self._add_crs_row(duration=1.0, strain_inc=0.0, steps=10)
+                self._add_crs_row(duration=1.0, strain_inc=0.0, steps=100)
 
             self._restore_inputs(test_name)
 
@@ -480,7 +480,7 @@ class GeotechTestUI:
         self.canvas = None
         self.axes = []
 
-    def _add_crs_row(self, duration=1.0, strain_inc=0.0, steps=10):
+    def _add_crs_row(self, duration=1.0, strain_inc=0.0, steps=100):
         row = {}
         row_frame = ttk.Frame(self.crs_table_frame)
         row_frame.pack(fill="x", pady=2)
@@ -615,5 +615,5 @@ class GeotechTestUI:
                 self._add_crs_row(
                     duration=float(row_vals.get("Duration", 1.0) or 1.0),
                     strain_inc=float(row_vals.get("Strain inc.", 0.0) or 0.0),
-                    steps=int(row_vals.get("Steps", 10) or 10),
+                    steps=int(row_vals.get("Steps", 100) or 100),
                 )
