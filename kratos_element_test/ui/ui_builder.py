@@ -491,7 +491,7 @@ class GeotechTestUI:
         for label, width, unit, default in zip(
                 ["Duration", "Strain inc.", "Steps"],
                 [10, 10, 10],
-                ["day ,", "% ,", ""],
+                ["days ,", "% ,", ""],
                 [duration, strain_inc, steps]):
             ttk.Label(row_frame, text=label).pack(side="left", padx=5)
             entry = ttk.Entry(row_frame, width=width)

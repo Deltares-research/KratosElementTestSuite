@@ -29,8 +29,8 @@ class GenericTestRunner:
             parameters = self._load_stage_parameters()
             self._execute_analysis_stages(parameters)
 
-        yy_strain_stages = []
         all_tensors = {}
+        yy_strain_stages = []
         all_shear_stress_xy = []
         all_yy_strain = []
         all_vol_strain = []

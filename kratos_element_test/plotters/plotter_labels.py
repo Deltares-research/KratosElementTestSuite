@@ -24,7 +24,7 @@ TIME_LABEL = "time [days]"
 TITLE_SIGMA1_VS_SIGMA3 = "σ₁ vs σ₃"
 TITLE_DIFF_PRINCIPAL_SIGMA_VS_STRAIN = "|σ₁ - σ₃| vs εᵧᵧ"
 TITLE_VOL_VS_VERT_STRAIN = "εᵥ vs εᵧᵧ"
-TITLE_MOHR = "Mohr Circle"
+TITLE_MOHR = "Mohr's Circle"
 TITLE_P_VS_Q = "p' vs q"
 TITLE_SHEAR_VS_STRAIN = "τₓᵧ vs εₓᵧ"
 TITLE_VERTICAL_STRAIN_VS_TIME = "εᵧᵧ vs time"
@@ -33,5 +33,5 @@ TITLE_VERTICAL_STRESS_VS_HORIZONTAL_STRESS = "σ'ᵧᵧ vs σ'ₓₓ"
 
 
 # Legends
-LEGEND_MC = "Mohr circle"
+LEGEND_MC = "Mohr's circle"
 LEGEND_MC_FAILURE = "Failure Criterion: τ = σ' tan(φ°) + c'"
