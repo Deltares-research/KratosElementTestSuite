@@ -63,7 +63,7 @@ class GenericTestRunner:
             all_mean_stress.extend(mean_stress_values)
             all_sigma_xx.extend(sigma_xx)
             all_sigma_yy.extend(sigma_yy)
-            all_time_steps.extend(time_steps)
+            all_time_steps.extend([t / 3600.0 for t in time_steps])  # Convert seconds → hours
 
             all_yy_strain = self._apply_cumulative_strain_offset(yy_strain_stages)
 

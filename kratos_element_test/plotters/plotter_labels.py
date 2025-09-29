@@ -18,7 +18,7 @@ EFFECTIVE_STRESS_LABEL = "σ' (Effective Stress) [kN/m²]"
 MOBILIZED_SHEAR_STRESS_LABEL = "τ (Mobilized Shear Stress) [kN/m²]"
 P_STRESS_LABEL = "p' (Mean Effective Stress) [kN/m²]"
 Q_STRESS_LABEL = "q (Deviatoric Stress) [kN/m²]"
-TIME_LABEL = "time [days]"
+TIME_HOURS_LABEL = "time [hours]"
 
 # Plot titles
 TITLE_SIGMA1_VS_SIGMA3 = "σ₁ vs σ₃"

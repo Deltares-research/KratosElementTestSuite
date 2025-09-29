@@ -491,7 +491,7 @@ class GeotechTestUI:
         for label, width, unit, default in zip(
                 ["Duration", "Strain inc.", "Steps"],
                 [10, 10, 10],
-                ["days ,", "% ,", ""],
+                ["hours ,", "% ,", ""],
                 [duration, strain_inc, steps]):
             ttk.Label(row_frame, text=label).pack(side="left", padx=5)
             entry = ttk.Entry(row_frame, width=width)
@@ -569,7 +569,7 @@ class GeotechTestUI:
                 n = int(row["Steps"].get())
             except Exception as e:
                 raise ValueError(f"Failed to extract CRS inputs: {e}")
-            durations.append(d)
+            durations.append(d * 3600) # Convert hours → seconds
             strains.append(s)
             steps.append(n)
 
