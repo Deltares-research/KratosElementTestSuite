@@ -92,8 +92,9 @@ class ElementTestController:
         try:
             inputs.validate()
         except ValueError as e:
+            self._logger("Calculation stopped due to invalid input.", "error")
             self._logger(str(e), "error")
-            return
+            return False
 
         plotter = self._plotter_factory(axes)
 
@@ -120,4 +121,5 @@ class ElementTestController:
 
         except Exception as e:
             self._logger(f"Simulation failed: {e}", "error")
-            raise
+            return False
+        return True

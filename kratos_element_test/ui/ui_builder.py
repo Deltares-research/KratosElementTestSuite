@@ -400,7 +400,7 @@ class GeotechTestUI:
             else:
                 raise ValueError(f"Unsupported test type: {test_type}")
 
-            self.controller.run(
+            success = self.controller.run(
                 axes=self.axes,
                 test_type=tt,
                 dll_path=self.dll_path or "",
@@ -412,8 +412,9 @@ class GeotechTestUI:
                 duration=duration,
             )
 
-            self.canvas.draw()
-            log_message(f"{test_type} test completed successfully.", "info")
+            if success:
+                self.canvas.draw()
+                log_message(f"{test_type} test completed successfully.", "info")
 
         except Exception:
             log_message("An error occurred during simulation:", "error")
