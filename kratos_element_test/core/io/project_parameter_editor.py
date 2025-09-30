@@ -70,7 +70,7 @@ class ProjectParameterEditor:
         """
         Applies staged start/end time logic.
         end_times: List of end_time values for each stage.
-        num_steps: Number of steps (uniform across stages).
+        step_counts: List of step counts for each stage.
         start_time: The start time of the first stage (default is 0.0).
         """
         try:
@@ -84,21 +84,20 @@ class ProjectParameterEditor:
             if len(end_times) != len(stage_names):
                 raise ValueError(f"Provided {len(end_times)} end_times but found {len(stage_names)} stages.")
 
-            # start_time = 0.0
-            for i, stage_name in enumerate(stage_names):
+            for stage_name, end_time, step_count in zip(stage_names, end_times, step_counts, strict=True):
                 stage = data["stages"][stage_name]
                 settings = stage.get("stage_settings", {})
 
                 settings.setdefault("problem_data", {})["start_time"] = start_time
-                settings["problem_data"]["end_time"] = end_times[i]
+                settings["problem_data"]["end_time"] = end_time
 
-                delta_t = (end_times[i] - start_time) / step_counts[i]
+                delta_t = (end_time - start_time) / step_count
                 settings.setdefault("solver_settings", {}).setdefault("time_stepping", {})["time_step"] = delta_t
 
                 self._log(
-                    f"Updated {stage_name}: start_time={start_time}, end_time={end_times[i]}, time_step={delta_t}",
+                    f"Updated {stage_name}: start_time={start_time}, end_time={end_time}, time_step={delta_t}",
                     "info")
-                start_time = end_times[i]
+                start_time = end_time
 
             self.raw_text = json.dumps(data, indent=4)
             self._write_back()
@@ -164,7 +163,7 @@ class ProjectParameterEditor:
                 processes = stage.get("stage_settings", {}).get("processes", {})
                 constraints = processes.get("constraints_process_list", [])
 
-                for p_idx, process in enumerate(constraints):
+                for process in constraints:
                     params = process.get("Parameters", {})
                     module = process.get("python_module")
                     model_part = params.get("model_part_name")
