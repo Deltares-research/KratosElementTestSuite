@@ -100,13 +100,19 @@ class MdpaEditor:
         """
         Inserts displacement tables into the .mdpa file, one per stage.
         """
+        if not durations or not strains:
+            raise ValueError("Durations and strains must be non-empty.")
+        if len(durations) != len(strains):
+            raise ValueError("Durations and strains lists must have the same length.")
+
         tables = []
+        sample_size = 1.0
         start_time = 0.0
         cumulative_strain = 0.0
 
-        for i, (duration, strain) in enumerate(zip(durations, strains)):
+        for i, (duration, strain) in enumerate(zip(durations, strains, strict=True)):
             end_time = start_time + duration
-            displacement = (strain / 100)
+            displacement = sample_size * strain / 100
 
             table = (
                 f"Begin Table {i + 1} TIME DISPLACEMENT_Y\n"
@@ -118,10 +124,6 @@ class MdpaEditor:
 
             start_time = end_time
             cumulative_strain += strain
-
-        if not tables:
-            self._log("No tables to insert.", "warn")
-            return
 
         table_block = "\n".join(tables) + "\n\n"
         self.raw_text = table_block + self.raw_text
