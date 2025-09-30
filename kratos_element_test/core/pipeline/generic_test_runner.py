@@ -11,14 +11,15 @@ import KratosMultiphysics as Kratos
 from KratosMultiphysics.GeoMechanicsApplication.geomechanics_analysis import GeoMechanicsAnalysis
 from KratosMultiphysics.project import Project
 from kratos_element_test.core.io import gid_output_reader
+from kratos_element_test.ui.ui_logger import log_message as fallback_log
+import KratosMultiphysics.GeoMechanicsApplication.context_managers as context_managers
 
 
 class GenericTestRunner:
-    def __init__(self, output_file_paths, work_dir, logger=None, plotter=None):
+    def __init__(self, output_file_paths, work_dir, logger=None):
         self.output_file_paths = output_file_paths
         self.work_dir = work_dir
-        self._plotter = plotter
-        self._log = logger or (lambda msg, lvl="info": print(f"[{lvl.upper()}] {msg}"))
+        self._log = logger or fallback_log
 
     def run(self):
         use_orchestrator = self._has_orchestrator()
@@ -249,11 +250,5 @@ class GenericTestRunner:
         orchestrator_module = importlib.import_module(reg_entry["ModuleName"])
         orchestrator_class = getattr(orchestrator_module, reg_entry["ClassName"])
 
-        original_cwd = os.getcwd()
-
-        try:
-            os.chdir(self.work_dir)
-            orchestrator_instance = orchestrator_class(project)
-            orchestrator_instance.Run()
-        finally:
-            os.chdir(original_cwd)
+        with context_managers.set_cwd_to(self.work_dir):
+            orchestrator_class(project).Run()
