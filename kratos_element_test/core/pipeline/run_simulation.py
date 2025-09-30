@@ -131,6 +131,7 @@ class RunSimulation:
             else:
                 try:
                     shutil.rmtree(self.tmp_dir, ignore_errors=True)
+                    pass
                 except Exception as e:
                     self.log(f"Failed to clean tmp dir: {e}", "warn")
 
@@ -199,16 +200,6 @@ class RunSimulation:
             for d, s in zip(self.stage_durations[current_stages:], self.step_counts[current_stages:]):
                 editor.append_stage(duration=d, steps=s)
 
-        cumulative_end_times = []
-        total = 0.0
-        for d in self.stage_durations:
-            total += d
-            cumulative_end_times.append(total)
-
-        editor.update_stage_timings(cumulative_end_times, self.step_counts)
-        if len(cumulative_end_times) > 1:
-            editor.update_top_displacement_table_numbers()
-
     def _set_material_constitutive_law(self) -> None:
         editor = MaterialEditor(str(self.material_json))
         if self.dll_path:
@@ -240,12 +231,12 @@ class RunSimulation:
                     total += d
                     cumulative_end_times.append(total)
 
-                editor.update_stage_timings(cumulative_end_times, self.num_steps)
+                editor.update_stage_timings(cumulative_end_times, self.num_steps, start_time=0.0)
 
                 if len(cumulative_end_times) > 1:
                     editor.update_top_displacement_table_numbers()
             else:
-                editor.update_stage_timings([self.end_time], self.num_steps)
+                editor.update_stage_timings([self.end_time], self.num_steps, start_time=0.0)
         else:
             time_step = (self.stage_durations[0] / self.num_steps[0]) if (
                         isinstance(self.num_steps, list) and self.stage_durations) else (self.end_time / self.num_steps)
