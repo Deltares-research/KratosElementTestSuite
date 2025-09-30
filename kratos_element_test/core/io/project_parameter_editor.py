@@ -66,11 +66,12 @@ class ProjectParameterEditor:
             self._log(f"Multiple occurrences of '{property_name}' found. Updated all {count}.", "warn")
         self._write_back()
 
-    def update_stage_timings(self, end_times: list[float], step_counts: list[int]):
+    def update_stage_timings(self, end_times: list[float], step_counts: list[int], start_time: float = 0.0):
         """
-        Applies staged start/end time logic. Assumes stage_1.start_time = 0.0.
+        Applies staged start/end time logic.
         end_times: List of end_time values for each stage.
         num_steps: Number of steps (uniform across stages).
+        start_time: The start time of the first stage (default is 0.0).
         """
         try:
             data = self._load_json()
@@ -83,7 +84,7 @@ class ProjectParameterEditor:
             if len(end_times) != len(stage_names):
                 raise ValueError(f"Provided {len(end_times)} end_times but found {len(stage_names)} stages.")
 
-            start_time = 0.0
+            # start_time = 0.0
             for i, stage_name in enumerate(stage_names):
                 stage = data["stages"][stage_name]
                 settings = stage.get("stage_settings", {})
