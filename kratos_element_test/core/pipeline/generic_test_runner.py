@@ -66,7 +66,7 @@ class GenericTestRunner:
             all_sigma_yy.extend(sigma_yy)
             all_time_steps.extend([t / 3600.0 for t in time_steps])  # Convert seconds → hours
 
-            all_yy_strain = self._apply_cumulative_strain_offset(yy_strain_stages)
+        all_yy_strain = self._apply_cumulative_strain_offset(yy_strain_stages)
 
         return (
             all_tensors,
@@ -109,8 +109,7 @@ class GenericTestRunner:
             os.chdir(original_cwd)
 
     def _read_output(self, result_path: Path) -> dict:
-        output = gid_output_reader.GiDOutputFileReader().read_output_from(result_path)
-        return output
+        return gid_output_reader.GiDOutputFileReader().read_output_from(result_path)
 
     def _collect_results(self, result_path: Path):
         result_path = Path(result_path)
@@ -160,6 +159,8 @@ class GenericTestRunner:
             if not values:
                 continue
             sublist = self._first_value_or_none(result)
+            if sublist is None:
+                continue
             tensor = np.array([
                 [sublist[0], sublist[3], sublist[5]],
                 [sublist[3], sublist[1], sublist[4]],
@@ -177,6 +178,8 @@ class GenericTestRunner:
             if not values:
                 continue
             stress_components = self._first_value_or_none(result)
+            if stress_components is None:
+                continue
             shear_xy = stress_components[3]
             shear_stress_xy.append(shear_xy)
         return shear_stress_xy
@@ -187,7 +190,10 @@ class GenericTestRunner:
             values = result["values"]
             if not values:
                 continue
-            eps_xx, eps_yy, eps_zz, eps_xy = self._first_value_or_none(result)[:4]
+            first_value = self._first_value_or_none(result)
+            if first_value is None:
+                continue
+            eps_xx, eps_yy, eps_zz, eps_xy = first_value[:4]
             vol.append(eps_xx + eps_yy + eps_zz)
             yy.append(eps_yy)
             shear_xy.append(eps_xy)
