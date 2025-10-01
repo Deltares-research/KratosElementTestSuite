@@ -41,6 +41,8 @@ INIT_PRESSURE_LABEL = "Initial effective cell pressure |σ'ₓₓ|"
 STRESS_INC_LABEL = "Stress increment |σ'ᵧᵧ|"
 NUM_STEPS_LABEL = "Number of steps"
 DURATION_LABEL = "Duration"
+STRAIN_INCREMENT_LABEL = "Strain inc."
+STEPS_LABEL = "steps"
 
 # Units
 FL2_UNIT_LABEL = "kN/m²"

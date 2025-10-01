@@ -20,7 +20,7 @@ from kratos_element_test.ui.ui_utils import _asset_path
 from kratos_element_test.ui.ui_constants import (
     TRIAXIAL, DIRECT_SHEAR, CRS,
     TEST_NAME_TO_TYPE, TEST_IMAGE_FILES,
-    MAX_STRAIN_LABEL, INIT_PRESSURE_LABEL, NUM_STEPS_LABEL, DURATION_LABEL,
+    MAX_STRAIN_LABEL, INIT_PRESSURE_LABEL, NUM_STEPS_LABEL, DURATION_LABEL, STRAIN_INCREMENT_LABEL, STEPS_LABEL,
     FL2_UNIT_LABEL, SECONDS_UNIT_LABEL, PERCENTAGE_UNIT_LABEL, WITHOUT_UNIT_LABEL,
     INPUT_SECTION_FONT, HELP_MENU_FONT
 )
@@ -419,7 +419,6 @@ class GeotechTestUI:
         except Exception:
             log_message("An error occurred during simulation:", "error")
             log_message(traceback.format_exc(), "error")
-            print(traceback.format_exc())
         finally:
             self.root.after(0, self._enable_gui)
             self.is_running = False
@@ -489,7 +488,7 @@ class GeotechTestUI:
         default_font.configure(size=10)
 
         for label, width, unit, default in zip(
-                ["Duration", "Strain inc.", "Steps"],
+                [DURATION_LABEL, STRAIN_INCREMENT_LABEL, STEPS_LABEL],
                 [10, 10, 10],
                 ["hours ,", "% ,", ""],
                 [duration, strain_inc, steps]):
@@ -564,9 +563,9 @@ class GeotechTestUI:
 
         for row in self.crs_rows:
             try:
-                d = float(row["Duration"].get())
-                s = float(row["Strain inc."].get())
-                n = int(row["Steps"].get())
+                d = float(row[DURATION_LABEL].get())
+                s = float(row[STRAIN_INCREMENT_LABEL].get())
+                n = int(row[STEPS_LABEL].get())
             except Exception as e:
                 raise ValueError(f"Failed to extract CRS inputs: {e}")
             durations.append(d * 3600) # Convert hours → seconds
@@ -605,15 +604,15 @@ class GeotechTestUI:
                     w.delete(0, "end")
                     w.insert(0, saved[k])
         elif test_name == CRS and isinstance(saved, list):
-            # clear existing default rows
             for row in self.crs_rows:
                 row_frame = next(iter(row.values())).master
                 row_frame.destroy()
+
             self.crs_rows = []
-            # restore saved rows
+
             for row_vals in saved:
                 self._add_crs_row(
-                    duration=float(row_vals.get("Duration", 1.0) or 1.0),
-                    strain_inc=float(row_vals.get("Strain inc.", 0.0) or 0.0),
-                    steps=int(row_vals.get("Steps", 100) or 100),
+                    duration=float(row_vals.get(DURATION_LABEL, 1.0) or 1.0),
+                    strain_inc=float(row_vals.get(STRAIN_INCREMENT_LABEL, 0.0) or 0.0),
+                    steps=int(row_vals.get(STEPS_LABEL, 100) or 100),
                 )

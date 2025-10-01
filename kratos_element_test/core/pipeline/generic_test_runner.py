@@ -23,7 +23,6 @@ class GenericTestRunner:
 
     def run(self):
         use_orchestrator = self._has_orchestrator()
-        self._log(f"work_dir={os.path.abspath(self.work_dir)} | orchestrator={use_orchestrator}", "info")
         if use_orchestrator:
             self._run_orchestrator()
         else:
