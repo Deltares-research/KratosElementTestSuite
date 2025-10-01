@@ -81,17 +81,19 @@ class GenericTestRunner:
             all_time_steps
         )
 
+    def _load_kratos_parameters_from_file(self, json_path: str) -> Kratos.Parameters:
+        with open(json_path, "r") as f:
+            return Kratos.Parameters(f.read())
+
     def _load_stage_parameters(self):
         orch_path = os.path.join(self.work_dir, "ProjectParametersOrchestrator.json")
         legacy_path = os.path.join(self.work_dir, "ProjectParameters.json")
 
         if os.path.exists(orch_path):
-            with open(orch_path, "r") as f:
-                return [Kratos.Parameters(f.read())]
+            return [self._load_kratos_parameters_from_file(orch_path)]
 
         if os.path.exists(legacy_path):
-            with open(legacy_path, "r") as f:
-                return [Kratos.Parameters(f.read())]
+            return [self._load_kratos_parameters_from_file(legacy_path)]
 
         raise FileNotFoundError("Neither ProjectParametersOrchestrator.json nor ProjectParameters.json found.")
 
@@ -241,9 +243,7 @@ class GenericTestRunner:
         if not os.path.exists(params_path):
             params_path = os.path.join(self.work_dir, "ProjectParameters.json")
 
-        with open(params_path, "r") as parameter_file:
-            project_parameters = Kratos.Parameters(parameter_file.read())
-        project = Project(project_parameters)
+        project = Project(self._load_kratos_parameters_from_file(params_path))
 
         orchestrator_name = project.GetSettings()["orchestrator"]["name"].GetString()
         reg_entry = Kratos.Registry[orchestrator_name]
