@@ -151,20 +151,13 @@ class ProjectParameterEditor:
 
             for i, stage_name in enumerate(stage_names):
                 stage = data["stages"][stage_name]
-                processes = stage.get("stage_settings", {}).get("processes", {})
-                constraints = processes.get("constraints_process_list", [])
-
-                for process in constraints:
-                    params = process.get("Parameters", {})
-                    module = process.get("python_module")
-                    model_part = params.get("model_part_name")
-
+                table_index_list = [0, i + 1, 0]
+                for process in stage.get("stage_settings", {}).get("processes", {}).get("constraints_process_list", []):
                     if (
-                            module == "apply_vector_constraint_table_process"
-                            and model_part == "PorousDomain.top_displacement"
+                            process.get("python_module") == "apply_vector_constraint_table_process"
+                            and process.get("Parameters", {}).get("model_part_name") == "PorousDomain.top_displacement"
                     ):
-                        new_table = [0, i + 1, 0]
-                        process["Parameters"]["table"] = new_table
+                        process["Parameters"]["table"] = table_index_list
 
             self.raw_text = json.dumps(data, indent=4)
             self._write_back()
