@@ -123,13 +123,11 @@ class ProjectParameterEditor:
         if "stage_preprocess" in new_stage:
             del new_stage["stage_preprocess"]
 
-        last_end_time = data["stages"][last_stage_key]["stage_settings"]["problem_data"]["end_time"]
-        new_end_time = last_end_time + duration
-        time_step = duration / steps
+        previous_end_time = new_stage["stage_settings"]["problem_data"]["end_time"]
 
-        new_stage["stage_settings"]["problem_data"]["start_time"] = last_end_time
-        new_stage["stage_settings"]["problem_data"]["end_time"] = new_end_time
-        new_stage["stage_settings"]["solver_settings"]["time_stepping"]["time_step"] = time_step
+        new_stage["stage_settings"]["problem_data"]["start_time"] = previous_end_time
+        new_stage["stage_settings"]["problem_data"]["end_time"] = previous_end_time + duration
+        new_stage["stage_settings"]["solver_settings"]["time_stepping"]["time_step"] = duration / steps
 
         new_stage["stage_settings"]["output_processes"]["gid_output"][0]["Parameters"][
             "output_name"] = f"gid_output/output_stage{new_stage_index}"
