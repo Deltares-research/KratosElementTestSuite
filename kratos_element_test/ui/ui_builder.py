@@ -505,7 +505,8 @@ class GeotechTestUI:
             self.remove_row_button.config(state="normal")
 
     def _prevent_removal_last_crs_row(self):
-        if len(self.crs_rows) <= 1:
+        minimum_number_of_rows = 1
+        if len(self.crs_rows) <= minimum_number_of_rows:
             self.remove_row_button.config(state="disabled")
             return
 
