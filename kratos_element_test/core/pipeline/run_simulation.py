@@ -85,7 +85,7 @@ class RunSimulation:
         self.log(f"Starting {self.test_type} simulation...", "info")
 
         try:
-            self._setup_simulation_files()
+            self._copy_simulation_files()
 
             if self.test_type == "crs":
                 self._prepare_crs_stages()
@@ -94,7 +94,7 @@ class RunSimulation:
             self._set_project_parameters()
             self._set_mdpa()
 
-            output_files = self._collect_expected_outputs()
+            output_files = self._output_file_paths()
             runner = GenericTestRunner([str(p) for p in output_files], str(self.tmp_dir))
 
             (tensors, yy_strain, vol_strain, von_mises, mean_stress,
@@ -162,7 +162,7 @@ class RunSimulation:
             f"Tried:\n  - " + "\n  - ".join(cls._candidate_template_dirs(test_type))
         )
 
-    def _setup_simulation_files(self) -> None:
+    def _copy_simulation_files(self) -> None:
         src_dir = self._find_template_dir(self.test_type)
         copied = {}
         for filename in REQUIRED_FILES:
@@ -265,7 +265,7 @@ class RunSimulation:
             editor.insert_displacement_tables(self.stage_durations, self.strain_incs)
             editor.update_top_displacement_tables(len(self.stage_durations))
 
-    def _collect_expected_outputs(self) -> List[Path]:
+    def _output_file_paths(self) -> List[Path]:
         with open(self.project_json, "r") as f:
             project_data = json.load(f)
 
