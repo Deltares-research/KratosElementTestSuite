@@ -504,18 +504,20 @@ class GeotechTestUI:
         if len(self.crs_rows) > 1:
             self.remove_row_button.config(state="normal")
 
-    def _remove_crs_row(self):
+    def _prevent_removal_last_crs_row(self):
         if len(self.crs_rows) <= 1:
             self.remove_row_button.config(state="disabled")
             return
+
+    def _remove_crs_row(self):
+        self._prevent_removal_last_crs_row()
 
         if self.crs_rows:
             row = self.crs_rows.pop()
             row_frame = next(iter(row.values())).master
             row_frame.destroy()
 
-        if len(self.crs_rows) <= 1:
-            self.remove_row_button.config(state="disabled")
+        self._prevent_removal_last_crs_row()
 
     def _on_mousewheel(self, event):
         if event.delta > 0:
