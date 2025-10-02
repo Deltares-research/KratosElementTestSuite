@@ -77,8 +77,8 @@ class RunSimulation:
         self.keep_tmp = keep_tmp
 
         self.tmp_dir = Path(tempfile.mkdtemp(prefix=f"{self.test_type}_"))
-        self.material_json: Optional[Path] = None
-        self.project_json: Optional[Path] = None
+        self.material_json_path: Optional[Path] = None
+        self.project_json_path: Optional[Path] = None
         self.mdpa_path: Optional[Path] = None
 
     def run(self) -> Dict[str, List[float]]:
@@ -173,15 +173,15 @@ class RunSimulation:
                 copied[filename] = dst_file
 
         if "ProjectParametersOrchestrator.json" in copied:
-            self.project_json = copied["ProjectParametersOrchestrator.json"]
+            self.project_json_path = copied["ProjectParametersOrchestrator.json"]
         elif "ProjectParameters.json" in copied:
-            self.project_json = copied["ProjectParameters.json"]
+            self.project_json_path = copied["ProjectParameters.json"]
         else:
             raise FileNotFoundError(
                 "Neither ProjectParametersOrchestrator.json nor ProjectParameters.json found in template."
             )
 
-        self.material_json = copied.get("MaterialParameters.json")
+        self.material_json_path = copied.get("MaterialParameters.json")
         self.mdpa_path = copied.get("mesh.mdpa")
         if self.mdpa_path is None:
             raise FileNotFoundError("mesh.mdpa missing in template set.")
@@ -190,8 +190,8 @@ class RunSimulation:
         if not (self.stage_durations and self.step_counts):
             return
 
-        editor = ProjectParameterEditor(str(self.project_json))
-        data = json.load(open(self.project_json, "r"))
+        editor = ProjectParameterEditor(str(self.project_json_path))
+        data = json.load(open(self.project_json_path, "r"))
         current_stages = len(data.get("stages", {}))
         required_stages = len(self.stage_durations)
 
@@ -200,7 +200,7 @@ class RunSimulation:
                 editor.append_stage(duration=d, steps=s)
 
     def _set_material_constitutive_law(self) -> None:
-        editor = MaterialEditor(str(self.material_json))
+        editor = MaterialEditor(str(self.material_json_path))
         if self.dll_path:
             editor.update_material_properties({
                 "IS_FORTRAN_UDSM": True,
@@ -217,10 +217,10 @@ class RunSimulation:
             editor.set_constitutive_law("GeoLinearElasticPlaneStrain2DLaw")
 
     def _set_project_parameters(self) -> None:
-        with open(self.project_json, "r") as f:
+        with open(self.project_json_path, "r") as f:
             data = json.load(f)
 
-        editor = ProjectParameterEditor(str(self.project_json))
+        editor = ProjectParameterEditor(str(self.project_json_path))
 
         if "stages" in data:
             if self.stage_durations and isinstance(self.num_steps, list):
@@ -266,7 +266,7 @@ class RunSimulation:
             editor.update_top_displacement_tables(len(self.stage_durations))
 
     def _output_file_paths(self) -> List[Path]:
-        with open(self.project_json, "r") as f:
+        with open(self.project_json_path, "r") as f:
             project_data = json.load(f)
 
         if "stages" in project_data:
