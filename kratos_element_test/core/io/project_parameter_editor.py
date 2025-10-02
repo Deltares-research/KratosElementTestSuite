@@ -76,10 +76,6 @@ class ProjectParameterEditor:
         try:
             data = self._load_json()
 
-            if "stages" not in data:
-                self._log("update_stage_timings is only supported in orchestrator-based files.", "error")
-                return
-
             stage_names = list(data["stages"].keys())
             if len(end_times) != len(stage_names):
                 raise ValueError(f"Provided {len(end_times)} end_times but found {len(stage_names)} stages.")
@@ -117,9 +113,6 @@ class ProjectParameterEditor:
             return
 
         stage_names = list(data["stages"].keys())
-        if not stage_names:
-            self._log("No existing stage to clone.", "error")
-            return
 
         last_stage_key = stage_names[-1]
         new_stage_index = len(stage_names) + 1
