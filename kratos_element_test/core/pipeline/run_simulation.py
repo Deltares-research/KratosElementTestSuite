@@ -154,13 +154,12 @@ class RunSimulation:
 
     @classmethod
     def _find_template_dir(cls, test_type: str) -> Path:
-        tried = []
         for p in cls._candidate_template_dirs(test_type):
-            tried.append(str(p))
             if p.exists():
                 return p
         raise FileNotFoundError(
-            f"Could not locate templates for '{test_type}'. Tried:\n  - " + "\n  - ".join(tried)
+            f"Could not locate templates for '{test_type}'."
+            f"Tried:\n  - " + "\n  - ".join(cls._candidate_template_dirs(test_type))
         )
 
     def _setup_simulation_files(self) -> None:
