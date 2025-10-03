@@ -224,13 +224,9 @@ class GenericTestRunner:
         return combined
 
     def _has_orchestrator(self):
-        orch_candidates = [
-            os.path.join(self.work_dir, "ProjectParametersOrchestrator.json"),
-            os.path.join(os.getcwd(), "ProjectParametersOrchestrator.json"),
-            os.path.join(self.work_dir, "ProjectParameters_Orchestrator.json"),
-        ]
+        orchestrator_path = os.path.join(self.work_dir, "ProjectParametersOrchestrator.json")
 
-        if any(os.path.isfile(p) for p in orch_candidates):
+        if os.path.isfile(orchestrator_path):
             return True
 
         pp = os.path.join(self.work_dir, "ProjectParameters.json")
