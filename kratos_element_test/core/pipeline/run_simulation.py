@@ -44,7 +44,7 @@ class RunSimulation:
         *,
         test_type: str,
         dll_path: Optional[str],
-        index: Optional[int],
+        udsm_number: Optional[int],
         material_parameters: List[float],
         num_steps: int | List[int],
         end_time: float,
@@ -61,7 +61,7 @@ class RunSimulation:
     ):
         self.test_type = test_type.lower()
         self.dll_path = dll_path
-        self.index = index
+        self.udsm_number = udsm_number
         self.material_parameters = material_parameters
         self.num_steps = num_steps
         self.end_time = end_time
@@ -206,7 +206,7 @@ class RunSimulation:
                 "IS_FORTRAN_UDSM": True,
                 "UMAT_PARAMETERS": self.material_parameters,
                 "UDSM_NAME": self.dll_path,
-                "UDSM_NUMBER": self.index,
+                "UDSM_NUMBER": self.udsm_number,
             })
             editor.set_constitutive_law("SmallStrainUDSM2DPlaneStrainLaw")
         else:

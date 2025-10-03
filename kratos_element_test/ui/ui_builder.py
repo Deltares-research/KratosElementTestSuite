@@ -299,7 +299,6 @@ class GeotechTestUI:
             )
             self._restore_inputs(test_name)
 
-
         elif test_name == DIRECT_SHEAR:
             self._init_plot_canvas(num_plots=4)
             ttk.Label(self.test_input_frame, text="Direct Simple Shear Input Data",
@@ -314,7 +313,6 @@ class GeotechTestUI:
                  NUM_STEPS_LABEL: "100", DURATION_LABEL: "1.0"}
             )
             self._restore_inputs(test_name)
-
 
         elif test_name == CRS:
             self._init_plot_canvas(num_plots=5)
@@ -377,7 +375,7 @@ class GeotechTestUI:
             self.root.update_idletasks()
 
             material_params = [e.get() for e in self.entry_widgets.values()]
-            index = self.model_dict["model_name"].index(self.model_var.get()) + 1 if self.dll_path else None
+            udsm_number = self.model_dict["model_name"].index(self.model_var.get()) + 1 if self.dll_path else None
             test_type = self.current_test.get()
             tt = TEST_NAME_TO_TYPE.get(test_type, "triaxial")
 
@@ -404,12 +402,12 @@ class GeotechTestUI:
                 axes=self.axes,
                 test_type=tt,
                 dll_path=self.dll_path or "",
-                index=index,
+                udsm_number=udsm_number,
                 material_parameters=[float(x) for x in material_params],
                 sigma_init=sigma_init,
                 eps_max=eps_max,
                 n_steps=n_steps,
-                duration=duration,
+                duration=duration
             )
 
             if success:
@@ -571,7 +569,7 @@ class GeotechTestUI:
                 n = int(row[STEPS_LABEL].get())
             except Exception as e:
                 raise ValueError(f"Failed to extract CRS inputs: {e}")
-            durations.append(d * 3600) # Convert hours → seconds
+            durations.append(d * 3600)  # Convert hours → seconds
             strains.append(s)
             steps.append(n)
 
