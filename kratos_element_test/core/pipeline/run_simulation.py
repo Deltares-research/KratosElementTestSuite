@@ -187,8 +187,8 @@ class RunSimulation:
             raise FileNotFoundError("mesh.mdpa missing in template set.")
 
     def _prepare_crs_stages(self) -> None:
-        if not (self.stage_durations and self.step_counts):
-            return
+        if not self.stage_durations or not self.step_counts:
+            raise ValueError("CRS test requires both stage durations and step counts to be provided.")
 
         editor = ProjectParameterEditor(str(self.project_json_path))
         data = json.load(open(self.project_json_path, "r"))
@@ -224,6 +224,11 @@ class RunSimulation:
 
         if "stages" in data:
             if self.stage_durations and isinstance(self.num_steps, list):
+                if len(self.stage_durations) != len(self.num_steps):
+                    raise ValueError(
+                        f"Mismatch: {len(self.stage_durations)} stage durations but {len(self.num_steps)} step counts provided."
+                    )
+
                 cumulative_end_times = []
                 total = 0.0
                 for d in self.stage_durations:
