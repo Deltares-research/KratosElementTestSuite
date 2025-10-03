@@ -239,8 +239,6 @@ class RunSimulation:
 
                 if len(cumulative_end_times) > 1:
                     editor.update_top_displacement_table_numbers()
-            else:
-                editor.update_stage_timings([self.end_time], self.num_steps, start_time=0.0)
         else:
             time_step = (self.stage_durations[0] / self.num_steps[0]) if (
                         isinstance(self.num_steps, list) and self.stage_durations) else (self.end_time / self.num_steps)
@@ -328,6 +326,3 @@ class RunSimulation:
             )
         else:
             raise ValueError(f"Unsupported test_type: {self.test_type}")
-
-    def run_simulation(**kwargs):
-        return RunSimulation(**kwargs).run()

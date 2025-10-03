@@ -101,7 +101,7 @@ class ElementTestController:
         try:
             self._logger(f"MC indices: {self._mc_tuple()}", "info")
 
-            RunSimulation.run_simulation(
+            sim = RunSimulation(
                 test_type=inputs.test_type,
                 drainage=inputs.drainage,
                 dll_path=dll_path or "",
@@ -118,6 +118,7 @@ class ElementTestController:
                 step_counts=getattr(self, "step_counts", None),
                 strain_incs=getattr(self, "strain_incs", None)
             )
+            sim.run()
 
         except Exception as e:
             self._logger(f"Simulation failed: {e}", "error")
