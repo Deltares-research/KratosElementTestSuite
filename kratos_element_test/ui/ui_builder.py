@@ -389,7 +389,14 @@ class GeotechTestUI:
 
             elif test_type == CRS:
                 sigma_init = 0.0
-                stage_durations, strain_incs, step_counts, eps_max, n_steps, duration = self._extract_staged_inputs()
+                stage_durations, strain_incs, step_counts = self._extract_staged_inputs()
+
+                eps_max = sum(strain_incs)
+                n_steps = sum(step_counts)
+                duration = sum(stage_durations)
+
+                if abs(eps_max) >= 100:
+                    raise ValueError("Sum of strain increments reaches or exceeds ±100%. Please revise your input.")
 
                 self.controller.stage_durations = stage_durations
                 self.controller.strain_incs = strain_incs
@@ -547,6 +554,12 @@ class GeotechTestUI:
         except tk.TclError:
             pass
 
+    def _extract_values_from_rows(self, label, data_type):
+        try:
+            return [data_type(row[label].get()) for row in self.crs_rows]
+        except Exception as e:
+            raise ValueError(f"Failed to extract CRS inputs '{label}': {e}")
+
     def _extract_classic_inputs(self, widgets):
         try:
             sigma_init = float(widgets[INIT_PRESSURE_LABEL].get())
@@ -558,29 +571,19 @@ class GeotechTestUI:
             raise ValueError(f"Failed to extract classic inputs: {e}")
 
     def _extract_staged_inputs(self):
-        durations = []
-        strains = []
-        steps = []
+        durations = self._extract_values_from_rows(DURATION_LABEL, float)
+        strains = self._extract_values_from_rows(STRAIN_INCREMENT_LABEL, float)
+        steps = self._extract_values_from_rows(STEPS_LABEL, int)
 
-        for row in self.crs_rows:
-            try:
-                d = float(row[DURATION_LABEL].get())
-                s = float(row[STRAIN_INCREMENT_LABEL].get())
-                n = int(row[STEPS_LABEL].get())
-            except Exception as e:
-                raise ValueError(f"Failed to extract CRS inputs: {e}")
-            durations.append(d * 3600)  # Convert hours → seconds
-            strains.append(s)
-            steps.append(n)
+        durations_sec = [d * 3600 for d in durations]  # convert hours → seconds
+        # eps_max = sum(strains)
+        # n_steps = sum(steps)
+        # duration = sum(durations_sec)
+        #
+        # if abs(eps_max) >= 100:
+        #     raise ValueError("Sum of strain increments reaches or exceeds ±100%. Please revise your input.")
 
-        eps_max = sum(strains)
-        n_steps = sum(steps)
-        duration = sum(durations)
-
-        if abs(eps_max) >= 100:
-            raise ValueError("Sum of strain increments reaches or exceeds ±100%. Please revise your input.")
-
-        return durations, strains, steps, eps_max, n_steps, duration
+        return durations_sec, strains, steps  #, eps_max, n_steps, duration
 
     def _save_current_inputs(self):
         test = self.current_test.get()
