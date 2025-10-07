@@ -284,19 +284,23 @@ class MatplotlibPlotter:
         ax.invert_xaxis()
 
         epsilon = 0.1
-        relative_diff = np.abs(sigma_1 - sigma_3) / max(np.abs(sigma_1), 1e-6)
+        relative_diff = np.abs(sigma_1 - sigma_3) / (max(np.abs(sigma_3), 1e-6))
 
         if relative_diff < epsilon:
             ax.set_xlim(center - (1.2 * radius), center + (1.2 * radius))
-            ax.set_ylim(bottom=0, top=-0.6*(np.max(sigma_1) - np.max(sigma_3)))
+            ax.set_ylim(bottom=0, top=-0.8*(np.max(sigma_1) - np.max(sigma_3)))
 
         else:
             if sigma_1 > 0 or sigma_3 > 0:
-                ax.set_xlim(left=1.2*np.max(sigma_3), right=1.2*np.max(sigma_1))
-                ax.set_ylim(bottom=0, top=-0.6*(np.max(sigma_1) - np.max(sigma_3)))
+                ax.set_xlim(left=0, right=1.2*max(sigma_1, sigma_3))
+                ax.set_ylim(bottom=0, top=(np.max(sigma_3) - np.max(sigma_1)))
+            elif sigma_1 < 0 and sigma_3 < 0:
+                ax.set_xlim(left=0, right=1.2*np.max(sigma_1))
+                ax.set_ylim(bottom=0, top=(np.max(np.abs(sigma_1)) - np.max(np.abs(sigma_3))))
             else:
                 ax.set_xlim(left=0, right=1.2*np.max(sigma_1))
-                ax.set_ylim(bottom=0, top=-0.6*np.max(sigma_1))
+                ax.set_ylim(bottom=0, top=-(np.max(sigma_3) - np.max(sigma_1)))
+
 
         ax.minorticks_on()
 
