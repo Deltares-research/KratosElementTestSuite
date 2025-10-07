@@ -576,14 +576,8 @@ class GeotechTestUI:
         steps = self._extract_values_from_rows(STEPS_LABEL, int)
 
         durations_sec = [d * 3600 for d in durations]  # convert hours → seconds
-        # eps_max = sum(strains)
-        # n_steps = sum(steps)
-        # duration = sum(durations_sec)
-        #
-        # if abs(eps_max) >= 100:
-        #     raise ValueError("Sum of strain increments reaches or exceeds ±100%. Please revise your input.")
 
-        return durations_sec, strains, steps  #, eps_max, n_steps, duration
+        return durations_sec, strains, steps
 
     def _save_current_inputs(self):
         test = self.current_test.get()
