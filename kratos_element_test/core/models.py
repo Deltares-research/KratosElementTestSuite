@@ -31,7 +31,7 @@ class SimulationInputs:
     mohr_coulomb: MohrCoulombOptions = field(default_factory=MohrCoulombOptions)
 
     def validate(self) -> None:
-        if self.test_type not in ("triaxial", "direct_shear"):
+        if self.test_type not in ("triaxial", "direct_shear", "crs"):
             raise ValueError("Unsupported test type.")
         if self.number_of_steps <= 0:
             raise ValueError("Number of steps must be > 0.")

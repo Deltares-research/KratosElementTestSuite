@@ -18,8 +18,9 @@ from kratos_element_test.plotters.matplotlib_plotter import MatplotlibPlotter
 from kratos_element_test.ui.ui_logger import init_log_widget, log_message, clear_log
 from kratos_element_test.ui.ui_utils import _asset_path
 from kratos_element_test.ui.ui_constants import (
-    TRIAXIAL, DIRECT_SHEAR, TEST_NAME_TO_TYPE,
-    MAX_STRAIN_LABEL, INIT_PRESSURE_LABEL, NUM_STEPS_LABEL, DURATION_LABEL,
+    TRIAXIAL, DIRECT_SHEAR, CRS,
+    TEST_NAME_TO_TYPE, TEST_IMAGE_FILES,
+    MAX_STRAIN_LABEL, INIT_PRESSURE_LABEL, NUM_STEPS_LABEL, DURATION_LABEL, STRAIN_INCREMENT_LABEL, STEPS_LABEL,
     FL2_UNIT_LABEL, SECONDS_UNIT_LABEL, PERCENTAGE_UNIT_LABEL, WITHOUT_UNIT_LABEL,
     INPUT_SECTION_FONT, HELP_MENU_FONT
 )
@@ -37,6 +38,7 @@ class GeotechTestUI:
         self.model_var = tk.StringVar(root)
         self.model_var.set(model_dict["model_name"][0])
         self.current_test = tk.StringVar(value=test_name)
+        self.test_input_history = {}
 
         def _sync_test_type(*_):
             value = self.current_test.get()
@@ -156,10 +158,7 @@ class GeotechTestUI:
 
         self.test_buttons = {}
 
-        image_paths = {
-            TRIAXIAL:  _asset_path("Triaxial.png"),
-            DIRECT_SHEAR: _asset_path("DSS.png")
-        }
+        image_paths = {name: _asset_path(filename) for name, filename in TEST_IMAGE_FILES.items()}
 
         self.test_images = {}
         for key, path in image_paths.items():
@@ -171,7 +170,7 @@ class GeotechTestUI:
                 log_message(f"Failed to load or resize image: {path} ({e})", "error")
                 self.test_images[key] = None
 
-        for test_name in [TRIAXIAL, DIRECT_SHEAR]:
+        for test_name in TEST_NAME_TO_TYPE.keys():
             btn = tk.Button(
                 self.test_selector_frame,
                 text=test_name,
@@ -198,7 +197,7 @@ class GeotechTestUI:
         widgets = {}
 
         default_font = tkFont.nametofont("TkDefaultFont").copy()
-        default_font.configure(size=11)
+        default_font.configure(size=10)
 
         ttk.Label(frame, text=title, font=("Arial", 12, "bold")).pack(anchor="w", padx=5, pady=5)
         for i, label in enumerate(labels):
@@ -270,6 +269,9 @@ class GeotechTestUI:
                 w.pack_forget()
 
     def _switch_test(self, test_name):
+
+        self._save_current_inputs()
+
         clear_log()
         self.current_test.set(test_name)
 
@@ -295,6 +297,7 @@ class GeotechTestUI:
                 {INIT_PRESSURE_LABEL: "100", MAX_STRAIN_LABEL: "20",
                  NUM_STEPS_LABEL: "100", DURATION_LABEL: "1.0"}
             )
+            self._restore_inputs(test_name)
 
         elif test_name == DIRECT_SHEAR:
             self._init_plot_canvas(num_plots=4)
@@ -309,6 +312,39 @@ class GeotechTestUI:
                 {INIT_PRESSURE_LABEL: "100", MAX_STRAIN_LABEL: "20",
                  NUM_STEPS_LABEL: "100", DURATION_LABEL: "1.0"}
             )
+            self._restore_inputs(test_name)
+
+        elif test_name == CRS:
+            self._init_plot_canvas(num_plots=5)
+            ttk.Label(self.test_input_frame, text="Constant Rate of Strain Input Data",
+                      font=(INPUT_SECTION_FONT, 12, "bold")).pack(anchor="w", padx=5, pady=(5, 0))
+            tk.Label(self.test_input_frame, text="(For Strain increment, compression is negative)",
+                     font=(INPUT_SECTION_FONT, 9)).pack(anchor="w", padx=5, pady=(0, 5))
+
+            self.crs_button_frame = ttk.Frame(self.test_input_frame)
+            self.crs_button_frame.pack(fill="x", padx=10, pady=(5, 5))
+
+            add_row_button = ttk.Button(
+                self.crs_button_frame,
+                text="Add Row",
+                command=self._add_crs_row)
+            add_row_button.pack(side="left", padx=5)
+
+            self.remove_row_button = ttk.Button(
+                self.crs_button_frame,
+                text="Remove Row",
+                command=self._remove_crs_row,
+                state="disabled")
+            self.remove_row_button.pack(side="left", padx=5)
+
+            self.crs_table_frame = ttk.Frame(self.test_input_frame)
+            self.crs_table_frame.pack(fill="x", padx=10, pady=5)
+
+            self.crs_rows = []
+            for _ in range(5):
+                self._add_crs_row(duration=1.0, strain_inc=0.0, steps=100)
+
+            self._restore_inputs(test_name)
 
         log_message(f"{test_name} test selected.", "info")
 
@@ -336,45 +372,58 @@ class GeotechTestUI:
     def _run_simulation(self):
         try:
             log_message("Starting calculation... Please wait...", "info")
-            log_message("Validating input...", "info")
             self.root.update_idletasks()
 
             material_params = [e.get() for e in self.entry_widgets.values()]
-
-            index = self.model_dict["model_name"].index(self.model_var.get()) + 1 if self.dll_path else None
+            udsm_number = self.model_dict["model_name"].index(self.model_var.get()) + 1 if self.dll_path else None
             test_type = self.current_test.get()
-
-            self.root.update_idletasks()
-
-            if test_type == TRIAXIAL:
-                w = self.triaxial_widgets
-            elif test_type == DIRECT_SHEAR:
-                w = self.shear_widgets
             tt = TEST_NAME_TO_TYPE.get(test_type, "triaxial")
 
-            sigma_init = float(w["Initial effective cell pressure |σ'ₓₓ|"].get())
-            eps_max = float(w["Maximum Strain |εᵧᵧ|"].get())
-            n_steps = float(w["Number of steps"].get())
-            duration = float(w["Duration"].get())
+            if test_type in [TRIAXIAL, DIRECT_SHEAR]:
+                widgets = self.triaxial_widgets if test_type == TRIAXIAL else self.shear_widgets
+                sigma_init, eps_max, n_steps, duration = self._extract_classic_inputs(widgets)
 
-            self.controller.run(
+                self.controller.stage_durations = None
+                self.controller.strain_incs = None
+                self.controller.step_counts = None
+
+            elif test_type == CRS:
+                sigma_init = 0.0
+                stage_durations, strain_incs, step_counts = self._extract_staged_inputs()
+
+                eps_max = sum(strain_incs)
+                n_steps = sum(step_counts)
+                duration = sum(stage_durations)
+
+                if abs(eps_max) >= 100:
+                    raise ValueError("Sum of strain increments reaches or exceeds ±100%. Please revise your input.")
+
+                self.controller.stage_durations = stage_durations
+                self.controller.strain_incs = strain_incs
+                self.controller.step_counts = step_counts
+
+            else:
+                raise ValueError(f"Unsupported test type: {test_type}")
+
+            success = self.controller.run(
                 axes=self.axes,
                 test_type=tt,
                 dll_path=self.dll_path or "",
-                index=index,
+                udsm_number=udsm_number,
                 material_parameters=[float(x) for x in material_params],
                 sigma_init=sigma_init,
                 eps_max=eps_max,
                 n_steps=n_steps,
-                duration=duration)
+                duration=duration
+            )
 
-            self.canvas.draw()
-            log_message(f"{test_type} test completed successfully.", "info")
+            if success:
+                self.canvas.draw()
+                log_message(f"{test_type} test completed successfully.", "info")
 
         except Exception:
             log_message("An error occurred during simulation:", "error")
             log_message(traceback.format_exc(), "error")
-
         finally:
             self.root.after(0, self._enable_gui)
             self.is_running = False
@@ -403,13 +452,14 @@ class GeotechTestUI:
     def _disable_gui(self):
         self._set_widget_state(self.left_frame, "disabled")
         self.model_menu.config(state="disabled")
-        self.test_type_menu.config(state="disabled")
         self.c_dropdown.config(state="disabled")
         self.phi_dropdown.config(state="disabled")
         self._set_widget_state(self.button_frame, "disabled")
         if hasattr(self, "scrollbar"):
             self._original_scroll_cmd = self.scrollbar.cget("command")
             self.scrollbar.config(command=lambda *args: None)
+        if hasattr(self, "test_type_menu") and self.test_type_menu.winfo_exists():
+            self.test_type_menu.config(state="disabled")
         self.scroll_canvas.unbind_all("<MouseWheel>")
 
     def _enable_gui(self):
@@ -434,6 +484,46 @@ class GeotechTestUI:
         self.canvas = None
         self.axes = []
 
+    def _add_crs_row(self, duration=1.0, strain_inc=0.0, steps=100):
+        row = {}
+        row_frame = ttk.Frame(self.crs_table_frame)
+        row_frame.pack(fill="x", pady=2)
+
+        default_font = tkFont.nametofont("TkDefaultFont").copy()
+        default_font.configure(size=10)
+
+        for label, width, unit, default in zip(
+                [DURATION_LABEL, STRAIN_INCREMENT_LABEL, STEPS_LABEL],
+                [10, 10, 10],
+                ["hours ,", "% ,", ""],
+                [duration, strain_inc, steps]):
+            ttk.Label(row_frame, text=label).pack(side="left", padx=5)
+            entry = ttk.Entry(row_frame, width=width)
+            entry.insert(0, str(default))
+            entry.pack(side="left", padx=2)
+            ttk.Label(row_frame, text=unit).pack(side="left", padx=0)
+            row[label] = entry
+
+        self.crs_rows.append(row)
+
+        if len(self.crs_rows) > 1:
+            self.remove_row_button.config(state="normal")
+
+    def _prevent_removal_last_crs_row(self):
+        minimum_number_of_rows = 1
+        if len(self.crs_rows) <= minimum_number_of_rows:
+            self.remove_row_button.config(state="disabled")
+
+    def _remove_crs_row(self):
+        self._prevent_removal_last_crs_row()
+
+        if self.crs_rows:
+            row = self.crs_rows.pop()
+            row_frame = next(iter(row.values())).master
+            row_frame.destroy()
+
+        self._prevent_removal_last_crs_row()
+
     def _on_mousewheel(self, event):
         if event.delta > 0:
             first, _ = self.scroll_canvas.yview()
@@ -446,12 +536,80 @@ class GeotechTestUI:
         self.log_frame.pack(fill="x", padx=10, pady=(0, 10))
 
         ttk.Label(self.log_frame, text="Log Output:", font=(INPUT_SECTION_FONT, 10, "bold")).pack(anchor="w")
-        self.log_widget = scrolledtext.ScrolledText(self.log_frame, height=6, width=40, state="disabled",
+        self.log_widget = scrolledtext.ScrolledText(self.log_frame, height=6, width=40, state="normal",
                                                     wrap="word", font=("Courier", 9))
         self.log_widget.pack(fill="x", expand=False)
 
         self.log_widget.bind("<Key>", lambda e: "break")
-        self.log_widget.bind("<Button-1>", lambda e: "break")
-        self.log_widget.bind("<FocusIn>", lambda e: self.root.focus())
+        self.log_widget.bind("<Control-c>", lambda e: self._copy_selection())
 
         init_log_widget(self.log_widget)
+
+    def _copy_selection(self):
+        try:
+            selection = self.log_widget.get("sel.first", "sel.last")
+            self.root.clipboard_clear()
+            self.root.clipboard_append(selection)
+        except tk.TclError:
+            pass
+
+    def _extract_values_from_rows(self, label, data_type):
+        try:
+            return [data_type(row[label].get()) for row in self.crs_rows]
+        except Exception as e:
+            raise ValueError(f"Failed to extract CRS inputs '{label}': {e}")
+
+    def _extract_classic_inputs(self, widgets):
+        try:
+            sigma_init = float(widgets[INIT_PRESSURE_LABEL].get())
+            eps_max = float(widgets[MAX_STRAIN_LABEL].get())
+            n_steps = float(widgets[NUM_STEPS_LABEL].get())
+            duration = float(widgets[DURATION_LABEL].get())
+            return sigma_init, eps_max, n_steps, duration
+        except Exception as e:
+            raise ValueError(f"Failed to extract classic inputs: {e}")
+
+    def _extract_staged_inputs(self):
+        durations = self._extract_values_from_rows(DURATION_LABEL, float)
+        strains = self._extract_values_from_rows(STRAIN_INCREMENT_LABEL, float)
+        steps = self._extract_values_from_rows(STEPS_LABEL, int)
+
+        durations_sec = [d * 3600 for d in durations]  # convert hours → seconds
+
+        return durations_sec, strains, steps
+
+    def _save_current_inputs(self):
+        test = self.current_test.get()
+        if test == TRIAXIAL and hasattr(self, "triaxial_widgets"):
+            self.test_input_history[test] = {k: w.get() for k, w in self.triaxial_widgets.items()}
+        elif test == DIRECT_SHEAR and hasattr(self, "shear_widgets"):
+            self.test_input_history[test] = {k: w.get() for k, w in self.shear_widgets.items()}
+        elif test == CRS and hasattr(self, "crs_rows"):
+            rows = []
+            for row in self.crs_rows:
+                rows.append({k: w.get() for k, w in row.items()})
+            self.test_input_history[test] = rows
+
+    def _restore_inputs(self, test_name):
+        saved = self.test_input_history.get(test_name)
+        if not saved:
+            return
+        if test_name in (TRIAXIAL, DIRECT_SHEAR):
+            widgets = self.triaxial_widgets if test_name == TRIAXIAL else self.shear_widgets
+            for k, w in widgets.items():
+                if k in saved:
+                    w.delete(0, "end")
+                    w.insert(0, saved[k])
+        elif test_name == CRS and isinstance(saved, list):
+            for row in self.crs_rows:
+                row_frame = next(iter(row.values())).master
+                row_frame.destroy()
+
+            self.crs_rows = []
+
+            for row_vals in saved:
+                self._add_crs_row(
+                    duration=float(row_vals.get(DURATION_LABEL, 1.0) or 1.0),
+                    strain_inc=float(row_vals.get(STRAIN_INCREMENT_LABEL, 0.0) or 0.0),
+                    steps=int(row_vals.get(STEPS_LABEL, 100) or 100),
+                )

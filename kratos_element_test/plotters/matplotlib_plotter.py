@@ -5,11 +5,12 @@
 import numpy as np
 from kratos_element_test.core.core_utils import _fallback_log
 from kratos_element_test.plotters.plotter_labels import (
-    SIGMA1_LABEL, SIGMA3_LABEL, SIGMA1_SIGMA3_DIFF_LABEL, VERTICAL_STRAIN_LABEL,
-    VOLUMETRIC_STRAIN_LABEL, SHEAR_STRAIN_LABEL, SHEAR_STRESS_LABEL, EFFECTIVE_STRESS_LABEL,
-    MOBILIZED_SHEAR_STRESS_LABEL, P_STRESS_LABEL, Q_STRESS_LABEL,
+    SIGMA1_LABEL, SIGMA3_LABEL, SIGMA1_SIGMA3_DIFF_LABEL, HORIZONTAL_STRESS_LABEL, VERTICAL_STRESS_LABEL,
+    VERTICAL_STRAIN_LABEL, VOLUMETRIC_STRAIN_LABEL, SHEAR_STRAIN_LABEL, SHEAR_STRESS_LABEL, EFFECTIVE_STRESS_LABEL,
+    MOBILIZED_SHEAR_STRESS_LABEL, P_STRESS_LABEL, Q_STRESS_LABEL, TIME_HOURS_LABEL,
     TITLE_SIGMA1_VS_SIGMA3, TITLE_DIFF_PRINCIPAL_SIGMA_VS_STRAIN, TITLE_VOL_VS_VERT_STRAIN,
-    TITLE_MOHR, TITLE_P_VS_Q, TITLE_SHEAR_VS_STRAIN,
+    TITLE_MOHR, TITLE_P_VS_Q, TITLE_SHEAR_VS_STRAIN, TITLE_VERTICAL_STRAIN_VS_TIME,
+    TITLE_VERTICAL_STRESS_VS_VERTICAL_STRAIN, TITLE_VERTICAL_STRESS_VS_HORIZONTAL_STRESS,
     LEGEND_MC, LEGEND_MC_FAILURE
 )
 
@@ -36,8 +37,8 @@ class MatplotlibPlotter:
         self.plot_principal_stresses_triaxial(self.axes[2], sigma1, sigma3)
         # 3: p' vs q
         self.plot_p_q_triaxial(self.axes[3], p_list, q_list)
-        # 4: Mohr–Coulomb
-        self.plot_mohr_coulomb_triaxial(self.axes[4], sigma1[-1], sigma3[-1], cohesion, phi)
+        # 4: Mohr's Circle
+        self.plot_mohr_circle_triaxial(self.axes[4], sigma1[-1], sigma3[-1], cohesion, phi)
 
     def direct_shear(self, gamma_xy, tau_xy, sigma1, sigma3, p_list, q_list, cohesion=None, phi=None):
         self._clear()
@@ -47,8 +48,21 @@ class MatplotlibPlotter:
         self.plot_principal_stresses_direct_shear(self.axes[1], sigma1, sigma3)
         # 2: p' vs q
         self.plot_p_q_direct_shear(self.axes[2], p_list, q_list)
-        # 3: Mohr–Coulomb
-        self.plot_mohr_coulomb_direct_shear(self.axes[3], sigma1[-1], sigma3[-1], cohesion, phi)
+        # 3: Mohr's Circle
+        self.plot_mohr_circle_direct_shear(self.axes[3], sigma1[-1], sigma3[-1], cohesion, phi)
+
+    def crs(self, yy_strain, time_steps, sigma_yy, sigma_xx, p_list, q_list, sigma1, sigma3, cohesion=None, phi=None):
+        self._clear()
+        # 0: σýy vs εyy
+        self.plot_vertical_stress_vs_vertical_strain_crs(self.axes[0], yy_strain, sigma_yy)
+        # 1: σ'yy vs σ'xx
+        self.plot_vertical_stress_vs_horizontal_stress_crs(self.axes[1], sigma_xx, sigma_yy)
+        # 2: p' vs q
+        self.plot_p_q_crs(self.axes[2], p_list, q_list)
+        # 3: Mohr's Circle
+        self.plot_mohr_circle_crs(self.axes[3], sigma1[-1], sigma3[-1], cohesion, phi)
+        # 4: εyy vs time
+        self.plot_vertical_strain_vs_time_crs(self.axes[4], yy_strain, time_steps)
 
     def plot_principal_stresses_triaxial(self, ax, sigma_1, sigma_3):
         ax.plot(sigma_3, sigma_1, '-', color='blue', label=TITLE_SIGMA1_VS_SIGMA3)
@@ -88,7 +102,7 @@ class MatplotlibPlotter:
         ax.locator_params(nbins=8)
         ax.minorticks_on()
 
-    def plot_mohr_coulomb_triaxial(self, ax, sigma_1, sigma_3, cohesion=None, friction_angle=None):
+    def plot_mohr_circle_triaxial(self, ax, sigma_1, sigma_3, cohesion=None, friction_angle=None):
         if np.isclose(sigma_1, sigma_3):
             self._log("σ₁ is equal to σ₃. Mohr circle collapses to a point.", "warn")
         center = (sigma_1 + sigma_3) / 2
@@ -154,7 +168,7 @@ class MatplotlibPlotter:
         ax.locator_params(nbins=8)
         ax.minorticks_on()
 
-    def plot_mohr_coulomb_direct_shear(self, ax, sigma_1, sigma_3, cohesion=None, friction_angle=None):
+    def plot_mohr_circle_direct_shear(self, ax, sigma_1, sigma_3, cohesion=None, friction_angle=None):
         if np.isclose(sigma_1, sigma_3):
             self._log("σ₁ is equal to σ₃. Mohr circle collapses to a point.", "warn")
         center = (sigma_1 + sigma_3) / 2
@@ -204,5 +218,98 @@ class MatplotlibPlotter:
         ax.grid(True)
         ax.invert_xaxis()
         ax.set_xlim(left=0, right=1.2*np.max(p_list))
+        ax.locator_params(nbins=8)
+        ax.minorticks_on()
+
+    def plot_vertical_stress_vs_vertical_strain_crs(self, ax, yy_strain, sigma_yy):
+        yy_strain.insert(0, 0.0)
+        sigma_yy.insert(0, 0.0)
+        ax.plot(yy_strain, sigma_yy, '-', color='blue', label=TITLE_VERTICAL_STRESS_VS_VERTICAL_STRAIN)
+        ax.set_title(TITLE_VERTICAL_STRESS_VS_VERTICAL_STRAIN)
+        ax.set_xlabel(VERTICAL_STRAIN_LABEL)
+        ax.set_ylabel(VERTICAL_STRESS_LABEL)
+        ax.grid(True)
+        ax.invert_xaxis()
+        ax.invert_yaxis()
+        ax.locator_params(nbins=8)
+        ax.minorticks_on()
+
+    def plot_vertical_stress_vs_horizontal_stress_crs(self, ax, sigma_xx, sigma_yy):
+        sigma_xx.insert(0, 0.0)
+        ax.plot(sigma_xx, sigma_yy, '-', color='blue', label=TITLE_VERTICAL_STRESS_VS_HORIZONTAL_STRESS)
+        ax.set_title(TITLE_VERTICAL_STRESS_VS_HORIZONTAL_STRESS)
+        ax.set_xlabel(HORIZONTAL_STRESS_LABEL)
+        ax.set_ylabel(VERTICAL_STRESS_LABEL)
+        ax.grid(True)
+        ax.invert_xaxis()
+        ax.invert_yaxis()
+        ax.locator_params(nbins=8)
+        ax.minorticks_on()
+
+    def plot_p_q_crs(self, ax, p_list, q_list):
+        p_list.insert(0, 0.0)
+        q_list.insert(0, 0.0)
+        ax.plot(p_list, q_list, '-', color='blue', label=TITLE_P_VS_Q)
+        ax.set_title(TITLE_P_VS_Q)
+        ax.set_xlabel(P_STRESS_LABEL)
+        ax.set_ylabel(Q_STRESS_LABEL)
+        ax.grid(True)
+        ax.invert_xaxis()
+        ax.locator_params(nbins=8)
+        ax.minorticks_on()
+
+    def plot_mohr_circle_crs(self, ax, sigma_1, sigma_3, cohesion=None, friction_angle=None):
+        if np.isclose(sigma_1, sigma_3):
+            self._log("σ₁ is equal to σ₃. Mohr circle collapses to a point.", "warn")
+        center = (sigma_1 + sigma_3) / 2
+        radius = (sigma_1 - sigma_3) / 2
+        theta = np.linspace(0, np.pi, 400)
+        sigma = center + radius * np.cos(theta)
+        tau = -radius * np.sin(theta)
+
+        ax.plot(sigma, tau, label=LEGEND_MC, color='blue')
+
+        if cohesion is not None and friction_angle is not None:
+            phi_rad = np.radians(friction_angle)
+            max_sigma = center + radius
+            x_line = np.linspace(0, max_sigma * 1.5, 400)
+            y_line = x_line * np.tan(phi_rad) - cohesion
+            ax.plot(x_line, -y_line, 'r--', label=LEGEND_MC_FAILURE)
+            ax.legend(loc='upper left')
+
+        ax.set_title(LEGEND_MC)
+        ax.set_xlabel(EFFECTIVE_STRESS_LABEL)
+        ax.set_ylabel(MOBILIZED_SHEAR_STRESS_LABEL)
+        ax.grid(True)
+        ax.invert_xaxis()
+
+        epsilon = 0.1
+        relative_diff = np.abs(sigma_1 - sigma_3) / (max(np.abs(sigma_3), 1e-6))
+
+        if relative_diff < epsilon:
+            ax.set_xlim(center - (1.2 * radius), center + (1.2 * radius))
+            ax.set_ylim(bottom=0, top=-0.8*(np.max(sigma_1) - np.max(sigma_3)))
+
+        else:
+            if sigma_1 > 0 or sigma_3 > 0:
+                ax.set_xlim(left=0, right=1.2*max(sigma_1, sigma_3))
+                ax.set_ylim(bottom=0, top=(np.max(sigma_3) - np.max(sigma_1)))
+            elif sigma_1 < 0 and sigma_3 < 0:
+                ax.set_xlim(left=0, right=1.2*np.max(sigma_1))
+                ax.set_ylim(bottom=0, top=(np.max(np.abs(sigma_1)) - np.max(np.abs(sigma_3))))
+            else:
+                ax.set_xlim(left=0, right=1.2*np.max(sigma_1))
+                ax.set_ylim(bottom=0, top=-(np.max(sigma_3) - np.max(sigma_1)))
+
+
+        ax.minorticks_on()
+
+    def plot_vertical_strain_vs_time_crs(self, ax, yy_strain, time_steps):
+        time_steps.insert(0, 0.0)
+        ax.plot(time_steps, yy_strain, '-', color='blue', label=TITLE_VERTICAL_STRAIN_VS_TIME)
+        ax.set_title(TITLE_VERTICAL_STRAIN_VS_TIME)
+        ax.set_xlabel(TIME_HOURS_LABEL)
+        ax.set_ylabel(VERTICAL_STRAIN_LABEL)
+        ax.grid(True)
         ax.locator_params(nbins=8)
         ax.minorticks_on()

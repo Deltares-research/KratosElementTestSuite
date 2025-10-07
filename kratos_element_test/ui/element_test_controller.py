@@ -3,7 +3,7 @@
 # Contact kratos@deltares.nl
 
 from typing import Optional, Callable, List, Tuple
-from kratos_element_test.core.pipeline.run_simulation import run_simulation
+from kratos_element_test.core.pipeline.run_simulation import RunSimulation
 from kratos_element_test.core.models import SimulationInputs, MohrCoulombOptions
 from kratos_element_test.ui.ui_constants import VALID_TEST_TYPES, VALID_DRAINAGE_TYPES
 
@@ -13,9 +13,8 @@ class ElementTestController:
         self._logger = logger
         self._plotter_factory = plotter_factory
 
-        # Mohr–Coulomb state
         self._mc_enabled: bool = False
-        self._mc_indices: Tuple[Optional[int], Optional[int]] = (None, None)  # (c_idx, phi_idx)
+        self._mc_indices: Tuple[Optional[int], Optional[int]] = (None, None)
 
         self._test_type: Optional[str] = None
         self._drainage: str = "drained"
@@ -62,12 +61,13 @@ class ElementTestController:
             axes,
             test_type: Optional[str] = None,
             dll_path: str,
-            index: Optional[int],
+            udsm_number: Optional[int],
             material_parameters: List[float],
             sigma_init: float,
             eps_max: float,
             n_steps: float,
-            duration: float) -> None:
+            duration: float,
+            ) -> None:
 
         tt = test_type or self._test_type
         if not self._is_valid_test_type(tt):
@@ -92,29 +92,35 @@ class ElementTestController:
         try:
             inputs.validate()
         except ValueError as e:
+            self._logger("Calculation stopped due to invalid input.", "error")
             self._logger(str(e), "error")
-            return
+            return False
 
         plotter = self._plotter_factory(axes)
 
         try:
             self._logger(f"MC indices: {self._mc_tuple()}", "info")
 
-            run_simulation(
+            sim = RunSimulation(
                 test_type=inputs.test_type,
                 drainage=inputs.drainage,
                 dll_path=dll_path or "",
-                index=index,
+                udsm_number=udsm_number,
                 material_parameters=material_parameters,
-                num_steps=inputs.number_of_steps,
+                num_steps=inputs.number_of_steps if not hasattr(self, "step_counts") or self.step_counts is None else self.step_counts,
                 end_time=inputs.duration,
                 maximum_strain=inputs.maximum_strain,
                 initial_effective_cell_pressure=inputs.initial_effective_cell_pressure,
                 cohesion_phi_indices=inputs.mohr_coulomb.to_indices(),
                 plotter=plotter,
-                logger=self._logger
+                logger=self._logger,
+                stage_durations=getattr(self, "stage_durations", None),
+                step_counts=getattr(self, "step_counts", None),
+                strain_incs=getattr(self, "strain_incs", None)
             )
+            sim.run()
 
         except Exception as e:
             self._logger(f"Simulation failed: {e}", "error")
-            raise
+            return False
+        return True
