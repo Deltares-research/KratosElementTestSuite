@@ -106,10 +106,6 @@ class ProjectParameterEditor:
         """
         data = self._load_json()
 
-        if "stages" not in data:
-            self._log("append_stage is only supported in orchestrator-based files.", "error")
-            return
-
         stage_names = list(data["stages"].keys())
 
         last_stage_key = stage_names[-1]
