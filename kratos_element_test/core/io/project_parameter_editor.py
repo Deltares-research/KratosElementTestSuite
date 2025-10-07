@@ -77,8 +77,6 @@ class ProjectParameterEditor:
             data = self._load_json()
 
             stage_names = list(data["stages"].keys())
-            if len(end_times) != len(stage_names):
-                raise ValueError(f"Provided {len(end_times)} end_times but found {len(stage_names)} stages.")
 
             for stage_name, end_time, step_count in zip(stage_names, end_times, step_counts, strict=True):
                 stage = data["stages"][stage_name]
