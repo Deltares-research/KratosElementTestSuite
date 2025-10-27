@@ -118,7 +118,11 @@ class ElementTestController:
                 step_counts=getattr(self, "step_counts", None),
                 strain_incs=getattr(self, "strain_incs", None)
             )
-            sim.run()
+            # sim.run()
+            self.latest_results = sim.run()
+            self.latest_test_type = inputs.test_type
+
+
 
         except Exception as e:
             self._logger(f"Simulation failed: {e}", "error")

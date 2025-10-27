@@ -17,6 +17,7 @@ from kratos_element_test.ui.element_test_controller import ElementTestController
 from kratos_element_test.plotters.matplotlib_plotter import MatplotlibPlotter
 from kratos_element_test.ui.ui_logger import init_log_widget, log_message, clear_log
 from kratos_element_test.ui.ui_utils import _asset_path
+from kratos_element_test.ui.result_registry import register_ui_instance
 from kratos_element_test.ui.ui_constants import (
     TRIAXIAL, DIRECT_SHEAR, CRS,
     TEST_NAME_TO_TYPE, TEST_IMAGE_FILES,
@@ -60,6 +61,7 @@ class GeotechTestUI:
             plotter_factory=lambda axes: MatplotlibPlotter(axes, logger=log_message)
         )
 
+        register_ui_instance(self)
         self._init_dropdown_section()
         self._create_input_fields()
 
@@ -420,6 +422,9 @@ class GeotechTestUI:
             if success:
                 self.canvas.draw()
                 log_message(f"{test_type} test completed successfully.", "info")
+                if hasattr(self.controller, "latest_results"):
+                    self.latest_results = self.controller.latest_results
+                self.latest_test_type = tt
 
         except Exception:
             log_message("An error occurred during simulation:", "error")
