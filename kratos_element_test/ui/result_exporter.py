@@ -87,6 +87,7 @@ def export_excel_by_test_type(results: dict, test_type: str, excel_path: str | N
     else:
         messagebox.showwarning("Export", "No matching data found to export for this test.")
 
+
 def export_latest_results() -> None:
     results = get_latest_results()
     test_type = get_latest_test_type()

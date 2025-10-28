@@ -10,6 +10,8 @@ from kratos_element_test.ui.ui_constants import VALID_TEST_TYPES, VALID_DRAINAGE
 
 class ElementTestController:
     def __init__(self, logger: Callable[[str, str], None], plotter_factory: Callable[[object], object]):
+        self.latest_results = None
+        self.latest_test_type = None
         self._logger = logger
         self._plotter_factory = plotter_factory
 
@@ -118,11 +120,9 @@ class ElementTestController:
                 step_counts=getattr(self, "step_counts", None),
                 strain_incs=getattr(self, "strain_incs", None)
             )
-            # sim.run()
+
             self.latest_results = sim.run()
             self.latest_test_type = inputs.test_type
-
-
 
         except Exception as e:
             self._logger(f"Simulation failed: {e}", "error")
