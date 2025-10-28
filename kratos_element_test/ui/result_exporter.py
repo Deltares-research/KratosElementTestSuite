@@ -1,8 +1,13 @@
+# ©Deltares 2025
+# This is a prototype version
+# Contact kratos@deltares.nl
+
 import numpy as np
 import pandas as pd
 from tkinter import filedialog, messagebox
 from pathlib import Path
 from kratos_element_test.ui.result_registry import PLOT_MAPPING
+from kratos_element_test.ui.result_registry import get_latest_results, get_latest_test_type
 
 
 def _build_sheet_df(results: dict, y_key: str, x_key: str, y_label: str, x_label: str) -> pd.DataFrame | None:
@@ -81,3 +86,13 @@ def export_excel_by_test_type(results: dict, test_type: str, excel_path: str | N
         messagebox.showinfo("Export", f"Exported Excel:\n{excel_path}")
     else:
         messagebox.showwarning("Export", "No matching data found to export for this test.")
+
+def export_latest_results() -> None:
+    results = get_latest_results()
+    test_type = get_latest_test_type()
+    if not results or not test_type:
+        return
+    try:
+        export_excel_by_test_type(results, test_type)
+    except Exception as e:
+        messagebox.showerror("Export Error", f"Failed to export Excel file.\n\n{e}")

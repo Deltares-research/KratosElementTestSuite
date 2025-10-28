@@ -1,3 +1,7 @@
+# ©Deltares 2025
+# This is a prototype version
+# Contact kratos@deltares.nl
+
 from tkinter import messagebox
 
 _ui_instance = None
