@@ -10,6 +10,7 @@ from pathlib import Path
 from kratos_element_test.ui.ui_builder import GeotechTestUI
 from kratos_element_test.core.io.udsm_parser import udsm_parser
 from kratos_element_test.ui.ui_utils import _asset_path
+from kratos_element_test.ui.result_exporter import export_latest_results
 from kratos_element_test.ui.ui_constants import (APP_TITLE, APP_VERSION, APP_NAME, APP_AUTHOR, SELECT_UDSM,
                                                  LINEAR_ELASTIC, HELP_MENU_FONT, DEFAULT_TKINTER_DPI)
 
@@ -127,6 +128,10 @@ def create_menu():
     file_menu = Menu(menubar, tearoff=0)
     file_menu.add_command(label="Exit", command=lambda: root.quit())
     menubar.add_cascade(label="File", menu=file_menu)
+
+    export_menu = Menu(menubar, tearoff=0)
+    export_menu.add_command(label="Export Results (Excel)", command=export_latest_results)
+    menubar.add_cascade(label="Export", menu=export_menu)
 
     about_menu = Menu(menubar, tearoff=0)
     about_menu.add_command(label="License", command=lambda: show_license_agreement(readonly=True))
