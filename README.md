@@ -29,9 +29,16 @@ To install the library into your current and active Python environment, use:
 ```bash
 pip install git+https://github.com/Deltares-research/KratosElementTestSuite
 ```
-
-## Running
 Once installed, you can run the Element Test Suite by:
+```bash
+startElementTest
+```
+## Running after installation
+Running the Element Test Suite after installation requires you to activate the virtual environment first:
+```bash
+element_env\Scripts\activate
+```
+After activating the virtual environment, you can run the Element Test Suite by:
 ```bash
 startElementTest
 ```
