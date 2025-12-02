@@ -27,10 +27,12 @@ from kratos_element_test.view.ui_constants import (
 )
 
 
-class GeotechTestUI:
-    def __init__(self, root, parent_frame, test_name, dll_path, model_dict, external_widgets=None):
+class GeotechTestUI(ttk.Frame):
+    def __init__(self, root, test_name, dll_path, model_dict, external_widgets=None):
+        super().__init__(root)
+        self.pack(side="top", fill="both", expand=True)
+
         self.root = root
-        self.parent = parent_frame
         self.test_name = test_name
         self.dll_path = dll_path
         self.model_dict = model_dict
@@ -50,7 +52,7 @@ class GeotechTestUI:
 
         self._init_frames()
 
-        self.plot_frame = ttk.Frame(self.parent, padding="5", width=800, height=600)
+        self.plot_frame = ttk.Frame(self, padding="5", width=800, height=600)
         self.plot_frame.pack(side="right", fill="both", expand=True, padx=5, pady=5)
 
         self.is_running = False
@@ -73,7 +75,7 @@ class GeotechTestUI:
         threading.Thread(target=self._run_simulation, daemon=True).start()
 
     def _init_frames(self):
-        self.left_panel = ttk.Frame(self.parent, width=555)
+        self.left_panel = ttk.Frame(self, width=555)
         self.left_panel.pack_propagate(False)
         self.left_panel.pack(side="left", fill="y", padx=10, pady=10)
 

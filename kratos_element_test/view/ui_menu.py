@@ -23,6 +23,8 @@ data_dir.mkdir(parents=True, exist_ok=True)
 LICENSE_FLAG_PATH = data_dir / "license_accepted.flag"
 
 class MainUI:
+    def __init__(self):
+        self.main_frame = None
     def show_license_agreement(self, readonly=False):
         license_file_path = _asset_path("license.txt")
         try:
@@ -154,9 +156,6 @@ class MainUI:
         top_frame = ttk.Frame(root, padding="10")
         top_frame.pack(side="top", fill="x")
 
-        main_frame = ttk.Frame(root)
-        main_frame.pack(side="top", fill="both", expand=True)
-
         def load_dll():
             nonlocal last_model_source
             dll_path = filedialog.askopenfilename(title=SELECT_UDSM, filetypes=[("DLL files", "*.dll")])
@@ -173,10 +172,12 @@ class MainUI:
                 return
             last_model_source = SELECT_UDSM
 
-            for widget in main_frame.winfo_children():
-                widget.destroy()
+            if self.main_frame:
+                for widget in self.main_frame.winfo_children():
+                    widget.destroy()
+                self.main_frame.destroy()
 
-            GeotechTestUI(root, main_frame, test_name="Triaxial", dll_path=dll_path, model_dict=model_dict,
+            self.main_frame = GeotechTestUI(root, test_name="Triaxial", dll_path=dll_path, model_dict=model_dict,
                           external_widgets=[model_source_menu])
 
         def load_linear_elastic():
@@ -189,11 +190,14 @@ class MainUI:
             }
             last_model_source = LINEAR_ELASTIC
 
-            for widget in main_frame.winfo_children():
-                widget.destroy()
+            if self.main_frame:
+                for widget in self.main_frame.winfo_children():
+                    widget.destroy()
+                self.main_frame.destroy()
 
-            GeotechTestUI(root, main_frame, test_name="Triaxial", dll_path=None, model_dict=model_dict,
-                          external_widgets=[model_source_menu])
+
+            self.main_frame = GeotechTestUI(root, test_name="Triaxial", dll_path=None, model_dict=model_dict,
+                              external_widgets=[model_source_menu])
 
         def handle_model_source_selection(event):
             choice = model_source_var.get()
