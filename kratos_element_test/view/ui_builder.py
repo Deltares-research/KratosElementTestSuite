@@ -2,21 +2,20 @@
 # This is a prototype version
 # Contact kratos@deltares.nl
 
-import math
 import threading
-import traceback
 import tkinter as tk
-from tkinter import ttk, scrolledtext
 import tkinter.font as tkFont
+import traceback
+from tkinter import ttk, scrolledtext
+
 from PIL import Image, ImageTk
 
 from kratos_element_test.control.element_test_controller import ElementTestController
 from kratos_element_test.plotters.matplotlib_plotter import MatplotlibPlotter
 from kratos_element_test.view.log_viewer import LogViewer
 from kratos_element_test.view.plot_viewer import PlotViewer
-from kratos_element_test.view.ui_logger import init_log_widget, log_message, clear_log
-from kratos_element_test.view.ui_utils import _asset_path
 from kratos_element_test.view.result_registry import register_ui_instance
+from kratos_element_test.view.soil_parameter_entries import SoilParameterEntries
 from kratos_element_test.view.ui_constants import (
     TRIAXIAL, DIRECT_SHEAR, CRS,
     TEST_NAME_TO_TYPE, TEST_IMAGE_FILES,
@@ -24,6 +23,8 @@ from kratos_element_test.view.ui_constants import (
     FL2_UNIT_LABEL, SECONDS_UNIT_LABEL, PERCENTAGE_UNIT_LABEL, WITHOUT_UNIT_LABEL,
     INPUT_SECTION_FONT, HELP_MENU_FONT
 )
+from kratos_element_test.view.ui_logger import log_message, clear_log
+from kratos_element_test.view.ui_utils import _asset_path
 
 
 class GeotechTestUI(ttk.Frame):
@@ -100,7 +101,7 @@ class GeotechTestUI(ttk.Frame):
         self.dropdown_frame = ttk.Frame(self.left_frame)
         self.dropdown_frame.pack(fill="x")
 
-        self.param_frame = ttk.Frame(self.left_frame, padding="10")
+        self.param_frame = SoilParameterEntries(self.left_frame, padding="10")
         self.param_frame.pack(fill="both", expand=True, pady=10)
 
         self.button_frame = ttk.Frame(self.left_panel, padding="10")
