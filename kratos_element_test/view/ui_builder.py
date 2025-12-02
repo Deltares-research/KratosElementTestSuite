@@ -12,6 +12,7 @@ from PIL import Image, ImageTk
 
 from kratos_element_test.control.element_test_controller import ElementTestController
 from kratos_element_test.plotters.matplotlib_plotter import MatplotlibPlotter
+from kratos_element_test.view.log_frame import LogFrame
 from kratos_element_test.view.plot_frame import PlotFrame
 from kratos_element_test.view.ui_logger import init_log_widget, log_message, clear_log
 from kratos_element_test.view.ui_utils import _asset_path
@@ -519,26 +520,8 @@ class GeotechTestUI(ttk.Frame):
         self.scroll_canvas.yview_scroll(int(-1 * (event.delta / 120)), "units")
 
     def _init_log_section(self):
-        self.log_frame = ttk.Frame(self.left_panel, padding="5")
+        self.log_frame = LogFrame(self.left_panel, padding="5")
         self.log_frame.pack(fill="x", padx=10, pady=(0, 10))
-
-        ttk.Label(self.log_frame, text="Log Output:", font=(INPUT_SECTION_FONT, 10, "bold")).pack(anchor="w")
-        self.log_widget = scrolledtext.ScrolledText(self.log_frame, height=6, width=40, state="normal",
-                                                    wrap="word", font=("Courier", 9))
-        self.log_widget.pack(fill="x", expand=False)
-
-        self.log_widget.bind("<Key>", lambda e: "break")
-        self.log_widget.bind("<Control-c>", lambda e: self._copy_selection())
-
-        init_log_widget(self.log_widget)
-
-    def _copy_selection(self):
-        try:
-            selection = self.log_widget.get("sel.first", "sel.last")
-            self.root.clipboard_clear()
-            self.root.clipboard_append(selection)
-        except tk.TclError:
-            pass
 
     def _extract_values_from_rows(self, label, data_type):
         try:
