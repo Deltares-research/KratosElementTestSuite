@@ -12,8 +12,8 @@ from PIL import Image, ImageTk
 
 from kratos_element_test.control.element_test_controller import ElementTestController
 from kratos_element_test.plotters.matplotlib_plotter import MatplotlibPlotter
-from kratos_element_test.view.log_frame import LogFrame
-from kratos_element_test.view.plot_frame import PlotFrame
+from kratos_element_test.view.log_viewer import LogViewer
+from kratos_element_test.view.plot_viewer import PlotViewer
 from kratos_element_test.view.ui_logger import init_log_widget, log_message, clear_log
 from kratos_element_test.view.ui_utils import _asset_path
 from kratos_element_test.view.result_registry import register_ui_instance
@@ -51,7 +51,7 @@ class GeotechTestUI(ttk.Frame):
 
         self._init_frames()
 
-        self.plot_frame = PlotFrame(self, padding="5", width=800, height=600)
+        self.plot_frame = PlotViewer(self, padding="5", width=800, height=600)
         self.plot_frame.pack(side="right", fill="both", expand=True, padx=5, pady=5)
 
         self.is_running = False
@@ -520,8 +520,8 @@ class GeotechTestUI(ttk.Frame):
         self.scroll_canvas.yview_scroll(int(-1 * (event.delta / 120)), "units")
 
     def _init_log_section(self):
-        self.log_frame = LogFrame(self.left_panel, padding="5")
-        self.log_frame.pack(fill="x", padx=10, pady=(0, 10))
+        self.log_viewer = LogViewer(self.left_panel, padding="5")
+        self.log_viewer.pack(fill="x", padx=10, pady=(0, 10))
 
     def _extract_values_from_rows(self, label, data_type):
         try:

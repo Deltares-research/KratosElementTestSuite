@@ -6,7 +6,7 @@ from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from matplotlib.gridspec import GridSpec
 
 
-class PlotFrame(ttk.Frame):
+class PlotViewer(ttk.Frame):
     def __init__(self, root, padding, width, height):
         super().__init__(root, padding=padding, width=width, height=height)
         self.axes = []

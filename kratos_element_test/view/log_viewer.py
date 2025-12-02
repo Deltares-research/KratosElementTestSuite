@@ -6,7 +6,7 @@ from kratos_element_test.view.ui_constants import INPUT_SECTION_FONT
 from kratos_element_test.view.ui_logger import init_log_widget
 
 
-class LogFrame(ttk.Frame):
+class LogViewer(ttk.Frame):
     def __init__(self, master, **kwargs):
         super().__init__(master, **kwargs)
 
