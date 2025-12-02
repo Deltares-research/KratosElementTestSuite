@@ -4,7 +4,7 @@
 
 import os
 import sys
-from kratos_element_test.view.ui_menu import create_menu
+from kratos_element_test.view.ui_menu import MainUI
 
 
 def main():
@@ -15,9 +15,9 @@ def main():
     )
     if element_test_path not in sys.path:
         sys.path.insert(0, element_test_path)
-
     try:
-        create_menu()
+        ui = MainUI()
+        ui.create_menu()
     except ImportError as e:
         print(
             f"[ERROR] Could not run GUI: {e}. Make sure the GeoMechanicsApplication is built and installed correctly."
