@@ -13,12 +13,12 @@ from matplotlib.gridspec import GridSpec
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from PIL import Image, ImageTk
 
-from kratos_element_test.ui.element_test_controller import ElementTestController
+from kratos_element_test.control.element_test_controller import ElementTestController
 from kratos_element_test.plotters.matplotlib_plotter import MatplotlibPlotter
-from kratos_element_test.ui.ui_logger import init_log_widget, log_message, clear_log
-from kratos_element_test.ui.ui_utils import _asset_path
-from kratos_element_test.ui.result_registry import register_ui_instance
-from kratos_element_test.ui.ui_constants import (
+from kratos_element_test.view.ui_logger import init_log_widget, log_message, clear_log
+from kratos_element_test.view.ui_utils import _asset_path
+from kratos_element_test.view.result_registry import register_ui_instance
+from kratos_element_test.view.ui_constants import (
     TRIAXIAL, DIRECT_SHEAR, CRS,
     TEST_NAME_TO_TYPE, TEST_IMAGE_FILES,
     MAX_STRAIN_LABEL, INIT_PRESSURE_LABEL, NUM_STEPS_LABEL, DURATION_LABEL, STRAIN_INCREMENT_LABEL, STEPS_LABEL,

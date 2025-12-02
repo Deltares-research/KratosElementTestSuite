@@ -3,7 +3,7 @@
 # Contact kratos@deltares.nl
 
 import json
-from kratos_element_test.core.core_utils import _fallback_log
+from kratos_element_test.model.core_utils import _fallback_log
 
 
 class MaterialEditor:

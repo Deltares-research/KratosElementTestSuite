@@ -8,11 +8,11 @@ import tempfile
 import numpy as np
 from pathlib import Path
 from typing import Callable, Dict, List, Optional, Tuple
-from kratos_element_test.core.core_utils import _fallback_log
-from kratos_element_test.core.io.material_editor import MaterialEditor
-from kratos_element_test.core.io.project_parameter_editor import ProjectParameterEditor
-from kratos_element_test.core.io.mdpa_editor import MdpaEditor
-from kratos_element_test.core.pipeline.generic_test_runner import GenericTestRunner
+from kratos_element_test.model.core_utils import _fallback_log
+from kratos_element_test.model.io.material_editor import MaterialEditor
+from kratos_element_test.model.io.project_parameter_editor import ProjectParameterEditor
+from kratos_element_test.model.io.mdpa_editor import MdpaEditor
+from kratos_element_test.model.pipeline.generic_test_runner import GenericTestRunner
 
 try:
     from importlib.resources import files as _res_files
