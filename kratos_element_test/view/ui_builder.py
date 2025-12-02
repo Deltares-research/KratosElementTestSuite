@@ -8,13 +8,11 @@ import traceback
 import tkinter as tk
 from tkinter import ttk, scrolledtext
 import tkinter.font as tkFont
-import matplotlib.pyplot as plt
-from matplotlib.gridspec import GridSpec
-from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from PIL import Image, ImageTk
 
 from kratos_element_test.control.element_test_controller import ElementTestController
 from kratos_element_test.plotters.matplotlib_plotter import MatplotlibPlotter
+from kratos_element_test.view.plot_frame import PlotFrame
 from kratos_element_test.view.ui_logger import init_log_widget, log_message, clear_log
 from kratos_element_test.view.ui_utils import _asset_path
 from kratos_element_test.view.result_registry import register_ui_instance
@@ -52,7 +50,7 @@ class GeotechTestUI(ttk.Frame):
 
         self._init_frames()
 
-        self.plot_frame = ttk.Frame(self, padding="5", width=800, height=600)
+        self.plot_frame = PlotFrame(self, padding="5", width=800, height=600)
         self.plot_frame.pack(side="right", fill="both", expand=True, padx=5, pady=5)
 
         self.is_running = False
@@ -113,17 +111,7 @@ class GeotechTestUI(ttk.Frame):
         self._init_log_section()
 
     def _init_plot_canvas(self, num_plots):
-        self._destroy_existing_plot_canvas()
-
-        self.fig = plt.figure(figsize=(12, 8), dpi=100)
-        rows = math.ceil(math.sqrt(num_plots))
-        cols = math.ceil(num_plots / rows)
-
-        self.gs = GridSpec(rows, cols, figure=self.fig, wspace=0.4, hspace=0.6)
-        self.axes = [self.fig.add_subplot(self.gs[i]) for i in range(num_plots)]
-        self.canvas = FigureCanvasTkAgg(self.fig, master=self.plot_frame)
-        self.canvas.draw()
-        self.canvas.get_tk_widget().pack(fill="both", expand=True)
+        self.plot_frame.initialize(num_plots)
 
     def _init_dropdown_section(self):
         ttk.Label(self.dropdown_frame, text="Select a Model:",
@@ -410,7 +398,7 @@ class GeotechTestUI(ttk.Frame):
                 raise ValueError(f"Unsupported test type: {test_type}")
 
             success = self.controller.run(
-                axes=self.axes,
+                axes=self.plot_frame.axes,
                 test_type=tt,
                 dll_path=self.dll_path or "",
                 udsm_number=udsm_number,
@@ -422,7 +410,7 @@ class GeotechTestUI(ttk.Frame):
             )
 
             if success:
-                self.canvas.draw()
+                self.plot_frame.draw()
                 log_message(f"{test_type} test completed successfully.", "info")
                 if hasattr(self.controller, "latest_results"):
                     self.latest_results = self.controller.latest_results
@@ -482,14 +470,6 @@ class GeotechTestUI(ttk.Frame):
             self.model_menu.configure(state="disabled")
         else:
             self.model_menu.configure(state="readonly")
-
-    def _destroy_existing_plot_canvas(self):
-        if hasattr(self, "plot_frame") and self.plot_frame.winfo_exists():
-            for widget in self.plot_frame.winfo_children():
-                widget.destroy()
-        self.fig = None
-        self.canvas = None
-        self.axes = []
 
     def _add_crs_row(self, duration=1.0, strain_inc=0.0, steps=100):
         row = {}
