@@ -23,8 +23,8 @@ class ResultCollectorTest(unittest.TestCase):
             ["sigma_xx", [-100.0, -100.0, -100.0, -100.0, -100.0]],
             ["sigma_yy", [-100.0, -45100.0, -90100, -135100, -180100]],
             [
-                "time_steps",
-                [5.555556e-05, 1.111111e-04, 1.666667e-04, 2.222222e-04, 2.777778e-04],
+                "time_steps", # in hours, hence the division by 3600
+                [0.2 / 3600, 0.4 / 3600, 0.6 / 3600, 0.8 / 3600, 1.0 / 3600],
             ],
         ]
     )
@@ -38,6 +38,18 @@ class ResultCollectorTest(unittest.TestCase):
         )
         results = collector.collect_results()
         np.testing.assert_array_almost_equal(results[variable_name], expected_values)
+
+    def test_collector_does_not_throw_when_result_file_does_not_exist(self):
+        collector = ResultCollector(
+            [Path("non_existent_file.res")],
+            material_parameters=[1.0, 2.0, 3.0, 4.0],
+            cohesion_phi_indices=(3, 4),
+        )
+        try:
+            results = collector.collect_results()
+            self.assertIsInstance(results, dict)
+        except Exception as e:
+            self.fail(f"collect_results raised an exception unexpectedly: {e}")
 
 
 if __name__ == "__main__":
