@@ -20,7 +20,6 @@ class ResultCollector:
         all_tensors = {}
         yy_strain_stages = []
         all_shear_stress_xy = []
-        all_yy_strain = []
         all_vol_strain = []
         all_shear_strain_xy = []
         all_von_mises = []
