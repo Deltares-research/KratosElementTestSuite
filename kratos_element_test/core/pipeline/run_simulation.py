@@ -111,6 +111,7 @@ class RunSimulation:
             return results
 
         finally:
+            # TODO check whether the cleanup is working correctly now
             if self.keep_tmp:
                 print(f"[Info] Temporary folder retained at: {self.tmp_dir}")
             else:
