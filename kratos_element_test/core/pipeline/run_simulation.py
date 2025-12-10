@@ -85,25 +85,27 @@ class RunSimulation:
     def run(self) -> Dict[str, List[float]]:
         self.log(f"Starting {self.test_type} simulation...", "info")
 
+        self._copy_simulation_files()
+
+        if self.test_type == "crs":
+            self._prepare_crs_stages()
+
+        self._set_material_constitutive_law()
+        self._set_project_parameters()
+        self._set_mdpa()
+
+        output_file_strings = [str(p) for p in self._output_file_paths()]
+        runner = GenericTestRunner(output_file_strings, str(self.tmp_dir))
+        runner.run()
+
+        self.log("Finished analysis", "info")
+        self.post_process_results(output_file_strings)
+
+    def post_process_results(self, output_file_strings):
         try:
-            self._copy_simulation_files()
-
-            if self.test_type == "crs":
-                self._prepare_crs_stages()
-
-            self._set_material_constitutive_law()
-            self._set_project_parameters()
-            self._set_mdpa()
-
-            output_file_strings = [str(p) for p in self._output_file_paths()]
-            runner = GenericTestRunner(output_file_strings, str(self.tmp_dir))
-            runner.run()
-
-            self.log("Finished analysis; collecting results...", "info")
-
+            self.log("Collecting results...", "info")
             collector = ResultCollector(output_file_strings, self.material_parameters, self.cohesion_phi_indices)
             results = collector.collect_results()
-
             self._render(results)
             self.log("Rendering complete.", "info")
             return results
