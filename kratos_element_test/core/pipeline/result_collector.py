@@ -1,14 +1,20 @@
+from pathlib import Path
+from typing import Dict, List, Optional, Tuple
+
 import numpy as np
 
 from kratos_element_test.core.io import gid_output_reader
-from pathlib import Path
 from kratos_element_test.ui.ui_logger import log_message as fallback_log
 
 
 class ResultCollector:
-    def __init__(self, output_file_paths, logger=None):
+    def __init__(
+        self, output_file_paths, material_parameters, cohesion_phi_indices, logger=None
+    ):
         self.output_file_paths = output_file_paths
         self._log = logger or fallback_log
+        self.material_parameters = material_parameters
+        self.cohesion_phi_indices = cohesion_phi_indices
 
     def collect_results(self):
         all_tensors = {}
@@ -51,18 +57,26 @@ class ResultCollector:
 
         all_yy_strain = self._apply_cumulative_strain_offset(yy_strain_stages)
 
-        return (
-            all_tensors,
-            all_yy_strain,
-            all_vol_strain,
-            all_von_mises,
-            all_mean_stress,
-            all_shear_stress_xy,
-            all_shear_strain_xy,
-            all_sigma_xx,
-            all_sigma_yy,
-            all_time_steps,
+        sigma_1, sigma_3 = self._calculate_principal_stresses(all_tensors)
+        cohesion, phi = self._get_cohesion_phi(
+            self.material_parameters, self.cohesion_phi_indices
         )
+
+        return {
+            "yy_strain": all_yy_strain,
+            "vol_strain": all_vol_strain,
+            "sigma1": sigma_1,
+            "sigma3": sigma_3,
+            "shear_xy": all_shear_stress_xy,
+            "shear_strain_xy": all_shear_strain_xy,
+            "mean_stress": all_mean_stress,
+            "von_mises": all_von_mises,
+            "cohesion": cohesion,
+            "phi": phi,
+            "sigma_xx": all_sigma_xx,
+            "sigma_yy": all_sigma_yy,
+            "time_steps": all_time_steps,
+        }
 
     def _read_output(self, result_path: Path) -> dict:
         return gid_output_reader.GiDOutputFileReader().read_output_from(result_path)
@@ -210,3 +224,24 @@ class ResultCollector:
             combined.extend(adjusted)
 
         return combined
+
+    @staticmethod
+    def _calculate_principal_stresses(
+        tensors: Dict[float, List[np.ndarray]],
+    ) -> Tuple[List[float], List[float]]:
+        sigma_1, sigma_3 = [], []
+        for time in sorted(tensors.keys()):
+            for sigma in tensors[time]:
+                eigenvalues, _ = np.linalg.eigh(sigma)
+                sigma_1.append(float(np.min(eigenvalues)))
+                sigma_3.append(float(np.max(eigenvalues)))
+        return sigma_1, sigma_3
+
+    @staticmethod
+    def _get_cohesion_phi(
+        umat_parameters: List[float], indices: Optional[Tuple[int, int]]
+    ) -> Tuple[Optional[float], Optional[float]]:
+        if not indices:
+            return None, None
+        c_idx, phi_idx = indices
+        return float(umat_parameters[c_idx - 1]), float(umat_parameters[phi_idx - 1])

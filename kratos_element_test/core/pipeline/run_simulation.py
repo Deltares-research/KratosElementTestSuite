@@ -101,40 +101,8 @@ class RunSimulation:
 
             self.log("Finished analysis; collecting results...", "info")
 
-            collector = ResultCollector(output_file_strings)
-            (
-                tensors,
-                yy_strain,
-                vol_strain,
-                von_mises,
-                mean_stress,
-                shear_xy,
-                shear_strain_xy,
-                sigma_xx,
-                sigma_yy,
-                time_steps,
-            ) = collector.collect_results()
-
-            sigma_1, sigma_3 = self._calculate_principal_stresses(tensors)
-            cohesion, phi = self._get_cohesion_phi(
-                self.material_parameters, self.cohesion_phi_indices
-            )
-
-            results = {
-                "yy_strain": yy_strain,
-                "vol_strain": vol_strain,
-                "sigma1": sigma_1,
-                "sigma3": sigma_3,
-                "shear_xy": shear_xy,
-                "shear_strain_xy": shear_strain_xy,
-                "mean_stress": mean_stress,
-                "von_mises": von_mises,
-                "cohesion": cohesion,
-                "phi": phi,
-                "sigma_xx": sigma_xx,
-                "sigma_yy": sigma_yy,
-                "time_steps": time_steps,
-            }
+            collector = ResultCollector(output_file_strings, self.material_parameters, self.cohesion_phi_indices)
+            results = collector.collect_results()
 
             self._render(results)
             self.log("Rendering complete.", "info")
@@ -315,27 +283,6 @@ class RunSimulation:
                 for i in range(len(project_data["stages"]))
             ]
         return [self.tmp_dir / "gid_output" / "output.post.res"]
-
-    @staticmethod
-    def _calculate_principal_stresses(
-        tensors: Dict[float, List[np.ndarray]],
-    ) -> Tuple[List[float], List[float]]:
-        sigma_1, sigma_3 = [], []
-        for time in sorted(tensors.keys()):
-            for sigma in tensors[time]:
-                eigenvalues, _ = np.linalg.eigh(sigma)
-                sigma_1.append(float(np.min(eigenvalues)))
-                sigma_3.append(float(np.max(eigenvalues)))
-        return sigma_1, sigma_3
-
-    @staticmethod
-    def _get_cohesion_phi(
-        umat_parameters: List[float], indices: Optional[Tuple[int, int]]
-    ) -> Tuple[Optional[float], Optional[float]]:
-        if not indices:
-            return None, None
-        c_idx, phi_idx = indices
-        return float(umat_parameters[c_idx - 1]), float(umat_parameters[phi_idx - 1])
 
     def _render(self, results: Dict[str, List[float]]) -> None:
         if not self.plotter:
