@@ -2,12 +2,13 @@ import numpy as np
 
 from kratos_element_test.core.io import gid_output_reader
 from pathlib import Path
+from kratos_element_test.ui.ui_logger import log_message as fallback_log
 
 
 class ResultCollector:
-    def __init__(self, output_file_paths, logger):
+    def __init__(self, output_file_paths, logger=None):
         self.output_file_paths = output_file_paths
-        self._log = logger
+        self._log = logger or fallback_log
 
     def collect_results(self):
         all_tensors = {}

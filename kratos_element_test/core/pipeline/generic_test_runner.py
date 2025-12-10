@@ -8,7 +8,6 @@ import importlib
 import KratosMultiphysics as Kratos
 from KratosMultiphysics.GeoMechanicsApplication.geomechanics_analysis import GeoMechanicsAnalysis
 from KratosMultiphysics.project import Project
-from kratos_element_test.core.pipeline.result_collector import ResultCollector
 from kratos_element_test.ui.ui_logger import log_message as fallback_log
 import KratosMultiphysics.GeoMechanicsApplication.context_managers as context_managers
 
@@ -26,9 +25,6 @@ class GenericTestRunner:
         else:
             parameters = self._load_stage_parameters()
             self._execute_analysis_stages(parameters)
-
-        collector = ResultCollector(self.output_file_paths, self._log)
-        return collector.collect_results()
 
     def _load_kratos_parameters_from_file(self, json_path: str) -> Kratos.Parameters:
         with open(json_path, "r") as f:
