@@ -5,7 +5,6 @@
 import json
 import shutil
 import tempfile
-import numpy as np
 from pathlib import Path
 from typing import Callable, Dict, List, Optional, Tuple
 from kratos_element_test.core.core_utils import _fallback_log
