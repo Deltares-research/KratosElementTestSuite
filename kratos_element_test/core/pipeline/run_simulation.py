@@ -99,7 +99,7 @@ class RunSimulation:
         runner.run()
 
         self.log("Finished analysis", "info")
-        self.post_process_results(output_file_strings)
+        return self.post_process_results(output_file_strings)
 
     def post_process_results(self, output_file_strings):
         try:
