@@ -27,18 +27,6 @@ REQUIRED_FILES = [
     "ProjectParametersOrchestrator.json",
 ]
 
-
-class _NoOpPlotter:
-    def triaxial(self, *args, **kwargs):
-        pass
-
-    def direct_shear(self, *args, **kwargs):
-        pass
-
-    def crs(self, *args, **kwargs):
-        pass
-
-
 class RunSimulation:
     def __init__(
         self,
@@ -52,7 +40,6 @@ class RunSimulation:
         maximum_strain: float,
         initial_effective_cell_pressure: float,
         cohesion_phi_indices: Optional[Tuple[int, int]] = None,
-        plotter=None,
         logger: Optional[Callable[[str, str], None]] = None,
         drainage: Optional[str] = None,
         stage_durations: Optional[List[float]] = None,
@@ -69,7 +56,6 @@ class RunSimulation:
         self.maximum_strain = maximum_strain
         self.initial_effective_cell_pressure = initial_effective_cell_pressure
         self.cohesion_phi_indices = cohesion_phi_indices
-        self.plotter = plotter or _NoOpPlotter()
         self.log = logger or _fallback_log
         self.drainage = drainage
         self.stage_durations = stage_durations
@@ -82,7 +68,7 @@ class RunSimulation:
         self.project_json_path: Optional[Path] = None
         self.mdpa_path: Optional[Path] = None
 
-    def run(self) -> Dict[str, List[float]]:
+    def run(self) -> None:
         self.log(f"Starting {self.test_type} simulation...", "info")
 
         self._copy_simulation_files()
@@ -99,14 +85,16 @@ class RunSimulation:
         runner.run()
 
         self.log("Finished analysis", "info")
-        return self.post_process_results(output_file_strings)
 
-    def post_process_results(self, output_file_strings):
+    def post_process_results(self) -> Dict[str, List[float]]:
         try:
             self.log("Collecting results...", "info")
-            collector = ResultCollector(output_file_strings, self.material_parameters, self.cohesion_phi_indices)
+
+            output_file_strings = [str(p) for p in self._output_file_paths()]
+            collector = ResultCollector(
+                output_file_strings, self.material_parameters, self.cohesion_phi_indices
+            )
             results = collector.collect_results()
-            self._render(results)
             self.log("Rendering complete.", "info")
             return results
 
@@ -286,48 +274,3 @@ class RunSimulation:
                 for i in range(len(project_data["stages"]))
             ]
         return [self.tmp_dir / "gid_output" / "output.post.res"]
-
-    def _render(self, results: Dict[str, List[float]]) -> None:
-        if not self.plotter:
-            self.log(
-                "No plotter was provided; using a no-op plotter (headless run).", "info"
-            )
-            return
-
-        if self.test_type == "triaxial":
-            self.plotter.triaxial(
-                results["yy_strain"],
-                results["vol_strain"],
-                results["sigma1"],
-                results["sigma3"],
-                results["mean_stress"],
-                results["von_mises"],
-                results["cohesion"],
-                results["phi"],
-            )
-        elif self.test_type == "direct_shear":
-            self.plotter.direct_shear(
-                results["shear_strain_xy"],
-                results["shear_xy"],
-                results["sigma1"],
-                results["sigma3"],
-                results["mean_stress"],
-                results["von_mises"],
-                results["cohesion"],
-                results["phi"],
-            )
-        elif self.test_type == "crs":
-            self.plotter.crs(
-                results["yy_strain"],
-                results["time_steps"],
-                results["sigma_yy"],
-                results["sigma_xx"],
-                results["mean_stress"],
-                results["von_mises"],
-                results["sigma1"],
-                results["sigma3"],
-                results["cohesion"],
-                results["phi"],
-            )
-        else:
-            raise ValueError(f"Unsupported test_type: {self.test_type}")

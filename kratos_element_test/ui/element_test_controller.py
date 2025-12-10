@@ -2,7 +2,7 @@
 # This is a prototype version
 # Contact kratos@deltares.nl
 
-from typing import Optional, Callable, List, Tuple
+from typing import Optional, Callable, List, Tuple, Dict
 from kratos_element_test.core.pipeline.run_simulation import RunSimulation
 from kratos_element_test.core.models import SimulationInputs, MohrCoulombOptions
 from kratos_element_test.ui.ui_constants import VALID_TEST_TYPES, VALID_DRAINAGE_TYPES
@@ -114,17 +114,64 @@ class ElementTestController:
                 maximum_strain=inputs.maximum_strain,
                 initial_effective_cell_pressure=inputs.initial_effective_cell_pressure,
                 cohesion_phi_indices=inputs.mohr_coulomb.to_indices(),
-                plotter=plotter,
                 logger=self._logger,
                 stage_durations=getattr(self, "stage_durations", None),
                 step_counts=getattr(self, "step_counts", None),
                 strain_incs=getattr(self, "strain_incs", None)
             )
 
-            self.latest_results = sim.run()
+            sim.run()
+            self.latest_results = sim.post_process_results()
+            self._render(self.latest_results, plotter, inputs.test_type)
             self.latest_test_type = inputs.test_type
 
         except Exception as e:
             self._logger(f"Simulation failed: {e}", "error")
             return False
         return True
+
+
+    def _render(self, results: Dict[str, List[float]], plotter, test_type) -> None:
+        if not plotter:
+            self._logger(
+                "No plotter was provided; using a no-op plotter (headless run).", "info"
+            )
+            return
+
+        if test_type == "triaxial":
+            plotter.triaxial(
+                results["yy_strain"],
+                results["vol_strain"],
+                results["sigma1"],
+                results["sigma3"],
+                results["mean_stress"],
+                results["von_mises"],
+                results["cohesion"],
+                results["phi"],
+            )
+        elif test_type == "direct_shear":
+            plotter.direct_shear(
+                results["shear_strain_xy"],
+                results["shear_xy"],
+                results["sigma1"],
+                results["sigma3"],
+                results["mean_stress"],
+                results["von_mises"],
+                results["cohesion"],
+                results["phi"],
+            )
+        elif test_type == "crs":
+            plotter.crs(
+                results["yy_strain"],
+                results["time_steps"],
+                results["sigma_yy"],
+                results["sigma_xx"],
+                results["mean_stress"],
+                results["von_mises"],
+                results["sigma1"],
+                results["sigma3"],
+                results["cohesion"],
+                results["phi"],
+            )
+        else:
+            raise ValueError(f"Unsupported test_type: {test_type}")
