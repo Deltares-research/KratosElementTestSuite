@@ -24,4 +24,4 @@ jobs:
       - name: Run tests
         run: |
           pip install pytest pytest-cov numpy parameterized
-          pytest --cov=com --cov-report=html
+          pytest --cov --cov-report=html
