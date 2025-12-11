@@ -4,7 +4,10 @@
 
 import os
 import tkinter as tk
-from tkinter import filedialog, messagebox, ttk, scrolledtext, Menu
+from tkinter import filedialog, messagebox, scrolledtext, Menu
+
+import customtkinter
+import customtkinter as ctk
 from platformdirs import user_data_dir
 from pathlib import Path
 from kratos_element_test.ui.ui_builder import GeotechTestUI
@@ -32,7 +35,7 @@ def show_license_agreement(readonly=False):
         messagebox.showerror("Error", f"Could not load license file: {e}")
         os._exit(1)
 
-    license_window = tk.Toplevel()
+    license_window = ctk.CTkToplevel()
     license_window.title("Pre-Release License Agreement")
     license_window.geometry("800x600")
     license_window.grab_set()
@@ -40,22 +43,22 @@ def show_license_agreement(readonly=False):
     if not readonly:
         license_window.protocol("WM_DELETE_WINDOW", lambda: os._exit(0))
 
-    tk.Label(license_window, text="Pre-Release Software License Agreement",
-             font=(HELP_MENU_FONT, 12, "bold"), pady=10).pack()
+    ctk.CTkLabel(license_window, text="Pre-Release Software License Agreement",
+             font=(HELP_MENU_FONT, 12, "bold")).pack(pady=10)
 
-    tk.Label(license_window, text="Please review and accept the agreement to continue.",
-             font=(HELP_MENU_FONT, 12, "bold"), pady=10).pack()
+    ctk.CTkLabel(license_window, text="Please review and accept the agreement to continue.",
+             font=(HELP_MENU_FONT, 12, "bold")).pack(pady=10)
 
     text_area = scrolledtext.ScrolledText(license_window, wrap="word", font=("Courier", 10))
     text_area.insert("1.0", license_text)
     text_area.config(state="disabled")
     text_area.pack(expand=True, fill="both", padx=10, pady=10)
 
-    button_frame = tk.Frame(license_window)
+    button_frame = ctk.CTkFrame(license_window)
     button_frame.pack(pady=10)
 
     if readonly:
-        tk.Button(button_frame, text="Close", width=15, command=license_window.destroy).pack()
+        ctk.CTkButton(button_frame, text="Close", width=150, command=license_window.destroy).pack()
     else:
         def accept():
             try:
@@ -70,21 +73,21 @@ def show_license_agreement(readonly=False):
             messagebox.showinfo("Exit", "You must accept the license agreement to use this software.")
             os._exit(0)
 
-        tk.Button(button_frame, text="Accept", width=15, command=accept).pack(side="left", padx=10)
-        tk.Button(button_frame, text="Decline", width=15, command=decline).pack(side="right", padx=10)
+        ctk.CTkButton(button_frame, text="Accept", width=150, command=accept).pack(side="left", padx=10)
+        ctk.CTkButton(button_frame, text="Decline", width=150, command=decline).pack(side="right", padx=10)
 
 def show_about_window():
-    about_win = tk.Toplevel()
+    about_win = ctk.CTkToplevel()
     about_win.title("About")
     about_win.geometry("500x400")
     about_win.resizable(False, False)
     about_win.grab_set()
 
-    tk.Label(about_win, text=APP_TITLE, font=(HELP_MENU_FONT, 14, "bold")).pack(pady=(20, 5))
-    tk.Label(about_win, text=APP_VERSION, font=(HELP_MENU_FONT, 12)).pack(pady=(0, 5))
-    tk.Label(about_win, text="Powered by:", font=(HELP_MENU_FONT, 12)).pack(pady=(0, 5))
+    ctk.CTkLabel(about_win, text=APP_TITLE, font=(HELP_MENU_FONT, 14, "bold")).pack(pady=(20, 5))
+    ctk.CTkLabel(about_win, text=APP_VERSION, font=(HELP_MENU_FONT, 12)).pack(pady=(0, 5))
+    ctk.CTkLabel(about_win, text="Powered by:", font=(HELP_MENU_FONT, 12)).pack(pady=(0, 5))
 
-    image_frame = tk.Frame(about_win)
+    image_frame = ctk.CTkFrame(about_win)
     image_frame.pack(pady=10)
 
     try:
@@ -103,15 +106,21 @@ def show_about_window():
         label2.pack(pady=15)
 
     except Exception:
-        tk.Label(about_win, text="[One or both images could not be loaded]", fg="red").pack()
+        ctk.CTkLabel(about_win, text="[One or both images could not be loaded]", text_color="red").pack()
 
-    tk.Label(about_win, text="Contact: kratos@deltares.nl", font=(HELP_MENU_FONT, 12)).pack(pady=(0, 2))
-    tk.Button(about_win, text="Close", command=about_win.destroy).pack(pady=10)
+    ctk.CTkLabel(about_win, text="Contact: kratos@deltares.nl", font=(HELP_MENU_FONT, 12)).pack(pady=(0, 2))
+    ctk.CTkButton(about_win, text="Close", command=about_win.destroy).pack(pady=10)
 
 
 def create_menu():
     last_model_source = LINEAR_ELASTIC
-    root = tk.Tk()
+    
+    # Set appearance mode and color theme
+    ctk.set_appearance_mode("System")
+    ctk.set_default_color_theme("blue")
+    
+    root = ctk.CTk()
+    customtkinter.set_appearance_mode("light")
 
     root.bind_class("TCombobox", "<MouseWheel>", lambda e: "break")
     root.bind_class("TCombobox", "<Shift-MouseWheel>", lambda e: "break")
@@ -120,7 +129,7 @@ def create_menu():
     scaling_factor = pixels_per_inch / DEFAULT_TKINTER_DPI
 
     if scaling_factor > 1.25:
-        root.tk.call('tk', 'scaling', scaling_factor)
+        ctk.set_widget_scaling(scaling_factor)
 
     menubar = Menu(root)
     root.config(menu=menubar)
@@ -151,10 +160,10 @@ def create_menu():
     root.state('zoomed')
     root.resizable(True, True)
 
-    top_frame = ttk.Frame(root, padding="10")
-    top_frame.pack(side="top", fill="x")
+    top_frame = ctk.CTkFrame(root)
+    top_frame.pack(side="top", fill="x", padx=10, pady=10)
 
-    main_frame = ttk.Frame(root)
+    main_frame = ctk.CTkFrame(root)
     main_frame.pack(side="top", fill="both", expand=True)
 
     def load_dll():
@@ -195,21 +204,20 @@ def create_menu():
         GeotechTestUI(root, main_frame, test_name="Triaxial", dll_path=None, model_dict=model_dict,
                       external_widgets=[model_source_menu])
 
-    def handle_model_source_selection(event):
-        choice = model_source_var.get()
+    def handle_model_source_selection(choice):
         if choice == SELECT_UDSM:
             load_dll()
         elif choice == LINEAR_ELASTIC:
             load_linear_elastic()
 
     model_source_var = tk.StringVar(value="Select Model Source")
-    model_source_menu = ttk.Combobox(
+    model_source_menu = ctk.CTkComboBox(
         top_frame,
-        textvariable=model_source_var,
+        variable=model_source_var,
         values=[SELECT_UDSM, LINEAR_ELASTIC],
-        state="readonly"
+        state="readonly",
+        command=handle_model_source_selection
     )
-    model_source_menu.bind("<<ComboboxSelected>>", handle_model_source_selection)
     model_source_menu.pack(side="left", padx=5)
 
     def on_close():

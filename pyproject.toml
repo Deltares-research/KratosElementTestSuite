@@ -22,6 +22,7 @@ Pillow = "*"
 pandas = "*"
 openpyxl = "*"
 KratosGeoMechanicsApplication = ">=10.2.3"
+customtkinter = ">=5.2.0"
 
 [tool.poetry.scripts]
 startElementTest = "kratos_element_test.ui.kratos_element_test_gui:main"

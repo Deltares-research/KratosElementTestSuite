@@ -6,8 +6,8 @@ import math
 import threading
 import traceback
 import tkinter as tk
-from tkinter import ttk, scrolledtext
-import tkinter.font as tkFont
+from tkinter import scrolledtext
+import customtkinter as ctk
 import matplotlib.pyplot as plt
 from matplotlib.gridspec import GridSpec
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
@@ -50,7 +50,7 @@ class GeotechTestUI:
 
         self._init_frames()
 
-        self.plot_frame = ttk.Frame(self.parent, padding="5", width=800, height=600)
+        self.plot_frame = ctk.CTkFrame(self.parent, width=800, height=600)
         self.plot_frame.pack(side="right", fill="both", expand=True, padx=5, pady=5)
 
         self.is_running = False
@@ -73,39 +73,26 @@ class GeotechTestUI:
         threading.Thread(target=self._run_simulation, daemon=True).start()
 
     def _init_frames(self):
-        self.left_panel = ttk.Frame(self.parent, width=555)
+        self.left_panel = ctk.CTkFrame(self.parent, width=555)
         self.left_panel.pack_propagate(False)
         self.left_panel.pack(side="left", fill="y", padx=10, pady=10)
 
-        self.scrollable_container = ttk.Frame(self.left_panel)
+        self.scrollable_container = ctk.CTkScrollableFrame(self.left_panel)
         self.scrollable_container.pack(fill="both", expand=True)
 
-        self.scroll_canvas = tk.Canvas(self.scrollable_container, borderwidth=0, highlightthickness=0)
-        self.scroll_canvas.pack(side="left", fill="both", expand=True)
+        self.left_frame = ctk.CTkFrame(self.scrollable_container)
+        self.left_frame.pack(fill="both", expand=True)
 
-        self.scrollbar = ttk.Scrollbar(self.scrollable_container, orient="vertical", command=self.scroll_canvas.yview)
-        self.scrollbar.pack(side="right", fill="y")
-        self.scroll_canvas.configure(yscrollcommand=self.scrollbar.set)
-
-        self.left_frame = ttk.Frame(self.scroll_canvas)
-        self.canvas_window = self.scroll_canvas.create_window((0, 0), window=self.left_frame, anchor="nw")
-
-        self.left_frame.bind(
-            "<Configure>",
-            lambda e: self.scroll_canvas.configure(scrollregion=self.scroll_canvas.bbox("all"))
-        )
-        self.scroll_canvas.bind_all("<MouseWheel>", self._on_mousewheel)
-
-        self.dropdown_frame = ttk.Frame(self.left_frame)
+        self.dropdown_frame = ctk.CTkFrame(self.left_frame)
         self.dropdown_frame.pack(fill="x")
 
-        self.param_frame = ttk.Frame(self.left_frame, padding="10")
+        self.param_frame = ctk.CTkFrame(self.left_frame)
         self.param_frame.pack(fill="both", expand=True, pady=10)
 
-        self.button_frame = ttk.Frame(self.left_panel, padding="10")
+        self.button_frame = ctk.CTkFrame(self.left_panel)
         self.button_frame.pack(fill="x", pady=(0, 5))
 
-        self.run_button = ttk.Button(self.button_frame, text="Run Calculation", command=self._start_simulation_thread)
+        self.run_button = ctk.CTkButton(self.button_frame, text="Run Calculation", command=self._start_simulation_thread)
         self.run_button.pack(pady=5, fill="x")
 
         self._init_log_section()
@@ -124,9 +111,9 @@ class GeotechTestUI:
         self.canvas.get_tk_widget().pack(fill="both", expand=True)
 
     def _init_dropdown_section(self):
-        ttk.Label(self.dropdown_frame, text="Select a Model:",
+        ctk.CTkLabel(self.dropdown_frame, text="Select a Model:",
                   font=(INPUT_SECTION_FONT, 12, "bold")).pack(anchor="w", padx=5, pady=5)
-        self.model_menu = ttk.Combobox(self.dropdown_frame, textvariable=self.model_var,
+        self.model_menu = ctk.CTkComboBox(self.dropdown_frame, variable=self.model_var,
                                        values=self.model_dict["model_name"], state="readonly")
         self.model_menu.pack(side="top", fill="x", expand=True, padx=5)
         self.model_var.trace("w", lambda *args: self._create_input_fields())
@@ -155,7 +142,7 @@ class GeotechTestUI:
         if self.is_linear_elastic:
             self.mohr_checkbox_widget.configure(state="disabled")
 
-        self.test_selector_frame = ttk.Frame(self.param_frame, padding="5")
+        self.test_selector_frame = ctk.CTkFrame(self.param_frame)
         self.test_selector_frame.pack(fill="x", pady=(10, 5))
 
         self.test_buttons = {}
@@ -167,13 +154,13 @@ class GeotechTestUI:
             try:
                 img = Image.open(path)
                 img_resized = img.resize((85, 85), Image.LANCZOS)
-                self.test_images[key] = ImageTk.PhotoImage(img_resized)
+                self.test_images[key] = ctk.CTkImage(light_image=img_resized, dark_image=img_resized, size=(85, 85))
             except Exception as e:
                 log_message(f"Failed to load or resize image: {path} ({e})", "error")
                 self.test_images[key] = None
 
         for test_name in TEST_NAME_TO_TYPE.keys():
-            btn = tk.Button(
+            btn = ctk.CTkButton(
                 self.test_selector_frame,
                 text=test_name,
                 image=self.test_images[test_name],
@@ -181,44 +168,40 @@ class GeotechTestUI:
                 font=(HELP_MENU_FONT, 8, "bold"),
                 width=100,
                 height=100,
-                relief="raised",
                 command=lambda name=test_name: self._switch_test(name)
             )
             btn.pack(side="left", padx=5, pady=5)
             self.test_buttons[test_name] = btn
 
-        self.test_input_frame = ttk.Frame(self.param_frame, padding="10")
+        self.test_input_frame = ctk.CTkFrame(self.param_frame)
         self.test_input_frame.pack(fill="both", expand=True)
 
         self._switch_test(TRIAXIAL)
 
-        self.run_button = ttk.Button(self.button_frame, text="Run Calculation", command=self._start_simulation_thread)
+        self.run_button = ctk.CTkButton(self.button_frame, text="Run Calculation", command=self._start_simulation_thread)
         self.run_button.pack(pady=5)
 
     def _create_entries(self, frame, title, labels, units, defaults):
         widgets = {}
 
-        default_font = tkFont.nametofont("TkDefaultFont").copy()
-        default_font.configure(size=10)
-
-        ttk.Label(frame, text=title, font=("Arial", 12, "bold")).pack(anchor="w", padx=5, pady=5)
+        ctk.CTkLabel(frame, text=title, font=("Arial", 12, "bold")).pack(anchor="w", padx=5, pady=5)
         for i, label in enumerate(labels):
             unit = units[i] if i < len(units) else ""
-            row = ttk.Frame(frame)
+            row = ctk.CTkFrame(frame)
             row.pack(fill="x", padx=10, pady=2)
-            ttk.Label(row, text=label, font=default_font).pack(side="left", padx=5)
-            entry = ttk.Entry(row, font=default_font, width=20)
+            ctk.CTkLabel(row, text=label).pack(side="left", padx=5)
+            entry = ctk.CTkEntry(row, width=200)
             entry.insert(0, defaults.get(label, ""))
             entry.pack(side="left", fill="x", expand=True)
-            ttk.Label(row, text=unit, font=default_font).pack(side="left", padx=5)
+            ctk.CTkLabel(row, text=unit).pack(side="left", padx=5)
             widgets[label] = entry
         return widgets
 
     def _create_mohr_options(self, params):
-        self.mohr_frame = ttk.Frame(self.param_frame)
+        self.mohr_frame = ctk.CTkFrame(self.param_frame)
         self.mohr_frame.pack(fill="x", padx=10, pady=5)
 
-        self.mohr_checkbox_widget = ttk.Checkbutton(
+        self.mohr_checkbox_widget = ctk.CTkCheckBox(
             self.mohr_frame,
             text="Mohr-Coulomb Model",
             variable=self.mohr_checkbox,
@@ -226,20 +209,20 @@ class GeotechTestUI:
         )
         self.mohr_checkbox_widget.pack(side="left")
 
-        self.c_label = ttk.Label(self.mohr_frame, text="Indices (1-based): Cohesion")
-        self.c_dropdown = ttk.Combobox(self.mohr_frame, textvariable=self.cohesion_var,
-                                       values=[str(i+1) for i in range(len(params))], state="readonly", width=2)
+        self.c_label = ctk.CTkLabel(self.mohr_frame, text="Indices (1-based): Cohesion")
+        self.c_dropdown = ctk.CTkComboBox(self.mohr_frame, variable=self.cohesion_var,
+                                       values=[str(i+1) for i in range(len(params))], state="readonly", width=50)
 
-        self.phi_label = ttk.Label(self.mohr_frame, text="Friction Angle")
-        self.phi_dropdown = ttk.Combobox(self.mohr_frame, textvariable=self.phi_var,
-                                         values=[str(i+1) for i in range(len(params))], state="readonly", width=2)
+        self.phi_label = ctk.CTkLabel(self.mohr_frame, text="Friction Angle")
+        self.phi_dropdown = ctk.CTkComboBox(self.mohr_frame, variable=self.phi_var,
+                                         values=[str(i+1) for i in range(len(params))], state="readonly", width=50)
 
         def _sync_mapping(*_):
             c_idx, phi_idx = self._parse_mc_indices()
             self.controller.set_mohr_mapping(c_idx, phi_idx)
 
-        self.c_dropdown.bind("<<ComboboxSelected>>", _sync_mapping)
-        self.phi_dropdown.bind("<<ComboboxSelected>>", _sync_mapping)
+        self.c_dropdown.configure(command=lambda choice: _sync_mapping())
+        self.phi_dropdown.configure(command=lambda choice: _sync_mapping())
 
         _sync_mapping()
 
@@ -279,16 +262,16 @@ class GeotechTestUI:
 
         for name, button in self.test_buttons.items():
             if name == test_name:
-                button.config(relief="sunken", bg="SystemButtonFace", state="normal")
+                button.configure(fg_color=("gray75", "gray25"))
             else:
-                button.config(relief="raised", bg="SystemButtonFace", state="normal")
+                button.configure(fg_color=["#3B8ED0", "#1F6AA5"])
 
         for w in self.test_input_frame.winfo_children():
             w.destroy()
 
         if test_name == TRIAXIAL:
             self._init_plot_canvas(num_plots=5)
-            ttk.Label(self.test_input_frame, text="Triaxial Input Data",
+            ctk.CTkLabel(self.test_input_frame, text="Triaxial Input Data",
                       font=(INPUT_SECTION_FONT, 12, "bold")).pack(anchor="w", padx=5, pady=(5, 0))
             self._add_test_type_dropdown(self.test_input_frame)
             self.triaxial_widgets = self._create_entries(
@@ -303,7 +286,7 @@ class GeotechTestUI:
 
         elif test_name == DIRECT_SHEAR:
             self._init_plot_canvas(num_plots=4)
-            ttk.Label(self.test_input_frame, text="Direct Simple Shear Input Data",
+            ctk.CTkLabel(self.test_input_frame, text="Direct Simple Shear Input Data",
                       font=(INPUT_SECTION_FONT, 12, "bold")).pack(anchor="w", padx=5, pady=(5, 0))
             self._add_test_type_dropdown(self.test_input_frame)
             self.shear_widgets = self._create_entries(
@@ -318,28 +301,28 @@ class GeotechTestUI:
 
         elif test_name == CRS:
             self._init_plot_canvas(num_plots=5)
-            ttk.Label(self.test_input_frame, text="Constant Rate of Strain Input Data",
+            ctk.CTkLabel(self.test_input_frame, text="Constant Rate of Strain Input Data",
                       font=(INPUT_SECTION_FONT, 12, "bold")).pack(anchor="w", padx=5, pady=(5, 0))
-            tk.Label(self.test_input_frame, text="(For Strain increment, compression is negative)",
+            ctk.CTkLabel(self.test_input_frame, text="(For Strain increment, compression is negative)",
                      font=(INPUT_SECTION_FONT, 9)).pack(anchor="w", padx=5, pady=(0, 5))
 
-            self.crs_button_frame = ttk.Frame(self.test_input_frame)
+            self.crs_button_frame = ctk.CTkFrame(self.test_input_frame)
             self.crs_button_frame.pack(fill="x", padx=10, pady=(5, 5))
 
-            add_row_button = ttk.Button(
+            add_row_button = ctk.CTkButton(
                 self.crs_button_frame,
                 text="Add Row",
                 command=self._add_crs_row)
             add_row_button.pack(side="left", padx=5)
 
-            self.remove_row_button = ttk.Button(
+            self.remove_row_button = ctk.CTkButton(
                 self.crs_button_frame,
                 text="Remove Row",
                 command=self._remove_crs_row,
                 state="disabled")
             self.remove_row_button.pack(side="left", padx=5)
 
-            self.crs_table_frame = ttk.Frame(self.test_input_frame)
+            self.crs_table_frame = ctk.CTkFrame(self.test_input_frame)
             self.crs_table_frame.pack(fill="x", padx=10, pady=5)
 
             self.crs_rows = []
@@ -351,16 +334,16 @@ class GeotechTestUI:
         log_message(f"{test_name} test selected.", "info")
 
     def _add_test_type_dropdown(self, parent):
-        ttk.Label(parent, text="Type of Test:",
+        ctk.CTkLabel(parent, text="Type of Test:",
                   font=(INPUT_SECTION_FONT, 10, "bold")).pack(anchor="w", padx=5, pady=(5, 2))
 
         self.test_type_var = tk.StringVar(value="Drained")
-        self.test_type_menu = ttk.Combobox(
+        self.test_type_menu = ctk.CTkComboBox(
             parent,
-            textvariable=self.test_type_var,
+            variable=self.test_type_var,
             values=["Drained"],
             state="readonly",
-            width=12
+            width=120
         )
         self.test_type_menu.pack(anchor="w", padx=10, pady=(0, 10))
 
@@ -368,7 +351,7 @@ class GeotechTestUI:
             val = (self.test_type_var.get() or "").strip().lower()
             self.controller.set_drainage("drained" if val.startswith("drained") else "undrained")
 
-        self.test_type_menu.bind("<<ComboboxSelected>>", lambda e: _sync_drainage_from_combobox())
+        self.test_type_menu.configure(command=lambda choice: _sync_drainage_from_combobox())
         _sync_drainage_from_combobox()
 
     def _run_simulation(self):
@@ -434,46 +417,38 @@ class GeotechTestUI:
             self.is_running = False
 
     def _enable_run_button(self):
-        self.run_button.config(state="normal")
+        self.run_button.configure(state="normal")
         self.is_running = False
 
     def _set_widget_state(self, parent, state):
         for child in parent.winfo_children():
-            if isinstance(child, ttk.Combobox):
-                child.configure(state="readonly")
-            elif isinstance(child, (ttk.Entry, tk.Button, ttk.Button, tk.Checkbutton, ttk.Checkbutton)):
+            if isinstance(child, ctk.CTkComboBox):
+                child.configure(state="readonly" if state == "normal" else "disabled")
+            elif isinstance(child, (ctk.CTkEntry, ctk.CTkButton, ctk.CTkCheckBox)):
                 child.configure(state=state)
             elif isinstance(child, scrolledtext.ScrolledText):
                 child.config(state=state if state == "normal" else "disabled")
-            elif isinstance(child, (ttk.Frame, tk.Frame)):
+            elif isinstance(child, (ctk.CTkFrame, tk.Frame)):
                 self._set_widget_state(child, state)
 
         for widget in self.external_widgets:
-            if isinstance(widget, ttk.Combobox):
+            if isinstance(widget, ctk.CTkComboBox):
                 widget.configure(state="readonly" if state == "normal" else "disabled")
             else:
                 widget.configure(state=state)
 
     def _disable_gui(self):
         self._set_widget_state(self.left_frame, "disabled")
-        self.model_menu.config(state="disabled")
-        self.c_dropdown.config(state="disabled")
-        self.phi_dropdown.config(state="disabled")
+        self.model_menu.configure(state="disabled")
+        self.c_dropdown.configure(state="disabled")
+        self.phi_dropdown.configure(state="disabled")
         self._set_widget_state(self.button_frame, "disabled")
-        if hasattr(self, "scrollbar"):
-            self._original_scroll_cmd = self.scrollbar.cget("command")
-            self.scrollbar.config(command=lambda *args: None)
         if hasattr(self, "test_type_menu") and self.test_type_menu.winfo_exists():
-            self.test_type_menu.config(state="disabled")
-        self.scroll_canvas.unbind_all("<MouseWheel>")
+            self.test_type_menu.configure(state="disabled")
 
     def _enable_gui(self):
         self._set_widget_state(self.left_frame, "normal")
-        self.run_button.config(state="normal")
-
-        if hasattr(self, "scrollbar") and hasattr(self, "_original_scroll_cmd"):
-            self.scrollbar.config(command=self._original_scroll_cmd)
-        self.scroll_canvas.bind_all("<MouseWheel>", self._on_mousewheel)
+        self.run_button.configure(state="normal")
 
         if self.is_linear_elastic:
             self.mohr_checkbox_widget.configure(state="disabled")
@@ -491,33 +466,30 @@ class GeotechTestUI:
 
     def _add_crs_row(self, duration=1.0, strain_inc=0.0, steps=100):
         row = {}
-        row_frame = ttk.Frame(self.crs_table_frame)
+        row_frame = ctk.CTkFrame(self.crs_table_frame)
         row_frame.pack(fill="x", pady=2)
-
-        default_font = tkFont.nametofont("TkDefaultFont").copy()
-        default_font.configure(size=10)
 
         for label, width, unit, default in zip(
                 [DURATION_LABEL, STRAIN_INCREMENT_LABEL, STEPS_LABEL],
                 [10, 10, 10],
                 ["hours ,", "% ,", ""],
                 [duration, strain_inc, steps]):
-            ttk.Label(row_frame, text=label).pack(side="left", padx=5)
-            entry = ttk.Entry(row_frame, width=width)
+            ctk.CTkLabel(row_frame, text=label).pack(side="left", padx=5)
+            entry = ctk.CTkEntry(row_frame, width=width)
             entry.insert(0, str(default))
             entry.pack(side="left", padx=2)
-            ttk.Label(row_frame, text=unit).pack(side="left", padx=0)
+            ctk.CTkLabel(row_frame, text=unit).pack(side="left", padx=0)
             row[label] = entry
 
         self.crs_rows.append(row)
 
         if len(self.crs_rows) > 1:
-            self.remove_row_button.config(state="normal")
+            self.remove_row_button.configure(state="normal")
 
     def _prevent_removal_last_crs_row(self):
         minimum_number_of_rows = 1
         if len(self.crs_rows) <= minimum_number_of_rows:
-            self.remove_row_button.config(state="disabled")
+            self.remove_row_button.configure(state="disabled")
 
     def _remove_crs_row(self):
         self._prevent_removal_last_crs_row()
@@ -530,17 +502,13 @@ class GeotechTestUI:
         self._prevent_removal_last_crs_row()
 
     def _on_mousewheel(self, event):
-        if event.delta > 0:
-            first, _ = self.scroll_canvas.yview()
-            if first <= 0:
-                return
-        self.scroll_canvas.yview_scroll(int(-1 * (event.delta / 120)), "units")
+        pass  # Handled by CTkScrollableFrame
 
     def _init_log_section(self):
-        self.log_frame = ttk.Frame(self.left_panel, padding="5")
+        self.log_frame = ctk.CTkFrame(self.left_panel)
         self.log_frame.pack(fill="x", padx=10, pady=(0, 10))
 
-        ttk.Label(self.log_frame, text="Log Output:", font=(INPUT_SECTION_FONT, 10, "bold")).pack(anchor="w")
+        ctk.CTkLabel(self.log_frame, text="Log Output:", font=(INPUT_SECTION_FONT, 10, "bold")).pack(anchor="w")
         self.log_widget = scrolledtext.ScrolledText(self.log_frame, height=6, width=40, state="normal",
                                                     wrap="word", font=("Courier", 9))
         self.log_widget.pack(fill="x", expand=False)
