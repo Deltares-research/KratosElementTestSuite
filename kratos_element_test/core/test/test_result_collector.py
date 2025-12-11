@@ -64,6 +64,47 @@ class ResultCollectorTest(unittest.TestCase):
         self.assertTrue(results["cohesion"] is None)
         self.assertTrue(results["phi"] is None)
 
+    def test_collector_appends_results_of_multiple_stages(self):
+        file_path = Path(os.path.dirname(__file__))
+        test_path = file_path / "output.post.res"
+        collector = ResultCollector(
+            [test_path, test_path],
+            material_parameters=[1.0, 2.0, 3.0, 4.0],
+            cohesion_phi_indices=(3, 4),
+        )
+        results = collector.collect_results()
+
+        # Since the same results file is used twice, the stress values repeat
+        # the same values for the second stage
+        expected_von_mises = [
+            0.0,
+            45000,
+            90000,
+            135000,
+            180000,
+            0.0,
+            45000,
+            90000,
+            135000,
+            180000,
+        ]
+        np.testing.assert_array_almost_equal(results["von_mises"], expected_von_mises)
+
+        # Although the same results file is used twice, the yy_strain values are cumulative
+        expected_yy_strain = [
+            0.0,
+            -0.05,
+            -0.1,
+            -0.15,
+            -0.2,
+            -0.2,
+            -0.25,
+            -0.3,
+            -0.35,
+            -0.4,
+        ]
+        np.testing.assert_array_almost_equal(results["yy_strain"], expected_yy_strain)
+
 
 if __name__ == "__main__":
     unittest.main()
