@@ -51,6 +51,19 @@ class ResultCollectorTest(unittest.TestCase):
         except Exception as e:
             self.fail(f"collect_results raised an exception unexpectedly: {e}")
 
+    def test_c_phi_are_none_when_indices_are_not_defined(self):
+        file_path = Path(os.path.dirname(__file__))
+        test_path = file_path / "output.post.res"
+        collector = ResultCollector(
+            [test_path],
+            material_parameters=[1.0, 2.0, 3.0, 4.0],
+            cohesion_phi_indices=(),
+        )
+
+        results = collector.collect_results()
+        self.assertTrue(results["cohesion"] is None)
+        self.assertTrue(results["phi"] is None)
+
 
 if __name__ == "__main__":
     unittest.main()
