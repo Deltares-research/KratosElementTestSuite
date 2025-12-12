@@ -10,7 +10,7 @@ from tkinter import ttk, scrolledtext
 import tkinter.font as tkFont
 import matplotlib.pyplot as plt
 from matplotlib.gridspec import GridSpec
-from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2Tk
 from PIL import Image, ImageTk
 
 from kratos_element_test.ui.element_test_controller import ElementTestController
@@ -121,6 +121,9 @@ class GeotechTestUI:
         self.axes = [self.fig.add_subplot(self.gs[i]) for i in range(num_plots)]
         self.canvas = FigureCanvasTkAgg(self.fig, master=self.plot_frame)
         self.canvas.draw()
+        toolbar = NavigationToolbar2Tk(self.canvas, self.plot_frame)
+        toolbar.update()
+        toolbar.pack(side="bottom", fill="x")
         self.canvas.get_tk_widget().pack(fill="both", expand=True)
 
     def _init_dropdown_section(self):
