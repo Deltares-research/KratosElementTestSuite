@@ -3,8 +3,9 @@
 # Contact kratos@deltares.nl
 
 import os
-import tkinter as tk
-from tkinter import filedialog, messagebox, ttk, scrolledtext, Menu
+import ttkbootstrap as ttk
+from ttkbootstrap.constants import *
+from tkinter import filedialog, messagebox, scrolledtext, Menu
 from platformdirs import user_data_dir
 from pathlib import Path
 from kratos_element_test.ui.ui_builder import GeotechTestUI
@@ -32,7 +33,7 @@ def show_license_agreement(readonly=False):
         messagebox.showerror("Error", f"Could not load license file: {e}")
         os._exit(1)
 
-    license_window = tk.Toplevel()
+    license_window = ttk.Toplevel()
     license_window.title("Pre-Release License Agreement")
     license_window.geometry("800x600")
     license_window.grab_set()
@@ -40,22 +41,22 @@ def show_license_agreement(readonly=False):
     if not readonly:
         license_window.protocol("WM_DELETE_WINDOW", lambda: os._exit(0))
 
-    tk.Label(license_window, text="Pre-Release Software License Agreement",
-             font=(HELP_MENU_FONT, 12, "bold"), pady=10).pack()
+    ttk.Label(license_window, text="Pre-Release Software License Agreement",
+             font=(HELP_MENU_FONT, 12, "bold")).pack(pady=10)
 
-    tk.Label(license_window, text="Please review and accept the agreement to continue.",
-             font=(HELP_MENU_FONT, 12, "bold"), pady=10).pack()
+    ttk.Label(license_window, text="Please review and accept the agreement to continue.",
+             font=(HELP_MENU_FONT, 12, "bold")).pack(pady=10)
 
     text_area = scrolledtext.ScrolledText(license_window, wrap="word", font=("Courier", 10))
     text_area.insert("1.0", license_text)
     text_area.config(state="disabled")
     text_area.pack(expand=True, fill="both", padx=10, pady=10)
 
-    button_frame = tk.Frame(license_window)
+    button_frame = ttk.Frame(license_window)
     button_frame.pack(pady=10)
 
     if readonly:
-        tk.Button(button_frame, text="Close", width=15, command=license_window.destroy).pack()
+        ttk.Button(button_frame, text="Close", width=15, command=license_window.destroy).pack()
     else:
         def accept():
             try:
@@ -70,48 +71,49 @@ def show_license_agreement(readonly=False):
             messagebox.showinfo("Exit", "You must accept the license agreement to use this software.")
             os._exit(0)
 
-        tk.Button(button_frame, text="Accept", width=15, command=accept).pack(side="left", padx=10)
-        tk.Button(button_frame, text="Decline", width=15, command=decline).pack(side="right", padx=10)
+        ttk.Button(button_frame, text="Accept", width=15, command=accept).pack(side="left", padx=10)
+        ttk.Button(button_frame, text="Decline", width=15, command=decline).pack(side="right", padx=10)
 
 def show_about_window():
-    about_win = tk.Toplevel()
+    about_win = ttk.Toplevel()
     about_win.title("About")
     about_win.geometry("500x400")
     about_win.resizable(False, False)
     about_win.grab_set()
 
-    tk.Label(about_win, text=APP_TITLE, font=(HELP_MENU_FONT, 14, "bold")).pack(pady=(20, 5))
-    tk.Label(about_win, text=APP_VERSION, font=(HELP_MENU_FONT, 12)).pack(pady=(0, 5))
-    tk.Label(about_win, text="Powered by:", font=(HELP_MENU_FONT, 12)).pack(pady=(0, 5))
+    ttk.Label(about_win, text=APP_TITLE, font=(HELP_MENU_FONT, 14, "bold")).pack(pady=(20, 5))
+    ttk.Label(about_win, text=APP_VERSION, font=(HELP_MENU_FONT, 12)).pack(pady=(0, 5))
+    ttk.Label(about_win, text="Powered by:", font=(HELP_MENU_FONT, 12)).pack(pady=(0, 5))
 
-    image_frame = tk.Frame(about_win)
+    image_frame = ttk.Frame(about_win)
     image_frame.pack(pady=10)
 
     try:
+        from tkinter import PhotoImage
         path1 = _asset_path("kratos.png")
         path2 = _asset_path("deltares.png")
 
-        photo1 = tk.PhotoImage(file=path1)
-        photo2 = tk.PhotoImage(file=path2)
+        photo1 = PhotoImage(file=path1)
+        photo2 = PhotoImage(file=path2)
 
-        label1 = tk.Label(image_frame, image=photo1)
+        label1 = ttk.Label(image_frame, image=photo1)
         label1.image = photo1
         label1.pack(pady=2)
 
-        label2 = tk.Label(image_frame, image=photo2)
+        label2 = ttk.Label(image_frame, image=photo2)
         label2.image = photo2
         label2.pack(pady=15)
 
     except Exception:
-        tk.Label(about_win, text="[One or both images could not be loaded]", fg="red").pack()
+        ttk.Label(about_win, text="[One or both images could not be loaded]", foreground="red").pack()
 
-    tk.Label(about_win, text="Contact: kratos@deltares.nl", font=(HELP_MENU_FONT, 12)).pack(pady=(0, 2))
-    tk.Button(about_win, text="Close", command=about_win.destroy).pack(pady=10)
+    ttk.Label(about_win, text="Contact: kratos@deltares.nl", font=(HELP_MENU_FONT, 12)).pack(pady=(0, 2))
+    ttk.Button(about_win, text="Close", command=about_win.destroy).pack(pady=10)
 
 
 def create_menu():
     last_model_source = LINEAR_ELASTIC
-    root = tk.Tk()
+    root = ttk.Window(themename="cosmo")
 
     root.bind_class("TCombobox", "<MouseWheel>", lambda e: "break")
     root.bind_class("TCombobox", "<Shift-MouseWheel>", lambda e: "break")
@@ -151,7 +153,7 @@ def create_menu():
     root.state('zoomed')
     root.resizable(True, True)
 
-    top_frame = ttk.Frame(root, padding="10")
+    top_frame = ttk.Frame(root, padding=10)
     top_frame.pack(side="top", fill="x")
 
     main_frame = ttk.Frame(root)
@@ -202,7 +204,8 @@ def create_menu():
         elif choice == LINEAR_ELASTIC:
             load_linear_elastic()
 
-    model_source_var = tk.StringVar(value="Select Model Source")
+    from tkinter import StringVar
+    model_source_var = StringVar(value="Select Model Source")
     model_source_menu = ttk.Combobox(
         top_frame,
         textvariable=model_source_var,

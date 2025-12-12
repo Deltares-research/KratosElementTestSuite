@@ -5,8 +5,10 @@
 import math
 import threading
 import traceback
-import tkinter as tk
-from tkinter import ttk, scrolledtext
+from tkinter import StringVar, BooleanVar, Canvas, Button
+import ttkbootstrap as ttk
+from ttkbootstrap.constants import *
+from tkinter import scrolledtext
 import tkinter.font as tkFont
 import matplotlib.pyplot as plt
 from matplotlib.gridspec import GridSpec
@@ -36,9 +38,9 @@ class GeotechTestUI:
         self.model_dict = model_dict
         self.is_linear_elastic = model_dict["model_name"][0].lower() == "linear elastic model"
 
-        self.model_var = tk.StringVar(root)
+        self.model_var = StringVar(root)
         self.model_var.set(model_dict["model_name"][0])
-        self.current_test = tk.StringVar(value=test_name)
+        self.current_test = StringVar(value=test_name)
         self.test_input_history = {}
 
         def _sync_test_type(*_):
@@ -50,7 +52,7 @@ class GeotechTestUI:
 
         self._init_frames()
 
-        self.plot_frame = ttk.Frame(self.parent, padding="5", width=800, height=600)
+        self.plot_frame = ttk.Frame(self.parent, padding=5, width=800, height=600)
         self.plot_frame.pack(side="right", fill="both", expand=True, padx=5, pady=5)
 
         self.is_running = False
@@ -80,7 +82,7 @@ class GeotechTestUI:
         self.scrollable_container = ttk.Frame(self.left_panel)
         self.scrollable_container.pack(fill="both", expand=True)
 
-        self.scroll_canvas = tk.Canvas(self.scrollable_container, borderwidth=0, highlightthickness=0)
+        self.scroll_canvas = Canvas(self.scrollable_container, borderwidth=0, highlightthickness=0)
         self.scroll_canvas.pack(side="left", fill="both", expand=True)
 
         self.scrollbar = ttk.Scrollbar(self.scrollable_container, orient="vertical", command=self.scroll_canvas.yview)
@@ -99,13 +101,13 @@ class GeotechTestUI:
         self.dropdown_frame = ttk.Frame(self.left_frame)
         self.dropdown_frame.pack(fill="x")
 
-        self.param_frame = ttk.Frame(self.left_frame, padding="10")
+        self.param_frame = ttk.Frame(self.left_frame, padding=10)
         self.param_frame.pack(fill="both", expand=True, pady=10)
 
-        self.button_frame = ttk.Frame(self.left_panel, padding="10")
+        self.button_frame = ttk.Frame(self.left_panel, padding=10)
         self.button_frame.pack(fill="x", pady=(0, 5))
 
-        self.run_button = ttk.Button(self.button_frame, text="Run Calculation", command=self._start_simulation_thread)
+        self.run_button = ttk.Button(self.button_frame, text="Run Calculation", command=self._start_simulation_thread, bootstyle="success")
         self.run_button.pack(pady=5, fill="x")
 
         self._init_log_section()
@@ -148,9 +150,6 @@ class GeotechTestUI:
         self.entry_widgets = self._create_entries(self.param_frame, "Soil Input Parameters",
                                                   params, units, default_values)
 
-        self.mohr_checkbox = tk.BooleanVar()
-        self.cohesion_var = tk.StringVar(value="3")
-        self.phi_var = tk.StringVar(value="4")
         self._create_mohr_options(params)
         if self.is_linear_elastic:
             self.mohr_checkbox_widget.configure(state="disabled")
@@ -173,7 +172,7 @@ class GeotechTestUI:
                 self.test_images[key] = None
 
         for test_name in TEST_NAME_TO_TYPE.keys():
-            btn = tk.Button(
+            btn = Button(
                 self.test_selector_frame,
                 text=test_name,
                 image=self.test_images[test_name],
@@ -187,12 +186,12 @@ class GeotechTestUI:
             btn.pack(side="left", padx=5, pady=5)
             self.test_buttons[test_name] = btn
 
-        self.test_input_frame = ttk.Frame(self.param_frame, padding="10")
+        self.test_input_frame = ttk.Frame(self.param_frame, padding=10)
         self.test_input_frame.pack(fill="both", expand=True)
 
         self._switch_test(TRIAXIAL)
 
-        self.run_button = ttk.Button(self.button_frame, text="Run Calculation", command=self._start_simulation_thread)
+        self.run_button = ttk.Button(self.button_frame, text="Run Calculation", command=self._start_simulation_thread, bootstyle="success")
         self.run_button.pack(pady=5)
 
     def _create_entries(self, frame, title, labels, units, defaults):
@@ -218,6 +217,7 @@ class GeotechTestUI:
         self.mohr_frame = ttk.Frame(self.param_frame)
         self.mohr_frame.pack(fill="x", padx=10, pady=5)
 
+        self.mohr_checkbox = BooleanVar()
         self.mohr_checkbox_widget = ttk.Checkbutton(
             self.mohr_frame,
             text="Mohr-Coulomb Model",
@@ -227,10 +227,12 @@ class GeotechTestUI:
         self.mohr_checkbox_widget.pack(side="left")
 
         self.c_label = ttk.Label(self.mohr_frame, text="Indices (1-based): Cohesion")
+        self.cohesion_var = StringVar(value="3")
         self.c_dropdown = ttk.Combobox(self.mohr_frame, textvariable=self.cohesion_var,
                                        values=[str(i+1) for i in range(len(params))], state="readonly", width=2)
 
         self.phi_label = ttk.Label(self.mohr_frame, text="Friction Angle")
+        self.phi_var = StringVar(value="4")
         self.phi_dropdown = ttk.Combobox(self.mohr_frame, textvariable=self.phi_var,
                                          values=[str(i+1) for i in range(len(params))], state="readonly", width=2)
 
@@ -320,7 +322,7 @@ class GeotechTestUI:
             self._init_plot_canvas(num_plots=5)
             ttk.Label(self.test_input_frame, text="Constant Rate of Strain Input Data",
                       font=(INPUT_SECTION_FONT, 12, "bold")).pack(anchor="w", padx=5, pady=(5, 0))
-            tk.Label(self.test_input_frame, text="(For Strain increment, compression is negative)",
+            ttk.Label(self.test_input_frame, text="(For Strain increment, compression is negative)",
                      font=(INPUT_SECTION_FONT, 9)).pack(anchor="w", padx=5, pady=(0, 5))
 
             self.crs_button_frame = ttk.Frame(self.test_input_frame)
@@ -354,7 +356,7 @@ class GeotechTestUI:
         ttk.Label(parent, text="Type of Test:",
                   font=(INPUT_SECTION_FONT, 10, "bold")).pack(anchor="w", padx=5, pady=(5, 2))
 
-        self.test_type_var = tk.StringVar(value="Drained")
+        self.test_type_var = StringVar(value="Drained")
         self.test_type_menu = ttk.Combobox(
             parent,
             textvariable=self.test_type_var,
@@ -441,11 +443,11 @@ class GeotechTestUI:
         for child in parent.winfo_children():
             if isinstance(child, ttk.Combobox):
                 child.configure(state="readonly")
-            elif isinstance(child, (ttk.Entry, tk.Button, ttk.Button, tk.Checkbutton, ttk.Checkbutton)):
+            elif isinstance(child, (ttk.Entry, Button, ttk.Button, ttk.Checkbutton)):
                 child.configure(state=state)
             elif isinstance(child, scrolledtext.ScrolledText):
                 child.config(state=state if state == "normal" else "disabled")
-            elif isinstance(child, (ttk.Frame, tk.Frame)):
+            elif isinstance(child, ttk.Frame):
                 self._set_widget_state(child, state)
 
         for widget in self.external_widgets:
@@ -537,7 +539,7 @@ class GeotechTestUI:
         self.scroll_canvas.yview_scroll(int(-1 * (event.delta / 120)), "units")
 
     def _init_log_section(self):
-        self.log_frame = ttk.Frame(self.left_panel, padding="5")
+        self.log_frame = ttk.Frame(self.left_panel, padding=5)
         self.log_frame.pack(fill="x", padx=10, pady=(0, 10))
 
         ttk.Label(self.log_frame, text="Log Output:", font=(INPUT_SECTION_FONT, 10, "bold")).pack(anchor="w")
@@ -552,10 +554,11 @@ class GeotechTestUI:
 
     def _copy_selection(self):
         try:
+            from tkinter import TclError
             selection = self.log_widget.get("sel.first", "sel.last")
             self.root.clipboard_clear()
             self.root.clipboard_append(selection)
-        except tk.TclError:
+        except TclError:
             pass
 
     def _extract_values_from_rows(self, label, data_type):
