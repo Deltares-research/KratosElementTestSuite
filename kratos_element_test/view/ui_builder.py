@@ -10,7 +10,7 @@ from tkinter import ttk, scrolledtext
 
 from PIL import Image, ImageTk
 
-from kratos_element_test.control.element_test_controller import ElementTestController
+from kratos_element_test.controller.element_test_controller import ElementTestController
 from kratos_element_test.plotters.matplotlib_plotter import MatplotlibPlotter
 from kratos_element_test.view.log_viewer import LogViewer
 from kratos_element_test.view.plot_viewer import PlotViewer

@@ -140,13 +140,13 @@ class RunSimulation:
         here = Path(__file__).resolve()
         candidates = [
             here.parent / f"test_{test_type}",  # legacy: alongside run_simulation.py
-            here.parents[1] / "templates" / f"test_{test_type}",  # NEW: core/templates/test_*
-            here.parents[1] / f"test_{test_type}",  # legacy: under core/
+            here.parents[1] / "templates" / f"test_{test_type}",  # NEW: model/templates/test_*
+            here.parents[1] / f"test_{test_type}",  # legacy: under model/
             here.parents[2] / f"test_{test_type}",  # legacy: under project root
         ]
         if _res_files:
             try:
-                pkg_path = _res_files("kratos_element_test.core.templates") / f"test_{test_type}"
+                pkg_path = _res_files("kratos_element_test.model.templates") / f"test_{test_type}"
                 candidates.append(Path(str(pkg_path)))
             except Exception:
                 pass
