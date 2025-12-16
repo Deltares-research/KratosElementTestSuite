@@ -29,3 +29,5 @@ class Model:
         plt.plot(x_values, y_values)
         plt.savefig("graph.png")
         plt.close()
+
+        return x_values, y_values

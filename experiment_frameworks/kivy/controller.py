@@ -22,6 +22,5 @@ class Controller:
         print("Phase from view:", phase)
         self.model.set_phase(phase)
 
-        self.model.generate_graph_image()
-        self.view.plot_view.source = "graph.png"
-        self.view.plot_view.reload()
+        x_values, y_values = self.model.generate_graph_image()
+        self.view.display_data(x_values, y_values)

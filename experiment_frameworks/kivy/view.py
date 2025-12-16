@@ -1,7 +1,6 @@
 from kivy.app import App
 from kivy.uix.button import Button
 from kivy.uix.gridlayout import GridLayout
-from kivy.uix.image import Image
 from kivy.uix.label import Label
 from kivy.uix.textinput import TextInput
 from kivy.uix.boxlayout import BoxLayout
@@ -9,6 +8,8 @@ from kivy.uix.anchorlayout import AnchorLayout
 from kivy.uix.widget import Widget
 from kivy.core.window import Window
 from kivy.metrics import dp
+from kivy_garden.matplotlib.backend_kivyagg import FigureCanvasKivyAgg
+import matplotlib.pyplot as plt
 
 
 class MyView(App):
@@ -25,14 +26,26 @@ class MyView(App):
         self.phase_input = TextInput(multiline=False, input_filter='float', size_hint=(1, None),
                                      height=dp(32), padding=[dp(8), dp(8), dp(8), dp(8)],
                                      background_color=(0.97, 0.97, 0.97, 1))
-        self.plot_view = Image(size_hint=(1, 0.6), allow_stretch=True, keep_ratio=True)
+        # Create a matplotlib figure and canvas
+        self.fig, self.ax = plt.subplots()
+
+        self.plot_canvas = FigureCanvasKivyAgg(self.fig)
+
+    def display_data(self, x, y):
+        self.ax.clear()
+        self.ax.set_title('Example Sine Wave')
+        self.ax.set_xlabel('x')
+        self.ax.set_ylabel('sin(x)')
+        self.ax.legend()
+        self.ax.plot(x, y, label='sin(x)', color='royalblue', linewidth=2)
+        self.plot_canvas.draw()
 
     def build(self):
         Window.clearcolor = (0.98, 0.98, 1, 1)
         mainLayout = BoxLayout(orientation='vertical', padding=dp(24), spacing=dp(18))
         # Plot area
         plot_anchor = AnchorLayout(anchor_x='center', anchor_y='top', size_hint=(1, 0.6))
-        plot_anchor.add_widget(self.plot_view)
+        plot_anchor.add_widget(self.plot_canvas)
         mainLayout.add_widget(plot_anchor)
         # Input area
         input_card = BoxLayout(orientation='vertical', padding=dp(18), spacing=dp(12), size_hint=(1, 0.4))
