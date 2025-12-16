@@ -8,7 +8,7 @@ import importlib
 import KratosMultiphysics as Kratos
 from KratosMultiphysics.GeoMechanicsApplication.geomechanics_analysis import GeoMechanicsAnalysis
 from KratosMultiphysics.project import Project
-from kratos_element_test.ui.ui_logger import log_message as fallback_log
+from kratos_element_test.view.ui_logger import log_message as fallback_log
 import KratosMultiphysics.GeoMechanicsApplication.context_managers as context_managers
 
 

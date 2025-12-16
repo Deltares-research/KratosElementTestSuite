@@ -3,9 +3,9 @@
 # Contact kratos@deltares.nl
 
 from typing import Optional, Callable, List, Tuple, Dict
-from kratos_element_test.core.pipeline.run_simulation import RunSimulation
-from kratos_element_test.core.models import SimulationInputs, MohrCoulombOptions
-from kratos_element_test.ui.ui_constants import VALID_TEST_TYPES, VALID_DRAINAGE_TYPES
+from kratos_element_test.model.pipeline.run_simulation import RunSimulation
+from kratos_element_test.model.models import SimulationInputs, MohrCoulombOptions
+from kratos_element_test.view.ui_constants import VALID_TEST_TYPES, VALID_DRAINAGE_TYPES
 
 
 class ElementTestController:

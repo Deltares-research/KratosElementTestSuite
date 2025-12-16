@@ -6,8 +6,8 @@ import numpy as np
 import pandas as pd
 from tkinter import filedialog, messagebox
 from pathlib import Path
-from kratos_element_test.ui.result_registry import PLOT_MAPPING
-from kratos_element_test.ui.result_registry import get_latest_results, get_latest_test_type
+from kratos_element_test.view.result_registry import PLOT_MAPPING
+from kratos_element_test.view.result_registry import get_latest_results, get_latest_test_type
 
 
 def _build_sheet_df(results: dict, y_key: str, x_key: str, y_label: str, x_label: str) -> pd.DataFrame | None:
