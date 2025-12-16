@@ -1,6 +1,3 @@
-from matplotlib import pyplot as plt
-
-
 class Model:
     def __init__(self):
         self.amplitude = 1.0
@@ -23,8 +20,5 @@ class Model:
         y_values = [
             self.amplitude * math.sin(self.frequency * x + self.phase) for x in x_values
         ]
-        plt.plot(x_values, y_values)
-        plt.savefig("graph.png")
-        plt.close()
 
         return x_values, y_values
