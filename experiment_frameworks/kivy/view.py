@@ -26,18 +26,21 @@ class MyView(App):
         self.phase_input = TextInput(multiline=False, input_filter='float', size_hint=(1, None),
                                      height=dp(32), padding=[dp(8), dp(8), dp(8), dp(8)],
                                      background_color=(0.97, 0.97, 0.97, 1))
-        # Create a matplotlib figure and canvas
-        self.fig, self.ax = plt.subplots()
 
+        self.fig, self.ax = plt.subplots()
+        self.fig.subplots_adjust(bottom=0.18)  # Add more space for x label
         self.plot_canvas = FigureCanvasKivyAgg(self.fig)
+        self.ax.set_xlabel('x')
+        self.ax.set_ylabel('sin(x)')
 
     def display_data(self, x, y):
         self.ax.clear()
+        self.ax.plot(x, y, label='sin(x)', color='royalblue', linewidth=2)
         self.ax.set_title('Example Sine Wave')
         self.ax.set_xlabel('x')
         self.ax.set_ylabel('sin(x)')
         self.ax.legend()
-        self.ax.plot(x, y, label='sin(x)', color='royalblue', linewidth=2)
+        self.fig.subplots_adjust(bottom=0.18)  # Ensure margin is always set
         self.plot_canvas.draw()
 
     def build(self):
