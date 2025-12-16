@@ -13,7 +13,7 @@ class Model:
     def set_phase(self, phase):
         self.phase = float(phase)
 
-    def generate_graph_image(self):
+    def generate_graph_data(self):
         import math
         x_values = [i * 0.1 for i in range(100)]
 

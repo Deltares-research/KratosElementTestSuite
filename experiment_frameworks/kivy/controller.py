@@ -19,5 +19,5 @@ class Controller:
         phase = self.view.phase_input.text
         self.model.set_phase(phase)
 
-        x_values, y_values = self.model.generate_graph_image()
+        x_values, y_values = self.model.generate_graph_data()
         self.view.display_data(x_values, y_values)
