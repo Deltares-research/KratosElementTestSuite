@@ -11,15 +11,12 @@ class Controller:
 
     def on_generate_graph(self, instance):
         amplitude = self.view.amplitude_input.text
-        print("Amplitude from view:", amplitude)
         self.model.set_amplitude(amplitude)
 
         frequency = self.view.frequency_input.text
-        print("Frequency from view:", frequency)
         self.model.set_frequency(frequency)
 
         phase = self.view.phase_input.text
-        print("Phase from view:", phase)
         self.model.set_phase(phase)
 
         x_values, y_values = self.model.generate_graph_image()
