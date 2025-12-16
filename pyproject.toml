@@ -24,7 +24,7 @@ openpyxl = "*"
 KratosGeoMechanicsApplication = ">=10.2.3"
 
 [tool.poetry.scripts]
-startElementTest = "kratos_element_test.ui.kratos_element_test_gui:main"
+startElementTest = "kratos_element_test.view.kratos_element_test_gui:main"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
