@@ -4,6 +4,10 @@ from pathlib import Path
 import numpy as np
 from parameterized import parameterized
 
+from kratos_element_test.model.core_utils import (
+    seconds_to_hours,
+    second_list_to_hour_list,
+)
 from kratos_element_test.model.pipeline.result_collector import ResultCollector
 
 
@@ -23,8 +27,8 @@ class ResultCollectorTest(unittest.TestCase):
             ["sigma_xx", [-100.0, -100.0, -100.0, -100.0, -100.0]],
             ["sigma_yy", [-100.0, -45100.0, -90100, -135100, -180100]],
             [
-                "time_steps",  # in hours, hence the division by 3600
-                [0.2 / 3600, 0.4 / 3600, 0.6 / 3600, 0.8 / 3600, 1.0 / 3600],
+                "time_steps",
+                second_list_to_hour_list([0.2, 0.4, 0.6, 0.8, 1.0]),
             ],
         ]
     )

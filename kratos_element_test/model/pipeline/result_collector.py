@@ -3,6 +3,7 @@ from typing import Dict, List, Optional, Tuple
 
 import numpy as np
 
+from kratos_element_test.model.core_utils import seconds_to_hours
 from kratos_element_test.model.io import gid_output_reader
 from kratos_element_test.view.ui_logger import log_message as fallback_log
 
@@ -51,8 +52,8 @@ class ResultCollector:
             all_sigma_xx.extend(sigma_xx)
             all_sigma_yy.extend(sigma_yy)
             all_time_steps.extend(
-                [t / 3600.0 for t in time_steps]
-            )  # Convert seconds → hours
+                [seconds_to_hours(t) for t in time_steps]
+            )
 
         all_yy_strain = self._apply_cumulative_strain_offset(yy_strain_stages)
 
