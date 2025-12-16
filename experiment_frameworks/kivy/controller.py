@@ -6,8 +6,8 @@ class Controller:
         view.button.bind(on_press=self.on_generate_graph)
 
     def start(self):
-        self.view.run()
         self.update_fields_based_on_model()
+        self.view.run()
 
     def update_fields_based_on_model(self):
         self.view.amplitude_input.text = str(self.model.amplitude)
