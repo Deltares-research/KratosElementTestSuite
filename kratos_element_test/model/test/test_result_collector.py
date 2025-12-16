@@ -1,17 +1,19 @@
 import os
 import unittest
 from pathlib import Path
+
 import numpy as np
 from parameterized import parameterized
 
-from kratos_element_test.model.core_utils import (
-    seconds_to_hours,
-    second_list_to_hour_list,
-)
+from kratos_element_test.model.core_utils import seconds_list_to_hours_list
 from kratos_element_test.model.pipeline.result_collector import ResultCollector
 
 
 class ResultCollectorTest(unittest.TestCase):
+
+    def setUp(self):
+        self.test_path = Path(os.path.dirname(__file__)) / "output.post.res"
+
     @parameterized.expand(
         [
             ["yy_strain", [0.0, -0.05, -0.1, -0.15, -0.2]],
@@ -28,15 +30,14 @@ class ResultCollectorTest(unittest.TestCase):
             ["sigma_yy", [-100.0, -45100.0, -90100, -135100, -180100]],
             [
                 "time_steps",
-                second_list_to_hour_list([0.2, 0.4, 0.6, 0.8, 1.0]),
+                seconds_list_to_hours_list([0.2, 0.4, 0.6, 0.8, 1.0]),
             ],
         ]
     )
     def test_collected_values(self, variable_name, expected_values):
-        file_path = Path(os.path.dirname(__file__))
-        test_path = file_path / "output.post.res"
+
         collector = ResultCollector(
-            [test_path],
+            [self.test_path],
             material_parameters=[1.0, 2.0, 3.0, 4.0],
             cohesion_phi_indices=(3, 4),
         )
@@ -56,10 +57,8 @@ class ResultCollectorTest(unittest.TestCase):
             self.fail(f"collect_results raised an exception unexpectedly: {e}")
 
     def test_c_phi_are_none_when_indices_are_not_defined(self):
-        file_path = Path(os.path.dirname(__file__))
-        test_path = file_path / "output.post.res"
         collector = ResultCollector(
-            [test_path],
+            [self.test_path],
             material_parameters=[1.0, 2.0, 3.0, 4.0],
             cohesion_phi_indices=(),
         )
@@ -69,10 +68,8 @@ class ResultCollectorTest(unittest.TestCase):
         self.assertTrue(results["phi"] is None)
 
     def test_collector_appends_results_of_multiple_stages(self):
-        file_path = Path(os.path.dirname(__file__))
-        test_path = file_path / "output.post.res"
         collector = ResultCollector(
-            [test_path, test_path],
+            [self.test_path, self.test_path],
             material_parameters=[1.0, 2.0, 3.0, 4.0],
             cohesion_phi_indices=(3, 4),
         )
