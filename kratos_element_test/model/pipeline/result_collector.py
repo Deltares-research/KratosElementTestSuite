@@ -3,8 +3,8 @@ from typing import Dict, List, Optional, Tuple
 
 import numpy as np
 
-from kratos_element_test.core.io import gid_output_reader
-from kratos_element_test.ui.ui_logger import log_message as fallback_log
+from kratos_element_test.model.io import gid_output_reader
+from kratos_element_test.view.ui_logger import log_message as fallback_log
 
 
 class ResultCollector:

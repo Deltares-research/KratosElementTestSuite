@@ -4,7 +4,7 @@ from pathlib import Path
 import numpy as np
 from parameterized import parameterized
 
-from kratos_element_test.core.pipeline.result_collector import ResultCollector
+from kratos_element_test.model.pipeline.result_collector import ResultCollector
 
 
 class ResultCollectorTest(unittest.TestCase):
