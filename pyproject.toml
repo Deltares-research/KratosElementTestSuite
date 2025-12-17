@@ -14,7 +14,6 @@ include = ["kratos_element_test/assets/**",
            
 [tool.poetry.dependencies]
 python = ">=3.10,<3.15"
-
 matplotlib = "*"
 pefile = "*"
 platformdirs = "*"
@@ -22,6 +21,8 @@ Pillow = "*"
 pandas = "*"
 openpyxl = "*"
 KratosGeoMechanicsApplication = ">=10.2.3"
+pytest = "*"
+parameterized = "*"
 
 [tool.poetry.scripts]
 startElementTest = "kratos_element_test.ui.kratos_element_test_gui:main"

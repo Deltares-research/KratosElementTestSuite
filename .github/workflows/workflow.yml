@@ -22,7 +22,7 @@ jobs:
           cache: 'pip'
       - name: Display Python version
         run: python --version
-      - name : Install dependencies
-        run: pip install --upgrade pip pytest numpy parameterized
+      - name: Install dependencies
+        run: pip install --upgrade pip .
       - name: Run tests
         run: pytest
