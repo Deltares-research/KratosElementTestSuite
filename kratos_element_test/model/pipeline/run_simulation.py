@@ -8,11 +8,11 @@ import tempfile
 import numpy as np
 from pathlib import Path
 from typing import Callable, Dict, List, Optional, Tuple
-from kratos_element_test.core.core_utils import _fallback_log
-from kratos_element_test.core.io.material_editor import MaterialEditor
-from kratos_element_test.core.io.project_parameter_editor import ProjectParameterEditor
-from kratos_element_test.core.io.mdpa_editor import MdpaEditor
-from kratos_element_test.core.pipeline.generic_test_runner import GenericTestRunner
+from kratos_element_test.model.core_utils import _fallback_log
+from kratos_element_test.model.io.material_editor import MaterialEditor
+from kratos_element_test.model.io.project_parameter_editor import ProjectParameterEditor
+from kratos_element_test.model.io.mdpa_editor import MdpaEditor
+from kratos_element_test.model.pipeline.generic_test_runner import GenericTestRunner
 
 try:
     from importlib.resources import files as _res_files
@@ -140,13 +140,13 @@ class RunSimulation:
         here = Path(__file__).resolve()
         candidates = [
             here.parent / f"test_{test_type}",  # legacy: alongside run_simulation.py
-            here.parents[1] / "templates" / f"test_{test_type}",  # NEW: core/templates/test_*
-            here.parents[1] / f"test_{test_type}",  # legacy: under core/
+            here.parents[1] / "templates" / f"test_{test_type}",  # NEW: model/templates/test_*
+            here.parents[1] / f"test_{test_type}",  # legacy: under model/
             here.parents[2] / f"test_{test_type}",  # legacy: under project root
         ]
         if _res_files:
             try:
-                pkg_path = _res_files("kratos_element_test.core.templates") / f"test_{test_type}"
+                pkg_path = _res_files("kratos_element_test.model.templates") / f"test_{test_type}"
                 candidates.append(Path(str(pkg_path)))
             except Exception:
                 pass
