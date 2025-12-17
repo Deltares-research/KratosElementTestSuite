@@ -5,14 +5,14 @@
 import json
 import shutil
 import tempfile
+import numpy as np
 from pathlib import Path
 from typing import Callable, Dict, List, Optional, Tuple
-from kratos_element_test.core.core_utils import _fallback_log
-from kratos_element_test.core.io.material_editor import MaterialEditor
-from kratos_element_test.core.io.project_parameter_editor import ProjectParameterEditor
-from kratos_element_test.core.io.mdpa_editor import MdpaEditor
-from kratos_element_test.core.pipeline.generic_test_runner import GenericTestRunner
-from kratos_element_test.core.pipeline.result_collector import ResultCollector
+from kratos_element_test.model.core_utils import _fallback_log
+from kratos_element_test.model.io.material_editor import MaterialEditor
+from kratos_element_test.model.io.project_parameter_editor import ProjectParameterEditor
+from kratos_element_test.model.io.mdpa_editor import MdpaEditor
+from kratos_element_test.model.pipeline.generic_test_runner import GenericTestRunner
 
 try:
     from importlib.resources import files as _res_files
@@ -25,6 +25,18 @@ REQUIRED_FILES = [
     "ProjectParameters.json",
     "ProjectParametersOrchestrator.json",
 ]
+
+
+class _NoOpPlotter:
+    def triaxial(self, *args, **kwargs):
+        pass
+
+    def direct_shear(self, *args, **kwargs):
+        pass
+
+    def crs(self, *args, **kwargs):
+        pass
+
 
 class RunSimulation:
     def __init__(
@@ -39,6 +51,7 @@ class RunSimulation:
         maximum_strain: float,
         initial_effective_cell_pressure: float,
         cohesion_phi_indices: Optional[Tuple[int, int]] = None,
+        plotter=None,
         logger: Optional[Callable[[str, str], None]] = None,
         drainage: Optional[str] = None,
         stage_durations: Optional[List[float]] = None,
@@ -55,6 +68,7 @@ class RunSimulation:
         self.maximum_strain = maximum_strain
         self.initial_effective_cell_pressure = initial_effective_cell_pressure
         self.cohesion_phi_indices = cohesion_phi_indices
+        self.plotter = plotter or _NoOpPlotter()
         self.log = logger or _fallback_log
         self.drainage = drainage
         self.stage_durations = stage_durations
@@ -67,33 +81,47 @@ class RunSimulation:
         self.project_json_path: Optional[Path] = None
         self.mdpa_path: Optional[Path] = None
 
-    def run(self) -> None:
+    def run(self) -> Dict[str, List[float]]:
         self.log(f"Starting {self.test_type} simulation...", "info")
 
-        self._copy_simulation_files()
-
-        if self.test_type == "crs":
-            self._prepare_crs_stages()
-
-        self._set_material_constitutive_law()
-        self._set_project_parameters()
-        self._set_mdpa()
-
-        output_file_strings = [str(p) for p in self._output_file_paths()]
-        runner = GenericTestRunner(output_file_strings, str(self.tmp_dir))
-        runner.run()
-
-        self.log("Finished analysis", "info")
-
-    def post_process_results(self) -> Dict[str, List[float]]:
         try:
-            self.log("Collecting results...", "info")
+            self._copy_simulation_files()
 
-            output_file_strings = [str(p) for p in self._output_file_paths()]
-            collector = ResultCollector(
-                output_file_strings, self.material_parameters, self.cohesion_phi_indices
-            )
-            results = collector.collect_results()
+            if self.test_type == "crs":
+                self._prepare_crs_stages()
+
+            self._set_material_constitutive_law()
+            self._set_project_parameters()
+            self._set_mdpa()
+
+            output_files = self._output_file_paths()
+            runner = GenericTestRunner([str(p) for p in output_files], str(self.tmp_dir))
+
+            (tensors, yy_strain, vol_strain, von_mises, mean_stress,
+             shear_xy, shear_strain_xy, sigma_xx, sigma_yy, time_steps) = runner.run()
+
+            self.log("Finished analysis; collecting results...", "info")
+
+            sigma_1, sigma_3 = self._calculate_principal_stresses(tensors)
+            cohesion, phi = self._get_cohesion_phi(self.material_parameters, self.cohesion_phi_indices)
+
+            results = {
+                "yy_strain": yy_strain,
+                "vol_strain": vol_strain,
+                "sigma1": sigma_1,
+                "sigma3": sigma_3,
+                "shear_xy": shear_xy,
+                "shear_strain_xy": shear_strain_xy,
+                "mean_stress": mean_stress,
+                "von_mises": von_mises,
+                "cohesion": cohesion,
+                "phi": phi,
+                "sigma_xx": sigma_xx,
+                "sigma_yy": sigma_yy,
+                "time_steps": time_steps,
+            }
+
+            self._render(results)
             self.log("Rendering complete.", "info")
             return results
 
@@ -112,18 +140,13 @@ class RunSimulation:
         here = Path(__file__).resolve()
         candidates = [
             here.parent / f"test_{test_type}",  # legacy: alongside run_simulation.py
-            here.parents[1]
-            / "templates"
-            / f"test_{test_type}",  # NEW: core/templates/test_*
-            here.parents[1] / f"test_{test_type}",  # legacy: under core/
+            here.parents[1] / "templates" / f"test_{test_type}",  # NEW: model/templates/test_*
+            here.parents[1] / f"test_{test_type}",  # legacy: under model/
             here.parents[2] / f"test_{test_type}",  # legacy: under project root
         ]
         if _res_files:
             try:
-                pkg_path = (
-                    _res_files("kratos_element_test.core.templates")
-                    / f"test_{test_type}"
-                )
+                pkg_path = _res_files("kratos_element_test.model.templates") / f"test_{test_type}"
                 candidates.append(Path(str(pkg_path)))
             except Exception:
                 pass
@@ -165,9 +188,7 @@ class RunSimulation:
 
     def _prepare_crs_stages(self) -> None:
         if not self.stage_durations or not self.step_counts:
-            raise ValueError(
-                "CRS test requires both stage durations and step counts to be provided."
-            )
+            raise ValueError("CRS test requires both stage durations and step counts to be provided.")
 
         editor = ProjectParameterEditor(str(self.project_json_path))
         data = json.load(open(self.project_json_path, "r"))
@@ -175,30 +196,24 @@ class RunSimulation:
         required_stages = len(self.stage_durations)
 
         if required_stages > current_stages:
-            for d, s in zip(
-                self.stage_durations[current_stages:], self.step_counts[current_stages:]
-            ):
+            for d, s in zip(self.stage_durations[current_stages:], self.step_counts[current_stages:]):
                 editor.append_stage(duration=d, steps=s)
 
     def _set_material_constitutive_law(self) -> None:
         editor = MaterialEditor(str(self.material_json_path))
         if self.dll_path:
-            editor.update_material_properties(
-                {
-                    "IS_FORTRAN_UDSM": True,
-                    "UMAT_PARAMETERS": self.material_parameters,
-                    "UDSM_NAME": self.dll_path,
-                    "UDSM_NUMBER": self.udsm_number,
-                }
-            )
+            editor.update_material_properties({
+                "IS_FORTRAN_UDSM": True,
+                "UMAT_PARAMETERS": self.material_parameters,
+                "UDSM_NAME": self.dll_path,
+                "UDSM_NUMBER": self.udsm_number,
+            })
             editor.set_constitutive_law("SmallStrainUDSM2DPlaneStrainLaw")
         else:
-            editor.update_material_properties(
-                {
-                    "YOUNG_MODULUS": self.material_parameters[0],
-                    "POISSON_RATIO": self.material_parameters[1],
-                }
-            )
+            editor.update_material_properties({
+                "YOUNG_MODULUS": self.material_parameters[0],
+                "POISSON_RATIO": self.material_parameters[1],
+            })
             editor.set_constitutive_law("GeoLinearElasticPlaneStrain2DLaw")
 
     def _set_project_parameters(self) -> None:
@@ -220,26 +235,19 @@ class RunSimulation:
                     total += d
                     cumulative_end_times.append(total)
 
-                editor.update_stage_timings(
-                    cumulative_end_times, self.num_steps, start_time=0.0
-                )
+                editor.update_stage_timings(cumulative_end_times, self.num_steps, start_time=0.0)
 
                 if len(cumulative_end_times) > 1:
                     editor.update_top_displacement_table_numbers()
         else:
-            time_step = (
-                (self.stage_durations[0] / self.num_steps[0])
-                if (isinstance(self.num_steps, list) and self.stage_durations)
-                else (self.end_time / self.num_steps)
-            )
-            editor.update_property("time_step", time_step)
-            editor.update_property("end_time", self.end_time)
+            time_step = (self.stage_durations[0] / self.num_steps[0]) if (
+                        isinstance(self.num_steps, list) and self.stage_durations) else (self.end_time / self.num_steps)
+            editor.update_property('time_step', time_step)
+            editor.update_property('end_time', self.end_time)
 
         # initial stress vector [-σ, -σ, -σ, 0]
         stress_vector = [-self.initial_effective_cell_pressure] * 3 + [0.0]
-        editor.update_nested_value(
-            "apply_initial_uniform_stress_field", "value", stress_vector
-        )
+        editor.update_nested_value("apply_initial_uniform_stress_field", "value", stress_vector)
 
     def _set_mdpa(self) -> None:
         editor = MdpaEditor(str(self.mdpa_path))
@@ -253,9 +261,7 @@ class RunSimulation:
         editor.update_first_timestep(first_timestep)
 
         if self.test_type == "triaxial":
-            editor.update_initial_effective_cell_pressure(
-                self.initial_effective_cell_pressure
-            )
+            editor.update_initial_effective_cell_pressure(self.initial_effective_cell_pressure)
         if self.test_type == "direct_shear":
             editor.update_middle_maximum_strain(self.maximum_strain)
         if self.test_type == "crs" and self.strain_incs and self.stage_durations:
@@ -272,3 +278,51 @@ class RunSimulation:
                 for i in range(len(project_data["stages"]))
             ]
         return [self.tmp_dir / "gid_output" / "output.post.res"]
+
+    @staticmethod
+    def _calculate_principal_stresses(tensors: Dict[float, List[np.ndarray]]) -> Tuple[List[float], List[float]]:
+        sigma_1, sigma_3 = [], []
+        for time in sorted(tensors.keys()):
+            for sigma in tensors[time]:
+                eigenvalues, _ = np.linalg.eigh(sigma)
+                sigma_1.append(float(np.min(eigenvalues)))
+                sigma_3.append(float(np.max(eigenvalues)))
+        return sigma_1, sigma_3
+
+    @staticmethod
+    def _get_cohesion_phi(umat_parameters: List[float], indices: Optional[Tuple[int, int]]) -> Tuple[
+            Optional[float], Optional[float]]:
+        if not indices:
+            return None, None
+        c_idx, phi_idx = indices
+        return float(umat_parameters[c_idx - 1]), float(umat_parameters[phi_idx - 1])
+
+    def _render(self, results: Dict[str, List[float]]) -> None:
+        if not self.plotter:
+            self.log('No plotter was provided; using a no-op plotter (headless run).', 'info')
+            return
+
+        if self.test_type == "triaxial":
+            self.plotter.triaxial(
+                results["yy_strain"], results["vol_strain"],
+                results["sigma1"], results["sigma3"],
+                results["mean_stress"], results["von_mises"],
+                results["cohesion"], results["phi"],
+            )
+        elif self.test_type == "direct_shear":
+            self.plotter.direct_shear(
+                results["shear_strain_xy"], results["shear_xy"],
+                results["sigma1"], results["sigma3"],
+                results["mean_stress"], results["von_mises"],
+                results["cohesion"], results["phi"],
+            )
+        elif self.test_type == "crs":
+            self.plotter.crs(
+                results["yy_strain"], results["time_steps"],
+                results["sigma_yy"], results["sigma_xx"],
+                results["mean_stress"], results["von_mises"],
+                results["sigma1"], results["sigma3"],
+                results["cohesion"], results["phi"],
+            )
+        else:
+            raise ValueError(f"Unsupported test_type: {self.test_type}")

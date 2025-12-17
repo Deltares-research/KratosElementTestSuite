@@ -4,7 +4,7 @@
 
 from dataclasses import dataclass, field
 from typing import Optional, Tuple
-from kratos_element_test.ui.ui_constants import VALID_TEST_TYPES, VALID_DRAINAGE_TYPES
+from kratos_element_test.view.ui_constants import VALID_TEST_TYPES, VALID_DRAINAGE_TYPES
 
 
 @dataclass

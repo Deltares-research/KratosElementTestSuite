@@ -2,35 +2,37 @@
 # This is a prototype version
 # Contact kratos@deltares.nl
 
-import math
 import threading
-import traceback
 import tkinter as tk
-from tkinter import ttk, scrolledtext
 import tkinter.font as tkFont
-import matplotlib.pyplot as plt
-from matplotlib.gridspec import GridSpec
-from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+import traceback
+from tkinter import ttk, scrolledtext
+
 from PIL import Image, ImageTk
 
-from kratos_element_test.ui.element_test_controller import ElementTestController
+from kratos_element_test.controller.element_test_controller import ElementTestController
 from kratos_element_test.plotters.matplotlib_plotter import MatplotlibPlotter
-from kratos_element_test.ui.ui_logger import init_log_widget, log_message, clear_log
-from kratos_element_test.ui.ui_utils import _asset_path
-from kratos_element_test.ui.result_registry import register_ui_instance
-from kratos_element_test.ui.ui_constants import (
+from kratos_element_test.view.log_viewer import LogViewer
+from kratos_element_test.view.plot_viewer import PlotViewer
+from kratos_element_test.view.result_registry import register_ui_instance
+from kratos_element_test.view.soil_parameter_entries import SoilParameterEntries
+from kratos_element_test.view.ui_constants import (
     TRIAXIAL, DIRECT_SHEAR, CRS,
     TEST_NAME_TO_TYPE, TEST_IMAGE_FILES,
     MAX_STRAIN_LABEL, INIT_PRESSURE_LABEL, NUM_STEPS_LABEL, DURATION_LABEL, STRAIN_INCREMENT_LABEL, STEPS_LABEL,
     FL2_UNIT_LABEL, SECONDS_UNIT_LABEL, PERCENTAGE_UNIT_LABEL, WITHOUT_UNIT_LABEL,
     INPUT_SECTION_FONT, HELP_MENU_FONT
 )
+from kratos_element_test.view.ui_logger import log_message, clear_log
+from kratos_element_test.view.ui_utils import _asset_path
 
 
-class GeotechTestUI:
-    def __init__(self, root, parent_frame, test_name, dll_path, model_dict, external_widgets=None):
+class GeotechTestUI(ttk.Frame):
+    def __init__(self, root, test_name, dll_path, model_dict, external_widgets=None):
+        super().__init__(root)
+        self.pack(side="top", fill="both", expand=True)
+
         self.root = root
-        self.parent = parent_frame
         self.test_name = test_name
         self.dll_path = dll_path
         self.model_dict = model_dict
@@ -50,7 +52,7 @@ class GeotechTestUI:
 
         self._init_frames()
 
-        self.plot_frame = ttk.Frame(self.parent, padding="5", width=800, height=600)
+        self.plot_frame = PlotViewer(self, padding="5", width=800, height=600)
         self.plot_frame.pack(side="right", fill="both", expand=True, padx=5, pady=5)
 
         self.is_running = False
@@ -73,7 +75,7 @@ class GeotechTestUI:
         threading.Thread(target=self._run_simulation, daemon=True).start()
 
     def _init_frames(self):
-        self.left_panel = ttk.Frame(self.parent, width=555)
+        self.left_panel = ttk.Frame(self, width=555)
         self.left_panel.pack_propagate(False)
         self.left_panel.pack(side="left", fill="y", padx=10, pady=10)
 
@@ -99,7 +101,7 @@ class GeotechTestUI:
         self.dropdown_frame = ttk.Frame(self.left_frame)
         self.dropdown_frame.pack(fill="x")
 
-        self.param_frame = ttk.Frame(self.left_frame, padding="10")
+        self.param_frame = SoilParameterEntries(self.left_frame, padding="10")
         self.param_frame.pack(fill="both", expand=True, pady=10)
 
         self.button_frame = ttk.Frame(self.left_panel, padding="10")
@@ -111,17 +113,7 @@ class GeotechTestUI:
         self._init_log_section()
 
     def _init_plot_canvas(self, num_plots):
-        self._destroy_existing_plot_canvas()
-
-        self.fig = plt.figure(figsize=(12, 8), dpi=100)
-        rows = math.ceil(math.sqrt(num_plots))
-        cols = math.ceil(num_plots / rows)
-
-        self.gs = GridSpec(rows, cols, figure=self.fig, wspace=0.4, hspace=0.6)
-        self.axes = [self.fig.add_subplot(self.gs[i]) for i in range(num_plots)]
-        self.canvas = FigureCanvasTkAgg(self.fig, master=self.plot_frame)
-        self.canvas.draw()
-        self.canvas.get_tk_widget().pack(fill="both", expand=True)
+        self.plot_frame.initialize(num_plots)
 
     def _init_dropdown_section(self):
         ttk.Label(self.dropdown_frame, text="Select a Model:",
@@ -408,7 +400,7 @@ class GeotechTestUI:
                 raise ValueError(f"Unsupported test type: {test_type}")
 
             success = self.controller.run(
-                axes=self.axes,
+                axes=self.plot_frame.axes,
                 test_type=tt,
                 dll_path=self.dll_path or "",
                 udsm_number=udsm_number,
@@ -420,7 +412,7 @@ class GeotechTestUI:
             )
 
             if success:
-                self.canvas.draw()
+                self.plot_frame.draw()
                 log_message(f"{test_type} test completed successfully.", "info")
                 if hasattr(self.controller, "latest_results"):
                     self.latest_results = self.controller.latest_results
@@ -481,14 +473,6 @@ class GeotechTestUI:
         else:
             self.model_menu.configure(state="readonly")
 
-    def _destroy_existing_plot_canvas(self):
-        if hasattr(self, "plot_frame") and self.plot_frame.winfo_exists():
-            for widget in self.plot_frame.winfo_children():
-                widget.destroy()
-        self.fig = None
-        self.canvas = None
-        self.axes = []
-
     def _add_crs_row(self, duration=1.0, strain_inc=0.0, steps=100):
         row = {}
         row_frame = ttk.Frame(self.crs_table_frame)
@@ -537,26 +521,8 @@ class GeotechTestUI:
         self.scroll_canvas.yview_scroll(int(-1 * (event.delta / 120)), "units")
 
     def _init_log_section(self):
-        self.log_frame = ttk.Frame(self.left_panel, padding="5")
-        self.log_frame.pack(fill="x", padx=10, pady=(0, 10))
-
-        ttk.Label(self.log_frame, text="Log Output:", font=(INPUT_SECTION_FONT, 10, "bold")).pack(anchor="w")
-        self.log_widget = scrolledtext.ScrolledText(self.log_frame, height=6, width=40, state="normal",
-                                                    wrap="word", font=("Courier", 9))
-        self.log_widget.pack(fill="x", expand=False)
-
-        self.log_widget.bind("<Key>", lambda e: "break")
-        self.log_widget.bind("<Control-c>", lambda e: self._copy_selection())
-
-        init_log_widget(self.log_widget)
-
-    def _copy_selection(self):
-        try:
-            selection = self.log_widget.get("sel.first", "sel.last")
-            self.root.clipboard_clear()
-            self.root.clipboard_append(selection)
-        except tk.TclError:
-            pass
+        self.log_viewer = LogViewer(self.left_panel, padding="5")
+        self.log_viewer.pack(fill="x", padx=10, pady=(0, 10))
 
     def _extract_values_from_rows(self, label, data_type):
         try:
