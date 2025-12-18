@@ -2,7 +2,7 @@ import math
 from tkinter import ttk
 
 from matplotlib import pyplot as plt
-from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2Tk
 from matplotlib.gridspec import GridSpec
 
 
@@ -25,6 +25,9 @@ class PlotViewer(ttk.Frame):
         self.axes = [self.fig.add_subplot(self.gs[i]) for i in range(num_plots)]
         self.canvas = FigureCanvasTkAgg(self.fig, master=self)
         self.canvas.draw()
+        toolbar = NavigationToolbar2Tk(self.canvas, self)
+        toolbar.update()
+        toolbar.pack(side="bottom", fill="x")
         self.canvas.get_tk_widget().pack(fill="both", expand=True)
 
     def clear(self):
