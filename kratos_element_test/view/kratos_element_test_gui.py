@@ -10,11 +10,6 @@ from kratos_element_test.view.ui_menu import MainUI
 def main():
     current_dir = os.path.dirname(os.path.abspath(__file__))
     os.chdir(current_dir)
-    element_test_path = os.path.join(
-        current_dir, "applications", "GeoMechanicsApplication", "python_scripts", "element_test"
-    )
-    if element_test_path not in sys.path:
-        sys.path.insert(0, element_test_path)
     try:
         ui = MainUI()
         ui.create_menu()
