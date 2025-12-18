@@ -53,6 +53,7 @@ WITHOUT_UNIT_LABEL = ""
 # Menu labels
 SELECT_UDSM = "Select UDSM File"
 LINEAR_ELASTIC = "Linear Elastic Model"
+MOHR_COULOMB = "Mohr-Coulomb Model"
 
 # Font labels
 HELP_MENU_FONT = "Segoe UI"
