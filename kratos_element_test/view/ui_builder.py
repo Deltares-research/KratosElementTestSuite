@@ -37,6 +37,7 @@ class GeotechTestUI(ttk.Frame):
         self.dll_path = dll_path
         self.model_dict = model_dict
         self.is_linear_elastic = model_dict["model_name"][0].lower() == "linear elastic model"
+        self.is_mohr_coulomb = model_dict["model_name"][0].lower() == "Mohr-Coulomb model"
 
         self.model_var = tk.StringVar(root)
         self.model_var.set(model_dict["model_name"][0])
@@ -123,7 +124,7 @@ class GeotechTestUI(ttk.Frame):
         self.model_menu.pack(side="top", fill="x", expand=True, padx=5)
         self.model_var.trace("w", lambda *args: self._create_input_fields())
 
-        if self.is_linear_elastic:
+        if self.is_linear_elastic or self.is_mohr_coulomb:
             self.model_menu.configure(state="disabled")
         else:
             self.model_menu.configure(state="readonly")
@@ -402,6 +403,7 @@ class GeotechTestUI(ttk.Frame):
             success = self.controller.run(
                 axes=self.plot_frame.axes,
                 test_type=tt,
+                model_name=self.model_var.get(),
                 dll_path=self.dll_path or "",
                 udsm_number=udsm_number,
                 material_parameters=[float(x) for x in material_params],
