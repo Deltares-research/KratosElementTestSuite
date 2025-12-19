@@ -4,9 +4,8 @@ from typing import Dict, List, Optional, Tuple
 import numpy as np
 
 from kratos_element_test.model.core_utils import seconds_to_hours
-from kratos_element_test.model.io import gid_output_reader
 from kratos_element_test.view.ui_logger import log_message as fallback_log
-
+from KratosMultiphysics.GeoMechanicsApplication.gid_output_file_reader import GiDOutputFileReader
 
 class ResultCollector:
     def __init__(
@@ -79,7 +78,7 @@ class ResultCollector:
         }
 
     def _read_output(self, result_path: Path) -> dict:
-        return gid_output_reader.GiDOutputFileReader().read_output_from(result_path)
+        return GiDOutputFileReader().read_output_from(result_path)
 
     def _read_results(self, result_path: Path):
         result_path = Path(result_path)
@@ -110,7 +109,7 @@ class ResultCollector:
                     strain,
                 )
 
-        time_steps = gid_output_reader.GiDOutputFileReader.get_time_steps_from_first_valid_result(
+        time_steps = GiDOutputFileReader.get_time_steps_from_first_valid_result(
             output
         )
 
