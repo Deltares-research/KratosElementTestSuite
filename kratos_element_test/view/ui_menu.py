@@ -156,6 +156,11 @@ class MainUI:
         top_frame = ttk.Frame(root, padding="10")
         top_frame.pack(side="top", fill="x")
 
+        controller = ElementTestController(
+            logger=log_message,
+            plotter_factory=lambda axes: MatplotlibPlotter(axes, logger=log_message),
+            Ui=self.main_frame
+        )
         def load_dll():
             nonlocal last_model_source
             dll_path = filedialog.askopenfilename(title=SELECT_UDSM, filetypes=[("DLL files", "*.dll")])
@@ -177,7 +182,7 @@ class MainUI:
                     widget.destroy()
                 self.main_frame.destroy()
 
-            self.main_frame = GeotechTestUI(root, test_name="Triaxial", dll_path=dll_path, model_dict=model_dict,
+            self.main_frame = GeotechTestUI(root, controller, test_name="Triaxial", dll_path=dll_path, model_dict=model_dict,
                           external_widgets=[model_source_menu])
 
         def load_linear_elastic():
@@ -196,7 +201,7 @@ class MainUI:
                 self.main_frame.destroy()
 
 
-            self.main_frame = GeotechTestUI(root, test_name="Triaxial", dll_path=None, model_dict=model_dict,
+            self.main_frame = GeotechTestUI(root, controller, test_name="Triaxial", dll_path=None, model_dict=model_dict,
                               external_widgets=[model_source_menu])
 
         def handle_model_source_selection(event):

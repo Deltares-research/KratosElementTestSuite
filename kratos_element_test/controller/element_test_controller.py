@@ -9,7 +9,7 @@ from kratos_element_test.view.ui_constants import VALID_TEST_TYPES, VALID_DRAINA
 
 
 class ElementTestController:
-    def __init__(self, logger: Callable[[str, str], None], plotter_factory: Callable[[object], object]):
+    def __init__(self, logger: Callable[[str, str], None], plotter_factory: Callable[[object], object], Ui):
         self.latest_results = None
         self.latest_test_type = None
         self._logger = logger
