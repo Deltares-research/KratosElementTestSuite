@@ -85,8 +85,8 @@ class ElementTestController:
 
     def update_crs_duration(self, new_duration: float, index: int) -> None:
         self._logger(f"Updating CRS duration at index {index} to {new_duration}", "info")
-        self._main_model.soil_test_input_manager.input_data[CRS].strain_increments[index].duration = new_duration
-        self._logger(f"Updated CRS duration at index {index} to {self._main_model.soil_test_input_manager.input_data[CRS].strain_increments[index].duration}", "info")
+        self._main_model.soil_test_input_manager.input_data[CRS].strain_increments[index].duration_in_hours = new_duration
+        self._logger(f"Updated CRS duration at index {index} to {self._main_model.soil_test_input_manager.input_data[CRS].strain_increments[index].duration_in_hours}", "info")
 
     def update_crs_strain_increment(self, new_strain_increment: float, index: int) -> None:
         self._logger(f"Updating CRS strain increment at index {index} to {new_strain_increment}", "info")
@@ -111,13 +111,13 @@ class ElementTestController:
         self._logger(f"Updated number of steps to {self._main_model.soil_test_input_manager.input_data[test_type].number_of_steps}", "info")
 
     def update_duration(self, new_duration: float, test_type: str) -> None:
-        self._main_model.soil_test_input_manager.input_data[test_type].duration = new_duration
-        self._logger(f"Updated duration to {self._main_model.soil_test_input_manager.input_data[test_type].duration}", "info")
+        self._main_model.soil_test_input_manager.input_data[test_type].duration_in_hours = new_duration
+        self._logger(f"Updated duration to {self._main_model.soil_test_input_manager.input_data[test_type].duration_in_hours}", "info")
 
     def add_crs_strain_increment(self) -> None:
         self._logger("Adding new CRS strain increment.", "info")
         new_increment = StrainIncrement(
-            duration=1.0,
+            duration_in_hours=1.0,
             strain_increment=0.0,
             steps=100
         )

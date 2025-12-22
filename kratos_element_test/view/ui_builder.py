@@ -368,7 +368,7 @@ class GeotechTestUI(ttk.Frame):
             crs_input = self.controller.get_crs_inputs()
 
             for increment in crs_input.strain_increments:
-                self._add_crs_row(duration=increment.duration, strain_inc=increment.strain_increment, steps=increment.steps)
+                self._add_crs_row(duration=increment.duration_in_hours, strain_inc=increment.strain_increment, steps=increment.steps)
 
         log_message(f"{test_name} test selected.", "info")
 
@@ -540,7 +540,7 @@ class GeotechTestUI(ttk.Frame):
         self.controller.add_crs_strain_increment()
         crs_input = self.controller.get_crs_inputs()
 
-        self._add_crs_row(duration=crs_input.strain_increments[-1].duration,
+        self._add_crs_row(duration=crs_input.strain_increments[-1].duration_in_hours,
                           strain_inc=crs_input.strain_increments[-1].strain_increment,
                           steps=crs_input.strain_increments[-1].steps)
 

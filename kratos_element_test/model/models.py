@@ -58,7 +58,7 @@ class TriaxialAndShearSimulationInputs:
 
 @dataclass
 class StrainIncrement:
-    duration: float
+    duration_in_hours: float
     strain_increment: float
     steps: int
 
@@ -67,6 +67,10 @@ class StrainIncrement:
 class CRSSimulationInputs:
     test_type: VALID_TEST_TYPES
     strain_increments: list[StrainIncrement]
+    maximum_strain: float = 0.0
+    number_of_steps: int = 0
+    duration_in_seconds: float = 0.0
+    initial_effective_cell_pressure: float = 0.0
 
     def validate(self) -> None:
         if self.test_type not in ("triaxial", "direct_shear", "crs"):
