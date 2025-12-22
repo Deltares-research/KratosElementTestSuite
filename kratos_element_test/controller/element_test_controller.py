@@ -84,35 +84,25 @@ class ElementTestController:
 
 
     def update_crs_duration(self, new_duration: float, index: int) -> None:
-        self._logger(f"Updating CRS duration at index {index} to {new_duration}", "info")
         self._main_model.soil_test_input_manager.input_data[CRS].strain_increments[index].duration_in_hours = new_duration
-        self._logger(f"Updated CRS duration at index {index} to {self._main_model.soil_test_input_manager.input_data[CRS].strain_increments[index].duration_in_hours}", "info")
 
     def update_crs_strain_increment(self, new_strain_increment: float, index: int) -> None:
-        self._logger(f"Updating CRS strain increment at index {index} to {new_strain_increment}", "info")
         self._main_model.soil_test_input_manager.input_data[CRS].strain_increments[index].strain_increment = new_strain_increment
-        self._logger(f"Updated CRS strain increment at index {index} to {self._main_model.soil_test_input_manager.input_data[CRS].strain_increments[index].strain_increment}", "info")
 
     def update_crs_number_of_steps(self, new_steps: int, index: int) -> None:
-        self._logger(f"Updating CRS number of steps at index {index} to {new_steps}", "info")
-        self._main_model.soil_test_input_manager.input_data[CRS].strain_increments[index].steps = new_steps
-        self._logger(f"Updated CRS number of steps at index {index} to {self._main_model.soil_test_input_manager.input_data[CRS].strain_increments[index].steps}", "info")
+        self._main_model.soil_test_input_manager.set_crs_strain_increment(index, new_steps)
 
     def update_init_pressure(self, new_pressure: float, test_type: str) -> None:
         self._main_model.soil_test_input_manager.input_data[test_type].initial_effective_cell_pressure = new_pressure
-        self._logger(f"Updated initial effective cell pressure to {self._main_model.soil_test_input_manager.input_data[test_type].initial_effective_cell_pressure}", "info")
 
     def update_max_strain(self, new_strain: float, test_type: str) -> None:
         self._main_model.soil_test_input_manager.input_data[TRIAXIAL].maximum_strain = new_strain
-        self._logger(f"Updated maximum strain to {self._main_model.soil_test_input_manager.input_data[test_type].maximum_strain}", "info")
 
     def update_num_steps(self, new_steps: int, test_type: str) -> None:
         self._main_model.soil_test_input_manager.input_data[test_type].number_of_steps = new_steps
-        self._logger(f"Updated number of steps to {self._main_model.soil_test_input_manager.input_data[test_type].number_of_steps}", "info")
 
     def update_duration(self, new_duration: float, test_type: str) -> None:
         self._main_model.soil_test_input_manager.input_data[test_type].duration_in_hours = new_duration
-        self._logger(f"Updated duration to {self._main_model.soil_test_input_manager.input_data[test_type].duration_in_hours}", "info")
 
     def add_crs_strain_increment(self) -> None:
         self._logger("Adding new CRS strain increment.", "info")
@@ -127,9 +117,7 @@ class ElementTestController:
     def remove_last_crs_strain_increment(self):
         pass
         if len(self._main_model.soil_test_input_manager.input_data[CRS].strain_increments) > 1:
-            self._logger("Removing last CRS strain increment.", "info")
             self._main_model.soil_test_input_manager.input_data[CRS].strain_increments.pop()
-            self._logger("Removed last CRS strain increment.", "info")
         else:
             self._logger("Cannot remove the last CRS strain increment; at least one must remain.", "warn")
 
