@@ -23,7 +23,7 @@ class SoilTestInputManagerTest(unittest.TestCase):
         self.assertIsNotNone(crs_inputs)
         self.assertEqual(len(crs_inputs.strain_increments), 5)
 
-        expected_number_of_steps = 500 # 5 increments * 100 steps each
+        expected_number_of_steps = 500  # 5 increments * 100 steps each
         self.assertEqual(expected_number_of_steps, crs_inputs.number_of_steps)
 
     def test_total_duration_for_crs(self):
@@ -32,9 +32,8 @@ class SoilTestInputManagerTest(unittest.TestCase):
         self.assertIsNotNone(crs_inputs)
         self.assertEqual(len(crs_inputs.strain_increments), 5)
 
-        expected_duration = 5.0 * 3600 # 5 increments * 1.0 hour each
+        expected_duration = 5.0 * 3600  # 5 increments * 1.0 hour each
         self.assertEqual(expected_duration, crs_inputs.duration_in_seconds)
-
 
     def test_max_strain_for_crs_after_updates(self):
         input_manager = SoilTestInputManager()
@@ -57,7 +56,6 @@ class SoilTestInputManagerTest(unittest.TestCase):
         expected_duration = 5.5 * 3600
         self.assertEqual(expected_duration, crs_inputs.duration_in_seconds)
 
-
     def test_number_of_steps_for_crs_after_updates(self):
         input_manager = SoilTestInputManager()
 
@@ -67,6 +65,7 @@ class SoilTestInputManagerTest(unittest.TestCase):
 
         expected_number_of_steps = 550
         self.assertEqual(expected_number_of_steps, crs_inputs.number_of_steps)
+
 
 if __name__ == "__main__":
     unittest.main()
