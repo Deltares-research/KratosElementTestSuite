@@ -16,6 +16,7 @@ from kratos_element_test.view.ui_constants import (
     VALID_DRAINAGE_TYPES,
     TRIAXIAL,
     DIRECT_SHEAR,
+    CRS,
 )
 
 
@@ -76,6 +77,25 @@ class ElementTestController:
 
     def get_shear_inputs(self) -> TriaxialAndShearSimulationInputs:
         return self._main_model.soil_test_input_manager.input_data.get(DIRECT_SHEAR)
+
+    def get_crs_inputs(self):
+        return self._main_model.soil_test_input_manager.input_data.get(CRS)
+
+
+    def update_crs_duration(self, new_duration: float, index: int) -> None:
+        self._logger(f"Updating CRS duration at index {index} to {new_duration}", "info")
+        self._main_model.soil_test_input_manager.input_data[CRS].strain_increments[index].duration = new_duration
+        self._logger(f"Updated CRS duration at index {index} to {self._main_model.soil_test_input_manager.input_data[CRS].strain_increments[index].duration}", "info")
+
+    def update_crs_strain_increment(self, new_strain_increment: float, index: int) -> None:
+        self._logger(f"Updating CRS strain increment at index {index} to {new_strain_increment}", "info")
+        self._main_model.soil_test_input_manager.input_data[CRS].strain_increments[index].strain_increment = new_strain_increment
+        self._logger(f"Updated CRS strain increment at index {index} to {self._main_model.soil_test_input_manager.input_data[CRS].strain_increments[index].strain_increment}", "info")
+
+    def update_crs_number_of_steps(self, new_steps: int, index: int) -> None:
+        self._logger(f"Updating CRS number of steps at index {index} to {new_steps}", "info")
+        self._main_model.soil_test_input_manager.input_data[CRS].strain_increments[index].steps = new_steps
+        self._logger(f"Updated CRS number of steps at index {index} to {self._main_model.soil_test_input_manager.input_data[CRS].strain_increments[index].steps}", "info")
 
     def update_init_pressure(self, new_pressure: float, test_type: str) -> None:
         self._main_model.soil_test_input_manager.input_data[test_type].initial_effective_cell_pressure = new_pressure

@@ -364,10 +364,19 @@ class GeotechTestUI(ttk.Frame):
             self.crs_table_frame.pack(fill="x", padx=10, pady=5)
 
             self.crs_rows = []
-            for _ in range(5):
-                self._add_crs_row(duration=1.0, strain_inc=0.0, steps=100)
 
-            self._restore_inputs(test_name)
+            crs_input = self.controller.get_crs_inputs()
+
+            for increment in crs_input.strain_increments:
+                self._add_crs_row(duration=increment.duration, strain_inc=increment.strain_increment, steps=increment.steps)
+
+            for i, row in enumerate(self.crs_rows):
+                row[DURATION_LABEL].bind("<FocusOut>", lambda e, idx=i: self.controller.update_crs_duration(
+                    new_duration=float(self.crs_rows[idx][DURATION_LABEL].get()), index = idx))
+                row[STRAIN_INCREMENT_LABEL].bind("<FocusOut>", lambda e, idx=i: self.controller.update_crs_strain_increment(
+                    new_strain_increment=float(self.crs_rows[idx][STRAIN_INCREMENT_LABEL].get()), index = idx))
+                row[STEPS_LABEL].bind("<FocusOut>", lambda e, idx=i: self.controller.update_crs_number_of_steps(
+                    new_steps=float(self.crs_rows[idx][STEPS_LABEL].get()), index = idx))
 
         log_message(f"{test_name} test selected.", "info")
 
