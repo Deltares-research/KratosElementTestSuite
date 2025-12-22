@@ -221,10 +221,8 @@ class MainUI:
                     widget.destroy()
                 self.main_frame.destroy()
 
-            self.main_frame = GeotechTestUI(
-                root, test_name="Triaxial", dll_path=None, model_dict=model_dict,
-                external_widgets=[model_source_menu]
-            )
+            self.main_frame = GeotechTestUI(root, test_name="Triaxial", dll_path=None, model_dict=model_dict,
+                                            external_widgets=[model_source_menu])
 
         def handle_model_source_selection(event):
             choice = model_source_var.get()

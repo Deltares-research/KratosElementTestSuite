@@ -141,28 +141,7 @@ class GeotechTestUI(ttk.Frame):
         self.entry_widgets = self._create_entries(self.param_frame, "Soil Input Parameters",
                                                   params, units, default_values)
 
-        self.mohr_checkbox = tk.BooleanVar()
-        self.cohesion_var = tk.StringVar(value="3")
-        self.phi_var = tk.StringVar(value="4")
-        self._create_mohr_options(params)
-
-        if self.is_linear_elastic:
-            self.controller.set_mohr_enabled(False)
-            self.controller.set_mohr_mapping(None, None)
-            self.mohr_checkbox_widget.configure(state="disabled")
-
-        elif self.is_mohr_coulomb:
-            self.controller.set_mohr_enabled(True)
-            self.cohesion_var = tk.StringVar(value="3")
-            self.phi_var = tk.StringVar(value="4")
-
-            c_idx, phi_idx = self._parse_mc_indices()
-            self.controller.set_mohr_mapping(c_idx, phi_idx)
-
-            self.mohr_checkbox_widget.configure(state="disabled")
-
-        else:
-            self.mohr_checkbox_widget.configure(state="normal")
+        self.setup_mohr_coulomb_controls(params)
 
         self.test_selector_frame = ttk.Frame(self.param_frame, padding="5")
         self.test_selector_frame.pack(fill="x", pady=(10, 5))
@@ -278,6 +257,30 @@ class GeotechTestUI(ttk.Frame):
 
             for w in widgets:
                 w.pack_forget()
+
+    def setup_mohr_coulomb_controls(self, params):
+        self.mohr_checkbox = tk.BooleanVar()
+        self.cohesion_var = tk.StringVar(value="3")
+        self.phi_var = tk.StringVar(value="4")
+        self._create_mohr_options(params)
+
+        if self.is_linear_elastic:
+            self.controller.set_mohr_enabled(False)
+            self.controller.set_mohr_mapping(None, None)
+            self.mohr_checkbox_widget.configure(state="disabled")
+
+        elif self.is_mohr_coulomb:
+            self.controller.set_mohr_enabled(True)
+            self.cohesion_var = tk.StringVar(value="3")
+            self.phi_var = tk.StringVar(value="4")
+
+            c_idx, phi_idx = self._parse_mc_indices()
+            self.controller.set_mohr_mapping(c_idx, phi_idx)
+
+            self.mohr_checkbox_widget.configure(state="disabled")
+
+        else:
+            self.mohr_checkbox_widget.configure(state="normal")
 
     def _switch_test(self, test_name):
 
