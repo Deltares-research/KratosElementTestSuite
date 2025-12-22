@@ -350,7 +350,7 @@ class GeotechTestUI(ttk.Frame):
             add_row_button = ttk.Button(
                 self.crs_button_frame,
                 text="Add Row",
-                command=self._add_crs_row)
+                command=self._add_new_crs_row)
             add_row_button.pack(side="left", padx=5)
 
             self.remove_row_button = ttk.Button(
@@ -369,14 +369,6 @@ class GeotechTestUI(ttk.Frame):
 
             for increment in crs_input.strain_increments:
                 self._add_crs_row(duration=increment.duration, strain_inc=increment.strain_increment, steps=increment.steps)
-
-            for i, row in enumerate(self.crs_rows):
-                row[DURATION_LABEL].bind("<FocusOut>", lambda e, idx=i: self.controller.update_crs_duration(
-                    new_duration=float(self.crs_rows[idx][DURATION_LABEL].get()), index = idx))
-                row[STRAIN_INCREMENT_LABEL].bind("<FocusOut>", lambda e, idx=i: self.controller.update_crs_strain_increment(
-                    new_strain_increment=float(self.crs_rows[idx][STRAIN_INCREMENT_LABEL].get()), index = idx))
-                row[STEPS_LABEL].bind("<FocusOut>", lambda e, idx=i: self.controller.update_crs_number_of_steps(
-                    new_steps=float(self.crs_rows[idx][STEPS_LABEL].get()), index = idx))
 
         log_message(f"{test_name} test selected.", "info")
 
@@ -531,10 +523,27 @@ class GeotechTestUI(ttk.Frame):
             ttk.Label(row_frame, text=unit).pack(side="left", padx=0)
             row[label] = entry
 
+        current_index = len(self.crs_rows)
+        row[DURATION_LABEL].bind("<FocusOut>", lambda e, idx=current_index: self.controller.update_crs_duration(
+            new_duration=float(self.crs_rows[idx][DURATION_LABEL].get()), index = idx))
+        row[STRAIN_INCREMENT_LABEL].bind("<FocusOut>", lambda e, idx=current_index: self.controller.update_crs_strain_increment(
+            new_strain_increment=float(self.crs_rows[idx][STRAIN_INCREMENT_LABEL].get()), index = idx))
+        row[STEPS_LABEL].bind("<FocusOut>", lambda e, idx=current_index: self.controller.update_crs_number_of_steps(
+            new_steps=float(self.crs_rows[idx][STEPS_LABEL].get()), index = idx))
+
         self.crs_rows.append(row)
 
         if len(self.crs_rows) > 1:
             self.remove_row_button.config(state="normal")
+
+    def _add_new_crs_row(self):
+        self.controller.add_crs_strain_increment()
+        crs_input = self.controller.get_crs_inputs()
+
+        self._add_crs_row(duration=crs_input.strain_increments[-1].duration,
+                          strain_inc=crs_input.strain_increments[-1].strain_increment,
+                          steps=crs_input.strain_increments[-1].steps)
+
 
     def _prevent_removal_last_crs_row(self):
         minimum_number_of_rows = 1

@@ -10,6 +10,7 @@ from kratos_element_test.model.models import (
     SimulationInputs,
     MohrCoulombOptions,
     TriaxialAndShearSimulationInputs,
+    StrainIncrement,
 )
 from kratos_element_test.view.ui_constants import (
     VALID_TEST_TYPES,
@@ -112,6 +113,16 @@ class ElementTestController:
     def update_duration(self, new_duration: float, test_type: str) -> None:
         self._main_model.soil_test_input_manager.input_data[test_type].duration = new_duration
         self._logger(f"Updated duration to {self._main_model.soil_test_input_manager.input_data[test_type].duration}", "info")
+
+    def add_crs_strain_increment(self) -> None:
+        self._logger("Adding new CRS strain increment.", "info")
+        new_increment = StrainIncrement(
+            duration=1.0,
+            strain_increment=0.0,
+            steps=100
+        )
+        self._main_model.soil_test_input_manager.input_data[CRS].strain_increments.append(new_increment)
+        self._logger("Added new CRS strain increment.", "info")
 
     def run(self,
             *,
