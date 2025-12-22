@@ -124,6 +124,15 @@ class ElementTestController:
         self._main_model.soil_test_input_manager.input_data[CRS].strain_increments.append(new_increment)
         self._logger("Added new CRS strain increment.", "info")
 
+    def remove_last_crs_strain_increment(self):
+        pass
+        if len(self._main_model.soil_test_input_manager.input_data[CRS].strain_increments) > 1:
+            self._logger("Removing last CRS strain increment.", "info")
+            self._main_model.soil_test_input_manager.input_data[CRS].strain_increments.pop()
+            self._logger("Removed last CRS strain increment.", "info")
+        else:
+            self._logger("Cannot remove the last CRS strain increment; at least one must remain.", "warn")
+
     def run(self,
             *,
             axes,

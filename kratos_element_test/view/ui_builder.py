@@ -557,6 +557,7 @@ class GeotechTestUI(ttk.Frame):
             row = self.crs_rows.pop()
             row_frame = next(iter(row.values())).master
             row_frame.destroy()
+        self.controller.remove_last_crs_strain_increment()
 
         self._prevent_removal_last_crs_row()
 
