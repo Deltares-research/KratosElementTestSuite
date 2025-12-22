@@ -105,14 +105,12 @@ class ElementTestController:
         self._main_model.soil_test_input_manager.input_data[test_type].duration_in_hours = new_duration
 
     def add_crs_strain_increment(self) -> None:
-        self._logger("Adding new CRS strain increment.", "info")
         new_increment = StrainIncrement(
             duration_in_hours=1.0,
             strain_increment=0.0,
             steps=100
         )
         self._main_model.soil_test_input_manager.input_data[CRS].strain_increments.append(new_increment)
-        self._logger("Added new CRS strain increment.", "info")
 
     def remove_last_crs_strain_increment(self):
         pass
