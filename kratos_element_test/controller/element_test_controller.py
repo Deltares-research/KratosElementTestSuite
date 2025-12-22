@@ -3,9 +3,15 @@
 # Contact kratos@deltares.nl
 
 from typing import Optional, Callable, List, Tuple, Dict
+
+from kratos_element_test.model.main_model import MainModel
 from kratos_element_test.model.pipeline.run_simulation import RunSimulation
 from kratos_element_test.model.models import SimulationInputs, MohrCoulombOptions
-from kratos_element_test.view.ui_constants import VALID_TEST_TYPES, VALID_DRAINAGE_TYPES
+from kratos_element_test.view.ui_constants import (
+    VALID_TEST_TYPES,
+    VALID_DRAINAGE_TYPES,
+    TRIAXIAL,
+)
 
 
 class ElementTestController:
@@ -21,6 +27,7 @@ class ElementTestController:
 
         self._test_type: Optional[str] = None
         self._drainage: str = "drained"
+        self._main_model = MainModel()
 
     def set_mohr_enabled(self, enabled: bool) -> None:
         self._mc_enabled = bool(enabled)
@@ -58,6 +65,9 @@ class ElementTestController:
         if not self._is_valid_drainage(drainage):
             return
         self._drainage = drainage
+
+    def get_triaxial_inputs(self) -> SimulationInputs:
+        return self._main_model.soil_test_input_manager.input_data.get(TRIAXIAL)
 
     def run(self,
             *,

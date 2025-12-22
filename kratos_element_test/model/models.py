@@ -37,3 +37,21 @@ class SimulationInputs:
             raise ValueError("Number of steps must be > 0.")
         if self.duration <= 0:
             raise ValueError("Duration must be > 0.")
+
+
+@dataclass
+class TriaxialSimulationInputs:
+    test_type: VALID_TEST_TYPES
+    maximum_strain: float
+    initial_effective_cell_pressure: float
+    number_of_steps: int
+    duration: float
+    drainage: VALID_DRAINAGE_TYPES = "drained"
+
+    def validate(self) -> None:
+        if self.test_type not in ("triaxial", "direct_shear", "crs"):
+            raise ValueError("Unsupported test type.")
+        if self.number_of_steps <= 0:
+            raise ValueError("Number of steps must be > 0.")
+        if self.duration <= 0:
+            raise ValueError("Duration must be > 0.")

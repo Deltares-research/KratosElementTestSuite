@@ -280,13 +280,17 @@ class GeotechTestUI(ttk.Frame):
             ttk.Label(self.test_input_frame, text="Triaxial Input Data",
                       font=(INPUT_SECTION_FONT, 12, "bold")).pack(anchor="w", padx=5, pady=(5, 0))
             self._add_test_type_dropdown(self.test_input_frame)
+
+            inputs = self.controller.get_triaxial_inputs()
+
+            input_values = {INIT_PRESSURE_LABEL: inputs.initial_effective_cell_pressure, MAX_STRAIN_LABEL: inputs.maximum_strain,
+                        NUM_STEPS_LABEL: inputs.number_of_steps, DURATION_LABEL: inputs.duration}
             self.triaxial_widgets = self._create_entries(
                 self.test_input_frame,
                 "",
                 [INIT_PRESSURE_LABEL, MAX_STRAIN_LABEL, NUM_STEPS_LABEL, DURATION_LABEL],
                 [FL2_UNIT_LABEL, PERCENTAGE_UNIT_LABEL, WITHOUT_UNIT_LABEL, SECONDS_UNIT_LABEL],
-                {INIT_PRESSURE_LABEL: "100", MAX_STRAIN_LABEL: "20",
-                 NUM_STEPS_LABEL: "100", DURATION_LABEL: "1.0"}
+                input_values
             )
             self._restore_inputs(test_name)
 
