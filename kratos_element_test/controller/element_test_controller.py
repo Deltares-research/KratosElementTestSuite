@@ -69,6 +69,22 @@ class ElementTestController:
     def get_triaxial_inputs(self) -> SimulationInputs:
         return self._main_model.soil_test_input_manager.input_data.get(TRIAXIAL)
 
+    def update_triaxial_init_pressure(self, new_pressure: float) -> None:
+        self._main_model.soil_test_input_manager.input_data[TRIAXIAL].initial_effective_cell_pressure = new_pressure
+        self._logger(f"Updated initial effective cell pressure to {self._main_model.soil_test_input_manager.input_data[TRIAXIAL].initial_effective_cell_pressure}", "info")
+
+    def update_triaxial_max_strain_pressure(self, new_strain: float) -> None:
+        self._main_model.soil_test_input_manager.input_data[TRIAXIAL].maximum_strain = new_strain
+        self._logger(f"Updated maximum strain to {self._main_model.soil_test_input_manager.input_data[TRIAXIAL].maximum_strain}", "info")
+
+    def update_triaxial_num_steps(self, new_steps: int) -> None:
+        self._main_model.soil_test_input_manager.input_data[TRIAXIAL].number_of_steps = new_steps
+        self._logger(f"Updated number of steps to {self._main_model.soil_test_input_manager.input_data[TRIAXIAL].number_of_steps}", "info")
+
+    def update_triaxial_duration(self, new_duration: float) -> None:
+        self._main_model.soil_test_input_manager.input_data[TRIAXIAL].duration = new_duration
+        self._logger(f"Updated duration to {self._main_model.soil_test_input_manager.input_data[TRIAXIAL].duration}", "info")
+
     def run(self,
             *,
             axes,

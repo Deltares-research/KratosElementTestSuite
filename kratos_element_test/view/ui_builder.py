@@ -292,7 +292,19 @@ class GeotechTestUI(ttk.Frame):
                 [FL2_UNIT_LABEL, PERCENTAGE_UNIT_LABEL, WITHOUT_UNIT_LABEL, SECONDS_UNIT_LABEL],
                 input_values
             )
-            self._restore_inputs(test_name)
+
+            self.triaxial_widgets[INIT_PRESSURE_LABEL].bind("<FocusOut>", lambda e: self.controller.update_triaxial_init_pressure(
+                new_pressure=float(self.triaxial_widgets[INIT_PRESSURE_LABEL].get())
+            ))
+            self.triaxial_widgets[MAX_STRAIN_LABEL].bind("<FocusOut>", lambda e: self.controller.update_triaxial_max_strain_pressure(
+                new_strain=float(self.triaxial_widgets[MAX_STRAIN_LABEL].get())
+            ))
+            self.triaxial_widgets[NUM_STEPS_LABEL].bind("<FocusOut>", lambda e: self.controller.update_triaxial_num_steps(
+                new_steps=float(self.triaxial_widgets[NUM_STEPS_LABEL].get())
+            ))
+            self.triaxial_widgets[DURATION_LABEL].bind("<FocusOut>", lambda e: self.controller.update_triaxial_duration(
+                new_duration=float(self.triaxial_widgets[DURATION_LABEL].get())
+            ))
 
         elif test_name == DIRECT_SHEAR:
             self._init_plot_canvas(num_plots=4)
