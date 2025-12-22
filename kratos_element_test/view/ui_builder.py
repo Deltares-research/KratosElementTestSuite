@@ -293,17 +293,17 @@ class GeotechTestUI(ttk.Frame):
                 input_values
             )
 
-            self.triaxial_widgets[INIT_PRESSURE_LABEL].bind("<FocusOut>", lambda e: self.controller.update_triaxial_init_pressure(
-                new_pressure=float(self.triaxial_widgets[INIT_PRESSURE_LABEL].get())
+            self.triaxial_widgets[INIT_PRESSURE_LABEL].bind("<FocusOut>", lambda e: self.controller.update_init_pressure(
+                new_pressure=float(self.triaxial_widgets[INIT_PRESSURE_LABEL].get()), test_type=TRIAXIAL
             ))
-            self.triaxial_widgets[MAX_STRAIN_LABEL].bind("<FocusOut>", lambda e: self.controller.update_triaxial_max_strain_pressure(
-                new_strain=float(self.triaxial_widgets[MAX_STRAIN_LABEL].get())
+            self.triaxial_widgets[MAX_STRAIN_LABEL].bind("<FocusOut>", lambda e: self.controller.update_max_strain(
+                new_strain=float(self.triaxial_widgets[MAX_STRAIN_LABEL].get()), test_type=TRIAXIAL
             ))
-            self.triaxial_widgets[NUM_STEPS_LABEL].bind("<FocusOut>", lambda e: self.controller.update_triaxial_num_steps(
-                new_steps=float(self.triaxial_widgets[NUM_STEPS_LABEL].get())
+            self.triaxial_widgets[NUM_STEPS_LABEL].bind("<FocusOut>", lambda e: self.controller.update_num_steps(
+                new_steps=float(self.triaxial_widgets[NUM_STEPS_LABEL].get()), test_type=TRIAXIAL
             ))
-            self.triaxial_widgets[DURATION_LABEL].bind("<FocusOut>", lambda e: self.controller.update_triaxial_duration(
-                new_duration=float(self.triaxial_widgets[DURATION_LABEL].get())
+            self.triaxial_widgets[DURATION_LABEL].bind("<FocusOut>", lambda e: self.controller.update_duration(
+                new_duration=float(self.triaxial_widgets[DURATION_LABEL].get()), test_type=TRIAXIAL
             ))
 
         elif test_name == DIRECT_SHEAR:
@@ -311,15 +311,31 @@ class GeotechTestUI(ttk.Frame):
             ttk.Label(self.test_input_frame, text="Direct Simple Shear Input Data",
                       font=(INPUT_SECTION_FONT, 12, "bold")).pack(anchor="w", padx=5, pady=(5, 0))
             self._add_test_type_dropdown(self.test_input_frame)
+
+            inputs = self.controller.get_shear_inputs()
+
+            input_values = {INIT_PRESSURE_LABEL: inputs.initial_effective_cell_pressure, MAX_STRAIN_LABEL: inputs.maximum_strain,
+                            NUM_STEPS_LABEL: inputs.number_of_steps, DURATION_LABEL: inputs.duration}
             self.shear_widgets = self._create_entries(
                 self.test_input_frame,
                 "",
                 [INIT_PRESSURE_LABEL, MAX_STRAIN_LABEL, NUM_STEPS_LABEL, DURATION_LABEL],
                 [FL2_UNIT_LABEL, PERCENTAGE_UNIT_LABEL, WITHOUT_UNIT_LABEL, SECONDS_UNIT_LABEL],
-                {INIT_PRESSURE_LABEL: "100", MAX_STRAIN_LABEL: "20",
-                 NUM_STEPS_LABEL: "100", DURATION_LABEL: "1.0"}
+                input_values
             )
-            self._restore_inputs(test_name)
+
+            self.shear_widgets[INIT_PRESSURE_LABEL].bind("<FocusOut>", lambda e: self.controller.update_init_pressure(
+                new_pressure=float(self.shear_widgets[INIT_PRESSURE_LABEL].get()), test_type=DIRECT_SHEAR
+            ))
+            self.shear_widgets[MAX_STRAIN_LABEL].bind("<FocusOut>", lambda e: self.controller.update_max_strain(
+                new_strain=float(self.shear_widgets[MAX_STRAIN_LABEL].get()), test_type=DIRECT_SHEAR
+            ))
+            self.shear_widgets[NUM_STEPS_LABEL].bind("<FocusOut>", lambda e: self.controller.update_num_steps(
+                new_steps=float(self.shear_widgets[NUM_STEPS_LABEL].get()), test_type=DIRECT_SHEAR
+            ))
+            self.shear_widgets[DURATION_LABEL].bind("<FocusOut>", lambda e: self.controller.update_duration(
+                new_duration=float(self.shear_widgets[DURATION_LABEL].get()), test_type=DIRECT_SHEAR
+            ))
 
         elif test_name == CRS:
             self._init_plot_canvas(num_plots=5)

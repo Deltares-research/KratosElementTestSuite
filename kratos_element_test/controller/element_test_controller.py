@@ -6,11 +6,16 @@ from typing import Optional, Callable, List, Tuple, Dict
 
 from kratos_element_test.model.main_model import MainModel
 from kratos_element_test.model.pipeline.run_simulation import RunSimulation
-from kratos_element_test.model.models import SimulationInputs, MohrCoulombOptions
+from kratos_element_test.model.models import (
+    SimulationInputs,
+    MohrCoulombOptions,
+    TriaxialAndShearSimulationInputs,
+)
 from kratos_element_test.view.ui_constants import (
     VALID_TEST_TYPES,
     VALID_DRAINAGE_TYPES,
     TRIAXIAL,
+    DIRECT_SHEAR,
 )
 
 
@@ -66,24 +71,27 @@ class ElementTestController:
             return
         self._drainage = drainage
 
-    def get_triaxial_inputs(self) -> SimulationInputs:
+    def get_triaxial_inputs(self) -> TriaxialAndShearSimulationInputs:
         return self._main_model.soil_test_input_manager.input_data.get(TRIAXIAL)
 
-    def update_triaxial_init_pressure(self, new_pressure: float) -> None:
-        self._main_model.soil_test_input_manager.input_data[TRIAXIAL].initial_effective_cell_pressure = new_pressure
-        self._logger(f"Updated initial effective cell pressure to {self._main_model.soil_test_input_manager.input_data[TRIAXIAL].initial_effective_cell_pressure}", "info")
+    def get_shear_inputs(self) -> TriaxialAndShearSimulationInputs:
+        return self._main_model.soil_test_input_manager.input_data.get(DIRECT_SHEAR)
 
-    def update_triaxial_max_strain_pressure(self, new_strain: float) -> None:
+    def update_init_pressure(self, new_pressure: float, test_type: str) -> None:
+        self._main_model.soil_test_input_manager.input_data[test_type].initial_effective_cell_pressure = new_pressure
+        self._logger(f"Updated initial effective cell pressure to {self._main_model.soil_test_input_manager.input_data[test_type].initial_effective_cell_pressure}", "info")
+
+    def update_max_strain(self, new_strain: float, test_type: str) -> None:
         self._main_model.soil_test_input_manager.input_data[TRIAXIAL].maximum_strain = new_strain
-        self._logger(f"Updated maximum strain to {self._main_model.soil_test_input_manager.input_data[TRIAXIAL].maximum_strain}", "info")
+        self._logger(f"Updated maximum strain to {self._main_model.soil_test_input_manager.input_data[test_type].maximum_strain}", "info")
 
-    def update_triaxial_num_steps(self, new_steps: int) -> None:
-        self._main_model.soil_test_input_manager.input_data[TRIAXIAL].number_of_steps = new_steps
-        self._logger(f"Updated number of steps to {self._main_model.soil_test_input_manager.input_data[TRIAXIAL].number_of_steps}", "info")
+    def update_num_steps(self, new_steps: int, test_type: str) -> None:
+        self._main_model.soil_test_input_manager.input_data[test_type].number_of_steps = new_steps
+        self._logger(f"Updated number of steps to {self._main_model.soil_test_input_manager.input_data[test_type].number_of_steps}", "info")
 
-    def update_triaxial_duration(self, new_duration: float) -> None:
-        self._main_model.soil_test_input_manager.input_data[TRIAXIAL].duration = new_duration
-        self._logger(f"Updated duration to {self._main_model.soil_test_input_manager.input_data[TRIAXIAL].duration}", "info")
+    def update_duration(self, new_duration: float, test_type: str) -> None:
+        self._main_model.soil_test_input_manager.input_data[test_type].duration = new_duration
+        self._logger(f"Updated duration to {self._main_model.soil_test_input_manager.input_data[test_type].duration}", "info")
 
     def run(self,
             *,

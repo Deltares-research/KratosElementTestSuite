@@ -40,7 +40,7 @@ class SimulationInputs:
 
 
 @dataclass
-class TriaxialSimulationInputs:
+class TriaxialAndShearSimulationInputs:
     test_type: VALID_TEST_TYPES
     maximum_strain: float
     initial_effective_cell_pressure: float
