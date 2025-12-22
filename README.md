@@ -34,10 +34,7 @@ Once installed, you can run the Element Test Suite by:
 startElementTest
 ```
 ## Running after installation
-Running the Element Test Suite after installation requires you to activate the virtual environment first:
-```bash
-element_env\Scripts\activate
-```
+Please make sure that the virtual environment is active before running the suite (the name of your environment `element_env` should be visible in parentheses at the start of the line.)
 After activating the virtual environment, you can run the Element Test Suite by:
 ```bash
 startElementTest
