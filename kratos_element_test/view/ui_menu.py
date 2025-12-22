@@ -212,7 +212,7 @@ class MainUI:
                     "Tensile Strength",
                     "Dilatancy Angle",
                 ]],
-                "param_units": [["kN/m²", "deg", "kN/m²", "deg"]],
+                "param_units": [["kN/m²", "-", "kN/m²", "deg", "kN/m²", "deg"]],
             }
             last_model_source = MOHR_COULOMB
 
