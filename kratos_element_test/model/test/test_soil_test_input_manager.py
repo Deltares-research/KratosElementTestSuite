@@ -49,7 +49,7 @@ class SoilTestInputManagerTest(unittest.TestCase):
     def test_duration_for_crs_after_updates(self):
         input_manager = SoilTestInputManager()
 
-        input_manager.set_duration(index=0, new_duration_in_hours=1.5)
+        input_manager.set_crs_duration(index=0, new_duration_in_hours=1.5)
 
         crs_inputs = input_manager.input_data.get("CRS")
 
@@ -59,7 +59,7 @@ class SoilTestInputManagerTest(unittest.TestCase):
     def test_number_of_steps_for_crs_after_updates(self):
         input_manager = SoilTestInputManager()
 
-        input_manager.set_steps(index=0, new_steps=150)
+        input_manager.set_crs_steps(index=0, new_steps=150)
 
         crs_inputs = input_manager.input_data.get("CRS")
 

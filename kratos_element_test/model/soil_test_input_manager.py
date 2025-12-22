@@ -57,13 +57,13 @@ class SoilTestInputManager:
 
         self.update_crs_totals()
 
-    def set_duration(self, index, new_duration_in_hours):
+    def set_crs_duration(self, index, new_duration_in_hours):
         crs_inputs = self.input_data.get(CRS)
         crs_inputs.strain_increments[index].duration_in_hours = new_duration_in_hours
 
         self.update_crs_totals()
 
-    def set_steps(self, index, new_steps):
+    def set_crs_steps(self, index, new_steps):
         crs_inputs = self.input_data.get(CRS)
         crs_inputs.strain_increments[index].steps = new_steps
 

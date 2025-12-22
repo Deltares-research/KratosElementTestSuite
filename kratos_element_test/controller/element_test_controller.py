@@ -84,13 +84,13 @@ class ElementTestController:
 
 
     def update_crs_duration(self, new_duration: float, index: int) -> None:
-        self._main_model.soil_test_input_manager.input_data[CRS].strain_increments[index].duration_in_hours = new_duration
+        self._main_model.soil_test_input_manager.set_crs_duration(index, new_duration)
 
     def update_crs_strain_increment(self, new_strain_increment: float, index: int) -> None:
-        self._main_model.soil_test_input_manager.input_data[CRS].strain_increments[index].strain_increment = new_strain_increment
+        self._main_model.soil_test_input_manager.set_crs_strain_increment(index, new_strain_increment)
 
     def update_crs_number_of_steps(self, new_steps: int, index: int) -> None:
-        self._main_model.soil_test_input_manager.set_crs_strain_increment(index, new_steps)
+        self._main_model.soil_test_input_manager.set_crs_steps(index, new_steps)
 
     def update_init_pressure(self, new_pressure: float, test_type: str) -> None:
         self._main_model.soil_test_input_manager.input_data[test_type].initial_effective_cell_pressure = new_pressure
