@@ -1,5 +1,13 @@
 from kratos_element_test.model.models import TriaxialAndShearSimulationInputs
-from kratos_element_test.view.ui_constants import TRIAXIAL, DIRECT_SHEAR, CRS
+from kratos_element_test.view.ui_constants import (
+    TRIAXIAL,
+    DIRECT_SHEAR,
+    CRS,
+    INIT_PRESSURE_LABEL,
+    MAX_STRAIN_LABEL,
+    NUM_STEPS_LABEL,
+    DURATION_LABEL,
+)
 
 
 class SoilTestInputController:
@@ -56,3 +64,17 @@ class SoilTestInputController:
                 "Cannot remove the last CRS strain increment; at least one must remain.",
                 "warn",
             )
+
+    def bind_widgets_to_handling_functions(self, widgets, test_type: str) -> None:
+        widgets[INIT_PRESSURE_LABEL].bind("<FocusOut>", lambda e: self.update_init_pressure(
+            new_pressure=float(widgets[INIT_PRESSURE_LABEL].get()), test_type=test_type
+        ))
+        widgets[MAX_STRAIN_LABEL].bind("<FocusOut>", lambda e: self.update_max_strain(
+            new_strain=float(widgets[MAX_STRAIN_LABEL].get()), test_type=test_type
+        ))
+        widgets[NUM_STEPS_LABEL].bind("<FocusOut>", lambda e: self.update_num_steps(
+            new_steps=int(widgets[NUM_STEPS_LABEL].get()), test_type=test_type
+        ))
+        widgets[DURATION_LABEL].bind("<FocusOut>", lambda e: self.update_duration(
+            new_duration=float(widgets[DURATION_LABEL].get()), test_type=test_type
+        ))

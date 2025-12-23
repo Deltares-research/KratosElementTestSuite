@@ -294,18 +294,7 @@ class GeotechTestUI(ttk.Frame):
                 input_values
             )
 
-            self.triaxial_widgets[INIT_PRESSURE_LABEL].bind("<FocusOut>", lambda e: test_input_controller.update_init_pressure(
-                new_pressure=float(self.triaxial_widgets[INIT_PRESSURE_LABEL].get()), test_type=TRIAXIAL
-            ))
-            self.triaxial_widgets[MAX_STRAIN_LABEL].bind("<FocusOut>", lambda e: test_input_controller.update_max_strain(
-                new_strain=float(self.triaxial_widgets[MAX_STRAIN_LABEL].get()), test_type=TRIAXIAL
-            ))
-            self.triaxial_widgets[NUM_STEPS_LABEL].bind("<FocusOut>", lambda e: test_input_controller.update_num_steps(
-                new_steps=float(self.triaxial_widgets[NUM_STEPS_LABEL].get()), test_type=TRIAXIAL
-            ))
-            self.triaxial_widgets[DURATION_LABEL].bind("<FocusOut>", lambda e: test_input_controller.update_duration(
-                new_duration=float(self.triaxial_widgets[DURATION_LABEL].get()), test_type=TRIAXIAL
-            ))
+            test_input_controller.bind_widgets_to_handling_functions(self.triaxial_widgets, TRIAXIAL)
 
         elif test_name == DIRECT_SHEAR:
             self._init_plot_canvas(num_plots=4)
@@ -326,18 +315,7 @@ class GeotechTestUI(ttk.Frame):
                 input_values
             )
 
-            self.shear_widgets[INIT_PRESSURE_LABEL].bind("<FocusOut>", lambda e: test_input_controller.update_init_pressure(
-                new_pressure=float(self.shear_widgets[INIT_PRESSURE_LABEL].get()), test_type=DIRECT_SHEAR
-            ))
-            self.shear_widgets[MAX_STRAIN_LABEL].bind("<FocusOut>", lambda e: test_input_controller.update_max_strain(
-                new_strain=float(self.shear_widgets[MAX_STRAIN_LABEL].get()), test_type=DIRECT_SHEAR
-            ))
-            self.shear_widgets[NUM_STEPS_LABEL].bind("<FocusOut>", lambda e: test_input_controller.update_num_steps(
-                new_steps=float(self.shear_widgets[NUM_STEPS_LABEL].get()), test_type=DIRECT_SHEAR
-            ))
-            self.shear_widgets[DURATION_LABEL].bind("<FocusOut>", lambda e: test_input_controller.update_duration(
-                new_duration=float(self.shear_widgets[DURATION_LABEL].get()), test_type=DIRECT_SHEAR
-            ))
+            test_input_controller.bind_widgets_to_handling_functions(self.shear_widgets, DIRECT_SHEAR)
 
         elif test_name == CRS:
             self._init_plot_canvas(num_plots=5)
