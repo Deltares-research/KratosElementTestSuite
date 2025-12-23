@@ -1,4 +1,5 @@
 from kratos_element_test.model.models import TriaxialAndShearSimulationInputs
+from kratos_element_test.model.soil_test_input_manager import SoilTestInputManager
 from kratos_element_test.view.ui_constants import (
     TRIAXIAL,
     DIRECT_SHEAR,
@@ -7,11 +8,13 @@ from kratos_element_test.view.ui_constants import (
     MAX_STRAIN_LABEL,
     NUM_STEPS_LABEL,
     DURATION_LABEL,
+    STRAIN_INCREMENT_LABEL,
+    STEPS_LABEL,
 )
 
 
 class SoilTestInputController:
-    def __init__(self, soil_test_input_manager):
+    def __init__(self, soil_test_input_manager: SoilTestInputManager):
         self._soil_test_input_manager = soil_test_input_manager
 
     def get_triaxial_inputs(self) -> TriaxialAndShearSimulationInputs:
@@ -56,16 +59,10 @@ class SoilTestInputController:
         self._soil_test_input_manager.add_strain_increment()
 
     def remove_last_crs_strain_increment(self):
-        pass
-        if len(self._soil_test_input_manager.input_data[CRS].strain_increments) > 1:
-            self._soil_test_input_manager.input_data[CRS].strain_increments.pop()
-        else:
-            self._logger(
-                "Cannot remove the last CRS strain increment; at least one must remain.",
-                "warn",
-            )
+        self._soil_test_input_manager.remove_last_crs_strain_increment()
 
-    def bind_widgets_to_handling_functions(self, widgets, test_type: str) -> None:
+
+    def bind_test_input_fields_to_update_functions(self, widgets, test_type: str) -> None:
         widgets[INIT_PRESSURE_LABEL].bind("<FocusOut>", lambda e: self.update_init_pressure(
             new_pressure=float(widgets[INIT_PRESSURE_LABEL].get()), test_type=test_type
         ))
@@ -78,3 +75,11 @@ class SoilTestInputController:
         widgets[DURATION_LABEL].bind("<FocusOut>", lambda e: self.update_duration(
             new_duration=float(widgets[DURATION_LABEL].get()), test_type=test_type
         ))
+
+    def bind_crs_test_input_row_to_update_functions(self, row, current_index: int) -> None:
+        row[DURATION_LABEL].bind("<FocusOut>", lambda e, idx=current_index: self.update_crs_duration(
+            new_duration=float(row[DURATION_LABEL].get()), index = idx))
+        row[STRAIN_INCREMENT_LABEL].bind("<FocusOut>", lambda e, idx=current_index: self.update_crs_strain_increment(
+            new_strain_increment=float(row[STRAIN_INCREMENT_LABEL].get()), index = idx))
+        row[STEPS_LABEL].bind("<FocusOut>", lambda e, idx=current_index: self.update_crs_number_of_steps(
+            new_steps=int(row[STEPS_LABEL].get()), index = idx))

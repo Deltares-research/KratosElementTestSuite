@@ -294,7 +294,7 @@ class GeotechTestUI(ttk.Frame):
                 input_values
             )
 
-            test_input_controller.bind_widgets_to_handling_functions(self.triaxial_widgets, TRIAXIAL)
+            test_input_controller.bind_test_input_fields_to_update_functions(self.triaxial_widgets, TRIAXIAL)
 
         elif test_name == DIRECT_SHEAR:
             self._init_plot_canvas(num_plots=4)
@@ -315,7 +315,7 @@ class GeotechTestUI(ttk.Frame):
                 input_values
             )
 
-            test_input_controller.bind_widgets_to_handling_functions(self.shear_widgets, DIRECT_SHEAR)
+            test_input_controller.bind_test_input_fields_to_update_functions(self.shear_widgets, DIRECT_SHEAR)
 
         elif test_name == CRS:
             self._init_plot_canvas(num_plots=5)
@@ -505,14 +505,8 @@ class GeotechTestUI(ttk.Frame):
 
         test_input_controller = self.controller._soil_test_input_controller
         current_index = len(self.crs_rows)
-        row[DURATION_LABEL].bind("<FocusOut>", lambda e, idx=current_index: test_input_controller.update_crs_duration(
-            new_duration=float(self.crs_rows[idx][DURATION_LABEL].get()), index = idx))
-        row[STRAIN_INCREMENT_LABEL].bind("<FocusOut>", lambda e, idx=current_index: test_input_controller.update_crs_strain_increment(
-            new_strain_increment=float(self.crs_rows[idx][STRAIN_INCREMENT_LABEL].get()), index = idx))
-        row[STEPS_LABEL].bind("<FocusOut>", lambda e, idx=current_index: test_input_controller.update_crs_number_of_steps(
-            new_steps=float(self.crs_rows[idx][STEPS_LABEL].get()), index = idx))
-
         self.crs_rows.append(row)
+        test_input_controller.bind_crs_test_input_row_to_update_functions(self.crs_rows[current_index], current_index)
 
         if len(self.crs_rows) > 1:
             self.remove_row_button.config(state="normal")

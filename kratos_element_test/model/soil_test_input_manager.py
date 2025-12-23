@@ -41,9 +41,12 @@ class SoilTestInputManager:
         crs_inputs.number_of_steps = sum(
             increment.steps for increment in crs_inputs.strain_increments
         )
-        crs_inputs.duration_in_seconds = hours_to_seconds(sum(
-            increment.duration_in_hours for increment in crs_inputs.strain_increments
-        ))
+        crs_inputs.duration_in_seconds = hours_to_seconds(
+            sum(
+                increment.duration_in_hours
+                for increment in crs_inputs.strain_increments
+            )
+        )
         crs_inputs.maximum_strain = sum(
             increment.strain_increment for increment in crs_inputs.strain_increments
         )
@@ -68,11 +71,13 @@ class SoilTestInputManager:
 
     def add_strain_increment(self):
         crs_inputs = self.input_data.get(CRS)
-        crs_inputs.strain_increments.append(
-            self.default_strain_increment()
-        )
+        crs_inputs.strain_increments.append(self.default_strain_increment())
 
         self.update_crs_totals()
+
+    def remove_last_crs_strain_increment(self):
+        if len(self.input_data[CRS].strain_increments) > 1:
+            self.input_data[CRS].strain_increments.pop()
 
     @staticmethod
     def default_strain_increment():
