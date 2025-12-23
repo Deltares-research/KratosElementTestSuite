@@ -6,25 +6,19 @@ from typing import Optional, Callable, List, Tuple, Dict
 
 from kratos_element_test.controller.soil_test_input_controller import SoilTestInputController
 from kratos_element_test.model.main_model import MainModel
-from kratos_element_test.model.pipeline.run_simulation import RunSimulation
 from kratos_element_test.model.models import (
     SimulationInputs,
     MohrCoulombOptions,
-    TriaxialAndShearSimulationInputs,
-    StrainIncrement,
 )
+from kratos_element_test.model.pipeline.run_simulation import RunSimulation
 from kratos_element_test.view.ui_constants import (
     VALID_TEST_TYPES,
     VALID_DRAINAGE_TYPES,
-    TRIAXIAL,
-    DIRECT_SHEAR,
-    CRS,
 )
 
 
 class ElementTestController:
     def __init__(self, logger: Callable[[str, str], None], plotter_factory: Callable[[object], object]):
-        self.ui = None
         self.latest_results = None
         self.latest_test_type = None
         self._logger = logger
@@ -193,6 +187,3 @@ class ElementTestController:
             )
         else:
             raise ValueError(f"Unsupported test_type: {test_type}")
-
-    def setUI(self, ui):
-        self.ui = ui

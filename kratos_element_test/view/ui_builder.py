@@ -28,7 +28,7 @@ from kratos_element_test.view.ui_utils import _asset_path
 
 
 class GeotechTestUI(ttk.Frame):
-    def __init__(self, root, controller, test_name, dll_path, model_dict, external_widgets=None):
+    def __init__(self, root, test_name, dll_path, model_dict, external_widgets=None):
         super().__init__(root)
         self.pack(side="top", fill="both", expand=True)
 
@@ -58,7 +58,10 @@ class GeotechTestUI(ttk.Frame):
         self.is_running = False
         self.external_widgets = external_widgets if external_widgets else []
 
-        self.controller = controller
+        self.controller = ElementTestController(
+            logger=log_message,
+            plotter_factory=lambda axes: MatplotlibPlotter(axes, logger=log_message)
+        )
 
         register_ui_instance(self)
         self._init_dropdown_section()
