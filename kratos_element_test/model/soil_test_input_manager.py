@@ -69,6 +69,18 @@ class SoilTestInputManager:
 
         self.update_crs_totals()
 
+    def update_init_pressure(self, new_pressure: float, test_type: str) -> None:
+        self.input_data[test_type].initial_effective_cell_pressure = new_pressure
+
+    def update_max_strain(self, new_strain: float, test_type: str) -> None:
+        self.input_data[test_type].maximum_strain = new_strain
+
+    def update_num_steps(self, new_steps: int, test_type: str) -> None:
+        self.input_data[test_type].number_of_steps = new_steps
+
+    def update_duration(self, new_duration: float, test_type: str) -> None:
+        self.input_data[test_type].duration = new_duration
+
     def add_strain_increment(self):
         crs_inputs = self.input_data.get(CRS)
         crs_inputs.strain_increments.append(self.default_strain_increment())
