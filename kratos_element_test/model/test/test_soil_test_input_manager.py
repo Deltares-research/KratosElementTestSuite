@@ -90,7 +90,9 @@ class SoilTestInputManagerTest(unittest.TestCase):
 
     def test_update_init_pressure(self):
         self.input_manager.update_init_pressure(250.0, TRIAXIAL)
-        updated = self.input_manager.input_data[TRIAXIAL].initial_effective_cell_pressure
+        updated = self.input_manager.input_data[
+            TRIAXIAL
+        ].initial_effective_cell_pressure
         self.assertEqual(updated, 250.0)
 
 
