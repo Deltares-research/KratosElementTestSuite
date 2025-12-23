@@ -71,6 +71,7 @@ class SoilTestInputManager:
 
     def update_init_pressure(self, new_pressure: float, test_type: str) -> None:
         self.input_data[test_type].initial_effective_cell_pressure = new_pressure
+        print("Updated initial pressure:", new_pressure)
 
     def update_max_strain(self, new_strain: float, test_type: str) -> None:
         self.input_data[test_type].maximum_strain = new_strain
