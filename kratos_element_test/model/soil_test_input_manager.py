@@ -31,13 +31,10 @@ class SoilTestInputManager:
             ),
             CRS: CRSSimulationInputs(
                 test_type=TEST_NAME_TO_TYPE.get(CRS),
-                strain_increments=self._create_default_strain_increments(),
+                strain_increments=[self.default_strain_increment() for _ in range(5)],
             ),
         }
         self.update_crs_totals()
-
-    def _create_default_strain_increments(self):
-        return [StrainIncrement(duration_in_hours=1.0, strain_increment=0.0, steps=100) for _ in range(5)]
 
     def update_crs_totals(self):
         crs_inputs = self.input_data.get(CRS)
@@ -68,3 +65,15 @@ class SoilTestInputManager:
         crs_inputs.strain_increments[index].steps = new_steps
 
         self.update_crs_totals()
+
+    def add_strain_increment(self):
+        crs_inputs = self.input_data.get(CRS)
+        crs_inputs.strain_increments.append(
+            self.default_strain_increment()
+        )
+
+        self.update_crs_totals()
+
+    @staticmethod
+    def default_strain_increment():
+        return StrainIncrement(duration_in_hours=1.0, strain_increment=0.0, steps=100)

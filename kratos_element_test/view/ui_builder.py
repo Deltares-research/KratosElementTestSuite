@@ -281,7 +281,8 @@ class GeotechTestUI(ttk.Frame):
                       font=(INPUT_SECTION_FONT, 12, "bold")).pack(anchor="w", padx=5, pady=(5, 0))
             self._add_test_type_dropdown(self.test_input_frame)
 
-            inputs = self.controller.get_triaxial_inputs()
+            test_input_controller = self.controller._soil_test_input_controller
+            inputs = test_input_controller.get_triaxial_inputs()
 
             input_values = {INIT_PRESSURE_LABEL: inputs.initial_effective_cell_pressure, MAX_STRAIN_LABEL: inputs.maximum_strain,
                         NUM_STEPS_LABEL: inputs.number_of_steps, DURATION_LABEL: inputs.duration}
@@ -293,16 +294,16 @@ class GeotechTestUI(ttk.Frame):
                 input_values
             )
 
-            self.triaxial_widgets[INIT_PRESSURE_LABEL].bind("<FocusOut>", lambda e: self.controller.update_init_pressure(
+            self.triaxial_widgets[INIT_PRESSURE_LABEL].bind("<FocusOut>", lambda e: test_input_controller.update_init_pressure(
                 new_pressure=float(self.triaxial_widgets[INIT_PRESSURE_LABEL].get()), test_type=TRIAXIAL
             ))
-            self.triaxial_widgets[MAX_STRAIN_LABEL].bind("<FocusOut>", lambda e: self.controller.update_max_strain(
+            self.triaxial_widgets[MAX_STRAIN_LABEL].bind("<FocusOut>", lambda e: test_input_controller.update_max_strain(
                 new_strain=float(self.triaxial_widgets[MAX_STRAIN_LABEL].get()), test_type=TRIAXIAL
             ))
-            self.triaxial_widgets[NUM_STEPS_LABEL].bind("<FocusOut>", lambda e: self.controller.update_num_steps(
+            self.triaxial_widgets[NUM_STEPS_LABEL].bind("<FocusOut>", lambda e: test_input_controller.update_num_steps(
                 new_steps=float(self.triaxial_widgets[NUM_STEPS_LABEL].get()), test_type=TRIAXIAL
             ))
-            self.triaxial_widgets[DURATION_LABEL].bind("<FocusOut>", lambda e: self.controller.update_duration(
+            self.triaxial_widgets[DURATION_LABEL].bind("<FocusOut>", lambda e: test_input_controller.update_duration(
                 new_duration=float(self.triaxial_widgets[DURATION_LABEL].get()), test_type=TRIAXIAL
             ))
 
@@ -312,7 +313,8 @@ class GeotechTestUI(ttk.Frame):
                       font=(INPUT_SECTION_FONT, 12, "bold")).pack(anchor="w", padx=5, pady=(5, 0))
             self._add_test_type_dropdown(self.test_input_frame)
 
-            inputs = self.controller.get_shear_inputs()
+            test_input_controller = self.controller._soil_test_input_controller
+            inputs = test_input_controller.get_shear_inputs()
 
             input_values = {INIT_PRESSURE_LABEL: inputs.initial_effective_cell_pressure, MAX_STRAIN_LABEL: inputs.maximum_strain,
                             NUM_STEPS_LABEL: inputs.number_of_steps, DURATION_LABEL: inputs.duration}
@@ -324,16 +326,16 @@ class GeotechTestUI(ttk.Frame):
                 input_values
             )
 
-            self.shear_widgets[INIT_PRESSURE_LABEL].bind("<FocusOut>", lambda e: self.controller.update_init_pressure(
+            self.shear_widgets[INIT_PRESSURE_LABEL].bind("<FocusOut>", lambda e: test_input_controller.update_init_pressure(
                 new_pressure=float(self.shear_widgets[INIT_PRESSURE_LABEL].get()), test_type=DIRECT_SHEAR
             ))
-            self.shear_widgets[MAX_STRAIN_LABEL].bind("<FocusOut>", lambda e: self.controller.update_max_strain(
+            self.shear_widgets[MAX_STRAIN_LABEL].bind("<FocusOut>", lambda e: test_input_controller.update_max_strain(
                 new_strain=float(self.shear_widgets[MAX_STRAIN_LABEL].get()), test_type=DIRECT_SHEAR
             ))
-            self.shear_widgets[NUM_STEPS_LABEL].bind("<FocusOut>", lambda e: self.controller.update_num_steps(
+            self.shear_widgets[NUM_STEPS_LABEL].bind("<FocusOut>", lambda e: test_input_controller.update_num_steps(
                 new_steps=float(self.shear_widgets[NUM_STEPS_LABEL].get()), test_type=DIRECT_SHEAR
             ))
-            self.shear_widgets[DURATION_LABEL].bind("<FocusOut>", lambda e: self.controller.update_duration(
+            self.shear_widgets[DURATION_LABEL].bind("<FocusOut>", lambda e: test_input_controller.update_duration(
                 new_duration=float(self.shear_widgets[DURATION_LABEL].get()), test_type=DIRECT_SHEAR
             ))
 
@@ -365,7 +367,7 @@ class GeotechTestUI(ttk.Frame):
 
             self.crs_rows = []
 
-            crs_input = self.controller.get_crs_inputs()
+            crs_input = self.controller._soil_test_input_controller.get_crs_inputs()
 
             for increment in crs_input.strain_increments:
                 self._add_crs_row(duration=increment.duration_in_hours, strain_inc=increment.strain_increment, steps=increment.steps)
@@ -523,12 +525,13 @@ class GeotechTestUI(ttk.Frame):
             ttk.Label(row_frame, text=unit).pack(side="left", padx=0)
             row[label] = entry
 
+        test_input_controller = self.controller._soil_test_input_controller
         current_index = len(self.crs_rows)
-        row[DURATION_LABEL].bind("<FocusOut>", lambda e, idx=current_index: self.controller.update_crs_duration(
+        row[DURATION_LABEL].bind("<FocusOut>", lambda e, idx=current_index: test_input_controller.update_crs_duration(
             new_duration=float(self.crs_rows[idx][DURATION_LABEL].get()), index = idx))
-        row[STRAIN_INCREMENT_LABEL].bind("<FocusOut>", lambda e, idx=current_index: self.controller.update_crs_strain_increment(
+        row[STRAIN_INCREMENT_LABEL].bind("<FocusOut>", lambda e, idx=current_index: test_input_controller.update_crs_strain_increment(
             new_strain_increment=float(self.crs_rows[idx][STRAIN_INCREMENT_LABEL].get()), index = idx))
-        row[STEPS_LABEL].bind("<FocusOut>", lambda e, idx=current_index: self.controller.update_crs_number_of_steps(
+        row[STEPS_LABEL].bind("<FocusOut>", lambda e, idx=current_index: test_input_controller.update_crs_number_of_steps(
             new_steps=float(self.crs_rows[idx][STEPS_LABEL].get()), index = idx))
 
         self.crs_rows.append(row)
@@ -537,8 +540,10 @@ class GeotechTestUI(ttk.Frame):
             self.remove_row_button.config(state="normal")
 
     def _add_new_crs_row(self):
-        self.controller.add_crs_strain_increment()
-        crs_input = self.controller.get_crs_inputs()
+        test_input_controller = self.controller._soil_test_input_controller
+
+        test_input_controller.add_crs_strain_increment()
+        crs_input = test_input_controller.get_crs_inputs()
 
         self._add_crs_row(duration=crs_input.strain_increments[-1].duration_in_hours,
                           strain_inc=crs_input.strain_increments[-1].strain_increment,
@@ -557,7 +562,7 @@ class GeotechTestUI(ttk.Frame):
             row = self.crs_rows.pop()
             row_frame = next(iter(row.values())).master
             row_frame.destroy()
-        self.controller.remove_last_crs_strain_increment()
+        self.controller._soil_test_input_controller.remove_last_crs_strain_increment()
 
         self._prevent_removal_last_crs_row()
 
