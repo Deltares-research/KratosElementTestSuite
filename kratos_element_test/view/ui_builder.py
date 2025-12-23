@@ -208,7 +208,6 @@ class GeotechTestUI(ttk.Frame):
             row.pack(fill="x", padx=10, pady=2)
             ttk.Label(row, text=label, font=default_font).pack(side="left", padx=5)
             entry = ttk.Entry(row, font=default_font, width=20, textvariable=string_var)
-            # entry.insert(0, defaults.get(label, ""))
             entry.pack(side="left", fill="x", expand=True)
             ttk.Label(row, text=unit, font=default_font).pack(side="left", padx=5)
             widgets[label] = entry
