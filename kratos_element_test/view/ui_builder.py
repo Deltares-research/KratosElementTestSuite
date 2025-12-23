@@ -271,10 +271,6 @@ class GeotechTestUI(ttk.Frame):
                 w.pack_forget()
 
     def _switch_test(self, test_name):
-        if hasattr(self, "run_button") and self.run_button.winfo_exists():
-            self.run_button.focus_set()
-        self.root.update_idletasks()
-        print(self.focus_get())
         clear_log()
         self.current_test.set(test_name)
 
