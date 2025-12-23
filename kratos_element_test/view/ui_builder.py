@@ -263,9 +263,6 @@ class GeotechTestUI(ttk.Frame):
                 w.pack_forget()
 
     def _switch_test(self, test_name):
-
-        self._save_current_inputs()
-
         clear_log()
         self.current_test.set(test_name)
 
@@ -582,39 +579,3 @@ class GeotechTestUI(ttk.Frame):
         durations_sec = [d * 3600 for d in durations]  # convert hours → seconds
 
         return durations_sec, strains, steps
-
-    def _save_current_inputs(self):
-        test = self.current_test.get()
-        if test == TRIAXIAL and hasattr(self, "triaxial_widgets"):
-            self.test_input_history[test] = {k: w.get() for k, w in self.triaxial_widgets.items()}
-        elif test == DIRECT_SHEAR and hasattr(self, "shear_widgets"):
-            self.test_input_history[test] = {k: w.get() for k, w in self.shear_widgets.items()}
-        elif test == CRS and hasattr(self, "crs_rows"):
-            rows = []
-            for row in self.crs_rows:
-                rows.append({k: w.get() for k, w in row.items()})
-            self.test_input_history[test] = rows
-
-    def _restore_inputs(self, test_name):
-        saved = self.test_input_history.get(test_name)
-        if not saved:
-            return
-        if test_name in (TRIAXIAL, DIRECT_SHEAR):
-            widgets = self.triaxial_widgets if test_name == TRIAXIAL else self.shear_widgets
-            for k, w in widgets.items():
-                if k in saved:
-                    w.delete(0, "end")
-                    w.insert(0, saved[k])
-        elif test_name == CRS and isinstance(saved, list):
-            for row in self.crs_rows:
-                row_frame = next(iter(row.values())).master
-                row_frame.destroy()
-
-            self.crs_rows = []
-
-            for row_vals in saved:
-                self._add_crs_row(
-                    duration=float(row_vals.get(DURATION_LABEL, 1.0) or 1.0),
-                    strain_inc=float(row_vals.get(STRAIN_INCREMENT_LABEL, 0.0) or 0.0),
-                    steps=int(row_vals.get(STEPS_LABEL, 100) or 100),
-                )
