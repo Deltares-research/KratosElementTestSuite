@@ -91,12 +91,12 @@ class ElementTestController:
         dll_path: str,
         udsm_number: Optional[int],
         material_parameters: List[float],
-    ) -> None:
+    ) -> bool:
 
         tt = test_type or self._test_type
         if not self._is_valid_test_type(tt):
             self._logger("Please select a test type.", "error")
-            return
+            return False
 
         if tt == "triaxial":
             inputs = self._main_model.soil_test_input_manager.input_data[TRIAXIAL]
