@@ -28,13 +28,13 @@ import tkinter.font as tkFont
 
 
 class SoilTestInputView(ttk.Frame):
-    def __init__(self, soil_test_input_controller, master, **kwargs):
+    def __init__(self, soil_test_input_controller, update_plots_callback, master, **kwargs):
         super().__init__(master, **kwargs)
         self._soil_test_input_controller = soil_test_input_controller
         self.pack(fill="both", expand=True)
         self.test_selector_frame = ttk.Frame(self, padding="5")
         self.test_selector_frame.pack(fill="x", pady=(10, 5))
-
+        self.update_plots_callback = update_plots_callback
         self.test_buttons = {}
 
         image_paths = {
@@ -82,7 +82,7 @@ class SoilTestInputView(ttk.Frame):
             w.destroy()
 
         if test_name == TRIAXIAL:
-            # self._init_plot_canvas(num_plots=5)
+            self.update_plots_callback(num_plots=5)
             ttk.Label(
                 self.test_input_frame,
                 text="Triaxial Input Data",
@@ -122,7 +122,7 @@ class SoilTestInputView(ttk.Frame):
             )
 
         elif test_name == DIRECT_SHEAR:
-            # self._init_plot_canvas(num_plots=4)
+            self.update_plots_callback(num_plots=4)
             ttk.Label(
                 self.test_input_frame,
                 text="Direct Simple Shear Input Data",
@@ -162,6 +162,7 @@ class SoilTestInputView(ttk.Frame):
             )
 
         elif test_name == CRS:
+            self.update_plots_callback(num_plots=5)
             ttk.Label(
                 self.test_input_frame,
                 text="Constant Rate of Strain Input Data",

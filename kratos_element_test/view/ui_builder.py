@@ -154,7 +154,7 @@ class GeotechTestUI(ttk.Frame):
         if self.is_linear_elastic:
             self.mohr_checkbox_widget.configure(state="disabled")
 
-        self.soil_test_input_view = SoilTestInputView(self.controller._soil_test_input_controller, self.param_frame)
+        self.soil_test_input_view = SoilTestInputView(self.controller._soil_test_input_controller, self._init_plot_canvas, self.param_frame)
 
         clear_log()
         self.current_test.set(TRIAXIAL)
@@ -248,12 +248,6 @@ class GeotechTestUI(ttk.Frame):
             udsm_number = self.model_dict["model_name"].index(self.model_var.get()) + 1 if self.dll_path else None
             test_type = self.current_test.get()
             tt = TEST_NAME_TO_TYPE.get(test_type, "triaxial")
-            if test_type == TRIAXIAL:
-                self._init_plot_canvas(num_plots=5)
-            elif test_type == DIRECT_SHEAR:
-                self._init_plot_canvas(num_plots=4)
-            elif test_type == CRS:
-                self._init_plot_canvas(num_plots=5)
             success = self.controller.run(
                 axes=self.plot_frame.axes,
                 test_type=tt,
