@@ -90,8 +90,7 @@ class SoilTestInputView(ttk.Frame):
             ).pack(anchor="w", padx=5, pady=(5, 0))
             self._add_test_type_dropdown(self.test_input_frame)
 
-            test_input_controller = self._soil_test_input_controller
-            inputs = test_input_controller.get_triaxial_inputs()
+            inputs = self._soil_test_input_controller.get_triaxial_inputs()
 
             input_values = {
                 INIT_PRESSURE_LABEL: inputs.initial_effective_cell_pressure,
@@ -117,7 +116,7 @@ class SoilTestInputView(ttk.Frame):
                 input_values,
             )
 
-            test_input_controller.bind_test_input_fields_to_update_functions(
+            self._soil_test_input_controller.bind_test_input_fields_to_update_functions(
                 self.triaxial_string_vars, TRIAXIAL
             )
 
@@ -130,8 +129,7 @@ class SoilTestInputView(ttk.Frame):
             ).pack(anchor="w", padx=5, pady=(5, 0))
             self._add_test_type_dropdown(self.test_input_frame)
 
-            test_input_controller = self._soil_test_input_controller
-            inputs = test_input_controller.get_shear_inputs()
+            inputs = self._soil_test_input_controller.get_shear_inputs()
 
             input_values = {
                 INIT_PRESSURE_LABEL: inputs.initial_effective_cell_pressure,
@@ -157,7 +155,7 @@ class SoilTestInputView(ttk.Frame):
                 input_values,
             )
 
-            test_input_controller.bind_test_input_fields_to_update_functions(
+            self._soil_test_input_controller.bind_test_input_fields_to_update_functions(
                 self.shear_string_vars, DIRECT_SHEAR
             )
 
