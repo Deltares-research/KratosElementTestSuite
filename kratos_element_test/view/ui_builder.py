@@ -6,10 +6,7 @@ import threading
 import tkinter as tk
 import tkinter.font as tkFont
 import traceback
-from time import sleep
 from tkinter import ttk, scrolledtext
-
-from PIL import Image, ImageTk
 
 from kratos_element_test.controller.element_test_controller import ElementTestController
 from kratos_element_test.plotters.matplotlib_plotter import MatplotlibPlotter
@@ -19,14 +16,9 @@ from kratos_element_test.view.result_registry import register_ui_instance
 from kratos_element_test.view.soil_parameter_entries import SoilParameterEntries
 from kratos_element_test.view.soil_test_input_view import SoilTestInputView
 from kratos_element_test.view.ui_constants import (
-    TRIAXIAL, DIRECT_SHEAR, CRS,
-    TEST_NAME_TO_TYPE, TEST_IMAGE_FILES,
-    MAX_STRAIN_LABEL, INIT_PRESSURE_LABEL, NUM_STEPS_LABEL, DURATION_LABEL, STRAIN_INCREMENT_LABEL, STEPS_LABEL,
-    FL2_UNIT_LABEL, SECONDS_UNIT_LABEL, PERCENTAGE_UNIT_LABEL, WITHOUT_UNIT_LABEL,
-    INPUT_SECTION_FONT, HELP_MENU_FONT
+    TRIAXIAL, TEST_NAME_TO_TYPE, INPUT_SECTION_FONT
 )
 from kratos_element_test.view.ui_logger import log_message, clear_log
-from kratos_element_test.view.ui_utils import _asset_path
 
 
 class GeotechTestUI(ttk.Frame):
