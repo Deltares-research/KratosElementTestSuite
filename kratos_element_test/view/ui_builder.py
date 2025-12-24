@@ -293,7 +293,7 @@ class GeotechTestUI(ttk.Frame):
             inputs = test_input_controller.get_triaxial_inputs()
 
             input_values = {INIT_PRESSURE_LABEL: inputs.initial_effective_cell_pressure, MAX_STRAIN_LABEL: inputs.maximum_strain,
-                        NUM_STEPS_LABEL: inputs.number_of_steps, DURATION_LABEL: inputs.duration}
+                            NUM_STEPS_LABEL: inputs.number_of_steps, DURATION_LABEL: inputs.duration_in_seconds}
             self.triaxial_widgets, self.triaxial_string_vars = self._create_entries(
                 self.test_input_frame,
                 "",
@@ -314,7 +314,7 @@ class GeotechTestUI(ttk.Frame):
             inputs = test_input_controller.get_shear_inputs()
 
             input_values = {INIT_PRESSURE_LABEL: inputs.initial_effective_cell_pressure, MAX_STRAIN_LABEL: inputs.maximum_strain,
-                            NUM_STEPS_LABEL: inputs.number_of_steps, DURATION_LABEL: inputs.duration}
+                            NUM_STEPS_LABEL: inputs.number_of_steps, DURATION_LABEL: inputs.duration_in_seconds}
             self.shear_widgets, self.shear_string_vars = self._create_entries(
                 self.test_input_frame,
                 "",
@@ -392,20 +392,14 @@ class GeotechTestUI(ttk.Frame):
             tt = TEST_NAME_TO_TYPE.get(test_type, "triaxial")
 
             if test_type in [TRIAXIAL, DIRECT_SHEAR]:
-                widgets = self.triaxial_widgets if test_type == TRIAXIAL else self.shear_widgets
-                sigma_init, eps_max, n_steps, duration = self._extract_classic_inputs(widgets)
-
                 self.controller.stage_durations = None
                 self.controller.strain_incs = None
                 self.controller.step_counts = None
 
             elif test_type == CRS:
-                sigma_init = 0.0
                 stage_durations, strain_incs, step_counts = self._extract_staged_inputs()
 
                 eps_max = sum(strain_incs)
-                n_steps = sum(step_counts)
-                duration = sum(stage_durations)
 
                 if abs(eps_max) >= 100:
                     raise ValueError("Sum of strain increments reaches or exceeds ±100%. Please revise your input.")
@@ -422,11 +416,7 @@ class GeotechTestUI(ttk.Frame):
                 test_type=tt,
                 dll_path=self.dll_path or "",
                 udsm_number=udsm_number,
-                material_parameters=[float(x) for x in material_params],
-                sigma_init=sigma_init,
-                eps_max=eps_max,
-                n_steps=n_steps,
-                duration=duration
+                material_parameters=[float(x) for x in material_params]
             )
 
             if success:
@@ -565,16 +555,6 @@ class GeotechTestUI(ttk.Frame):
             return [data_type(row[label].get()) for row in self.crs_rows]
         except Exception as e:
             raise ValueError(f"Failed to extract CRS inputs '{label}': {e}")
-
-    def _extract_classic_inputs(self, widgets):
-        try:
-            sigma_init = float(widgets[INIT_PRESSURE_LABEL].get())
-            eps_max = float(widgets[MAX_STRAIN_LABEL].get())
-            n_steps = float(widgets[NUM_STEPS_LABEL].get())
-            duration = float(widgets[DURATION_LABEL].get())
-            return sigma_init, eps_max, n_steps, duration
-        except Exception as e:
-            raise ValueError(f"Failed to extract classic inputs: {e}")
 
     def _extract_staged_inputs(self):
         durations = self._extract_values_from_rows(DURATION_LABEL, float)

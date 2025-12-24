@@ -4,21 +4,27 @@
 
 from typing import Optional, Callable, List, Tuple, Dict
 
-from kratos_element_test.controller.soil_test_input_controller import SoilTestInputController
-from kratos_element_test.model.main_model import MainModel
-from kratos_element_test.model.models import (
-    SimulationInputs,
-    MohrCoulombOptions,
+from kratos_element_test.controller.soil_test_input_controller import (
+    SoilTestInputController,
 )
+from kratos_element_test.model.main_model import MainModel
+from kratos_element_test.model.models import MohrCoulombOptions
 from kratos_element_test.model.pipeline.run_simulation import RunSimulation
 from kratos_element_test.view.ui_constants import (
     VALID_TEST_TYPES,
     VALID_DRAINAGE_TYPES,
+    TRIAXIAL,
+    DIRECT_SHEAR,
+    CRS,
 )
 
 
 class ElementTestController:
-    def __init__(self, logger: Callable[[str, str], None], plotter_factory: Callable[[object], object]):
+    def __init__(
+        self,
+        logger: Callable[[str, str], None],
+        plotter_factory: Callable[[object], object],
+    ):
         self.latest_results = None
         self.latest_test_type = None
         self._logger = logger
@@ -31,13 +37,19 @@ class ElementTestController:
         self._drainage: str = "drained"
         self._main_model = MainModel()
 
-        self._soil_test_input_controller = SoilTestInputController(self._main_model.soil_test_input_manager)
+        self._soil_test_input_controller = SoilTestInputController(
+            self._main_model.soil_test_input_manager
+        )
 
     def set_mohr_enabled(self, enabled: bool) -> None:
         self._mc_enabled = bool(enabled)
-        self._logger(f"Mohr-Coulomb model {'enabled' if enabled else 'disabled'}.", "info")
+        self._logger(
+            f"Mohr-Coulomb model {'enabled' if enabled else 'disabled'}.", "info"
+        )
 
-    def set_mohr_mapping(self, c_index: Optional[int], phi_index: Optional[int]) -> None:
+    def set_mohr_mapping(
+        self, c_index: Optional[int], phi_index: Optional[int]
+    ) -> None:
         self._mc_indices = (c_index, phi_index)
 
     def _mc_tuple(self) -> Optional[Tuple[int, int]]:
@@ -70,38 +82,29 @@ class ElementTestController:
             return
         self._drainage = drainage
 
-    def run(self,
-            *,
-            axes,
-            test_type: Optional[str] = None,
-            dll_path: str,
-            udsm_number: Optional[int],
-            material_parameters: List[float],
-            sigma_init: float,
-            eps_max: float,
-            n_steps: float,
-            duration: float,
-            ) -> None:
+    def run(
+        self,
+        *,
+        axes,
+        test_type: Optional[str] = None,
+        dll_path: str,
+        udsm_number: Optional[int],
+        material_parameters: List[float],
+    ) -> None:
 
         tt = test_type or self._test_type
         if not self._is_valid_test_type(tt):
             self._logger("Please select a test type.", "error")
             return
 
-        inputs = SimulationInputs(
-            test_type=tt,
-            maximum_strain=eps_max,
-            initial_effective_cell_pressure=sigma_init,
-            stress_increment=0.0,
-            number_of_steps=int(n_steps),
-            duration=duration,
-            drainage=self._drainage,
-            mohr_coulomb=MohrCoulombOptions(
-                enabled=self._mc_enabled,
-                c_index=self._mc_indices[0],
-                phi_index=self._mc_indices[1],
-            ),
-        )
+        if tt == "triaxial":
+            inputs = self._main_model.soil_test_input_manager.input_data[TRIAXIAL]
+        elif tt == "direct_shear":
+            inputs = self._main_model.soil_test_input_manager.input_data[DIRECT_SHEAR]
+        elif tt == "crs":
+            inputs = self._main_model.soil_test_input_manager.input_data[CRS]
+        else:
+            raise ValueError(f"Unsupported test type: {tt}")
 
         try:
             inputs.validate()
@@ -115,21 +118,31 @@ class ElementTestController:
         try:
             self._logger(f"MC indices: {self._mc_tuple()}", "info")
 
+            mohr_coulomb_options = MohrCoulombOptions(
+                enabled=self._mc_enabled,
+                c_index=self._mc_indices[0],
+                phi_index=self._mc_indices[1],
+            )
+
             sim = RunSimulation(
                 test_type=inputs.test_type,
-                drainage=inputs.drainage,
+                drainage=self._drainage,
                 dll_path=dll_path or "",
                 udsm_number=udsm_number,
                 material_parameters=material_parameters,
-                num_steps=inputs.number_of_steps if not hasattr(self, "step_counts") or self.step_counts is None else self.step_counts,
-                end_time=inputs.duration,
+                num_steps=(
+                    inputs.number_of_steps
+                    if not hasattr(self, "step_counts") or self.step_counts is None
+                    else self.step_counts
+                ),
+                end_time=inputs.duration_in_seconds,
                 maximum_strain=inputs.maximum_strain,
                 initial_effective_cell_pressure=inputs.initial_effective_cell_pressure,
-                cohesion_phi_indices=inputs.mohr_coulomb.to_indices(),
+                cohesion_phi_indices=mohr_coulomb_options.to_indices(),
                 logger=self._logger,
                 stage_durations=getattr(self, "stage_durations", None),
                 step_counts=getattr(self, "step_counts", None),
-                strain_incs=getattr(self, "strain_incs", None)
+                strain_incs=getattr(self, "strain_incs", None),
             )
 
             sim.run()
@@ -141,7 +154,6 @@ class ElementTestController:
             self._logger(f"Simulation failed: {e}", "error")
             return False
         return True
-
 
     def _render(self, results: Dict[str, List[float]], plotter, test_type) -> None:
         if not plotter:

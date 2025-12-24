@@ -20,14 +20,14 @@ class SoilTestInputManager:
                 maximum_strain=20.0,
                 initial_effective_cell_pressure=100.0,
                 number_of_steps=100,
-                duration=1.0,
+                duration_in_seconds=1.0,
             ),
             DIRECT_SHEAR: TriaxialAndShearSimulationInputs(
                 test_type=TEST_NAME_TO_TYPE.get(TRIAXIAL),
                 maximum_strain=20.0,
                 initial_effective_cell_pressure=100.0,
                 number_of_steps=100,
-                duration=1.0,
+                duration_in_seconds=1.0,
             ),
             CRS: CRSSimulationInputs(
                 test_type=TEST_NAME_TO_TYPE.get(CRS),
@@ -80,7 +80,7 @@ class SoilTestInputManager:
         self.input_data[test_type].number_of_steps = new_steps
 
     def update_duration(self, new_duration: float, test_type: str) -> None:
-        self.input_data[test_type].duration = new_duration
+        self.input_data[test_type].duration_in_seconds = new_duration
 
     def add_strain_increment(self):
         crs_inputs = self.input_data.get(CRS)

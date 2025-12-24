@@ -75,7 +75,7 @@ class SoilTestInputManagerTest(unittest.TestCase):
 
     def test_update_duration(self):
         self.input_manager.update_duration(2.5, TRIAXIAL)
-        updated = self.input_manager.input_data[TRIAXIAL].duration
+        updated = self.input_manager.input_data[TRIAXIAL].duration_in_seconds
         self.assertEqual(updated, 2.5)
 
     def test_update_num_steps(self):
