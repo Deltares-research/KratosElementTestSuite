@@ -32,6 +32,7 @@ class RunSimulation:
         self,
         *,
         test_type: str,
+        model_name: Optional[str],
         dll_path: Optional[str],
         udsm_number: Optional[int],
         material_parameters: List[float],
@@ -48,6 +49,7 @@ class RunSimulation:
         keep_tmp: bool = False,
     ):
         self.test_type = test_type.lower()
+        self.model_name = model_name
         self.dll_path = dll_path
         self.udsm_number = udsm_number
         self.material_parameters = material_parameters
@@ -193,14 +195,26 @@ class RunSimulation:
                 }
             )
             editor.set_constitutive_law("SmallStrainUDSM2DPlaneStrainLaw")
-        else:
-            editor.update_material_properties(
-                {
+        if self.model_name:
+            if self.model_name.strip().lower() == "linear elastic model":
+                editor.update_material_properties(
+                    {
+                        "YOUNG_MODULUS": self.material_parameters[0],
+                        "POISSON_RATIO": self.material_parameters[1],
+                    }
+                )
+                editor.set_constitutive_law("GeoLinearElasticPlaneStrain2DLaw")
+
+            if self.model_name.strip().lower() == "mohr-coulomb model":
+                editor.update_material_properties({
                     "YOUNG_MODULUS": self.material_parameters[0],
                     "POISSON_RATIO": self.material_parameters[1],
-                }
-            )
-            editor.set_constitutive_law("GeoLinearElasticPlaneStrain2DLaw")
+                    "GEO_COHESION": self.material_parameters[2],
+                    "GEO_FRICTION_ANGLE": self.material_parameters[3],
+                    "GEO_TENSILE_STRENGTH": self.material_parameters[4],
+                    "GEO_DILATANCY_ANGLE": self.material_parameters[5],
+                })
+                editor.set_constitutive_law("GeoMohrCoulombWithTensionCutOff2D")
 
     def _set_project_parameters(self) -> None:
         with open(self.project_json_path, "r") as f:
