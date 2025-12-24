@@ -75,3 +75,5 @@ class CRSSimulationInputs:
     def validate(self) -> None:
         if self.test_type not in ("triaxial", "direct_shear", "crs"):
             raise ValueError("Unsupported test type.")
+        if abs(self.maximum_strain) > 100.0:
+            raise ValueError("Sum of the strain increments must be between -100% and 100%.")
