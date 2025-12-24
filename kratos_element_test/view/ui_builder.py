@@ -271,8 +271,6 @@ class GeotechTestUI(ttk.Frame):
 
         elif self.is_mohr_coulomb:
             self.controller.set_mohr_enabled(True)
-            self.cohesion_var = tk.StringVar(value="3")
-            self.phi_var = tk.StringVar(value="4")
 
             c_idx, phi_idx = self._parse_mc_indices()
             self.controller.set_mohr_mapping(c_idx, phi_idx)
