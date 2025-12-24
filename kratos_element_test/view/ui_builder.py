@@ -391,26 +391,6 @@ class GeotechTestUI(ttk.Frame):
             test_type = self.current_test.get()
             tt = TEST_NAME_TO_TYPE.get(test_type, "triaxial")
 
-            if test_type in [TRIAXIAL, DIRECT_SHEAR]:
-                self.controller.stage_durations = None
-                self.controller.strain_incs = None
-                self.controller.step_counts = None
-
-            elif test_type == CRS:
-                stage_durations, strain_incs, step_counts = self._extract_staged_inputs()
-
-                eps_max = sum(strain_incs)
-
-                if abs(eps_max) >= 100:
-                    raise ValueError("Sum of strain increments reaches or exceeds ±100%. Please revise your input.")
-
-                self.controller.stage_durations = stage_durations
-                self.controller.strain_incs = strain_incs
-                self.controller.step_counts = step_counts
-
-            else:
-                raise ValueError(f"Unsupported test type: {test_type}")
-
             success = self.controller.run(
                 axes=self.plot_frame.axes,
                 test_type=tt,
@@ -549,18 +529,3 @@ class GeotechTestUI(ttk.Frame):
     def _init_log_section(self):
         self.log_viewer = LogViewer(self.left_panel, padding="5")
         self.log_viewer.pack(fill="x", padx=10, pady=(0, 10))
-
-    def _extract_values_from_rows(self, label, data_type):
-        try:
-            return [data_type(row[label].get()) for row in self.crs_rows]
-        except Exception as e:
-            raise ValueError(f"Failed to extract CRS inputs '{label}': {e}")
-
-    def _extract_staged_inputs(self):
-        durations = self._extract_values_from_rows(DURATION_LABEL, float)
-        strains = self._extract_values_from_rows(STRAIN_INCREMENT_LABEL, float)
-        steps = self._extract_values_from_rows(STEPS_LABEL, int)
-
-        durations_sec = [d * 3600 for d in durations]  # convert hours → seconds
-
-        return durations_sec, strains, steps

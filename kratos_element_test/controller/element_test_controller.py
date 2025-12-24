@@ -7,6 +7,7 @@ from typing import Optional, Callable, List, Tuple, Dict
 from kratos_element_test.controller.soil_test_input_controller import (
     SoilTestInputController,
 )
+from kratos_element_test.model.core_utils import hours_to_seconds
 from kratos_element_test.model.main_model import MainModel
 from kratos_element_test.model.models import MohrCoulombOptions
 from kratos_element_test.model.pipeline.run_simulation import RunSimulation
@@ -124,6 +125,34 @@ class ElementTestController:
                 phi_index=self._mc_indices[1],
             )
 
+            stage_durations = None
+            if tt == "crs":
+                stage_durations = [
+                    hours_to_seconds(inc.duration_in_hours)
+                    for inc in self._main_model.soil_test_input_manager.input_data[
+                        CRS
+                    ].strain_increments
+                ]
+
+            step_counts=None
+            if tt == "crs":
+                step_counts = [
+                    inc.steps
+                    for inc in self._main_model.soil_test_input_manager.input_data[
+                        CRS
+                    ].strain_increments
+                ]
+
+            strain_incs=None
+            if tt == "crs":
+                strain_incs = [
+                    inc.strain_increment
+                    for inc in self._main_model.soil_test_input_manager.input_data[
+                        CRS
+                    ].strain_increments
+                ]
+
+
             sim = RunSimulation(
                 test_type=inputs.test_type,
                 drainage=self._drainage,
@@ -132,17 +161,17 @@ class ElementTestController:
                 material_parameters=material_parameters,
                 num_steps=(
                     inputs.number_of_steps
-                    if not hasattr(self, "step_counts") or self.step_counts is None
-                    else self.step_counts
+                    if step_counts is None
+                    else step_counts
                 ),
                 end_time=inputs.duration_in_seconds,
                 maximum_strain=inputs.maximum_strain,
                 initial_effective_cell_pressure=inputs.initial_effective_cell_pressure,
                 cohesion_phi_indices=mohr_coulomb_options.to_indices(),
                 logger=self._logger,
-                stage_durations=getattr(self, "stage_durations", None),
-                step_counts=getattr(self, "step_counts", None),
-                strain_incs=getattr(self, "strain_incs", None),
+                stage_durations=stage_durations,
+                step_counts=step_counts,
+                strain_incs=strain_incs
             )
 
             sim.run()
