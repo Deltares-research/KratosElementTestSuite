@@ -215,7 +215,6 @@ class RunSimulation:
                     "GEO_DILATANCY_ANGLE": self.material_parameters[5],
                 })
                 editor.set_constitutive_law("GeoMohrCoulombWithTensionCutOff2D")
-                return
 
     def _set_project_parameters(self) -> None:
         with open(self.project_json_path, "r") as f:
