@@ -487,7 +487,7 @@ class GeotechTestUI(ttk.Frame):
         self.scroll_canvas.bind_all("<MouseWheel>", self._on_mousewheel)
 
         if self.is_linear_elastic or self.is_mohr_coulomb:
-            self.mohr_checkbox_widget.configure(state="disabled")
+            self.mohr_frame.pack_forget()
             self.model_menu.configure(state="disabled")
         else:
             self.model_menu.configure(state="readonly")
