@@ -23,7 +23,7 @@ class SoilTestInputManager:
                 duration_in_seconds=1.0,
             ),
             DIRECT_SHEAR: TriaxialAndShearSimulationInputs(
-                test_type=TEST_NAME_TO_TYPE.get(TRIAXIAL),
+                test_type=TEST_NAME_TO_TYPE.get(DIRECT_SHEAR),
                 maximum_strain=20.0,
                 initial_effective_cell_pressure=100.0,
                 number_of_steps=100,
