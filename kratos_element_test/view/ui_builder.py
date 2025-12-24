@@ -267,7 +267,7 @@ class GeotechTestUI(ttk.Frame):
         if self.is_linear_elastic:
             self.controller.set_mohr_enabled(False)
             self.controller.set_mohr_mapping(None, None)
-            self.mohr_checkbox_widget.configure(state="disabled")
+            self.mohr_frame.pack_forget()
 
         elif self.is_mohr_coulomb:
             self.controller.set_mohr_enabled(True)
@@ -275,7 +275,7 @@ class GeotechTestUI(ttk.Frame):
             c_idx, phi_idx = self._parse_mc_indices()
             self.controller.set_mohr_mapping(c_idx, phi_idx)
 
-            self.mohr_checkbox_widget.configure(state="disabled")
+            self.mohr_frame.pack_forget()
 
         else:
             self.mohr_checkbox_widget.configure(state="normal")
