@@ -10,7 +10,7 @@ from kratos_element_test.view.ui_constants import VALID_TEST_TYPES, VALID_DRAINA
 @dataclass
 class MohrCoulombOptions:
     enabled: bool = False
-    c_index: Optional[int] = None   # 1-based index from the UDSM mapping
+    c_index: Optional[int] = None  # 1-based index from the UDSM mapping
     phi_index: Optional[int] = None
 
     def to_indices(self) -> Optional[Tuple[int, int]]:
@@ -37,3 +37,41 @@ class SimulationInputs:
             raise ValueError("Number of steps must be > 0.")
         if self.duration <= 0:
             raise ValueError("Duration must be > 0.")
+
+
+@dataclass
+class TriaxialAndShearSimulationInputs:
+    test_type: VALID_TEST_TYPES
+    maximum_strain: float
+    initial_effective_cell_pressure: float
+    number_of_steps: int
+    duration: float
+
+    def validate(self) -> None:
+        if self.test_type not in ("triaxial", "direct_shear", "crs"):
+            raise ValueError("Unsupported test type.")
+        if self.number_of_steps <= 0:
+            raise ValueError("Number of steps must be > 0.")
+        if self.duration <= 0:
+            raise ValueError("Duration must be > 0.")
+
+
+@dataclass
+class StrainIncrement:
+    duration_in_hours: float
+    strain_increment: float
+    steps: int
+
+
+@dataclass
+class CRSSimulationInputs:
+    test_type: VALID_TEST_TYPES
+    strain_increments: list[StrainIncrement]
+    maximum_strain: float = 0.0
+    number_of_steps: int = 0
+    duration_in_seconds: float = 0.0
+    initial_effective_cell_pressure: float = 0.0
+
+    def validate(self) -> None:
+        if self.test_type not in ("triaxial", "direct_shear", "crs"):
+            raise ValueError("Unsupported test type.")
