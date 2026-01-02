@@ -58,9 +58,9 @@ class TriaxialAndShearSimulationInputs:
 
 @dataclass
 class StrainIncrement:
-    duration_in_hours: float
-    strain_increment: float
-    steps: int
+    duration_in_hours: float = 1.0
+    strain_increment: float = 0.0
+    steps: int = 100
 
 
 @dataclass
