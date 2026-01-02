@@ -95,6 +95,20 @@ class SoilTestInputManagerTest(unittest.TestCase):
         ].initial_effective_cell_pressure
         self.assertEqual(updated, 250.0)
 
+    def test_get_current_default_inputs(self):
+        inputs = self.input_manager.get_current_test_inputs()
+        self.assertIsNotNone(inputs)
+        self.assertEqual(inputs.maximum_strain, 20.0)
+        self.assertEqual(inputs.duration_in_seconds, 1.0)
+        self.assertEqual(inputs.number_of_steps, 100)
+
+    def test_get_current_default_inputs_for_crs(self):
+        self.input_manager.set_current_test_type("CRS")
+        inputs = self.input_manager.get_current_test_inputs()
+        self.assertIsNotNone(inputs)
+        self.assertEqual(inputs.maximum_strain, 0.0)
+        self.assertEqual(inputs.duration_in_seconds, 18000.0)
+        self.assertEqual(inputs.number_of_steps, 500)
 
 if __name__ == "__main__":
     unittest.main()

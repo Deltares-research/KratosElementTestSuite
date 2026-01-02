@@ -35,6 +35,7 @@ class SoilTestInputManager:
             ),
         }
         self.update_crs_totals()
+        self._current_test_type = TRIAXIAL
 
     def update_crs_totals(self):
         crs_inputs = self.input_data.get(CRS)
@@ -91,6 +92,15 @@ class SoilTestInputManager:
     def remove_last_crs_strain_increment(self):
         if len(self.input_data[CRS].strain_increments) > 1:
             self.input_data[CRS].strain_increments.pop()
+
+    def get_current_test_type(self) -> str:
+        return self._current_test_type
+
+    def set_current_test_type(self, test_type: str) -> None:
+        self._current_test_type = test_type
+
+    def get_current_test_inputs(self):
+        return self.input_data.get(self._current_test_type)
 
     @staticmethod
     def default_strain_increment():
