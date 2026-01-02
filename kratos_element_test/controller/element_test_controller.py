@@ -137,7 +137,7 @@ class ElementTestController:
                 ]
 
             sim = RunSimulation(
-                test_type=inputs.test_type,
+                test_inputs=inputs,
                 drainage=self._drainage,
                 dll_path=dll_path or "",
                 udsm_number=udsm_number,

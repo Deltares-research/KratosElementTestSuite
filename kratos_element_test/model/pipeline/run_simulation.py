@@ -11,6 +11,7 @@ from kratos_element_test.model.core_utils import _fallback_log
 from kratos_element_test.model.io.material_editor import MaterialEditor
 from kratos_element_test.model.io.project_parameter_editor import ProjectParameterEditor
 from kratos_element_test.model.io.mdpa_editor import MdpaEditor
+from kratos_element_test.model.models import TriaxialAndShearSimulationInputs, CRSSimulationInputs
 from kratos_element_test.model.pipeline.generic_test_runner import GenericTestRunner
 from kratos_element_test.model.pipeline.result_collector import ResultCollector
 
@@ -31,7 +32,7 @@ class RunSimulation:
     def __init__(
         self,
         *,
-        test_type: str,
+        test_inputs: TriaxialAndShearSimulationInputs | CRSSimulationInputs,
         dll_path: Optional[str],
         udsm_number: Optional[int],
         material_parameters: List[float],
@@ -47,7 +48,7 @@ class RunSimulation:
         strain_incs: Optional[List[float]] = None,
         keep_tmp: bool = False,
     ):
-        self.test_type = test_type.lower()
+        self.test_type = test_inputs.test_type.lower()
         self.dll_path = dll_path
         self.udsm_number = udsm_number
         self.material_parameters = material_parameters
