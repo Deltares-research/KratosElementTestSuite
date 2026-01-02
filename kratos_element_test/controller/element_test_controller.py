@@ -7,14 +7,12 @@ from typing import Optional, Callable, List, Tuple, Dict
 from kratos_element_test.controller.soil_test_input_controller import (
     SoilTestInputController,
 )
-from kratos_element_test.model.core_utils import hours_to_seconds
 from kratos_element_test.model.main_model import MainModel
 from kratos_element_test.model.models import MohrCoulombOptions
 from kratos_element_test.model.pipeline.run_simulation import RunSimulation
 from kratos_element_test.view.ui_constants import (
     VALID_TEST_TYPES,
     VALID_DRAINAGE_TYPES,
-    CRS,
     TEST_NAME_TO_TYPE,
 )
 
