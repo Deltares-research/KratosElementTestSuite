@@ -14,8 +14,6 @@ from kratos_element_test.model.pipeline.run_simulation import RunSimulation
 from kratos_element_test.view.ui_constants import (
     VALID_TEST_TYPES,
     VALID_DRAINAGE_TYPES,
-    TRIAXIAL,
-    DIRECT_SHEAR,
     CRS,
     TEST_NAME_TO_TYPE,
 )

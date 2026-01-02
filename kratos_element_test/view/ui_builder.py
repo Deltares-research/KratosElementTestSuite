@@ -16,7 +16,7 @@ from kratos_element_test.view.result_registry import register_ui_instance
 from kratos_element_test.view.soil_parameter_entries import SoilParameterEntries
 from kratos_element_test.view.soil_test_input_view import SoilTestInputView
 from kratos_element_test.view.ui_constants import (
-    TRIAXIAL, TEST_NAME_TO_TYPE, INPUT_SECTION_FONT
+    TEST_NAME_TO_TYPE, INPUT_SECTION_FONT
 )
 from kratos_element_test.view.ui_logger import log_message, clear_log
 
