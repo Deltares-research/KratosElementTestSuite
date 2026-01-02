@@ -145,9 +145,6 @@ class ElementTestController:
                 num_steps=(
                     inputs.number_of_steps if step_counts is None else step_counts
                 ),
-                end_time=inputs.duration_in_seconds,
-                maximum_strain=inputs.maximum_strain,
-                initial_effective_cell_pressure=inputs.initial_effective_cell_pressure,
                 cohesion_phi_indices=mohr_coulomb_options.to_indices(),
                 logger=self._logger,
                 stage_durations=stage_durations,

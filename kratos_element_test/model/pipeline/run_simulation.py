@@ -37,9 +37,6 @@ class RunSimulation:
         udsm_number: Optional[int],
         material_parameters: List[float],
         num_steps: int | List[int],
-        end_time: float,
-        maximum_strain: float,
-        initial_effective_cell_pressure: float,
         cohesion_phi_indices: Optional[Tuple[int, int]] = None,
         logger: Optional[Callable[[str, str], None]] = None,
         drainage: Optional[str] = None,
@@ -53,9 +50,9 @@ class RunSimulation:
         self.udsm_number = udsm_number
         self.material_parameters = material_parameters
         self.num_steps = num_steps
-        self.end_time = end_time
-        self.maximum_strain = maximum_strain
-        self.initial_effective_cell_pressure = initial_effective_cell_pressure
+        self.end_time = test_inputs.duration_in_seconds
+        self.maximum_strain = test_inputs.maximum_strain
+        self.initial_effective_cell_pressure = test_inputs.initial_effective_cell_pressure
         self.cohesion_phi_indices = cohesion_phi_indices
         self.log = logger or _fallback_log
         self.drainage = drainage
