@@ -112,6 +112,8 @@ class ElementTestController:
             )
 
             stage_durations = None
+            step_counts = None
+            strain_incs = None
             if tt == "crs":
                 stage_durations = [
                     hours_to_seconds(inc.duration_in_hours)
@@ -120,8 +122,6 @@ class ElementTestController:
                     ].strain_increments
                 ]
 
-            step_counts = None
-            if tt == "crs":
                 step_counts = [
                     inc.steps
                     for inc in self._main_model.soil_test_input_manager.input_data[
@@ -129,8 +129,6 @@ class ElementTestController:
                     ].strain_increments
                 ]
 
-            strain_incs = None
-            if tt == "crs":
                 strain_incs = [
                     inc.strain_increment
                     for inc in self._main_model.soil_test_input_manager.input_data[
