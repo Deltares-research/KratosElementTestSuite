@@ -158,7 +158,7 @@ class GeotechTestUI(ttk.Frame):
         for key, path in image_paths.items():
             try:
                 img = Image.open(path)
-                img_resized = img.resize((85, 85), Image.LANCZOS)
+                img_resized = img.resize((85, 85), Image.Resampling.LANCZOS)
                 self.test_images[key] = ImageTk.PhotoImage(img_resized)
             except Exception as e:
                 log_message(f"Failed to load or resize image: {path} ({e})", "error")
