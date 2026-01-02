@@ -39,7 +39,6 @@ class RunSimulation:
         dll_path: Optional[str],
         udsm_number: Optional[int],
         material_parameters: List[float],
-        num_steps: int | List[int],
         cohesion_phi_indices: Optional[Tuple[int, int]] = None,
         logger: Optional[Callable[[str, str], None]] = None,
         drainage: Optional[str] = None,
@@ -49,7 +48,7 @@ class RunSimulation:
         self.dll_path = dll_path
         self.udsm_number = udsm_number
         self.material_parameters = material_parameters
-        self.num_steps = num_steps
+        self.num_steps = test_inputs.number_of_steps
         self.end_time = test_inputs.duration_in_seconds
         self.maximum_strain = test_inputs.maximum_strain
         self.initial_effective_cell_pressure = (

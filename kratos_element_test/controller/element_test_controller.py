@@ -117,7 +117,6 @@ class ElementTestController:
                 dll_path=dll_path or "",
                 udsm_number=udsm_number,
                 material_parameters=material_parameters,
-                num_steps=inputs.number_of_steps,
                 cohesion_phi_indices=mohr_coulomb_options.to_indices(),
                 logger=self._logger,
             )
