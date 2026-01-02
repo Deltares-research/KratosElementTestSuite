@@ -7,7 +7,7 @@
 
 # Application data
 APP_TITLE = "Deltares Soil Element Test Suite"
-APP_VERSION = "Version 0.2.0 ~ Alpha Release"
+APP_VERSION = "Version 0.3.0 ~ Alpha Release"
 APP_NAME = "SoilElementSuite"
 APP_AUTHOR = "Deltares"
 
@@ -53,6 +53,7 @@ WITHOUT_UNIT_LABEL = ""
 # Menu labels
 SELECT_UDSM = "Select UDSM File"
 LINEAR_ELASTIC = "Linear Elastic Model"
+MOHR_COULOMB = "Mohr-Coulomb Model"
 
 # Font labels
 HELP_MENU_FONT = "Segoe UI"

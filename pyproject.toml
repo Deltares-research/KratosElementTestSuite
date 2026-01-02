@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "kratos_element_test"
-version = "0.2.0"
+version = "0.3.0"
 description = "The Kratos Element Test Suite..."
 authors = ["Deltares Geo Kratos Team <kratos@deltares.nl>"]
 license = "Proprietary"
