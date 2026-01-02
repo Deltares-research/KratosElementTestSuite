@@ -50,11 +50,8 @@ class ResultCollectorTest(unittest.TestCase):
             material_parameters=[1.0, 2.0, 3.0, 4.0],
             cohesion_phi_indices=(3, 4),
         )
-        try:
-            results = collector.collect_results()
-            self.assertIsInstance(results, dict)
-        except Exception as e:
-            self.fail(f"collect_results raised an exception unexpectedly: {e}")
+        results = collector.collect_results()
+        self.assertIsInstance(results, dict)
 
     def test_c_phi_are_none_when_indices_are_not_defined(self):
         collector = ResultCollector(
