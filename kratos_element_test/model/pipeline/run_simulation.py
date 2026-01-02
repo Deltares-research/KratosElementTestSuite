@@ -7,11 +7,14 @@ import shutil
 import tempfile
 from pathlib import Path
 from typing import Callable, Dict, List, Optional, Tuple
-from kratos_element_test.model.core_utils import _fallback_log
+from kratos_element_test.model.core_utils import _fallback_log, hours_to_seconds
 from kratos_element_test.model.io.material_editor import MaterialEditor
 from kratos_element_test.model.io.project_parameter_editor import ProjectParameterEditor
 from kratos_element_test.model.io.mdpa_editor import MdpaEditor
-from kratos_element_test.model.models import TriaxialAndShearSimulationInputs, CRSSimulationInputs
+from kratos_element_test.model.models import (
+    TriaxialAndShearSimulationInputs,
+    CRSSimulationInputs,
+)
 from kratos_element_test.model.pipeline.generic_test_runner import GenericTestRunner
 from kratos_element_test.model.pipeline.result_collector import ResultCollector
 
@@ -40,9 +43,6 @@ class RunSimulation:
         cohesion_phi_indices: Optional[Tuple[int, int]] = None,
         logger: Optional[Callable[[str, str], None]] = None,
         drainage: Optional[str] = None,
-        stage_durations: Optional[List[float]] = None,
-        step_counts: Optional[List[int]] = None,
-        strain_incs: Optional[List[float]] = None,
         keep_tmp: bool = False,
     ):
         self.test_type = test_inputs.test_type.lower()
@@ -52,13 +52,29 @@ class RunSimulation:
         self.num_steps = num_steps
         self.end_time = test_inputs.duration_in_seconds
         self.maximum_strain = test_inputs.maximum_strain
-        self.initial_effective_cell_pressure = test_inputs.initial_effective_cell_pressure
+        self.initial_effective_cell_pressure = (
+            test_inputs.initial_effective_cell_pressure
+        )
         self.cohesion_phi_indices = cohesion_phi_indices
         self.log = logger or _fallback_log
         self.drainage = drainage
-        self.stage_durations = stage_durations
-        self.step_counts = step_counts
-        self.strain_incs = strain_incs
+        self.stage_durations = None
+        self.step_counts = None
+        self.strain_incs = None
+
+        if self.test_type == "crs":
+            if isinstance(test_inputs, CRSSimulationInputs):
+                self.stage_durations = [
+                    hours_to_seconds(inc.duration_in_hours)
+                    for inc in test_inputs.strain_increments
+                ]
+                self.step_counts = [inc.steps for inc in test_inputs.strain_increments]
+                self.strain_incs = [inc.strain_increment for inc in test_inputs.strain_increments]
+            else:
+                raise ValueError(
+                    "test_inputs must be of type CRSSimulationInputs for CRS tests."
+                )
+
         self.keep_tmp = keep_tmp
 
         self.tmp_dir = Path(tempfile.mkdtemp(prefix=f"{self.test_type}_"))

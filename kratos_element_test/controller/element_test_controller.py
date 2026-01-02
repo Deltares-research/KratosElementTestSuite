@@ -147,9 +147,6 @@ class ElementTestController:
                 ),
                 cohesion_phi_indices=mohr_coulomb_options.to_indices(),
                 logger=self._logger,
-                stage_durations=stage_durations,
-                step_counts=step_counts,
-                strain_incs=strain_incs,
             )
 
             sim.run()
