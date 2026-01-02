@@ -26,3 +26,5 @@ jobs:
         run: pip install --upgrade pip .
       - name: Run tests
         run: pytest
+      - name: Lint code
+        run: pylint kratos_element_test --output-format=github
