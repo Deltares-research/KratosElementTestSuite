@@ -27,4 +27,4 @@ jobs:
       - name: Run tests
         run: pytest
       - name: Lint code
-        run: pylint kratos_element_test --output-format=github
+        run: pylint kratos_element_test --output-format=github --fail-under 5 --fail-on E
