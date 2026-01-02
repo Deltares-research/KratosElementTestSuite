@@ -81,6 +81,7 @@ class SoilTestInputView(ttk.Frame):
         for w in self.test_input_frame.winfo_children():
             w.destroy()
 
+        self._soil_test_input_controller.set_current_test_type(test_name)
         if test_name == TRIAXIAL:
             self.update_plots_callback(num_plots=5)
             ttk.Label(

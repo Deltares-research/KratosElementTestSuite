@@ -26,6 +26,9 @@ class SoilTestInputController:
     def get_crs_inputs(self):
         return self._soil_test_input_manager.input_data.get(CRS)
 
+    def get_current_test_inputs(self):
+        return self._soil_test_input_manager.get_current_test_inputs()
+
     def add_crs_strain_increment(self) -> None:
         self._soil_test_input_manager.add_strain_increment()
 
@@ -85,3 +88,9 @@ class SoilTestInputController:
                 new_steps=int(string_vars[STEPS_LABEL].get()), index=idx
             ),
         )
+
+    def set_current_test_type(self, test_type: str) -> None:
+        self._soil_test_input_manager.set_current_test_type(test_type)
+
+    def get_current_test_type(self) -> str:
+        return self._soil_test_input_manager.get_current_test_type()

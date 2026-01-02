@@ -35,15 +35,7 @@ class GeotechTestUI(ttk.Frame):
 
         self.model_var = tk.StringVar(root)
         self.model_var.set(model_dict["model_name"][0])
-        self.current_test = tk.StringVar(value=test_name)
         self.test_input_history = {}
-
-        def _sync_test_type(*_):
-            value = self.current_test.get()
-            tt = TEST_NAME_TO_TYPE.get(value, "triaxial")
-            self.controller.set_test_type(tt)
-            self.current_test.trace_add("write", lambda *_: _sync_test_type())
-            _sync_test_type()
 
         self._init_frames()
 
@@ -149,7 +141,6 @@ class GeotechTestUI(ttk.Frame):
         self.soil_test_input_view = SoilTestInputView(self.controller._soil_test_input_controller, self._init_plot_canvas, self.param_frame)
 
         clear_log()
-        self.current_test.set(TRIAXIAL)
 
         self.run_button = ttk.Button(self.button_frame, text="Run Calculation", command=self._start_simulation_thread)
         self.run_button.pack(pady=5)
@@ -238,11 +229,9 @@ class GeotechTestUI(ttk.Frame):
 
             material_params = [e.get() for e in self.entry_widgets.values()]
             udsm_number = self.model_dict["model_name"].index(self.model_var.get()) + 1 if self.dll_path else None
-            test_type = self.current_test.get()
-            tt = TEST_NAME_TO_TYPE.get(test_type, "triaxial")
+
             success = self.controller.run(
                 axes=self.plot_frame.axes,
-                test_type=tt,
                 dll_path=self.dll_path or "",
                 udsm_number=udsm_number,
                 material_parameters=[float(x) for x in material_params]
@@ -250,6 +239,8 @@ class GeotechTestUI(ttk.Frame):
 
             if success:
                 self.plot_frame.draw()
+                test_type = self.controller.get_current_test_type()
+                tt = TEST_NAME_TO_TYPE.get(test_type, "triaxial")
                 log_message(f"{test_type} test completed successfully.", "info")
                 if hasattr(self.controller, "latest_results"):
                     self.latest_results = self.controller.latest_results

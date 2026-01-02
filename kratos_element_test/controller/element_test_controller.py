@@ -17,6 +17,7 @@ from kratos_element_test.view.ui_constants import (
     TRIAXIAL,
     DIRECT_SHEAR,
     CRS,
+    TEST_NAME_TO_TYPE,
 )
 
 
@@ -34,7 +35,6 @@ class ElementTestController:
         self._mc_enabled: bool = False
         self._mc_indices: Tuple[Optional[int], Optional[int]] = (None, None)
 
-        self._test_type: Optional[str] = None
         self._drainage: str = "drained"
         self._main_model = MainModel()
 
@@ -67,11 +67,6 @@ class ElementTestController:
         self._logger(f"Unknown test type: {test_type}", "warn")
         return False
 
-    def set_test_type(self, test_type: str) -> None:
-        if not self._is_valid_test_type(test_type):
-            return
-        self._test_type = test_type
-
     def _is_valid_drainage(self, drainage: Optional[str]) -> bool:
         if drainage in VALID_DRAINAGE_TYPES:
             return True
@@ -87,25 +82,18 @@ class ElementTestController:
         self,
         *,
         axes,
-        test_type: Optional[str] = None,
         dll_path: str,
         udsm_number: Optional[int],
         material_parameters: List[float],
     ) -> bool:
-
-        tt = test_type or self._test_type
+        tt = TEST_NAME_TO_TYPE.get(
+            self._main_model.soil_test_input_manager.get_current_test_type()
+        )
         if not self._is_valid_test_type(tt):
             self._logger("Please select a test type.", "error")
             return False
 
-        if tt == "triaxial":
-            inputs = self._main_model.soil_test_input_manager.input_data[TRIAXIAL]
-        elif tt == "direct_shear":
-            inputs = self._main_model.soil_test_input_manager.input_data[DIRECT_SHEAR]
-        elif tt == "crs":
-            inputs = self._main_model.soil_test_input_manager.input_data[CRS]
-        else:
-            raise ValueError(f"Unsupported test type: {tt}")
+        inputs = self._main_model.soil_test_input_manager.get_current_test_inputs()
 
         try:
             inputs.validate()
@@ -134,7 +122,7 @@ class ElementTestController:
                     ].strain_increments
                 ]
 
-            step_counts=None
+            step_counts = None
             if tt == "crs":
                 step_counts = [
                     inc.steps
@@ -143,7 +131,7 @@ class ElementTestController:
                     ].strain_increments
                 ]
 
-            strain_incs=None
+            strain_incs = None
             if tt == "crs":
                 strain_incs = [
                     inc.strain_increment
@@ -152,7 +140,6 @@ class ElementTestController:
                     ].strain_increments
                 ]
 
-
             sim = RunSimulation(
                 test_type=inputs.test_type,
                 drainage=self._drainage,
@@ -160,9 +147,7 @@ class ElementTestController:
                 udsm_number=udsm_number,
                 material_parameters=material_parameters,
                 num_steps=(
-                    inputs.number_of_steps
-                    if step_counts is None
-                    else step_counts
+                    inputs.number_of_steps if step_counts is None else step_counts
                 ),
                 end_time=inputs.duration_in_seconds,
                 maximum_strain=inputs.maximum_strain,
@@ -171,7 +156,7 @@ class ElementTestController:
                 logger=self._logger,
                 stage_durations=stage_durations,
                 step_counts=step_counts,
-                strain_incs=strain_incs
+                strain_incs=strain_incs,
             )
 
             sim.run()
@@ -228,3 +213,6 @@ class ElementTestController:
             )
         else:
             raise ValueError(f"Unsupported test_type: {test_type}")
+
+    def get_current_test_type(self) -> str:
+        return self._main_model.get_current_test_type()
