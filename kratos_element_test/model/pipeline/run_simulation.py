@@ -223,10 +223,10 @@ class RunSimulation:
         editor = ProjectParameterEditor(str(self.project_json_path))
 
         if "stages" in data:
-            if self.stage_durations and isinstance(self.num_steps, list):
-                if len(self.stage_durations) != len(self.num_steps):
+            if self.stage_durations and self.step_counts:
+                if len(self.stage_durations) != len(self.step_counts):
                     raise ValueError(
-                        f"Mismatch: {len(self.stage_durations)} stage durations but {len(self.num_steps)} step counts provided."
+                        f"Mismatch: {len(self.stage_durations)} stage durations but {len(self.step_counts)} step counts provided."
                     )
 
                 cumulative_end_times = []
@@ -236,15 +236,15 @@ class RunSimulation:
                     cumulative_end_times.append(total)
 
                 editor.update_stage_timings(
-                    cumulative_end_times, self.num_steps, start_time=0.0
+                    cumulative_end_times, self.step_counts, start_time=0.0
                 )
 
                 if len(cumulative_end_times) > 1:
                     editor.update_top_displacement_table_numbers()
         else:
             time_step = (
-                (self.stage_durations[0] / self.num_steps[0])
-                if (isinstance(self.num_steps, list) and self.stage_durations)
+                (self.stage_durations[0] / self.step_counts[0])
+                if (self.step_counts and self.stage_durations)
                 else (self.end_time / self.num_steps)
             )
             editor.update_property("time_step", time_step)
@@ -261,8 +261,8 @@ class RunSimulation:
         editor.update_maximum_strain(self.maximum_strain)
         editor.update_end_time(self.end_time)
 
-        if isinstance(self.num_steps, list) and self.stage_durations:
-            first_timestep = self.stage_durations[0] / self.num_steps[0]
+        if self.step_counts and self.stage_durations:
+            first_timestep = self.stage_durations[0] / self.step_counts[0]
         else:
             first_timestep = self.end_time / self.num_steps
         editor.update_first_timestep(first_timestep)

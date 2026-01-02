@@ -111,40 +111,13 @@ class ElementTestController:
                 phi_index=self._mc_indices[1],
             )
 
-            stage_durations = None
-            step_counts = None
-            strain_incs = None
-            if tt == "crs":
-                stage_durations = [
-                    hours_to_seconds(inc.duration_in_hours)
-                    for inc in self._main_model.soil_test_input_manager.input_data[
-                        CRS
-                    ].strain_increments
-                ]
-
-                step_counts = [
-                    inc.steps
-                    for inc in self._main_model.soil_test_input_manager.input_data[
-                        CRS
-                    ].strain_increments
-                ]
-
-                strain_incs = [
-                    inc.strain_increment
-                    for inc in self._main_model.soil_test_input_manager.input_data[
-                        CRS
-                    ].strain_increments
-                ]
-
             sim = RunSimulation(
                 test_inputs=inputs,
                 drainage=self._drainage,
                 dll_path=dll_path or "",
                 udsm_number=udsm_number,
                 material_parameters=material_parameters,
-                num_steps=(
-                    inputs.number_of_steps if step_counts is None else step_counts
-                ),
+                num_steps=inputs.number_of_steps,
                 cohesion_phi_indices=mohr_coulomb_options.to_indices(),
                 logger=self._logger,
             )
