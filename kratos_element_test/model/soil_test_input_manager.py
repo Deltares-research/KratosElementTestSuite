@@ -98,7 +98,6 @@ class SoilTestInputManager:
 
     def set_current_test_type(self, test_type: str) -> None:
         self._current_test_type = test_type
-        print(f"Current test type set to: {test_type}")
 
     def get_current_test_inputs(self):
         return self.input_data[self._current_test_type]
