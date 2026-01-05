@@ -65,10 +65,8 @@ class SoilTestInputManagerTest(unittest.TestCase):
 
     def test_removing_last_strain_increment_is_not_possible(self):
         initial_count = len(self.input_manager.input_data.get("CRS").strain_increments)
-        [
+        for _ in range(initial_count):
             self.input_manager.remove_last_crs_strain_increment()
-            for _ in range(initial_count)
-        ]
 
         new_count = len(self.input_manager.input_data.get("CRS").strain_increments)
         self.assertEqual(1, new_count)
