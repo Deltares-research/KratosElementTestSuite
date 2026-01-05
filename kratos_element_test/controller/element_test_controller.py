@@ -32,7 +32,7 @@ class ElementTestController:
         self._mc_indices: Tuple[Optional[int], Optional[int]] = (None, None)
 
         self._drainage: str = "drained"
-        self._main_model = MainModel()
+        self._main_model = MainModel(logger)
 
         self._soil_test_input_controller = SoilTestInputController(
             self._main_model.soil_test_input_manager
@@ -82,23 +82,12 @@ class ElementTestController:
         udsm_number: Optional[int],
         material_parameters: List[float],
     ) -> bool:
-        tt = TEST_NAME_TO_TYPE.get(
+        test_type = TEST_NAME_TO_TYPE.get(
             self._main_model.soil_test_input_manager.get_current_test_type()
         )
-        if not self._is_valid_test_type(tt):
+        if not self._is_valid_test_type(test_type):
             self._logger("Please select a test type.", "error")
             return False
-
-        inputs = self._main_model.soil_test_input_manager.get_current_test_inputs()
-
-        try:
-            inputs.validate()
-        except ValueError as e:
-            self._logger("Calculation stopped due to invalid input.", "error")
-            self._logger(str(e), "error")
-            return False
-
-        plotter = self._plotter_factory(axes)
 
         try:
             self._logger(f"MC indices: {self._mc_tuple()}", "info")
@@ -109,20 +98,12 @@ class ElementTestController:
                 phi_index=self._mc_indices[1],
             )
 
-            sim = RunSimulation(
-                test_inputs=inputs,
-                drainage=self._drainage,
-                dll_path=dll_path or "",
-                udsm_number=udsm_number,
-                material_parameters=material_parameters,
-                cohesion_phi_indices=mohr_coulomb_options.to_indices(),
-                logger=self._logger,
-            )
+            self._main_model.run_simulation(self._drainage, dll_path, udsm_number, mohr_coulomb_options, material_parameters)
+            self.latest_results = self._main_model.get_latest_results()
 
-            sim.run()
-            self.latest_results = sim.post_process_results()
-            self._render(self.latest_results, plotter, inputs.test_type)
-            self.latest_test_type = inputs.test_type
+            plotter = self._plotter_factory(axes)
+            self._render(self.latest_results, plotter, test_type)
+            self.latest_test_type = test_type
 
         except Exception as e:
             self._logger(f"Simulation failed: {e}", "error")
