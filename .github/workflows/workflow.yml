@@ -27,7 +27,7 @@ jobs:
       - name: Run tests
         run: pytest
 
-  static-code-analyisis:
+  static-code-analysis:
     runs-on: windows-latest
 
     steps:
