@@ -46,9 +46,10 @@ class TriaxialAndShearSimulationInputs:
     initial_effective_cell_pressure: float
     number_of_steps: int
     duration: float
+    drainage: str
 
     def validate(self) -> None:
-        if self.test_type not in ("triaxial", "direct_shear", "crs"):
+        if self.test_type not in ("triaxial", "direct_shear"):
             raise ValueError("Unsupported test type.")
         if self.number_of_steps <= 0:
             raise ValueError("Number of steps must be > 0.")
@@ -58,9 +59,9 @@ class TriaxialAndShearSimulationInputs:
 
 @dataclass
 class StrainIncrement:
-    duration_in_hours: float
-    strain_increment: float
-    steps: int
+    duration_in_hours: float = 1.0
+    strain_increment: float = 0.0
+    steps: int = 100
 
 
 @dataclass

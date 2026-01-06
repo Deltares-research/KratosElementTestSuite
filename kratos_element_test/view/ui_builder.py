@@ -376,7 +376,7 @@ class GeotechTestUI(ttk.Frame):
 
         def _sync_drainage_from_combobox(*_):
             val = (self.test_type_var.get() or "").strip().lower()
-            self.controller.set_drainage("drained" if val.startswith("drained") else "undrained")
+            self.controller.set_drainage("drained" if val.startswith("drained") else "undrained", self.current_test.get())
 
         self.test_type_menu.bind("<<ComboboxSelected>>", lambda e: _sync_drainage_from_combobox())
         _sync_drainage_from_combobox()

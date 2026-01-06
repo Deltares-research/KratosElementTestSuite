@@ -21,17 +21,19 @@ class SoilTestInputManager:
                 initial_effective_cell_pressure=100.0,
                 number_of_steps=100,
                 duration=1.0,
+                drainage="drained",
             ),
             DIRECT_SHEAR: TriaxialAndShearSimulationInputs(
-                test_type=TEST_NAME_TO_TYPE.get(TRIAXIAL),
+                test_type=TEST_NAME_TO_TYPE.get(DIRECT_SHEAR),
                 maximum_strain=20.0,
                 initial_effective_cell_pressure=100.0,
                 number_of_steps=100,
                 duration=1.0,
+                drainage="drained",
             ),
             CRS: CRSSimulationInputs(
                 test_type=TEST_NAME_TO_TYPE.get(CRS),
-                strain_increments=[self.default_strain_increment() for _ in range(5)],
+                strain_increments=[StrainIncrement() for _ in range(5)],
             ),
         }
         self.update_crs_totals()
@@ -71,7 +73,6 @@ class SoilTestInputManager:
 
     def update_init_pressure(self, new_pressure: float, test_type: str) -> None:
         self.input_data[test_type].initial_effective_cell_pressure = new_pressure
-        print("Updated initial pressure:", new_pressure)
 
     def update_max_strain(self, new_strain: float, test_type: str) -> None:
         self.input_data[test_type].maximum_strain = new_strain
@@ -82,16 +83,15 @@ class SoilTestInputManager:
     def update_duration(self, new_duration: float, test_type: str) -> None:
         self.input_data[test_type].duration = new_duration
 
+    def update_drainage(self, new_drainage: str, test_type: str) -> None:
+        self.input_data[test_type].drainage = new_drainage
+
     def add_strain_increment(self):
         crs_inputs = self.input_data.get(CRS)
-        crs_inputs.strain_increments.append(self.default_strain_increment())
+        crs_inputs.strain_increments.append(StrainIncrement())
 
         self.update_crs_totals()
 
     def remove_last_crs_strain_increment(self):
         if len(self.input_data[CRS].strain_increments) > 1:
             self.input_data[CRS].strain_increments.pop()
-
-    @staticmethod
-    def default_strain_increment():
-        return StrainIncrement(duration_in_hours=1.0, strain_increment=0.0, steps=100)
