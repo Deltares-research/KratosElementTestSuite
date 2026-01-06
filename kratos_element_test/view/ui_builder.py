@@ -6,7 +6,6 @@ import threading
 import tkinter as tk
 import tkinter.font as tkFont
 import traceback
-from time import sleep
 from tkinter import ttk, scrolledtext
 
 from PIL import Image, ImageTk
@@ -32,8 +31,6 @@ class GeotechTestUI(ttk.Frame):
     def __init__(self, root, test_name, dll_path, model_dict, external_widgets=None):
         super().__init__(root)
         self.pack(side="top", fill="both", expand=True)
-        self.dummy_focus_entry = tk.Entry(self)
-        self.dummy_focus_entry.place(x=-100, y=-100, width=1, height=1)  # Off-screen but mapped
         self.root = root
         self.test_name = test_name
         self.dll_path = dll_path
@@ -68,8 +65,6 @@ class GeotechTestUI(ttk.Frame):
         register_ui_instance(self)
         self._init_dropdown_section()
         self._create_input_fields()
-
-
 
     def _start_simulation_thread(self):
         if self.is_running:
