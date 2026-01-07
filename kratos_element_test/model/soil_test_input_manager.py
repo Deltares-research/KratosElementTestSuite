@@ -17,19 +17,9 @@ class SoilTestInputManager:
         self.input_data = {
             TRIAXIAL: TriaxialAndShearSimulationInputs(
                 test_type=TEST_NAME_TO_TYPE.get(TRIAXIAL),
-                maximum_strain=20.0,
-                initial_effective_cell_pressure=100.0,
-                number_of_steps=100,
-                duration=1.0,
-                drainage="drained",
             ),
             DIRECT_SHEAR: TriaxialAndShearSimulationInputs(
                 test_type=TEST_NAME_TO_TYPE.get(DIRECT_SHEAR),
-                maximum_strain=20.0,
-                initial_effective_cell_pressure=100.0,
-                number_of_steps=100,
-                duration=1.0,
-                drainage="drained",
             ),
             CRS: CRSSimulationInputs(
                 test_type=TEST_NAME_TO_TYPE.get(CRS),

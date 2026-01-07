@@ -1,25 +1,28 @@
 import unittest
 
+from parameterized import parameterized
+
 from kratos_element_test.model.soil_test_input_manager import SoilTestInputManager
-from kratos_element_test.view.ui_constants import TRIAXIAL
+from kratos_element_test.view.ui_constants import TRIAXIAL, DIRECT_SHEAR
 
 
 class SoilTestInputManagerTest(unittest.TestCase):
     def setUp(self):
         self.input_manager = SoilTestInputManager()
 
-    def test_total_number_of_steps_for_crs(self):
+    def test_default_crs_input(self):
         crs_inputs = self.input_manager.input_data.get("CRS")
         self.assertIsNotNone(crs_inputs)
         self.assertEqual(len(crs_inputs.strain_increments), 5)
+
+    def test_total_number_of_steps_for_crs(self):
+        crs_inputs = self.input_manager.input_data.get("CRS")
 
         expected_number_of_steps = 500  # 5 increments * 100 steps each by default
         self.assertEqual(expected_number_of_steps, crs_inputs.number_of_steps)
 
     def test_total_duration_for_crs(self):
         crs_inputs = self.input_manager.input_data.get("CRS")
-        self.assertIsNotNone(crs_inputs)
-        self.assertEqual(len(crs_inputs.strain_increments), 5)
 
         expected_duration = 5.0 * 3600  # 5 increments * 1.0 hour each by default
         self.assertEqual(expected_duration, crs_inputs.duration_in_seconds)
@@ -65,33 +68,36 @@ class SoilTestInputManagerTest(unittest.TestCase):
 
     def test_removing_last_strain_increment_is_not_possible(self):
         initial_count = len(self.input_manager.input_data.get("CRS").strain_increments)
-        [
+
+        for _ in range(initial_count):
             self.input_manager.remove_last_crs_strain_increment()
-            for _ in range(initial_count)
-        ]
 
         new_count = len(self.input_manager.input_data.get("CRS").strain_increments)
         self.assertEqual(1, new_count)
 
-    def test_update_duration(self):
-        self.input_manager.update_duration(2.5, TRIAXIAL)
-        updated = self.input_manager.input_data[TRIAXIAL].duration
+    @parameterized.expand([TRIAXIAL, DIRECT_SHEAR])
+    def test_update_duration(self,test_type):
+        self.input_manager.update_duration(2.5, test_type)
+        updated = self.input_manager.input_data[test_type].duration
         self.assertEqual(updated, 2.5)
 
-    def test_update_num_steps(self):
-        self.input_manager.update_num_steps(250, TRIAXIAL)
-        updated = self.input_manager.input_data[TRIAXIAL].number_of_steps
+    @parameterized.expand([TRIAXIAL, DIRECT_SHEAR])
+    def test_update_num_steps(self,test_type):
+        self.input_manager.update_num_steps(250, test_type)
+        updated = self.input_manager.input_data[test_type].number_of_steps
         self.assertEqual(updated, 250)
 
-    def test_update_max_strain(self):
-        self.input_manager.update_max_strain(15.0, TRIAXIAL)
-        updated = self.input_manager.input_data[TRIAXIAL].maximum_strain
+    @parameterized.expand([TRIAXIAL, DIRECT_SHEAR])
+    def test_update_max_strain(self,test_type):
+        self.input_manager.update_max_strain(15.0, test_type)
+        updated = self.input_manager.input_data[test_type].maximum_strain
         self.assertEqual(updated, 15.0)
 
-    def test_update_init_pressure(self):
-        self.input_manager.update_init_pressure(250.0, TRIAXIAL)
+    @parameterized.expand([TRIAXIAL, DIRECT_SHEAR])
+    def test_update_init_pressure(self, test_type):
+        self.input_manager.update_init_pressure(250.0, test_type)
         updated = self.input_manager.input_data[
-            TRIAXIAL
+            test_type
         ].initial_effective_cell_pressure
         self.assertEqual(updated, 250.0)
 
