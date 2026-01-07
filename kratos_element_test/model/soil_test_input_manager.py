@@ -16,15 +16,12 @@ class SoilTestInputManager:
     def __init__(self):
         self.input_data = {
             TRIAXIAL: TriaxialAndShearSimulationInputs(
-                test_type=TEST_NAME_TO_TYPE.get(TRIAXIAL),
+                test_type=TEST_NAME_TO_TYPE.get(TRIAXIAL)
             ),
             DIRECT_SHEAR: TriaxialAndShearSimulationInputs(
-                test_type=TEST_NAME_TO_TYPE.get(DIRECT_SHEAR),
+                test_type=TEST_NAME_TO_TYPE.get(DIRECT_SHEAR)
             ),
-            CRS: CRSSimulationInputs(
-                test_type=TEST_NAME_TO_TYPE.get(CRS),
-                strain_increments=[StrainIncrement() for _ in range(5)],
-            ),
+            CRS: CRSSimulationInputs(test_type=TEST_NAME_TO_TYPE.get(CRS)),
         }
         self.update_crs_totals()
 
