@@ -36,6 +36,7 @@ class GeotechTestUI(ttk.Frame):
         self.dll_path = dll_path
         self.model_dict = model_dict
         self.is_linear_elastic = model_dict["model_name"][0].lower() == "linear elastic model"
+        self.is_mohr_coulomb = model_dict["model_name"][0].lower() == "mohr-coulomb model"
 
         self.model_var = tk.StringVar(root)
         self.model_var.set(model_dict["model_name"][0])
@@ -122,7 +123,7 @@ class GeotechTestUI(ttk.Frame):
         self.model_menu.pack(side="top", fill="x", expand=True, padx=5)
         self.model_var.trace("w", lambda *args: self._create_input_fields())
 
-        if self.is_linear_elastic:
+        if self.is_linear_elastic or self.is_mohr_coulomb:
             self.model_menu.configure(state="disabled")
         else:
             self.model_menu.configure(state="readonly")
@@ -141,12 +142,7 @@ class GeotechTestUI(ttk.Frame):
         self.entry_widgets, string_vars = self._create_entries(self.param_frame, "Soil Input Parameters",
                                                   params, units, default_values)
 
-        self.mohr_checkbox = tk.BooleanVar()
-        self.cohesion_var = tk.StringVar(value="3")
-        self.phi_var = tk.StringVar(value="4")
-        self._create_mohr_options(params)
-        if self.is_linear_elastic:
-            self.mohr_checkbox_widget.configure(state="disabled")
+        self.setup_mohr_coulomb_controls(params)
 
         self.test_selector_frame = ttk.Frame(self.param_frame, padding="5")
         self.test_selector_frame.pack(fill="x", pady=(10, 5))
@@ -264,6 +260,28 @@ class GeotechTestUI(ttk.Frame):
 
             for w in widgets:
                 w.pack_forget()
+
+    def setup_mohr_coulomb_controls(self, params):
+        self.mohr_checkbox = tk.BooleanVar()
+        self.cohesion_var = tk.StringVar(value="3")
+        self.phi_var = tk.StringVar(value="4")
+        self._create_mohr_options(params)
+
+        if self.is_linear_elastic:
+            self.controller.set_mohr_enabled(False)
+            self.controller.set_mohr_mapping(None, None)
+            self.mohr_frame.pack_forget()
+
+        elif self.is_mohr_coulomb:
+            self.controller.set_mohr_enabled(True)
+
+            c_idx, phi_idx = self._parse_mc_indices()
+            self.controller.set_mohr_mapping(c_idx, phi_idx)
+
+            self.mohr_frame.pack_forget()
+
+        else:
+            self.mohr_checkbox_widget.configure(state="normal")
 
     def _switch_test(self, test_name):
         clear_log()
@@ -415,6 +433,7 @@ class GeotechTestUI(ttk.Frame):
             success = self.controller.run(
                 axes=self.plot_frame.axes,
                 test_type=tt,
+                model_name=self.model_var.get(),
                 dll_path=self.dll_path or "",
                 udsm_number=udsm_number,
                 material_parameters=[float(x) for x in material_params],
@@ -480,8 +499,8 @@ class GeotechTestUI(ttk.Frame):
             self.scrollbar.config(command=self._original_scroll_cmd)
         self.scroll_canvas.bind_all("<MouseWheel>", self._on_mousewheel)
 
-        if self.is_linear_elastic:
-            self.mohr_checkbox_widget.configure(state="disabled")
+        if self.is_linear_elastic or self.is_mohr_coulomb:
+            self.mohr_frame.pack_forget()
             self.model_menu.configure(state="disabled")
         else:
             self.model_menu.configure(state="readonly")

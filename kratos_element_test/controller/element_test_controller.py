@@ -78,6 +78,7 @@ class ElementTestController:
             *,
             axes,
             test_type: Optional[str] = None,
+            model_name: Optional[str] = None,
             dll_path: str,
             udsm_number: Optional[int],
             material_parameters: List[float],
@@ -121,6 +122,7 @@ class ElementTestController:
 
             sim = RunSimulation(
                 test_type=inputs.test_type,
+                model_name=model_name,
                 drainage=inputs.drainage,
                 dll_path=dll_path or "",
                 udsm_number=udsm_number,

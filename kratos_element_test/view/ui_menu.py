@@ -12,7 +12,7 @@ from kratos_element_test.model.io.udsm_parser import udsm_parser
 from kratos_element_test.view.ui_utils import _asset_path
 from kratos_element_test.view.result_exporter import export_latest_results
 from kratos_element_test.view.ui_constants import (APP_TITLE, APP_VERSION, APP_NAME, APP_AUTHOR, SELECT_UDSM,
-                                                 LINEAR_ELASTIC, HELP_MENU_FONT, DEFAULT_TKINTER_DPI)
+                                                 LINEAR_ELASTIC, MOHR_COULOMB, HELP_MENU_FONT, DEFAULT_TKINTER_DPI)
 
 import ctypes
 ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID("deltares.ElementTestSuite.ui")
@@ -199,18 +199,45 @@ class MainUI:
             self.main_frame = GeotechTestUI(root, test_name="Triaxial", dll_path=None, model_dict=model_dict,
                               external_widgets=[model_source_menu])
 
+        def load_mohr_coulomb():
+            nonlocal last_model_source
+            model_dict = {
+                "model_name": [MOHR_COULOMB],
+                "num_params": [4],
+                "param_names": [[
+                    "Young's Modulus",
+                    "Poisson's Ratio",
+                    "Cohesion",
+                    "Friction Angle",
+                    "Tensile Strength",
+                    "Dilatancy Angle",
+                ]],
+                "param_units": [["kN/m²", "-", "kN/m²", "deg", "kN/m²", "deg"]],
+            }
+            last_model_source = MOHR_COULOMB
+
+            if self.main_frame:
+                for widget in self.main_frame.winfo_children():
+                    widget.destroy()
+                self.main_frame.destroy()
+
+            self.main_frame = GeotechTestUI(root, test_name="Triaxial", dll_path=None, model_dict=model_dict,
+                                            external_widgets=[model_source_menu])
+
         def handle_model_source_selection(event):
             choice = model_source_var.get()
             if choice == SELECT_UDSM:
                 load_dll()
             elif choice == LINEAR_ELASTIC:
                 load_linear_elastic()
+            elif choice == MOHR_COULOMB:
+                load_mohr_coulomb()
 
         model_source_var = tk.StringVar(value="Select Model Source")
         model_source_menu = ttk.Combobox(
             top_frame,
             textvariable=model_source_var,
-            values=[SELECT_UDSM, LINEAR_ELASTIC],
+            values=[SELECT_UDSM, LINEAR_ELASTIC, MOHR_COULOMB],
             state="readonly"
         )
         model_source_menu.bind("<<ComboboxSelected>>", handle_model_source_selection)
