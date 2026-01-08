@@ -69,15 +69,20 @@ class ElementTestController:
         self._logger(f"Unknown drainage: {drainage}", "warn")
         return False
 
-    def set_drainage(self, drainage: str) -> None:
+    def set_drainage(self, drainage: str, test_type: str) -> None:
         if not self._is_valid_drainage(drainage):
             return
+
+        # For now we save the drainage in two places, in the next PR we will
+        # refactor to have a single source of truth (i.e. the SoilTestInputManager)
+        self._main_model.soil_test_input_manager.update_drainage(drainage, test_type)
         self._drainage = drainage
 
     def run(
         self,
         *,
         axes,
+        model_name: Optional[str] = None,
         dll_path: str,
         udsm_number: Optional[int],
         material_parameters: List[float],

@@ -38,54 +38,55 @@ class SoilTestInputController:
     def bind_test_input_fields_to_update_functions(
         self, string_vars, test_type: str
     ) -> None:
-        # In these binds, I use _1, _2, _3 to indicate these parameters are unused
         string_vars[INIT_PRESSURE_LABEL].trace_add(
             "write",
-            lambda _1, _2, _3: self._soil_test_input_manager.update_init_pressure(
+            lambda _var_name, _index, _operation: self._soil_test_input_manager.update_init_pressure(
                 new_pressure=float(string_vars[INIT_PRESSURE_LABEL].get()),
                 test_type=test_type,
             ),
         )
         string_vars[MAX_STRAIN_LABEL].trace_add(
             "write",
-            lambda _1, _2, _3: self._soil_test_input_manager.update_max_strain(
-                new_strain=float(string_vars[MAX_STRAIN_LABEL].get()), test_type=test_type
+            lambda _var_name, _index, _operation: self._soil_test_input_manager.update_max_strain(
+                new_strain=float(string_vars[MAX_STRAIN_LABEL].get()),
+                test_type=test_type,
             ),
         )
         string_vars[NUM_STEPS_LABEL].trace_add(
             "write",
-            lambda _1, _2, _3: self._soil_test_input_manager.update_num_steps(
+            lambda _var_name, _index, _operation: self._soil_test_input_manager.update_num_steps(
                 new_steps=int(string_vars[NUM_STEPS_LABEL].get()), test_type=test_type
             ),
         )
         string_vars[DURATION_LABEL].trace_add(
             "write",
-            lambda _1, _2, _3: self._soil_test_input_manager.update_duration(
-                new_duration=float(string_vars[DURATION_LABEL].get()), test_type=test_type
+            lambda _var_name, _index, _operation: self._soil_test_input_manager.update_duration(
+                new_duration=float(string_vars[DURATION_LABEL].get()),
+                test_type=test_type,
             ),
         )
 
     def bind_crs_test_input_row_to_update_functions(
         self, string_vars, current_index: int
     ) -> None:
-        # In these binds, I use _1, _2, _3 to indicate these parameters are unused
         string_vars[DURATION_LABEL].trace_add(
             "write",
-            lambda _1, _2, _3, idx=current_index: self._soil_test_input_manager.set_crs_duration(
-                new_duration_in_hours=float(string_vars[DURATION_LABEL].get()), index=idx
+            lambda _var_name, _index, _operation: self._soil_test_input_manager.set_crs_duration(
+                new_duration_in_hours=float(string_vars[DURATION_LABEL].get()),
+                index=current_index,
             ),
         )
         string_vars[STRAIN_INCREMENT_LABEL].trace_add(
             "write",
-            lambda _1, _2, _3, idx=current_index:
-            self._soil_test_input_manager.set_crs_strain_increment(
-                new_increment=float(string_vars[STRAIN_INCREMENT_LABEL].get()), index=idx
+            lambda _var_name, _index, _operation: self._soil_test_input_manager.set_crs_strain_increment(
+                new_increment=float(string_vars[STRAIN_INCREMENT_LABEL].get()),
+                index=current_index,
             ),
         )
         string_vars[STEPS_LABEL].trace_add(
             "write",
-            lambda _1, _2, _3, idx=current_index: self._soil_test_input_manager.set_crs_steps(
-                new_steps=int(string_vars[STEPS_LABEL].get()), index=idx
+            lambda _var_name, _index, _operation: self._soil_test_input_manager.set_crs_steps(
+                new_steps=int(string_vars[STEPS_LABEL].get()), index=current_index
             ),
         )
 
