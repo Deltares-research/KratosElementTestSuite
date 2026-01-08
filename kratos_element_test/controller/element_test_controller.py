@@ -3,9 +3,18 @@
 # Contact kratos@deltares.nl
 
 from typing import Optional, Callable, List, Tuple, Dict
+
+from kratos_element_test.controller.soil_test_input_controller import SoilTestInputController
+from kratos_element_test.model.main_model import MainModel
+from kratos_element_test.model.models import (
+    SimulationInputs,
+    MohrCoulombOptions,
+)
 from kratos_element_test.model.pipeline.run_simulation import RunSimulation
-from kratos_element_test.model.models import SimulationInputs, MohrCoulombOptions
-from kratos_element_test.view.ui_constants import VALID_TEST_TYPES, VALID_DRAINAGE_TYPES
+from kratos_element_test.view.ui_constants import (
+    VALID_TEST_TYPES,
+    VALID_DRAINAGE_TYPES,
+)
 
 
 class ElementTestController:
@@ -20,6 +29,9 @@ class ElementTestController:
 
         self._test_type: Optional[str] = None
         self._drainage: str = "drained"
+        self._main_model = MainModel()
+
+        self._soil_test_input_controller = SoilTestInputController(self._main_model.soil_test_input_manager)
 
     def set_mohr_enabled(self, enabled: bool) -> None:
         self._mc_enabled = bool(enabled)
@@ -53,9 +65,13 @@ class ElementTestController:
         self._logger(f"Unknown drainage: {drainage}", "warn")
         return False
 
-    def set_drainage(self, drainage: str) -> None:
+    def set_drainage(self, drainage: str, test_type: str) -> None:
         if not self._is_valid_drainage(drainage):
             return
+
+        # For now we save the drainage in two places, in the next PR we will
+        # refactor to have a single source of truth (i.e. the SoilTestInputManager)
+        self._main_model.soil_test_input_manager.update_drainage(drainage, test_type)
         self._drainage = drainage
 
     def run(self,
@@ -70,12 +86,12 @@ class ElementTestController:
             eps_max: float,
             n_steps: float,
             duration: float,
-            ) -> None:
+            ) -> bool:
 
         tt = test_type or self._test_type
         if not self._is_valid_test_type(tt):
             self._logger("Please select a test type.", "error")
-            return
+            return False
 
         inputs = SimulationInputs(
             test_type=tt,

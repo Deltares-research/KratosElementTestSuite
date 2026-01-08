@@ -16,3 +16,7 @@ def seconds_to_hours(seconds: float) -> float:
 
 def seconds_list_to_hours_list(second_list: list[float]) -> list[float]:
     return [seconds_to_hours(second) for second in second_list]
+
+
+def hours_to_seconds(hours: float) -> float:
+    return hours * 3600.0
