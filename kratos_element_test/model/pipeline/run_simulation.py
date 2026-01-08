@@ -116,6 +116,7 @@ class RunSimulation:
         candidates = [
             here.parent / f"test_{test_type}",  # legacy: alongside run_simulation.py
             here.parents[1]
+            / "simulation_assets"
             / "templates"
             / f"test_{test_type}",  # NEW: model/templates/test_*
             here.parents[1] / f"test_{test_type}",  # legacy: under model/
@@ -124,7 +125,7 @@ class RunSimulation:
         if _res_files:
             try:
                 pkg_path = (
-                    _res_files("kratos_element_test.model.templates")
+                    _res_files("kratos_element_test.model.simulation_assets.templates")
                     / f"test_{test_type}"
                 )
                 candidates.append(Path(str(pkg_path)))
