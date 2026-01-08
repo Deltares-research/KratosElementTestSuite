@@ -311,3 +311,23 @@ class SoilTestInputView(ttk.Frame):
             widgets[label] = entry
             string_vars[label] = string_var
         return widgets, string_vars
+
+    def validate(self, current_test_type):
+        widget_dicts = []
+        if current_test_type == TRIAXIAL:
+            widget_dicts=[self.triaxial_widgets]
+        elif current_test_type==DIRECT_SHEAR:
+            widget_dicts=[self.shear_widgets]
+        elif current_test_type == CRS:
+            widget_dicts=self.crs_rows
+
+        self._validate_entries_are_convertible_to_numbers(widget_dicts)
+
+    @staticmethod
+    def _validate_entries_are_convertible_to_numbers(widget_dicts):
+        for widget_dict in widget_dicts:
+            for key, widget in widget_dict.items():
+                try:
+                    float(widget.get())
+                except ValueError:
+                    raise ValueError(f"Could not convert entry to number for '{key}'.")

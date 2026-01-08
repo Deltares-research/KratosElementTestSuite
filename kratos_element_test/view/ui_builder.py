@@ -241,6 +241,7 @@ class GeotechTestUI(ttk.Frame):
             log_message("Starting calculation... Please wait...", "info")
             self.root.update_idletasks()
 
+            self.soil_test_input_view.validate(self.controller.get_current_test_type())
             material_params = [e.get() for e in self.entry_widgets.values()]
             udsm_number = self.model_dict["model_name"].index(self.model_var.get()) + 1 if self.dll_path else None
 
