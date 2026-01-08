@@ -73,7 +73,6 @@ class ElementTestController:
     def run(
         self,
         *,
-        axes,
         model_name: Optional[str] = None,
         dll_path: str,
         udsm_number: Optional[int],
@@ -97,60 +96,12 @@ class ElementTestController:
 
             self._main_model.run_simulation(model_name, dll_path, udsm_number, mohr_coulomb_options, material_parameters)
             self.latest_results = self._main_model.get_latest_results()
-
-            plotter = self._plotter_factory(axes)
-            self._render(self.latest_results, plotter, test_type)
             self.latest_test_type = test_type
 
         except Exception as e:
             self._logger(f"Simulation failed: {e}", "error")
             return False
         return True
-
-    def _render(self, results: Dict[str, List[float]], plotter, test_type) -> None:
-        if not plotter:
-            self._logger(
-                "No plotter was provided; using a no-op plotter (headless run).", "info"
-            )
-            return
-
-        if test_type == "triaxial":
-            plotter.triaxial(
-                results["yy_strain"],
-                results["vol_strain"],
-                results["sigma1"],
-                results["sigma3"],
-                results["mean_stress"],
-                results["von_mises"],
-                results["cohesion"],
-                results["phi"],
-            )
-        elif test_type == "direct_shear":
-            plotter.direct_shear(
-                results["shear_strain_xy"],
-                results["shear_xy"],
-                results["sigma1"],
-                results["sigma3"],
-                results["mean_stress"],
-                results["von_mises"],
-                results["cohesion"],
-                results["phi"],
-            )
-        elif test_type == "crs":
-            plotter.crs(
-                results["yy_strain"],
-                results["time_steps"],
-                results["sigma_yy"],
-                results["sigma_xx"],
-                results["mean_stress"],
-                results["von_mises"],
-                results["sigma1"],
-                results["sigma3"],
-                results["cohesion"],
-                results["phi"],
-            )
-        else:
-            raise ValueError(f"Unsupported test_type: {test_type}")
 
     def get_current_test_type(self) -> str:
         return self._main_model.get_current_test_type()
