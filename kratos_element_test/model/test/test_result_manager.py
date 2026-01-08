@@ -17,5 +17,17 @@ class ResultManagerTest(unittest.TestCase):
         self.assertIsInstance(test_results, Dict)
         self.assertEqual(len(test_results), 0)
 
-if __name__ == '__main__':
+    def test_results_can_be_set_and_retrieved(self):
+        result_manager = ResultManager()
+        expected_results = {
+            "values_variable_1": [1, 2, 3],
+            "values_variable_2": [4, 5, 6],
+        }
+
+        result_manager.set_results(expected_results, TRIAXIAL)
+
+        self.assertDictEqual(result_manager.get_results(TRIAXIAL), expected_results)
+
+
+if __name__ == "__main__":
     unittest.main()
