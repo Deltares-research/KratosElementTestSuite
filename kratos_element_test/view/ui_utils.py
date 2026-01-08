@@ -21,3 +21,17 @@ def _asset_path(name: str) -> str:
             return str(p)
     raise FileNotFoundError(
         f"Asset '{name}' not found. Tried: {', '.join(str(p) for p in candidates)}")
+
+def _soil_models_dir() -> str:
+    """
+        Return an absolute path to the shipped soil_models directory.
+
+        """
+    package_root = Path(__file__).resolve().parents[1]
+    soil_models_dir = package_root / "model" / "simulation_assets" / "soil_models"
+    if soil_models_dir.is_dir():
+        return str(soil_models_dir)
+    raise FileNotFoundError(
+        "Soil models directory not found. Expected at: "
+        f"{soil_models_dir}"
+    )

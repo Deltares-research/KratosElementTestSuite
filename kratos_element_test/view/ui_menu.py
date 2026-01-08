@@ -9,7 +9,7 @@ from platformdirs import user_data_dir
 from pathlib import Path
 from kratos_element_test.view.ui_builder import GeotechTestUI
 from kratos_element_test.model.io.udsm_parser import udsm_parser
-from kratos_element_test.view.ui_utils import _asset_path
+from kratos_element_test.view.ui_utils import _asset_path, _soil_models_dir
 from kratos_element_test.view.result_exporter import export_latest_results
 from kratos_element_test.view.ui_constants import (APP_TITLE, APP_VERSION, APP_NAME, APP_AUTHOR, SELECT_UDSM,
                                                  LINEAR_ELASTIC, MOHR_COULOMB, HELP_MENU_FONT, DEFAULT_TKINTER_DPI)
@@ -158,7 +158,11 @@ class MainUI:
 
         def load_dll():
             nonlocal last_model_source
-            dll_path = filedialog.askopenfilename(title=SELECT_UDSM, filetypes=[("DLL files", "*.dll")])
+            dll_path = filedialog.askopenfilename(
+                title=SELECT_UDSM,
+                initialdir=_soil_models_dir(),
+                filetypes=[("DLL files", "*.dll")],
+            )
             if not dll_path:
                 messagebox.showerror("Error", "No DLL file selected.")
                 model_source_var.set(last_model_source)
