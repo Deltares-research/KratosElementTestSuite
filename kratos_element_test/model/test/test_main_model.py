@@ -8,8 +8,9 @@ class MainModelTest(unittest.TestCase):
     def test_running_a_linear_elastic_triaxial_simulation(self):
         model = MainModel(logger=lambda msg, level: None)
 
-        material_parameters = [9e5, 0.3]
-
+        youngs_modulus = 9e5
+        poisson_ratio = 0.3
+        material_parameters = [youngs_modulus, poisson_ratio]
         model.run_simulation(
             "linear elastic model", None, 0, MohrCoulombOptions(), material_parameters
         )
