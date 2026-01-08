@@ -28,7 +28,9 @@ import tkinter.font as tkFont
 
 
 class SoilTestInputView(ttk.Frame):
-    def __init__(self, soil_test_input_controller, update_plots_callback, master, **kwargs):
+    def __init__(
+        self, soil_test_input_controller, update_plots_callback, master, **kwargs
+    ):
         super().__init__(master, **kwargs)
         self._soil_test_input_controller = soil_test_input_controller
         self.pack(fill="both", expand=True)
@@ -70,6 +72,10 @@ class SoilTestInputView(ttk.Frame):
         self.test_input_frame.pack(fill="both", expand=True)
 
         self._switch_test(TRIAXIAL)
+
+    def disable(self):
+        if hasattr(self, "test_type_menu") and self.test_type_menu.winfo_exists():
+            self.test_type_menu.config(state="disabled")
 
     def _switch_test(self, test_name):
         for name, button in self.test_buttons.items():
@@ -220,14 +226,7 @@ class SoilTestInputView(ttk.Frame):
         )
         self.test_type_menu.pack(anchor="w", padx=10, pady=(0, 10))
 
-        def _sync_drainage_from_combobox(*_):
-            val = (self.test_type_var.get() or "").strip().lower()
-            # self.controller.set_drainage("drained" if val.startswith("drained") else "undrained")
-
-        self.test_type_menu.bind(
-            "<<ComboboxSelected>>", lambda e: _sync_drainage_from_combobox()
-        )
-        _sync_drainage_from_combobox()
+        self._soil_test_input_controller.bind_drainage_combo_box(self.test_type_menu)
 
     def _add_crs_row(self, duration=1.0, strain_inc=0.0, steps=100):
         row = {}
@@ -297,7 +296,9 @@ class SoilTestInputView(ttk.Frame):
         default_font = tkFont.nametofont("TkDefaultFont").copy()
         default_font.configure(size=10)
 
-        ttk.Label(frame, text=title, font=("Arial", 12, "bold")).pack(anchor="w", padx=5, pady=5)
+        ttk.Label(frame, text=title, font=("Arial", 12, "bold")).pack(
+            anchor="w", padx=5, pady=5
+        )
         for i, label in enumerate(labels):
             string_var = tk.StringVar()
             string_var.set(defaults.get(label, ""))
@@ -315,11 +316,11 @@ class SoilTestInputView(ttk.Frame):
     def validate(self, current_test_type):
         widget_dicts = []
         if current_test_type == TRIAXIAL:
-            widget_dicts=[self.triaxial_widgets]
-        elif current_test_type==DIRECT_SHEAR:
-            widget_dicts=[self.shear_widgets]
+            widget_dicts = [self.triaxial_widgets]
+        elif current_test_type == DIRECT_SHEAR:
+            widget_dicts = [self.shear_widgets]
         elif current_test_type == CRS:
-            widget_dicts=self.crs_rows
+            widget_dicts = self.crs_rows
 
         self._validate_entries_are_convertible_to_numbers(widget_dicts)
 

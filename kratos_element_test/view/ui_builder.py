@@ -299,8 +299,7 @@ class GeotechTestUI(ttk.Frame):
         if hasattr(self, "scrollbar"):
             self._original_scroll_cmd = self.scrollbar.cget("command")
             self.scrollbar.config(command=lambda *args: None)
-        if hasattr(self, "test_type_menu") and self.test_type_menu.winfo_exists():
-            self.test_type_menu.config(state="disabled")
+        self.soil_test_input_view.disable()
         self.scroll_canvas.unbind_all("<MouseWheel>")
 
     def _enable_gui(self):

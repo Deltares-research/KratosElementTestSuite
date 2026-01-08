@@ -31,7 +31,6 @@ class ElementTestController:
         self._mc_enabled: bool = False
         self._mc_indices: Tuple[Optional[int], Optional[int]] = (None, None)
 
-        self._drainage: str = "drained"
         self._main_model = MainModel(logger)
 
         self._soil_test_input_controller = SoilTestInputController(
@@ -68,15 +67,6 @@ class ElementTestController:
             return True
         self._logger(f"Unknown drainage: {drainage}", "warn")
         return False
-
-    def set_drainage(self, drainage: str, test_type: str) -> None:
-        if not self._is_valid_drainage(drainage):
-            return
-
-        # For now we save the drainage in two places, in the next PR we will
-        # refactor to have a single source of truth (i.e. the SoilTestInputManager)
-        self._main_model.soil_test_input_manager.update_drainage(drainage, test_type)
-        self._drainage = drainage
 
     def run(
         self,
