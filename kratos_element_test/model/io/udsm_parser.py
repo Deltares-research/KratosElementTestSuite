@@ -21,11 +21,11 @@ def find_symbol_in_dll(dll_path, dll_lib, symbol_name):
     try:
         pe = pefile.PE(dll_path)
         symbol_name_lower = symbol_name.lower()
-
-        for exp in pe.DIRECTORY_ENTRY_EXPORT.symbols:
-            name = exp.name
-            if name and name.decode().lower() == symbol_name_lower:
-                return getattr(dll_lib, name.decode())
+        if hasattr(pe, "DIRECTORY_ENTRY_EXPORT"):
+            for exp in pe.DIRECTORY_ENTRY_EXPORT.symbols:
+                name = exp.name
+                if name and name.decode().lower() == symbol_name_lower:
+                    return getattr(dll_lib, name.decode())
 
         return None
     except Exception as e:

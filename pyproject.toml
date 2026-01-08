@@ -23,6 +23,7 @@ openpyxl = "*"
 KratosGeoMechanicsApplication = ">=10.2.3"
 pytest = "*"
 parameterized = "*"
+pylint = "*"
 
 [tool.poetry.scripts]
 startElementTest = "kratos_element_test.view.kratos_element_test_gui:main"
