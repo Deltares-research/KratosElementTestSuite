@@ -1,9 +1,10 @@
 class ResultManager:
-    def __init__(self):
+    def __init__(self, current_test_getter):
         self._results = {}
+        self._current_test_getter = current_test_getter
 
-    def get_results(self, test_type):
-        return self._results.get(test_type, {})
+    def get_results(self):
+        return self._results.get(self._current_test_getter(), {})
 
-    def set_results(self, expected_results,test_type):
-        self._results[test_type] = expected_results
+    def set_results(self, expected_results):
+        self._results[self._current_test_getter()] = expected_results

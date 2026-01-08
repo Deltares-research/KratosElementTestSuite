@@ -11,22 +11,24 @@ class ResultManagerTest(unittest.TestCase):
 
     @parameterized.expand([TRIAXIAL, DIRECT_SHEAR, CRS])
     def test_results_are_empty_dictionary_initially(self, test_name):
-        result_manager = ResultManager()
+        current_test_getter = lambda: test_name
+        result_manager = ResultManager(current_test_getter)
 
-        test_results = result_manager.get_results(test_name)
+        test_results = result_manager.get_results()
         self.assertIsInstance(test_results, Dict)
         self.assertEqual(len(test_results), 0)
 
     def test_results_can_be_set_and_retrieved(self):
-        result_manager = ResultManager()
+        current_test_getter = lambda: TRIAXIAL
+        result_manager = ResultManager(current_test_getter)
         expected_results = {
             "values_variable_1": [1, 2, 3],
             "values_variable_2": [4, 5, 6],
         }
 
-        result_manager.set_results(expected_results, TRIAXIAL)
+        result_manager.set_results(expected_results)
 
-        self.assertDictEqual(result_manager.get_results(TRIAXIAL), expected_results)
+        self.assertDictEqual(result_manager.get_results(), expected_results)
 
 
 if __name__ == "__main__":
