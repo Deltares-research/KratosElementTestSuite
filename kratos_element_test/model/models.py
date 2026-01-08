@@ -10,7 +10,7 @@ from kratos_element_test.view.ui_constants import VALID_TEST_TYPES, VALID_DRAINA
 @dataclass
 class MohrCoulombOptions:
     enabled: bool = False
-    c_index: Optional[int] = None   # 1-based index from the UDSM mapping
+    c_index: Optional[int] = None  # 1-based index from the UDSM mapping
     phi_index: Optional[int] = None
 
     def to_indices(self) -> Optional[Tuple[int, int]]:
@@ -56,7 +56,9 @@ class TriaxialAndShearSimulationInputs:
                 f"Number of steps must be > 0, but got {self.number_of_steps}."
             )
         if self.duration_in_seconds <= 0:
-            raise ValueError(f"Duration must be > 0, but got {self.duration_in_seconds}.")
+            raise ValueError(
+                f"Duration must be > 0, but got {self.duration_in_seconds}."
+            )
         if self.drainage not in ("drained", "undrained"):
             raise ValueError(f"Unsupported drainage type: {self.drainage}.")
 
