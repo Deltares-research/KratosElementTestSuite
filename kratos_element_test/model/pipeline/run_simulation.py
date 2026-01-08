@@ -57,23 +57,24 @@ class RunSimulation:
         )
         self.cohesion_phi_indices = cohesion_phi_indices
         self.log = logger or _fallback_log
-        self.drainage = test_inputs.drainage if type(test_inputs) is TriaxialAndShearSimulationInputs else None
+        self.drainage = (
+            test_inputs.drainage
+            if type(test_inputs) is TriaxialAndShearSimulationInputs
+            else None
+        )
         self.stage_durations = None
         self.step_counts = None
         self.strain_incs = None
 
-        if self.test_type == "crs":
-            if isinstance(test_inputs, CRSSimulationInputs):
-                self.stage_durations = [
-                    hours_to_seconds(inc.duration_in_hours)
-                    for inc in test_inputs.strain_increments
-                ]
-                self.step_counts = [inc.steps for inc in test_inputs.strain_increments]
-                self.strain_incs = [inc.strain_increment for inc in test_inputs.strain_increments]
-            else:
-                raise ValueError(
-                    "test_inputs must be of type CRSSimulationInputs for CRS tests."
-                )
+        if isinstance(test_inputs, CRSSimulationInputs):
+            self.stage_durations = [
+                hours_to_seconds(inc.duration_in_hours)
+                for inc in test_inputs.strain_increments
+            ]
+            self.step_counts = [inc.steps for inc in test_inputs.strain_increments]
+            self.strain_incs = [
+                inc.strain_increment for inc in test_inputs.strain_increments
+            ]
 
         self.keep_tmp = keep_tmp
 
@@ -218,14 +219,16 @@ class RunSimulation:
                 editor.set_constitutive_law("GeoLinearElasticPlaneStrain2DLaw")
 
             if self.model_name.strip().lower() == "mohr-coulomb model":
-                editor.update_material_properties({
-                    "YOUNG_MODULUS": self.material_parameters[0],
-                    "POISSON_RATIO": self.material_parameters[1],
-                    "GEO_COHESION": self.material_parameters[2],
-                    "GEO_FRICTION_ANGLE": self.material_parameters[3],
-                    "GEO_TENSILE_STRENGTH": self.material_parameters[4],
-                    "GEO_DILATANCY_ANGLE": self.material_parameters[5],
-                })
+                editor.update_material_properties(
+                    {
+                        "YOUNG_MODULUS": self.material_parameters[0],
+                        "POISSON_RATIO": self.material_parameters[1],
+                        "GEO_COHESION": self.material_parameters[2],
+                        "GEO_FRICTION_ANGLE": self.material_parameters[3],
+                        "GEO_TENSILE_STRENGTH": self.material_parameters[4],
+                        "GEO_DILATANCY_ANGLE": self.material_parameters[5],
+                    }
+                )
                 editor.set_constitutive_law("GeoMohrCoulombWithTensionCutOff2D")
 
     def _set_project_parameters(self) -> None:
