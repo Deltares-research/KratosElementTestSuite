@@ -16,7 +16,7 @@ class MainModel:
 
     def run_simulation(
         self,
-        drainage: str,
+        model_name: str,
         dll_path: str | None,
         udsm_number: int,
         mohr_coulomb_options: MohrCoulombOptions,
@@ -33,7 +33,7 @@ class MainModel:
 
         sim = RunSimulation(
             test_inputs=inputs,
-            drainage=drainage,
+            model_name=model_name,
             dll_path=dll_path or "",
             udsm_number=udsm_number,
             material_parameters=material_parameters,

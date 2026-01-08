@@ -42,7 +42,6 @@ class RunSimulation:
         material_parameters: List[float],
         cohesion_phi_indices: Optional[Tuple[int, int]] = None,
         logger: Optional[Callable[[str, str], None]] = None,
-        drainage: Optional[str] = None,
         keep_tmp: bool = False,
     ):
         self.test_type = test_inputs.test_type.lower()
@@ -58,7 +57,7 @@ class RunSimulation:
         )
         self.cohesion_phi_indices = cohesion_phi_indices
         self.log = logger or _fallback_log
-        self.drainage = drainage
+        self.drainage = test_inputs.drainage if type(test_inputs) is TriaxialAndShearSimulationInputs else None
         self.stage_durations = None
         self.step_counts = None
         self.strain_incs = None

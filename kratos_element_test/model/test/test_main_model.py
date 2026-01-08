@@ -11,7 +11,7 @@ class MainModelTest(unittest.TestCase):
         material_parameters = [9e5, 0.3]
 
         model.run_simulation(
-            "drained", None, 0, MohrCoulombOptions(), material_parameters
+            "linear elastic model", None, 0, MohrCoulombOptions(), material_parameters
         )
 
         results = model.get_latest_results()

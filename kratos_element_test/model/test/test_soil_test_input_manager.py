@@ -78,7 +78,7 @@ class SoilTestInputManagerTest(unittest.TestCase):
     @parameterized.expand([TRIAXIAL, DIRECT_SHEAR])
     def test_update_duration(self,test_type):
         self.input_manager.update_duration(2.5, test_type)
-        updated = self.input_manager.input_data[test_type].duration
+        updated = self.input_manager.input_data[test_type].duration_in_seconds
         self.assertEqual(updated, 2.5)
 
     @parameterized.expand([TRIAXIAL, DIRECT_SHEAR])
