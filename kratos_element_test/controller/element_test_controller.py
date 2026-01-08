@@ -4,6 +4,7 @@
 
 from typing import Optional, Callable, List, Tuple, Dict
 
+from kratos_element_test.controller.result_controller import ResultController
 from kratos_element_test.controller.soil_test_input_controller import (
     SoilTestInputController,
 )
@@ -36,6 +37,7 @@ class ElementTestController:
         self._soil_test_input_controller = SoilTestInputController(
             self._main_model.soil_test_input_manager
         )
+        self._result_controller = ResultController(self._main_model._result_manager)
 
     def set_mohr_enabled(self, enabled: bool) -> None:
         self._mc_enabled = bool(enabled)

@@ -8,3 +8,6 @@ class ResultManager:
 
     def set_results(self, expected_results):
         self._results[self._current_test_getter()] = expected_results
+
+    def get_current_test(self):
+        return self._current_test_getter()
