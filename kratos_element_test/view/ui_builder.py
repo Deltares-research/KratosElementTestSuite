@@ -31,7 +31,6 @@ class GeotechTestUI(ttk.Frame):
     def __init__(self, root, test_name, dll_path, model_dict, external_widgets=None):
         super().__init__(root)
         self.pack(side="top", fill="both", expand=True)
-
         self.root = root
         self.test_name = test_name
         self.dll_path = dll_path
@@ -138,7 +137,9 @@ class GeotechTestUI(ttk.Frame):
         units = self.model_dict.get("param_units", [[]])[index]
 
         default_values = {}
-        self.entry_widgets = self._create_entries(self.param_frame, "Soil Input Parameters",
+        # For now the string_vars are not used yet, but they'll be useful for adding a trace
+        # later (similar to the test input fields)
+        self.entry_widgets, string_vars = self._create_entries(self.param_frame, "Soil Input Parameters",
                                                   params, units, default_values)
 
         self.setup_mohr_coulomb_controls(params)
@@ -185,22 +186,24 @@ class GeotechTestUI(ttk.Frame):
 
     def _create_entries(self, frame, title, labels, units, defaults):
         widgets = {}
-
+        string_vars = {}
         default_font = tkFont.nametofont("TkDefaultFont").copy()
         default_font.configure(size=10)
 
         ttk.Label(frame, text=title, font=("Arial", 12, "bold")).pack(anchor="w", padx=5, pady=5)
         for i, label in enumerate(labels):
+            string_var = tk.StringVar()
+            string_var.set(defaults.get(label, ""))
             unit = units[i] if i < len(units) else ""
             row = ttk.Frame(frame)
             row.pack(fill="x", padx=10, pady=2)
             ttk.Label(row, text=label, font=default_font).pack(side="left", padx=5)
-            entry = ttk.Entry(row, font=default_font, width=20)
-            entry.insert(0, defaults.get(label, ""))
+            entry = ttk.Entry(row, font=default_font, width=20, textvariable=string_var)
             entry.pack(side="left", fill="x", expand=True)
             ttk.Label(row, text=unit, font=default_font).pack(side="left", padx=5)
             widgets[label] = entry
-        return widgets
+            string_vars[label] = string_var
+        return widgets, string_vars
 
     def _create_mohr_options(self, params):
         self.mohr_frame = ttk.Frame(self.param_frame)
@@ -281,9 +284,6 @@ class GeotechTestUI(ttk.Frame):
             self.mohr_checkbox_widget.configure(state="normal")
 
     def _switch_test(self, test_name):
-
-        self._save_current_inputs()
-
         clear_log()
         self.current_test.set(test_name)
 
@@ -301,30 +301,42 @@ class GeotechTestUI(ttk.Frame):
             ttk.Label(self.test_input_frame, text="Triaxial Input Data",
                       font=(INPUT_SECTION_FONT, 12, "bold")).pack(anchor="w", padx=5, pady=(5, 0))
             self._add_test_type_dropdown(self.test_input_frame)
-            self.triaxial_widgets = self._create_entries(
+
+            test_input_controller = self.controller._soil_test_input_controller
+            inputs = test_input_controller.get_triaxial_inputs()
+
+            input_values = {INIT_PRESSURE_LABEL: inputs.initial_effective_cell_pressure, MAX_STRAIN_LABEL: inputs.maximum_strain,
+                        NUM_STEPS_LABEL: inputs.number_of_steps, DURATION_LABEL: inputs.duration}
+            self.triaxial_widgets, self.triaxial_string_vars = self._create_entries(
                 self.test_input_frame,
                 "",
                 [INIT_PRESSURE_LABEL, MAX_STRAIN_LABEL, NUM_STEPS_LABEL, DURATION_LABEL],
                 [FL2_UNIT_LABEL, PERCENTAGE_UNIT_LABEL, WITHOUT_UNIT_LABEL, SECONDS_UNIT_LABEL],
-                {INIT_PRESSURE_LABEL: "100", MAX_STRAIN_LABEL: "20",
-                 NUM_STEPS_LABEL: "100", DURATION_LABEL: "1.0"}
+                input_values
             )
-            self._restore_inputs(test_name)
+
+            test_input_controller.bind_test_input_fields_to_update_functions(self.triaxial_string_vars, TRIAXIAL)
 
         elif test_name == DIRECT_SHEAR:
             self._init_plot_canvas(num_plots=4)
             ttk.Label(self.test_input_frame, text="Direct Simple Shear Input Data",
                       font=(INPUT_SECTION_FONT, 12, "bold")).pack(anchor="w", padx=5, pady=(5, 0))
             self._add_test_type_dropdown(self.test_input_frame)
-            self.shear_widgets = self._create_entries(
+
+            test_input_controller = self.controller._soil_test_input_controller
+            inputs = test_input_controller.get_shear_inputs()
+
+            input_values = {INIT_PRESSURE_LABEL: inputs.initial_effective_cell_pressure, MAX_STRAIN_LABEL: inputs.maximum_strain,
+                            NUM_STEPS_LABEL: inputs.number_of_steps, DURATION_LABEL: inputs.duration}
+            self.shear_widgets, self.shear_string_vars = self._create_entries(
                 self.test_input_frame,
                 "",
                 [INIT_PRESSURE_LABEL, MAX_STRAIN_LABEL, NUM_STEPS_LABEL, DURATION_LABEL],
                 [FL2_UNIT_LABEL, PERCENTAGE_UNIT_LABEL, WITHOUT_UNIT_LABEL, SECONDS_UNIT_LABEL],
-                {INIT_PRESSURE_LABEL: "100", MAX_STRAIN_LABEL: "20",
-                 NUM_STEPS_LABEL: "100", DURATION_LABEL: "1.0"}
+                input_values
             )
-            self._restore_inputs(test_name)
+
+            test_input_controller.bind_test_input_fields_to_update_functions(self.shear_string_vars, DIRECT_SHEAR)
 
         elif test_name == CRS:
             self._init_plot_canvas(num_plots=5)
@@ -339,7 +351,7 @@ class GeotechTestUI(ttk.Frame):
             add_row_button = ttk.Button(
                 self.crs_button_frame,
                 text="Add Row",
-                command=self._add_crs_row)
+                command=self._add_new_crs_row)
             add_row_button.pack(side="left", padx=5)
 
             self.remove_row_button = ttk.Button(
@@ -353,10 +365,11 @@ class GeotechTestUI(ttk.Frame):
             self.crs_table_frame.pack(fill="x", padx=10, pady=5)
 
             self.crs_rows = []
-            for _ in range(5):
-                self._add_crs_row(duration=1.0, strain_inc=0.0, steps=100)
 
-            self._restore_inputs(test_name)
+            crs_input = self.controller._soil_test_input_controller.get_crs_inputs()
+
+            for increment in crs_input.strain_increments:
+                self._add_crs_row(duration=increment.duration_in_hours, strain_inc=increment.strain_increment, steps=increment.steps)
 
         log_message(f"{test_name} test selected.", "info")
 
@@ -376,7 +389,7 @@ class GeotechTestUI(ttk.Frame):
 
         def _sync_drainage_from_combobox(*_):
             val = (self.test_type_var.get() or "").strip().lower()
-            self.controller.set_drainage("drained" if val.startswith("drained") else "undrained")
+            self.controller.set_drainage("drained" if val.startswith("drained") else "undrained", self.current_test.get())
 
         self.test_type_menu.bind("<<ComboboxSelected>>", lambda e: _sync_drainage_from_combobox())
         _sync_drainage_from_combobox()
@@ -494,6 +507,7 @@ class GeotechTestUI(ttk.Frame):
 
     def _add_crs_row(self, duration=1.0, strain_inc=0.0, steps=100):
         row = {}
+        string_vars = {}
         row_frame = ttk.Frame(self.crs_table_frame)
         row_frame.pack(fill="x", pady=2)
 
@@ -505,17 +519,33 @@ class GeotechTestUI(ttk.Frame):
                 [10, 10, 10],
                 ["hours ,", "% ,", ""],
                 [duration, strain_inc, steps]):
+            string_var = tk.StringVar()
+            string_var.set(str(default))
             ttk.Label(row_frame, text=label).pack(side="left", padx=5)
-            entry = ttk.Entry(row_frame, width=width)
-            entry.insert(0, str(default))
+            entry = ttk.Entry(row_frame, width=width, textvariable=string_var)
             entry.pack(side="left", padx=2)
             ttk.Label(row_frame, text=unit).pack(side="left", padx=0)
             row[label] = entry
+            string_vars[label] = string_var
 
+        test_input_controller = self.controller._soil_test_input_controller
+        current_index = len(self.crs_rows)
         self.crs_rows.append(row)
+        test_input_controller.bind_crs_test_input_row_to_update_functions(string_vars, current_index)
 
         if len(self.crs_rows) > 1:
             self.remove_row_button.config(state="normal")
+
+    def _add_new_crs_row(self):
+        test_input_controller = self.controller._soil_test_input_controller
+
+        test_input_controller.add_crs_strain_increment()
+        crs_input = test_input_controller.get_crs_inputs()
+
+        self._add_crs_row(duration=crs_input.strain_increments[-1].duration_in_hours,
+                          strain_inc=crs_input.strain_increments[-1].strain_increment,
+                          steps=crs_input.strain_increments[-1].steps)
+
 
     def _prevent_removal_last_crs_row(self):
         minimum_number_of_rows = 1
@@ -529,6 +559,7 @@ class GeotechTestUI(ttk.Frame):
             row = self.crs_rows.pop()
             row_frame = next(iter(row.values())).master
             row_frame.destroy()
+        self.controller._soil_test_input_controller.remove_last_crs_strain_increment()
 
         self._prevent_removal_last_crs_row()
 
@@ -567,39 +598,3 @@ class GeotechTestUI(ttk.Frame):
         durations_sec = [d * 3600 for d in durations]  # convert hours → seconds
 
         return durations_sec, strains, steps
-
-    def _save_current_inputs(self):
-        test = self.current_test.get()
-        if test == TRIAXIAL and hasattr(self, "triaxial_widgets"):
-            self.test_input_history[test] = {k: w.get() for k, w in self.triaxial_widgets.items()}
-        elif test == DIRECT_SHEAR and hasattr(self, "shear_widgets"):
-            self.test_input_history[test] = {k: w.get() for k, w in self.shear_widgets.items()}
-        elif test == CRS and hasattr(self, "crs_rows"):
-            rows = []
-            for row in self.crs_rows:
-                rows.append({k: w.get() for k, w in row.items()})
-            self.test_input_history[test] = rows
-
-    def _restore_inputs(self, test_name):
-        saved = self.test_input_history.get(test_name)
-        if not saved:
-            return
-        if test_name in (TRIAXIAL, DIRECT_SHEAR):
-            widgets = self.triaxial_widgets if test_name == TRIAXIAL else self.shear_widgets
-            for k, w in widgets.items():
-                if k in saved:
-                    w.delete(0, "end")
-                    w.insert(0, saved[k])
-        elif test_name == CRS and isinstance(saved, list):
-            for row in self.crs_rows:
-                row_frame = next(iter(row.values())).master
-                row_frame.destroy()
-
-            self.crs_rows = []
-
-            for row_vals in saved:
-                self._add_crs_row(
-                    duration=float(row_vals.get(DURATION_LABEL, 1.0) or 1.0),
-                    strain_inc=float(row_vals.get(STRAIN_INCREMENT_LABEL, 0.0) or 0.0),
-                    steps=int(row_vals.get(STEPS_LABEL, 100) or 100),
-                )
