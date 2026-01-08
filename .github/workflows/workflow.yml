@@ -26,3 +26,20 @@ jobs:
         run: pip install --upgrade pip .
       - name: Run tests
         run: pytest
+
+  static-code-analysis:
+    runs-on: windows-latest
+
+    steps:
+      - uses: actions/checkout@v5
+      - name: Set up Python 3.13
+        uses: actions/setup-python@v5
+        with:
+          python-version: 3.13
+          cache: 'pip'
+      - name: Install dependencies
+        run: pip install --upgrade pip .
+      - name: Run code quality checks
+        run: pylint kratos_element_test --output-format=github --fail-under 5 --fail-on E
+  
+    
