@@ -2,6 +2,7 @@ from typing import Callable
 
 from kratos_element_test.model.models import MohrCoulombOptions
 from kratos_element_test.model.pipeline.run_simulation import RunSimulation
+from kratos_element_test.model.result_manager import ResultManager
 from kratos_element_test.model.soil_test_input_manager import SoilTestInputManager
 
 
@@ -10,6 +11,7 @@ class MainModel:
         self._logger = logger
         self.soil_test_input_manager = SoilTestInputManager()
         self._latest_results = None
+        self._result_manager = ResultManager()
 
     def get_current_test_type(self) -> str:
         return self.soil_test_input_manager.get_current_test_type()
@@ -42,7 +44,10 @@ class MainModel:
         )
 
         sim.run()
-        self._latest_results = sim.post_process_results()
+        self._result_manager.set_results(
+            sim.post_process_results(),
+            self.soil_test_input_manager.get_current_test_type(),
+        )
 
     def get_latest_results(self):
-        return self._latest_results
+        return self._result_manager.get_results(self.soil_test_input_manager.get_current_test_type())
