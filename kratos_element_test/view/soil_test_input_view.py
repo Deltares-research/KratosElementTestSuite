@@ -26,6 +26,8 @@ from kratos_element_test.view.ui_logger import log_message
 from kratos_element_test.view.ui_utils import _asset_path
 import tkinter.font as tkFont
 
+from kratos_element_test.view.widget_creation_utils import create_entries
+
 
 class SoilTestInputView(ttk.Frame):
     def __init__(
@@ -105,7 +107,7 @@ class SoilTestInputView(ttk.Frame):
                 NUM_STEPS_LABEL: inputs.number_of_steps,
                 DURATION_LABEL: inputs.duration_in_seconds,
             }
-            self.triaxial_widgets, self.triaxial_string_vars = self._create_entries(
+            self.triaxial_widgets, self.triaxial_string_vars = create_entries(
                 self.test_input_frame,
                 "",
                 [
@@ -144,7 +146,7 @@ class SoilTestInputView(ttk.Frame):
                 NUM_STEPS_LABEL: inputs.number_of_steps,
                 DURATION_LABEL: inputs.duration_in_seconds,
             }
-            self.shear_widgets, self.shear_string_vars = self._create_entries(
+            self.shear_widgets, self.shear_string_vars = create_entries(
                 self.test_input_frame,
                 "",
                 [
@@ -289,29 +291,6 @@ class SoilTestInputView(ttk.Frame):
         self._soil_test_input_controller.remove_last_crs_strain_increment()
 
         self._prevent_removal_last_crs_row()
-
-    def _create_entries(self, frame, title, labels, units, defaults):
-        widgets = {}
-        string_vars = {}
-        default_font = tkFont.nametofont("TkDefaultFont").copy()
-        default_font.configure(size=10)
-
-        ttk.Label(frame, text=title, font=("Arial", 12, "bold")).pack(
-            anchor="w", padx=5, pady=5
-        )
-        for i, label in enumerate(labels):
-            string_var = tk.StringVar()
-            string_var.set(defaults.get(label, ""))
-            unit = units[i] if i < len(units) else ""
-            row = ttk.Frame(frame)
-            row.pack(fill="x", padx=10, pady=2)
-            ttk.Label(row, text=label, font=default_font).pack(side="left", padx=5)
-            entry = ttk.Entry(row, font=default_font, width=20, textvariable=string_var)
-            entry.pack(side="left", fill="x", expand=True)
-            ttk.Label(row, text=unit, font=default_font).pack(side="left", padx=5)
-            widgets[label] = entry
-            string_vars[label] = string_var
-        return widgets, string_vars
 
     def validate(self, current_test_type):
         widget_dicts = []

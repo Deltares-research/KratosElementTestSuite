@@ -19,6 +19,7 @@ from kratos_element_test.view.ui_constants import (
     TEST_NAME_TO_TYPE, INPUT_SECTION_FONT
 )
 from kratos_element_test.view.ui_logger import log_message, clear_log
+from kratos_element_test.view.widget_creation_utils import create_entries
 
 
 class GeotechTestUI(ttk.Frame):
@@ -125,7 +126,7 @@ class GeotechTestUI(ttk.Frame):
         default_values = {}
         # For now the string_vars are not used yet, but they'll be useful for adding a trace
         # later (similar to the test input fields)
-        self.entry_widgets, string_vars = self._create_entries(self.param_frame, "Soil Input Parameters",
+        self.entry_widgets, string_vars = create_entries(self.param_frame, "Soil Input Parameters",
                                                   params, units, default_values)
 
         self.setup_mohr_coulomb_controls(params)
@@ -136,27 +137,6 @@ class GeotechTestUI(ttk.Frame):
 
         self.run_button = ttk.Button(self.button_frame, text="Run Calculation", command=self._start_simulation_thread)
         self.run_button.pack(pady=5)
-
-    def _create_entries(self, frame, title, labels, units, defaults):
-        widgets = {}
-        string_vars = {}
-        default_font = tkFont.nametofont("TkDefaultFont").copy()
-        default_font.configure(size=10)
-
-        ttk.Label(frame, text=title, font=("Arial", 12, "bold")).pack(anchor="w", padx=5, pady=5)
-        for i, label in enumerate(labels):
-            string_var = tk.StringVar()
-            string_var.set(defaults.get(label, ""))
-            unit = units[i] if i < len(units) else ""
-            row = ttk.Frame(frame)
-            row.pack(fill="x", padx=10, pady=2)
-            ttk.Label(row, text=label, font=default_font).pack(side="left", padx=5)
-            entry = ttk.Entry(row, font=default_font, width=20, textvariable=string_var)
-            entry.pack(side="left", fill="x", expand=True)
-            ttk.Label(row, text=unit, font=default_font).pack(side="left", padx=5)
-            widgets[label] = entry
-            string_vars[label] = string_var
-        return widgets, string_vars
 
     def _create_mohr_options(self, params):
         self.mohr_frame = ttk.Frame(self.param_frame)
