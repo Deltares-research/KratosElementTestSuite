@@ -1,11 +1,12 @@
 from tkinter import ttk
-import tkinter.font as tkFont
+import tkinter.font as tk_font
+import tkinter as tk
 
 
 def create_entries(frame, title, labels, units, defaults):
     widgets = {}
     string_vars = {}
-    default_font = tkFont.nametofont("TkDefaultFont").copy()
+    default_font = tk_font.nametofont("TkDefaultFont").copy()
     default_font.configure(size=10)
 
     ttk.Label(frame, text=title, font=("Arial", 12, "bold")).pack(

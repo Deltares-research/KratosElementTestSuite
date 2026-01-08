@@ -4,7 +4,6 @@
 
 import threading
 import tkinter as tk
-import tkinter.font as tkFont
 import traceback
 from tkinter import ttk, scrolledtext
 
