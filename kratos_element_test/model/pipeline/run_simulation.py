@@ -140,7 +140,7 @@ class RunSimulation:
                 return p
         raise FileNotFoundError(
             f"Could not locate templates for '{test_type}'."
-            f"Tried:\n  - " + "\n  - ".join(cls._candidate_template_dirs(test_type))
+            f"Tried:\n  - " + "\n  - ".join(str(p) for p in cls._candidate_template_dirs(test_type))
         )
 
     def _copy_simulation_files(self) -> None:
