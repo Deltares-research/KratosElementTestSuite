@@ -2,10 +2,6 @@
 # This is a prototype version
 # Contact kratos@deltares.nl
 
-from tkinter import messagebox
-
-_ui_instance = None
-
 PLOT_MAPPING = {
     "triaxial": [
         ("delta_sigma", "yy_strain", "Δσ = |σ1-σ3| (kPa)", "Vertical Strain εyy"),
