@@ -9,7 +9,7 @@ from platformdirs import user_data_dir
 from pathlib import Path
 from kratos_element_test.view.ui_builder import GeotechTestUI
 from kratos_element_test.model.io.udsm_parser import udsm_parser
-from kratos_element_test.view.ui_utils import _asset_path, _soil_models_dir
+from kratos_element_test.view.ui_utils import asset_path, soil_models_dir
 from kratos_element_test.view.result_exporter import export_latest_results
 from kratos_element_test.view.ui_constants import (APP_TITLE, APP_VERSION, APP_NAME, APP_AUTHOR, SELECT_UDSM,
                                                  LINEAR_ELASTIC, MOHR_COULOMB, HELP_MENU_FONT, DEFAULT_TKINTER_DPI)
@@ -26,7 +26,7 @@ class MainUI:
     def __init__(self):
         self.main_frame = None
     def show_license_agreement(self, readonly=False):
-        license_file_path = _asset_path("license.txt")
+        license_file_path = asset_path("license.txt")
         try:
             with open(license_file_path, "r", encoding="utf-8") as f:
                 license_text = f.read()
@@ -90,8 +90,8 @@ class MainUI:
         image_frame.pack(pady=10)
 
         try:
-            path1 = _asset_path("kratos.png")
-            path2 = _asset_path("deltares.png")
+            path1 = asset_path("kratos.png")
+            path2 = asset_path("deltares.png")
 
             photo1 = tk.PhotoImage(file=path1)
             photo2 = tk.PhotoImage(file=path2)
@@ -144,7 +144,7 @@ class MainUI:
             self.show_license_agreement()
 
         try:
-            icon_path = _asset_path("icon.ico")
+            icon_path = asset_path("icon.ico")
             root.iconbitmap(default=icon_path)
         except Exception as e:
             print(f"Could not set icon: {e}")
@@ -160,7 +160,7 @@ class MainUI:
             nonlocal last_model_source
             dll_path = filedialog.askopenfilename(
                 title=SELECT_UDSM,
-                initialdir=_soil_models_dir(),
+                initialdir=soil_models_dir(),
                 filetypes=[("DLL files", "*.dll")],
             )
             if not dll_path:
