@@ -94,7 +94,13 @@ class ElementTestController:
                 phi_index=self._mc_indices[1],
             )
 
-            self._main_model.run_simulation(model_name, dll_path, udsm_number, mohr_coulomb_options, material_parameters)
+            self._main_model.run_simulation(
+                model_name,
+                dll_path,
+                udsm_number,
+                mohr_coulomb_options,
+                material_parameters,
+            )
 
         except Exception as e:
             self._logger(f"Simulation failed: {e}", "error")
@@ -113,4 +119,3 @@ class ElementTestController:
             export_excel_by_test_type(results, test_type)
         except Exception as e:
             messagebox.showerror("Export Error", f"Failed to export Excel file.\n\n{e}")
-
