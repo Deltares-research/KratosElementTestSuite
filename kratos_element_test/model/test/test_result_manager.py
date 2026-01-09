@@ -14,7 +14,7 @@ class ResultManagerTest(unittest.TestCase):
         current_test_getter = lambda: test_name
         result_manager = ResultManager(current_test_getter)
 
-        test_results = result_manager.get_results()
+        test_results = result_manager.get_results_of_active_test_type()
         self.assertIsInstance(test_results, Dict)
         self.assertEqual(len(test_results), 0)
 
@@ -26,9 +26,9 @@ class ResultManagerTest(unittest.TestCase):
             "values_variable_2": [4, 5, 6],
         }
 
-        result_manager.set_results(expected_results)
+        result_manager.set_results_of_active_test_type(expected_results)
 
-        self.assertDictEqual(result_manager.get_results(), expected_results)
+        self.assertDictEqual(result_manager.get_results_of_active_test_type(), expected_results)
 
 
 if __name__ == "__main__":

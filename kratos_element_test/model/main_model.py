@@ -12,7 +12,7 @@ class MainModel:
         self.soil_test_input_manager = SoilTestInputManager()
         self._latest_results = None
         self._result_manager = ResultManager(
-            lambda: self.soil_test_input_manager.get_current_test_type()
+            self.soil_test_input_manager.get_current_test_type
         )
 
     def get_current_test_type(self) -> str:
@@ -46,9 +46,9 @@ class MainModel:
         )
 
         sim.run()
-        self._result_manager.set_results(
+        self._result_manager.set_results_of_active_test_type(
             sim.post_process_results(),
         )
 
     def get_latest_results(self):
-        return self._result_manager.get_results()
+        return self._result_manager.get_results_of_active_test_type()
