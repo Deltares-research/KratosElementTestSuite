@@ -1,5 +1,5 @@
 import math
-from tkinter import ttk
+import ttkbootstrap as ttk
 
 from matplotlib import pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2Tk

@@ -4,7 +4,9 @@
 
 import os
 import tkinter as tk
-from tkinter import filedialog, messagebox, ttk, scrolledtext, Menu
+from tkinter import filedialog, messagebox, Menu
+import ttkbootstrap as ttk
+from ttkbootstrap.scrolled import ScrolledText
 from platformdirs import user_data_dir
 from pathlib import Path
 
@@ -51,16 +53,17 @@ class MainUI:
         tk.Label(license_window, text="Please review and accept the agreement to continue.",
                  font=(HELP_MENU_FONT, 12, "bold"), pady=10).pack()
 
-        text_area = scrolledtext.ScrolledText(license_window, wrap="word", font=("Courier", 10))
-        text_area.insert("1.0", license_text)
-        text_area.config(state="disabled")
+        text_area = ScrolledText(license_window, wrap="word", autohide=True)
+        text_area.text.config(font=("Courier", 10))
+        text_area.text.insert("1.0", license_text)
+        text_area.text.config(state="disabled")
         text_area.pack(expand=True, fill="both", padx=10, pady=10)
 
         button_frame = tk.Frame(license_window)
         button_frame.pack(pady=10)
 
         if readonly:
-            tk.Button(button_frame, text="Close", width=15, command=license_window.destroy).pack()
+            ttk.Button(button_frame, text="Close", width=15, command=license_window.destroy).pack()
         else:
             def accept():
                 try:
@@ -111,7 +114,7 @@ class MainUI:
             tk.Label(about_win, text="[One or both images could not be loaded]", fg="red").pack()
 
         tk.Label(about_win, text="Contact: kratos@deltares.nl", font=(HELP_MENU_FONT, 12)).pack(pady=(0, 2))
-        tk.Button(about_win, text="Close", command=about_win.destroy).pack(pady=10)
+        ttk.Button(about_win, text="Close", command=about_win.destroy).pack(pady=10)
 
 
     def create_menu(self):
@@ -121,7 +124,7 @@ class MainUI:
         )
 
         last_model_source = LINEAR_ELASTIC
-        root = tk.Tk()
+        root = ttk.Window(themename="litera")
 
         root.bind_class("TCombobox", "<MouseWheel>", lambda e: "break")
         root.bind_class("TCombobox", "<Shift-MouseWheel>", lambda e: "break")

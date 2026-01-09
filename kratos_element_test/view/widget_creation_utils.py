@@ -1,4 +1,4 @@
-from tkinter import ttk
+import ttkbootstrap as ttk
 import tkinter.font as tk_font
 import tkinter as tk
 

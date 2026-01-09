@@ -5,7 +5,8 @@
 import threading
 import tkinter as tk
 import traceback
-from tkinter import ttk, scrolledtext
+import ttkbootstrap as ttk
+from ttkbootstrap.scrolled import ScrolledText
 
 from kratos_element_test.view.log_viewer import LogViewer
 from kratos_element_test.view.plot_viewer import PlotViewer
@@ -298,8 +299,8 @@ class GeotechTestUI(ttk.Frame):
                 (ttk.Entry, tk.Button, ttk.Button, tk.Checkbutton, ttk.Checkbutton),
             ):
                 child.configure(state=state)
-            elif isinstance(child, scrolledtext.ScrolledText):
-                child.config(state=state if state == "normal" else "disabled")
+            elif isinstance(child, ScrolledText):
+                child.text.config(state=state if state == "normal" else "disabled")
             elif isinstance(child, (ttk.Frame, tk.Frame)):
                 self._set_widget_state(child, state)
 
