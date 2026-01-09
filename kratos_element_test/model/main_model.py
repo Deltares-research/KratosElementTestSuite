@@ -10,7 +10,6 @@ class MainModel:
     def __init__(self, logger: Callable[[str, str], None]):
         self._logger = logger
         self.soil_test_input_manager = SoilTestInputManager()
-        self._latest_results = None
         self._result_manager = ResultManager(
             self.soil_test_input_manager.get_current_test_type
         )

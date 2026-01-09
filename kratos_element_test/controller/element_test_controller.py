@@ -2,7 +2,7 @@
 # This is a prototype version
 # Contact kratos@deltares.nl
 from tkinter import messagebox
-from typing import Optional, Callable, List, Tuple, Dict
+from typing import Optional, Callable, List, Tuple
 
 from kratos_element_test.controller.result_controller import ResultController
 from kratos_element_test.controller.soil_test_input_controller import (
@@ -10,9 +10,7 @@ from kratos_element_test.controller.soil_test_input_controller import (
 )
 from kratos_element_test.model.main_model import MainModel
 from kratos_element_test.model.models import MohrCoulombOptions
-from kratos_element_test.model.pipeline.run_simulation import RunSimulation
 from kratos_element_test.view.result_exporter import (
-    export_latest_results,
     export_excel_by_test_type,
 )
 from kratos_element_test.view.ui_constants import (
@@ -28,8 +26,6 @@ class ElementTestController:
         logger: Callable[[str, str], None],
         plotter_factory: Callable[[object], object],
     ):
-        self.latest_results = None
-        self.latest_test_type = None
         self._logger = logger
         self._plotter_factory = plotter_factory
 
@@ -99,8 +95,6 @@ class ElementTestController:
             )
 
             self._main_model.run_simulation(model_name, dll_path, udsm_number, mohr_coulomb_options, material_parameters)
-            self.latest_results = self._main_model.get_latest_results()
-            self.latest_test_type = test_type
 
         except Exception as e:
             self._logger(f"Simulation failed: {e}", "error")

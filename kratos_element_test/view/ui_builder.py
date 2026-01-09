@@ -11,7 +11,6 @@ from kratos_element_test.controller.element_test_controller import ElementTestCo
 from kratos_element_test.plotters.matplotlib_plotter import MatplotlibPlotter
 from kratos_element_test.view.log_viewer import LogViewer
 from kratos_element_test.view.plot_viewer import PlotViewer
-from kratos_element_test.view.result_registry import register_ui_instance
 from kratos_element_test.view.soil_parameter_entries import SoilParameterEntries
 from kratos_element_test.view.soil_test_input_view import SoilTestInputView
 from kratos_element_test.view.ui_constants import (
@@ -45,7 +44,6 @@ class GeotechTestUI(ttk.Frame):
         self.is_running = False
         self.external_widgets = external_widgets if external_widgets else []
 
-        register_ui_instance(self)
         self._init_dropdown_section()
         self._create_input_fields()
 
@@ -230,11 +228,7 @@ class GeotechTestUI(ttk.Frame):
             if success:
                 self.plot_frame.draw()
                 test_type = self.controller.get_current_test_type()
-                tt = TEST_NAME_TO_TYPE.get(test_type, "triaxial")
                 log_message(f"{test_type} test completed successfully.", "info")
-                if hasattr(self.controller, "latest_results"):
-                    self.latest_results = self.controller.latest_results
-                self.latest_test_type = tt
 
         except Exception:
             log_message("An error occurred during simulation:", "error")

@@ -26,25 +26,5 @@ PLOT_MAPPING = {
         ("von_mises", "mean_stress", "q (kPa)", "p′ (kPa)"),
         ("mohr_circle", None, "τ (kPa)", "σ′ (kPa)"),
         ("yy_strain", "time_steps", "Vertical Strain εyy", "Time (h)"),
-    ]
+    ],
 }
-
-
-def register_ui_instance(ui):
-    global _ui_instance
-    _ui_instance = ui
-
-
-def get_latest_results():
-    if _ui_instance and hasattr(_ui_instance, "latest_results"):
-        return _ui_instance.latest_results
-    else:
-        messagebox.showerror("Export Error", "No results available to export yet.")
-        return {}
-
-
-def get_latest_test_type():
-    if _ui_instance and hasattr(_ui_instance, "latest_test_type"):
-        return _ui_instance.latest_test_type or ""
-    messagebox.showerror("Export Error", "No test type available to export yet.")
-    return ""
