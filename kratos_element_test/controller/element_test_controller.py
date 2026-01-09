@@ -1,7 +1,7 @@
 # ©Deltares 2025
 # This is a prototype version
 # Contact kratos@deltares.nl
-
+from tkinter import messagebox
 from typing import Optional, Callable, List, Tuple, Dict
 
 from kratos_element_test.controller.result_controller import ResultController
@@ -11,6 +11,10 @@ from kratos_element_test.controller.soil_test_input_controller import (
 from kratos_element_test.model.main_model import MainModel
 from kratos_element_test.model.models import MohrCoulombOptions
 from kratos_element_test.model.pipeline.run_simulation import RunSimulation
+from kratos_element_test.view.result_exporter import (
+    export_latest_results,
+    export_excel_by_test_type,
+)
 from kratos_element_test.view.ui_constants import (
     VALID_TEST_TYPES,
     VALID_DRAINAGE_TYPES,
@@ -105,3 +109,14 @@ class ElementTestController:
 
     def get_current_test_type(self) -> str:
         return self._main_model.get_current_test_type()
+
+    def export_latest_results(self):
+        results = self._result_controller.get_latest_results()
+        test_type = TEST_NAME_TO_TYPE.get(self._result_controller.get_current_test())
+        if not results or not test_type:
+            return
+        try:
+            export_excel_by_test_type(results, test_type)
+        except Exception as e:
+            messagebox.showerror("Export Error", f"Failed to export Excel file.\n\n{e}")
+

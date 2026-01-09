@@ -7,12 +7,16 @@ import tkinter as tk
 from tkinter import filedialog, messagebox, ttk, scrolledtext, Menu
 from platformdirs import user_data_dir
 from pathlib import Path
+
+from kratos_element_test.controller.element_test_controller import ElementTestController
+from kratos_element_test.plotters.matplotlib_plotter import MatplotlibPlotter
 from kratos_element_test.view.ui_builder import GeotechTestUI
 from kratos_element_test.model.io.udsm_parser import udsm_parser
 from kratos_element_test.view.ui_utils import _asset_path
 from kratos_element_test.view.result_exporter import export_latest_results
 from kratos_element_test.view.ui_constants import (APP_TITLE, APP_VERSION, APP_NAME, APP_AUTHOR, SELECT_UDSM,
                                                  LINEAR_ELASTIC, MOHR_COULOMB, HELP_MENU_FONT, DEFAULT_TKINTER_DPI)
+from kratos_element_test.view.ui_logger import log_message
 
 import ctypes
 ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID("deltares.ElementTestSuite.ui")
@@ -112,6 +116,11 @@ class MainUI:
 
 
     def create_menu(self):
+        controller = ElementTestController(
+            logger=log_message,
+            plotter_factory=lambda axes: MatplotlibPlotter(axes, logger=log_message)
+        )
+
         last_model_source = LINEAR_ELASTIC
         root = tk.Tk()
 
@@ -132,7 +141,7 @@ class MainUI:
         menubar.add_cascade(label="File", menu=file_menu)
 
         export_menu = Menu(menubar, tearoff=0)
-        export_menu.add_command(label="Export Results (Excel)", command=export_latest_results)
+        export_menu.add_command(label="Export Results (Excel)", command=controller.export_latest_results)
         menubar.add_cascade(label="Export", menu=export_menu)
 
         about_menu = Menu(menubar, tearoff=0)
@@ -178,7 +187,7 @@ class MainUI:
                 self.main_frame.destroy()
 
             self.main_frame = GeotechTestUI(root, test_name="Triaxial", dll_path=dll_path, model_dict=model_dict,
-                          external_widgets=[model_source_menu])
+                                            controller=controller, external_widgets=[model_source_menu])
 
         def load_linear_elastic():
             nonlocal last_model_source
@@ -197,7 +206,7 @@ class MainUI:
 
 
             self.main_frame = GeotechTestUI(root, test_name="Triaxial", dll_path=None, model_dict=model_dict,
-                              external_widgets=[model_source_menu])
+                                            controller=controller, external_widgets=[model_source_menu])
 
         def load_mohr_coulomb():
             nonlocal last_model_source
@@ -222,7 +231,7 @@ class MainUI:
                 self.main_frame.destroy()
 
             self.main_frame = GeotechTestUI(root, test_name="Triaxial", dll_path=None, model_dict=model_dict,
-                                            external_widgets=[model_source_menu])
+                                            controller=controller, external_widgets=[model_source_menu])
 
         def handle_model_source_selection(event):
             choice = model_source_var.get()

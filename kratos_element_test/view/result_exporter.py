@@ -86,14 +86,3 @@ def export_excel_by_test_type(results: dict, test_type: str, excel_path: str | N
         messagebox.showinfo("Export", f"Exported Excel:\n{excel_path}")
     else:
         messagebox.showwarning("Export", "No matching data found to export for this test.")
-
-
-def export_latest_results() -> None:
-    results = get_latest_results()
-    test_type = get_latest_test_type()
-    if not results or not test_type:
-        return
-    try:
-        export_excel_by_test_type(results, test_type)
-    except Exception as e:
-        messagebox.showerror("Export Error", f"Failed to export Excel file.\n\n{e}")

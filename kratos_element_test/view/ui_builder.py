@@ -22,12 +22,9 @@ from kratos_element_test.view.widget_creation_utils import create_entries
 
 
 class GeotechTestUI(ttk.Frame):
-    def __init__(self, root, test_name, dll_path, model_dict, external_widgets=None):
+    def __init__(self, root, test_name, dll_path, model_dict, controller, external_widgets=None):
+        self.controller = controller
         super().__init__(root)
-        self.controller = ElementTestController(
-            logger=log_message,
-            plotter_factory=lambda axes: MatplotlibPlotter(axes, logger=log_message)
-        )
         self.pack(side="top", fill="both", expand=True)
         self.root = root
         self.test_name = test_name
