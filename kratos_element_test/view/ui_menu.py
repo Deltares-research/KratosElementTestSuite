@@ -118,13 +118,18 @@ class MainUI:
 
 
     def create_menu(self):
+        root = ttk.Window(themename="superhero")
+        
+        # Get theme colors for plotter
+        style = ttk.Style.get_instance()
+        primary_color = style.colors.primary
+        
         controller = ElementTestController(
             logger=log_message,
-            plotter_factory=lambda axes: MatplotlibPlotter(axes, logger=log_message)
+            plotter_factory=lambda axes: MatplotlibPlotter(axes, logger=log_message, line_color=primary_color)
         )
 
         last_model_source = LINEAR_ELASTIC
-        root = ttk.Window(themename="litera")
 
         root.bind_class("TCombobox", "<MouseWheel>", lambda e: "break")
         root.bind_class("TCombobox", "<Shift-MouseWheel>", lambda e: "break")

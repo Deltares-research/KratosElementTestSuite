@@ -16,9 +16,10 @@ from kratos_element_test.plotters.plotter_labels import (
 
 
 class MatplotlibPlotter:
-    def __init__(self, axes, logger=None):
+    def __init__(self, axes, logger=None, line_color='blue'):
         self._log = logger or _fallback_log
         self.axes = list(axes or [])
+        self.line_color = line_color
 
     def _clear(self):
         for ax in self.axes:
@@ -65,7 +66,7 @@ class MatplotlibPlotter:
         self.plot_vertical_strain_vs_time_crs(self.axes[4], yy_strain, time_steps)
 
     def plot_principal_stresses_triaxial(self, ax, sigma_1, sigma_3):
-        ax.plot(sigma_3, sigma_1, '-', color='blue', label=TITLE_SIGMA1_VS_SIGMA3)
+        ax.plot(sigma_3, sigma_1, '-', color=self.line_color, label=TITLE_SIGMA1_VS_SIGMA3)
         ax.set_title(TITLE_SIGMA1_VS_SIGMA3)
         ax.set_xlabel(SIGMA3_LABEL)
         ax.set_ylabel(SIGMA1_LABEL)
@@ -82,7 +83,7 @@ class MatplotlibPlotter:
         ax.minorticks_on()
 
     def plot_delta_sigma_triaxial(self, ax, vertical_strain, sigma_diff):
-        ax.plot(vertical_strain, sigma_diff, '-', color='blue', label=SIGMA1_SIGMA3_DIFF_LABEL)
+        ax.plot(vertical_strain, sigma_diff, '-', color=self.line_color, label=SIGMA1_SIGMA3_DIFF_LABEL)
         ax.set_title(TITLE_DIFF_PRINCIPAL_SIGMA_VS_STRAIN)
         ax.set_xlabel(VERTICAL_STRAIN_LABEL)
         ax.set_ylabel(SIGMA1_SIGMA3_DIFF_LABEL)
@@ -92,7 +93,7 @@ class MatplotlibPlotter:
         ax.minorticks_on()
 
     def plot_volumetric_vertical_strain_triaxial(self, ax, vertical_strain, volumetric_strain):
-        ax.plot(vertical_strain, volumetric_strain, '-', color='blue', label=TITLE_VOL_VS_VERT_STRAIN)
+        ax.plot(vertical_strain, volumetric_strain, '-', color=self.line_color, label=TITLE_VOL_VS_VERT_STRAIN)
         ax.set_title(TITLE_VOL_VS_VERT_STRAIN)
         ax.set_xlabel(VERTICAL_STRAIN_LABEL)
         ax.set_ylabel(VOLUMETRIC_STRAIN_LABEL)
@@ -111,7 +112,7 @@ class MatplotlibPlotter:
         sigma = center + radius * np.cos(theta)
         tau = -radius * np.sin(theta)
 
-        ax.plot(sigma, tau, label=LEGEND_MC, color='blue')
+        ax.plot(sigma, tau, label=LEGEND_MC, color=self.line_color)
 
         if cohesion is not None and friction_angle is not None:
             phi_rad = np.radians(friction_angle)
@@ -130,7 +131,7 @@ class MatplotlibPlotter:
         ax.minorticks_on()
 
     def plot_p_q_triaxial(self, ax, p_list, q_list):
-        ax.plot(p_list, q_list, '-', color='blue', label=TITLE_P_VS_Q)
+        ax.plot(p_list, q_list, '-', color=self.line_color, label=TITLE_P_VS_Q)
         ax.set_title(TITLE_P_VS_Q)
         ax.set_xlabel(P_STRESS_LABEL)
         ax.set_ylabel(Q_STRESS_LABEL)
@@ -140,7 +141,7 @@ class MatplotlibPlotter:
         ax.minorticks_on()
 
     def plot_principal_stresses_direct_shear(self, ax, sigma_1, sigma_3):
-        ax.plot(sigma_3, sigma_1, '-', color='blue', label=TITLE_SIGMA1_VS_SIGMA3)
+        ax.plot(sigma_3, sigma_1, '-', color=self.line_color, label=TITLE_SIGMA1_VS_SIGMA3)
         ax.set_title(TITLE_SIGMA1_VS_SIGMA3)
         ax.set_xlabel(SIGMA3_LABEL)
         ax.set_ylabel(SIGMA1_LABEL)
@@ -160,7 +161,7 @@ class MatplotlibPlotter:
 
     def plot_strain_stress_direct_shear(self, ax, shear_strain_xy, shear_stress_xy):
         gamma_xy = 2 * np.array(shear_strain_xy)
-        ax.plot(np.abs(gamma_xy), np.abs(shear_stress_xy), '-', color='blue', label=TITLE_SHEAR_VS_STRAIN)
+        ax.plot(np.abs(gamma_xy), np.abs(shear_stress_xy), '-', color=self.line_color, label=TITLE_SHEAR_VS_STRAIN)
         ax.set_title(TITLE_SHEAR_VS_STRAIN)
         ax.set_xlabel(SHEAR_STRAIN_LABEL)
         ax.set_ylabel(SHEAR_STRESS_LABEL)
@@ -211,7 +212,7 @@ class MatplotlibPlotter:
         ax.minorticks_on()
 
     def plot_p_q_direct_shear(self, ax, p_list, q_list):
-        ax.plot(p_list, q_list, '-', color='blue', label=TITLE_P_VS_Q)
+        ax.plot(p_list, q_list, '-', color=self.line_color, label=TITLE_P_VS_Q)
         ax.set_title(TITLE_P_VS_Q)
         ax.set_xlabel(P_STRESS_LABEL)
         ax.set_ylabel(Q_STRESS_LABEL)
@@ -224,7 +225,7 @@ class MatplotlibPlotter:
     def plot_vertical_stress_vs_vertical_strain_crs(self, ax, yy_strain, sigma_yy):
         yy_strain.insert(0, 0.0)
         sigma_yy.insert(0, 0.0)
-        ax.plot(yy_strain, sigma_yy, '-', color='blue', label=TITLE_VERTICAL_STRESS_VS_VERTICAL_STRAIN)
+        ax.plot(yy_strain, sigma_yy, '-', color=self.line_color, label=TITLE_VERTICAL_STRESS_VS_VERTICAL_STRAIN)
         ax.set_title(TITLE_VERTICAL_STRESS_VS_VERTICAL_STRAIN)
         ax.set_xlabel(VERTICAL_STRAIN_LABEL)
         ax.set_ylabel(VERTICAL_STRESS_LABEL)
@@ -236,7 +237,7 @@ class MatplotlibPlotter:
 
     def plot_vertical_stress_vs_horizontal_stress_crs(self, ax, sigma_xx, sigma_yy):
         sigma_xx.insert(0, 0.0)
-        ax.plot(sigma_xx, sigma_yy, '-', color='blue', label=TITLE_VERTICAL_STRESS_VS_HORIZONTAL_STRESS)
+        ax.plot(sigma_xx, sigma_yy, '-', color=self.line_color, label=TITLE_VERTICAL_STRESS_VS_HORIZONTAL_STRESS)
         ax.set_title(TITLE_VERTICAL_STRESS_VS_HORIZONTAL_STRESS)
         ax.set_xlabel(HORIZONTAL_STRESS_LABEL)
         ax.set_ylabel(VERTICAL_STRESS_LABEL)
@@ -249,7 +250,7 @@ class MatplotlibPlotter:
     def plot_p_q_crs(self, ax, p_list, q_list):
         p_list.insert(0, 0.0)
         q_list.insert(0, 0.0)
-        ax.plot(p_list, q_list, '-', color='blue', label=TITLE_P_VS_Q)
+        ax.plot(p_list, q_list, '-', color=self.line_color, label=TITLE_P_VS_Q)
         ax.set_title(TITLE_P_VS_Q)
         ax.set_xlabel(P_STRESS_LABEL)
         ax.set_ylabel(Q_STRESS_LABEL)
@@ -267,7 +268,7 @@ class MatplotlibPlotter:
         sigma = center + radius * np.cos(theta)
         tau = -radius * np.sin(theta)
 
-        ax.plot(sigma, tau, label=LEGEND_MC, color='blue')
+        ax.plot(sigma, tau, label=LEGEND_MC, color=self.line_color)
 
         if cohesion is not None and friction_angle is not None:
             phi_rad = np.radians(friction_angle)
@@ -306,7 +307,7 @@ class MatplotlibPlotter:
 
     def plot_vertical_strain_vs_time_crs(self, ax, yy_strain, time_steps):
         time_steps.insert(0, 0.0)
-        ax.plot(time_steps, yy_strain, '-', color='blue', label=TITLE_VERTICAL_STRAIN_VS_TIME)
+        ax.plot(time_steps, yy_strain, '-', color=self.line_color, label=TITLE_VERTICAL_STRAIN_VS_TIME)
         ax.set_title(TITLE_VERTICAL_STRAIN_VS_TIME)
         ax.set_xlabel(TIME_HOURS_LABEL)
         ax.set_ylabel(VERTICAL_STRAIN_LABEL)

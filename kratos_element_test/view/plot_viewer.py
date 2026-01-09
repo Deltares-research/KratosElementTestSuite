@@ -17,16 +17,47 @@ class PlotViewer(ttk.Frame):
         self.canvas = None
         self.gs = None
         self.fig = None
+        
+        # Get theme colors from ttkbootstrap
+        self.style = ttk.Style.get_instance()
+        self.theme_colors = self.style.colors
+        
+        # Configure matplotlib to use theme colors
+        self._configure_matplotlib_theme()
+
+    def _configure_matplotlib_theme(self):
+        """Configure matplotlib to match ttkbootstrap theme"""
+        bg_color = self.theme_colors.bg
+        fg_color = self.theme_colors.fg
+        primary_color = self.theme_colors.primary
+        
+        # Set matplotlib parameters
+        plt.rcParams.update({
+            'figure.facecolor': bg_color,
+            'axes.facecolor': bg_color,
+            'axes.edgecolor': fg_color,
+            'axes.labelcolor': fg_color,
+            'axes.prop_cycle': plt.cycler(color=[primary_color]),
+            'text.color': fg_color,
+            'xtick.color': fg_color,
+            'ytick.color': fg_color,
+            'grid.color': fg_color,
+            'grid.alpha': 0.3,
+            'legend.facecolor': bg_color,
+            'legend.edgecolor': fg_color,
+            'lines.color': primary_color,
+        })
 
     def initialize(self, num_plots):
         self.clear()
 
-        self.fig = plt.figure(figsize=(12, 8), dpi=100)
+        bg_color = self.theme_colors.bg
+        self.fig = plt.figure(figsize=(12, 8), dpi=100, facecolor=bg_color)
         rows = math.ceil(math.sqrt(num_plots))
         cols = math.ceil(num_plots / rows)
 
         self.gs = GridSpec(rows, cols, figure=self.fig, wspace=0.4, hspace=0.6)
-        self.axes = [self.fig.add_subplot(self.gs[i]) for i in range(num_plots)]
+        self.axes = [self.fig.add_subplot(self.gs[i], facecolor=bg_color) for i in range(num_plots)]
         self.canvas = FigureCanvasTkAgg(self.fig, master=self)
         self.canvas.draw()
         toolbar = NavigationToolbar2Tk(self.canvas, self)
@@ -50,7 +81,7 @@ class PlotViewer(ttk.Frame):
         return self.axes
 
     def draw(self):
-        plotter = MatplotlibPlotter(self.axes, logger=None)
+        plotter = MatplotlibPlotter(self.axes, logger=None, line_color=self.theme_colors.primary)
         results = self._result_controller.get_latest_results()
         if len(results) == 0:
             return
