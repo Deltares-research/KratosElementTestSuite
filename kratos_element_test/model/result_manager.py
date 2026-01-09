@@ -9,7 +9,7 @@ class ResultManager:
         """
         :param active_test_getter: callable which returns the currently active test
         """
-        self._simulation_results = {}
+        self._simulation_results: Dict[str, Dict[str, List[float]]] = {}
         self._active_test_getter = active_test_getter
 
     def get_results_of_active_test_type(self) -> Dict[str, List[float]]:
