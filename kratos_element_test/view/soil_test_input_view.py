@@ -40,10 +40,6 @@ class SoilTestInputView(ttk.Frame):
         self.test_selector_frame.pack(fill="x", pady=(10, 5))
         self.update_plots_callback = update_plots_callback
         self.test_buttons = {}
-        
-        # Get the primary color from ttkbootstrap theme
-        style = ttk.Style.get_instance()
-        self.primary_color = style.colors.primary
 
         image_paths = {
             name: _asset_path(filename) for name, filename in TEST_IMAGE_FILES.items()
@@ -60,16 +56,13 @@ class SoilTestInputView(ttk.Frame):
                 self.test_images[key] = None
 
         for test_name in TEST_NAME_TO_TYPE.keys():
-            btn = tk.Button(
+            btn = ttk.Button(
                 self.test_selector_frame,
                 text=test_name,
                 image=self.test_images[test_name],
                 compound="top",
-                font=(HELP_MENU_FONT, 8, "bold"),
-                width=100,
-                height=100,
-                relief="raised",
                 command=lambda name=test_name: self._switch_test(name),
+                bootstyle="outline"
             )
             btn.pack(side="left", padx=5, pady=5)
             self.test_buttons[test_name] = btn
@@ -86,9 +79,9 @@ class SoilTestInputView(ttk.Frame):
     def _switch_test(self, test_name):
         for name, button in self.test_buttons.items():
             if name == test_name:
-                button.config(relief="sunken", bg=self.primary_color, fg="white", state="normal")
+                button.config(bootstyle="primary")
             else:
-                button.config(relief="raised", bg="SystemButtonFace", fg="black", state="normal")
+                button.config(bootstyle="outline")
 
         for w in self.test_input_frame.winfo_children():
             w.destroy()
