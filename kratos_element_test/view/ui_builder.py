@@ -24,7 +24,7 @@ from kratos_element_test.view.ui_constants import (
     INPUT_SECTION_FONT, HELP_MENU_FONT
 )
 from kratos_element_test.view.ui_logger import log_message, clear_log
-from kratos_element_test.view.ui_utils import _asset_path
+from kratos_element_test.view.ui_utils import asset_path
 
 
 class GeotechTestUI(ttk.Frame):
@@ -149,7 +149,7 @@ class GeotechTestUI(ttk.Frame):
 
         self.test_buttons = {}
 
-        image_paths = {name: _asset_path(filename) for name, filename in TEST_IMAGE_FILES.items()}
+        image_paths = {name: asset_path(filename) for name, filename in TEST_IMAGE_FILES.items()}
 
         self.test_images = {}
         for key, path in image_paths.items():
