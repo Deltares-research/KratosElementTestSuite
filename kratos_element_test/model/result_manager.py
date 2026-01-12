@@ -21,5 +21,5 @@ class ResultManager:
     def get_current_test(self) -> str:
         return self._active_test_getter()
 
-    def clear_results(self):
+    def clear_results(self) -> None:
         self._simulation_results.clear()
