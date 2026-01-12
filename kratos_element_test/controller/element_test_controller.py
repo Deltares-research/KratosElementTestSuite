@@ -119,3 +119,6 @@ class ElementTestController:
             export_excel_by_test_type(results, test_type)
         except Exception as e:
             messagebox.showerror("Export Error", f"Failed to export Excel file.\n\n{e}")
+
+    def clear_results(self):
+        self._main_model._result_manager.clear_results()

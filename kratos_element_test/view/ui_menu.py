@@ -184,7 +184,7 @@ class MainUI:
                 for widget in self.main_frame.winfo_children():
                     widget.destroy()
                 self.main_frame.destroy()
-
+            controller.clear_results()
             self.main_frame = GeotechTestUI(root, test_name="Triaxial", dll_path=dll_path, model_dict=model_dict,
                                             controller=controller, external_widgets=[model_source_menu])
 
@@ -203,7 +203,7 @@ class MainUI:
                     widget.destroy()
                 self.main_frame.destroy()
 
-
+            controller.clear_results()
             self.main_frame = GeotechTestUI(root, test_name="Triaxial", dll_path=None, model_dict=model_dict,
                                             controller=controller, external_widgets=[model_source_menu])
 
@@ -229,6 +229,7 @@ class MainUI:
                     widget.destroy()
                 self.main_frame.destroy()
 
+            controller.clear_results()
             self.main_frame = GeotechTestUI(root, test_name="Triaxial", dll_path=None, model_dict=model_dict,
                                             controller=controller, external_widgets=[model_source_menu])
 
