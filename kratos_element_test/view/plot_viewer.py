@@ -1,87 +1,76 @@
 import math
-import ttkbootstrap as ttk
-
+from kivy.uix.boxlayout import BoxLayout
 from matplotlib import pyplot as plt
-from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2Tk
+from matplotlib.backends.backend_agg import FigureCanvasAgg
 from matplotlib.gridspec import GridSpec
+from kivy.graphics.texture import Texture
+from kivy.uix.image import Image as KivyImage
+from io import BytesIO
 
 from kratos_element_test.plotters.matplotlib_plotter import MatplotlibPlotter
 from kratos_element_test.view.ui_constants import TEST_NAME_TO_TYPE
 
 
-class PlotViewer(ttk.Frame):
-    def __init__(self, result_controller, root, padding, width, height):
-        super().__init__(root, padding=padding, width=width, height=height)
+class PlotViewer(BoxLayout):
+    def __init__(self, result_controller, **kwargs):
+        kwargs.setdefault('orientation', 'vertical')
+        super().__init__(**kwargs)
         self._result_controller = result_controller
         self.axes = []
-        self.canvas = None
+        self.canvas_widget = None
         self.gs = None
         self.fig = None
         
-        # Get theme colors from ttkbootstrap
-        self.style = ttk.Style.get_instance()
-        self.theme_colors = self.style.colors
-        
-        # Configure matplotlib to use theme colors
+        # Configure matplotlib with a default theme
         self._configure_matplotlib_theme()
 
     def _configure_matplotlib_theme(self):
-        """Configure matplotlib to match ttkbootstrap theme"""
-        bg_color = self.theme_colors.bg
-        fg_color = self.theme_colors.fg
-        primary_color = self.theme_colors.primary
-        
-        # Set matplotlib parameters
+        """Configure matplotlib with default dark theme"""
         plt.rcParams.update({
-            'figure.facecolor': bg_color,
-            'axes.facecolor': bg_color,
-            'axes.edgecolor': fg_color,
-            'axes.labelcolor': fg_color,
-            'axes.prop_cycle': plt.cycler(color=[primary_color]),
-            'text.color': fg_color,
-            'xtick.color': fg_color,
-            'ytick.color': fg_color,
-            'grid.color': fg_color,
+            'figure.facecolor': '#1e1e1e',
+            'axes.facecolor': '#1e1e1e',
+            'axes.edgecolor': '#ffffff',
+            'axes.labelcolor': '#ffffff',
+            'text.color': '#ffffff',
+            'xtick.color': '#ffffff',
+            'ytick.color': '#ffffff',
+            'grid.color': '#ffffff',
             'grid.alpha': 0.3,
-            'legend.facecolor': bg_color,
-            'legend.edgecolor': fg_color,
-            'lines.color': primary_color,
+            'legend.facecolor': '#1e1e1e',
+            'legend.edgecolor': '#ffffff',
         })
 
     def initialize(self, num_plots):
         self.clear()
 
-        bg_color = self.theme_colors.bg
-        self.fig = plt.figure(figsize=(12, 8), dpi=100, facecolor=bg_color)
+        self.fig = plt.figure(figsize=(12, 8), dpi=100)
         rows = math.ceil(math.sqrt(num_plots))
         cols = math.ceil(num_plots / rows)
 
         self.gs = GridSpec(rows, cols, figure=self.fig, wspace=0.4, hspace=0.6)
-        self.axes = [self.fig.add_subplot(self.gs[i], facecolor=bg_color) for i in range(num_plots)]
-        self.canvas = FigureCanvasTkAgg(self.fig, master=self)
-        self.canvas.draw()
-        toolbar = NavigationToolbar2Tk(self.canvas, self)
-        toolbar.update()
-        toolbar.pack(side="bottom", fill="x")
-        self.canvas.get_tk_widget().pack(fill="both", expand=True)
+        self.axes = [self.fig.add_subplot(self.gs[i]) for i in range(num_plots)]
+        
+        # Create Kivy image widget to display matplotlib figure
+        self.canvas_widget = KivyImage()
+        self.add_widget(self.canvas_widget)
         self.draw()
 
     def clear(self):
-        if self.winfo_exists():
-            for widget in self.winfo_children():
-                widget.destroy()
+        self.clear_widgets()
         self.axes = []
+        if self.fig is not None:
+            plt.close(self.fig)
         self.fig = None
-        self.canvas = None
+        self.canvas_widget = None
 
     def get_canvas(self):
-        return self.canvas
+        return self.canvas_widget
 
     def get_axes(self):
         return self.axes
 
     def draw(self):
-        plotter = MatplotlibPlotter(self.axes, logger=None, line_color=self.theme_colors.primary)
+        plotter = MatplotlibPlotter(self.axes, logger=None, line_color='#3498db')
         results = self._result_controller.get_latest_results()
         if len(results) == 0:
             return
@@ -123,4 +112,27 @@ class PlotViewer(ttk.Frame):
             )
         else:
             raise ValueError(f"Unsupported test_type: {test_type}")
-        self.canvas.draw()
+        
+        # Convert matplotlib figure to Kivy texture
+        self._update_canvas()
+
+    def _update_canvas(self):
+        """Convert matplotlib figure to Kivy texture"""
+        if self.fig is None or self.canvas_widget is None:
+            return
+        
+        # Render figure to buffer
+        canvas = FigureCanvasAgg(self.fig)
+        canvas.draw()
+        
+        # Get the RGBA buffer from the figure
+        buf = canvas.buffer_rgba()
+        w, h = canvas.get_width_height()
+        
+        # Create Kivy texture from buffer
+        texture = Texture.create(size=(w, h), colorfmt='rgba')
+        texture.blit_buffer(buf, colorfmt='rgba', bufferfmt='ubyte')
+        texture.flip_vertical()
+        
+        # Update image widget
+        self.canvas_widget.texture = texture

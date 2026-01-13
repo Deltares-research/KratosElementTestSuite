@@ -1,11 +1,13 @@
-import ttkbootstrap as ttk
-
-from PIL import Image, ImageTk
-import tkinter as tk
+from kivy.uix.boxlayout import BoxLayout
+from kivy.uix.button import Button
+from kivy.uix.label import Label
+from kivy.uix.textinput import TextInput
+from kivy.uix.spinner import Spinner
+from kivy.uix.image import Image as KivyImage
+from kivy.metrics import dp
 
 from kratos_element_test.view.ui_constants import (
     TEST_NAME_TO_TYPE,
-    HELP_MENU_FONT,
     TEST_IMAGE_FILES,
     TRIAXIAL,
     CRS,
@@ -24,77 +26,92 @@ from kratos_element_test.view.ui_constants import (
 )
 from kratos_element_test.view.ui_logger import log_message
 from kratos_element_test.view.ui_utils import _asset_path
-import tkinter.font as tkFont
-
 from kratos_element_test.view.widget_creation_utils import create_entries
 
 
-class SoilTestInputView(ttk.Frame):
-    def __init__(
-        self, soil_test_input_controller, update_plots_callback, master, **kwargs
-    ):
-        super().__init__(master, **kwargs)
+class SoilTestInputView(BoxLayout):
+    def __init__(self, soil_test_input_controller, update_plots_callback, master=None, **kwargs):
+        # Ignore master parameter for Kivy compatibility
+        kwargs.setdefault('orientation', 'vertical')
+        kwargs.setdefault('spacing', 10)
+        kwargs.setdefault('padding', 10)
+        super().__init__(**kwargs)
+        
         self._soil_test_input_controller = soil_test_input_controller
-        self.pack(fill="both", expand=True)
-        self.test_selector_frame = ttk.Frame(self, padding="5")
-        self.test_selector_frame.pack(fill="x", pady=(10, 5))
         self.update_plots_callback = update_plots_callback
         self.test_buttons = {}
-
-        image_paths = {
-            name: _asset_path(filename) for name, filename in TEST_IMAGE_FILES.items()
-        }
-
-        self.test_images = {}
-        for key, path in image_paths.items():
-            try:
-                img = Image.open(path)
-                img_resized = img.resize((85, 85), Image.Resampling.LANCZOS)
-                self.test_images[key] = ImageTk.PhotoImage(img_resized)
-            except Exception as e:
-                log_message(f"Failed to load or resize image: {path} ({e})", "error")
-                self.test_images[key] = None
-
+        
+        # Test selector frame
+        self.test_selector_frame = BoxLayout(
+            orientation='horizontal',
+            size_hint_y=None,
+            height=dp(120),
+            spacing=dp(5)
+        )
+        self.add_widget(self.test_selector_frame)
+        
+        # Create test buttons with images
         for test_name in TEST_NAME_TO_TYPE.keys():
-            btn = ttk.Button(
-                self.test_selector_frame,
+            btn_layout = BoxLayout(orientation='vertical', size_hint_x=None, width=dp(100))
+            
+            # Try to load image
+            try:
+                img_path = _asset_path(TEST_IMAGE_FILES[test_name])
+                img = KivyImage(source=img_path, size_hint=(1, 0.7))
+                btn_layout.add_widget(img)
+            except Exception as e:
+                log_message(f"Failed to load image: {e}", "error")
+            
+            btn = Button(
                 text=test_name,
-                image=self.test_images[test_name],
-                compound="top",
-                command=lambda name=test_name: self._switch_test(name),
-                bootstyle="outline"
+                size_hint=(1, 0.3),
+                on_press=lambda instance, name=test_name: self._switch_test(name)
             )
-            btn.pack(side="left", padx=5, pady=5)
+            btn_layout.add_widget(btn)
+            
+            self.test_selector_frame.add_widget(btn_layout)
             self.test_buttons[test_name] = btn
-
-        self.test_input_frame = ttk.Frame(self, padding="10")
-        self.test_input_frame.pack(fill="both", expand=True)
-
+        
+        # Test input frame
+        self.test_input_frame = BoxLayout(
+            orientation='vertical',
+            spacing=dp(10),
+            padding=dp(10)
+        )
+        self.add_widget(self.test_input_frame)
+        
         self._switch_test(TRIAXIAL)
 
     def disable(self):
-        if hasattr(self, "test_type_menu") and self.test_type_menu.winfo_exists():
-            self.test_type_menu.config(state="disabled")
+        if hasattr(self, "test_type_menu"):
+            self.test_type_menu.disabled = True
 
     def _switch_test(self, test_name):
+        # Update button colors
         for name, button in self.test_buttons.items():
             if name == test_name:
-                button.config(bootstyle="primary")
+                button.background_color = (0.2, 0.6, 1, 1)  # Primary color
             else:
-                button.config(bootstyle="outline")
+                button.background_color = (0.5, 0.5, 0.5, 1)  # Outline color
 
-        for w in self.test_input_frame.winfo_children():
-            w.destroy()
+        # Clear test input frame
+        self.test_input_frame.clear_widgets()
 
         self._soil_test_input_controller.set_current_test_type(test_name)
+        
         if test_name == TRIAXIAL:
             self.update_plots_callback(num_plots=5)
-            ttk.Label(
-                self.test_input_frame,
+            
+            title = Label(
                 text="Triaxial Input Data",
-                font=(INPUT_SECTION_FONT, 12, "bold"),
-            ).pack(anchor="w", padx=5, pady=(5, 0))
-            self._add_test_type_dropdown(self.test_input_frame)
+                size_hint_y=None,
+                height=dp(30),
+                bold=True,
+                font_size='12sp'
+            )
+            self.test_input_frame.add_widget(title)
+            
+            self._add_test_type_dropdown()
 
             inputs = self._soil_test_input_controller.get_triaxial_inputs()
 
@@ -104,7 +121,8 @@ class SoilTestInputView(ttk.Frame):
                 NUM_STEPS_LABEL: inputs.number_of_steps,
                 DURATION_LABEL: inputs.duration_in_seconds,
             }
-            self.triaxial_widgets, self.triaxial_string_vars = create_entries(
+            
+            self.triaxial_widgets, self.triaxial_callbacks = create_entries(
                 self.test_input_frame,
                 "",
                 [
@@ -122,18 +140,21 @@ class SoilTestInputView(ttk.Frame):
                 input_values,
             )
 
-            self._soil_test_input_controller.bind_test_input_fields_to_update_functions(
-                self.triaxial_string_vars, TRIAXIAL
-            )
+            self._bind_triaxial_inputs()
 
         elif test_name == DIRECT_SHEAR:
             self.update_plots_callback(num_plots=4)
-            ttk.Label(
-                self.test_input_frame,
+            
+            title = Label(
                 text="Direct Simple Shear Input Data",
-                font=(INPUT_SECTION_FONT, 12, "bold"),
-            ).pack(anchor="w", padx=5, pady=(5, 0))
-            self._add_test_type_dropdown(self.test_input_frame)
+                size_hint_y=None,
+                height=dp(30),
+                bold=True,
+                font_size='12sp'
+            )
+            self.test_input_frame.add_widget(title)
+            
+            self._add_test_type_dropdown()
 
             inputs = self._soil_test_input_controller.get_shear_inputs()
 
@@ -143,7 +164,8 @@ class SoilTestInputView(ttk.Frame):
                 NUM_STEPS_LABEL: inputs.number_of_steps,
                 DURATION_LABEL: inputs.duration_in_seconds,
             }
-            self.shear_widgets, self.shear_string_vars = create_entries(
+            
+            self.shear_widgets, self.shear_callbacks = create_entries(
                 self.test_input_frame,
                 "",
                 [
@@ -161,41 +183,54 @@ class SoilTestInputView(ttk.Frame):
                 input_values,
             )
 
-            self._soil_test_input_controller.bind_test_input_fields_to_update_functions(
-                self.shear_string_vars, DIRECT_SHEAR
-            )
+            self._bind_shear_inputs()
 
         elif test_name == CRS:
             self.update_plots_callback(num_plots=5)
-            ttk.Label(
-                self.test_input_frame,
+            
+            title = Label(
                 text="Constant Rate of Strain Input Data",
-                font=(INPUT_SECTION_FONT, 12, "bold"),
-            ).pack(anchor="w", padx=5, pady=(5, 0))
-            tk.Label(
-                self.test_input_frame,
+                size_hint_y=None,
+                height=dp(30),
+                bold=True,
+                font_size='12sp'
+            )
+            self.test_input_frame.add_widget(title)
+            
+            subtitle = Label(
                 text="(For Strain increment, compression is negative)",
-                font=(INPUT_SECTION_FONT, 9),
-            ).pack(anchor="w", padx=5, pady=(0, 5))
-
-            self.crs_button_frame = ttk.Frame(self.test_input_frame)
-            self.crs_button_frame.pack(fill="x", padx=10, pady=(5, 5))
-
-            add_row_button = ttk.Button(
-                self.crs_button_frame, text="Add Row", command=self._add_new_crs_row
+                size_hint_y=None,
+                height=dp(20),
+                font_size='9sp'
             )
-            add_row_button.pack(side="left", padx=5)
+            self.test_input_frame.add_widget(subtitle)
 
-            self.remove_row_button = ttk.Button(
-                self.crs_button_frame,
+            self.crs_button_frame = BoxLayout(
+                orientation='horizontal',
+                size_hint_y=None,
+                height=dp(40),
+                spacing=dp(5)
+            )
+            self.test_input_frame.add_widget(self.crs_button_frame)
+
+            add_row_button = Button(
+                text="Add Row",
+                on_press=lambda x: self._add_new_crs_row()
+            )
+            self.crs_button_frame.add_widget(add_row_button)
+
+            self.remove_row_button = Button(
                 text="Remove Row",
-                command=self._remove_crs_row,
-                state="disabled",
+                disabled=True,
+                on_press=lambda x: self._remove_crs_row()
             )
-            self.remove_row_button.pack(side="left", padx=5)
+            self.crs_button_frame.add_widget(self.remove_row_button)
 
-            self.crs_table_frame = ttk.Frame(self.test_input_frame)
-            self.crs_table_frame.pack(fill="x", padx=10, pady=5)
+            self.crs_table_frame = BoxLayout(
+                orientation='vertical',
+                spacing=dp(5)
+            )
+            self.test_input_frame.add_widget(self.crs_table_frame)
 
             self.crs_rows = []
 
@@ -210,62 +245,105 @@ class SoilTestInputView(ttk.Frame):
 
         log_message(f"{test_name} test selected.", "info")
 
-    def _add_test_type_dropdown(self, parent):
-        ttk.Label(
-            parent, text="Type of Test:", font=(INPUT_SECTION_FONT, 10, "bold")
-        ).pack(anchor="w", padx=5, pady=(5, 2))
-
-        self.test_type_var = tk.StringVar(value="Drained")
-        self.test_type_menu = ttk.Combobox(
-            parent,
-            textvariable=self.test_type_var,
-            values=["Drained"],
-            state="readonly",
-            width=12,
+    def _add_test_type_dropdown(self):
+        label = Label(
+            text="Type of Test:",
+            size_hint_y=None,
+            height=dp(25),
+            bold=True,
+            font_size='10sp'
         )
-        self.test_type_menu.pack(anchor="w", padx=10, pady=(0, 10))
+        self.test_input_frame.add_widget(label)
+
+        self.test_type_menu = Spinner(
+            text="Drained",
+            values=["Drained"],
+            size_hint_y=None,
+            height=dp(35)
+        )
+        self.test_input_frame.add_widget(self.test_type_menu)
 
         self._soil_test_input_controller.bind_drainage_combo_box(self.test_type_menu)
 
+    def _bind_triaxial_inputs(self):
+        """Bind triaxial input fields to controller update functions"""
+        for label, entry in self.triaxial_widgets.items():
+            if label == INIT_PRESSURE_LABEL:
+                entry.bind(text=lambda inst, val: self._soil_test_input_controller.update_triaxial_pressure(val))
+            elif label == MAX_STRAIN_LABEL:
+                entry.bind(text=lambda inst, val: self._soil_test_input_controller.update_triaxial_strain(val))
+            elif label == NUM_STEPS_LABEL:
+                entry.bind(text=lambda inst, val: self._soil_test_input_controller.update_triaxial_steps(val))
+            elif label == DURATION_LABEL:
+                entry.bind(text=lambda inst, val: self._soil_test_input_controller.update_triaxial_duration(val))
+
+    def _bind_shear_inputs(self):
+        """Bind shear input fields to controller update functions"""
+        for label, entry in self.shear_widgets.items():
+            if label == INIT_PRESSURE_LABEL:
+                entry.bind(text=lambda inst, val: self._soil_test_input_controller.update_shear_pressure(val))
+            elif label == MAX_STRAIN_LABEL:
+                entry.bind(text=lambda inst, val: self._soil_test_input_controller.update_shear_strain(val))
+            elif label == NUM_STEPS_LABEL:
+                entry.bind(text=lambda inst, val: self._soil_test_input_controller.update_shear_steps(val))
+            elif label == DURATION_LABEL:
+                entry.bind(text=lambda inst, val: self._soil_test_input_controller.update_shear_duration(val))
+
     def _add_crs_row(self, duration=1.0, strain_inc=0.0, steps=100):
         row = {}
-        string_vars = {}
-        row_frame = ttk.Frame(self.crs_table_frame)
-        row_frame.pack(fill="x", pady=2)
-
-        default_font = tkFont.nametofont("TkDefaultFont").copy()
-        default_font.configure(size=10)
-
-        for label, width, unit, default in zip(
-            [DURATION_LABEL, STRAIN_INCREMENT_LABEL, STEPS_LABEL],
-            [10, 10, 10],
-            ["hours ,", "% ,", ""],
-            [duration, strain_inc, steps],
-        ):
-            string_var = tk.StringVar()
-            string_var.set(str(default))
-            ttk.Label(row_frame, text=label).pack(side="left", padx=5)
-            entry = ttk.Entry(row_frame, width=width, textvariable=string_var)
-            entry.pack(side="left", padx=2)
-            ttk.Label(row_frame, text=unit).pack(side="left", padx=0)
-            row[label] = entry
-            string_vars[label] = string_var
-
-        test_input_controller = self._soil_test_input_controller
-        current_index = len(self.crs_rows)
-        self.crs_rows.append(row)
-        test_input_controller.bind_crs_test_input_row_to_update_functions(
-            string_vars, current_index
+        row_frame = BoxLayout(
+            orientation='horizontal',
+            size_hint_y=None,
+            height=dp(40),
+            spacing=dp(5)
         )
 
+        for label_text, default, unit in [
+            (DURATION_LABEL, duration, "hours ,"),
+            (STRAIN_INCREMENT_LABEL, strain_inc, "% ,"),
+            (STEPS_LABEL, steps, "")
+        ]:
+            lbl = Label(text=label_text, size_hint_x=0.3, font_size='10sp')
+            row_frame.add_widget(lbl)
+            
+            entry = TextInput(
+                text=str(default),
+                multiline=False,
+                size_hint_x=0.3,
+                font_size='10sp'
+            )
+            row_frame.add_widget(entry)
+            
+            unit_lbl = Label(text=unit, size_hint_x=0.1, font_size='10sp')
+            row_frame.add_widget(unit_lbl)
+            
+            row[label_text] = entry
+
+        current_index = len(self.crs_rows)
+        self.crs_rows.append(row)
+        self.crs_table_frame.add_widget(row_frame)
+
+        # Bind to controller
+        self._bind_crs_row(row, current_index)
+
         if len(self.crs_rows) > 1:
-            self.remove_row_button.config(state="normal")
+            self.remove_row_button.disabled = False
+
+    def _bind_crs_row(self, row, index):
+        """Bind CRS row inputs to controller"""
+        row[DURATION_LABEL].bind(
+            text=lambda inst, val: self._soil_test_input_controller.update_crs_duration(index, val)
+        )
+        row[STRAIN_INCREMENT_LABEL].bind(
+            text=lambda inst, val: self._soil_test_input_controller.update_crs_strain(index, val)
+        )
+        row[STEPS_LABEL].bind(
+            text=lambda inst, val: self._soil_test_input_controller.update_crs_steps(index, val)
+        )
 
     def _add_new_crs_row(self):
-        test_input_controller = self._soil_test_input_controller
-
-        test_input_controller.add_crs_strain_increment()
-        crs_input = test_input_controller.get_crs_inputs()
+        self._soil_test_input_controller.add_crs_strain_increment()
+        crs_input = self._soil_test_input_controller.get_crs_inputs()
 
         self._add_crs_row(
             duration=crs_input.strain_increments[-1].duration_in_hours,
@@ -273,21 +351,23 @@ class SoilTestInputView(ttk.Frame):
             steps=crs_input.strain_increments[-1].steps,
         )
 
-    def _prevent_removal_last_crs_row(self):
-        minimum_number_of_rows = 1
-        if len(self.crs_rows) <= minimum_number_of_rows:
-            self.remove_row_button.config(state="disabled")
-
     def _remove_crs_row(self):
-        self._prevent_removal_last_crs_row()
+        if len(self.crs_rows) <= 1:
+            self.remove_row_button.disabled = True
+            return
 
         if self.crs_rows:
             row = self.crs_rows.pop()
-            row_frame = next(iter(row.values())).master
-            row_frame.destroy()
+            # Find and remove the row's parent frame from crs_table_frame
+            for widget in self.crs_table_frame.children:
+                if any(entry.parent == widget for entry in row.values()):
+                    self.crs_table_frame.remove_widget(widget)
+                    break
+                    
         self._soil_test_input_controller.remove_last_crs_strain_increment()
 
-        self._prevent_removal_last_crs_row()
+        if len(self.crs_rows) <= 1:
+            self.remove_row_button.disabled = True
 
     def validate(self, current_test_type):
         widget_dicts = []
@@ -305,6 +385,6 @@ class SoilTestInputView(ttk.Frame):
         for widget_dict in widget_dicts:
             for key, widget in widget_dict.items():
                 try:
-                    float(widget.get())
+                    float(widget.text)
                 except ValueError:
                     raise ValueError(f"Could not convert entry to number for '{key}'.")

@@ -13,14 +13,12 @@ def log_message(msg, level="info"):
         print(f"{level.upper()}: {msg}")
         return
 
-    _log_widget.config(state="normal")
     prefix = {"info": "[INFO]", "error": "[ERROR]", "warn": "[WARN]"}
-    _log_widget.insert("end", f"{prefix.get(level, '[INFO]')} {msg}\n")
-    _log_widget.see("end")
-    _log_widget.config(state="normal")
+    message = f"{prefix.get(level, '[INFO]')} {msg}\n"
+    _log_widget.text += message
+    # Scroll to end by setting cursor position
+    _log_widget.cursor = (0, len(_log_widget.text))
 
 def clear_log():
     if _log_widget is not None:
-        _log_widget.config(state="normal")
-        _log_widget.delete("1.0", "end")
-        _log_widget.config(state="disabled")
+        _log_widget.text = ""

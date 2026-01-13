@@ -8,11 +8,10 @@ from kratos_element_test.view.ui_menu import MainUI
 
 
 def main():
-    current_dir = os.path.dirname(os.path.abspath(__file__))
-    os.chdir(current_dir)
+    """Entry point for Kivy application"""
     try:
-        ui = MainUI()
-        ui.create_menu()
+        app = MainUI()
+        app.run()
     except ImportError as e:
         print(
             f"[ERROR] Could not run GUI: {e}. Make sure the GeoMechanicsApplication is built and installed correctly."

@@ -1,27 +1,61 @@
-import ttkbootstrap as ttk
-import tkinter.font as tk_font
-import tkinter as tk
+from kivy.uix.boxlayout import BoxLayout
+from kivy.uix.label import Label
+from kivy.uix.textinput import TextInput
+from kivy.metrics import dp
 
 
-def create_entries(frame, title, labels, units, defaults):
+def create_entries(container, title, labels, units, defaults):
+    """Create entry widgets in Kivy. Returns widgets dict and callbacks dict."""
     widgets = {}
-    string_vars = {}
-    default_font = tk_font.nametofont("TkDefaultFont").copy()
-    default_font.configure(size=10)
-
-    ttk.Label(frame, text=title, font=("Arial", 12, "bold")).pack(
-        anchor="w", padx=5, pady=5
-    )
+    callbacks = {}
+    
+    if title:
+        title_label = Label(
+            text=title,
+            size_hint_y=None,
+            height=dp(30),
+            bold=True,
+            font_size='12sp'
+        )
+        container.add_widget(title_label)
+    
     for i, label in enumerate(labels):
-        string_var = tk.StringVar()
-        string_var.set(defaults.get(label, ""))
         unit = units[i] if i < len(units) else ""
-        row = ttk.Frame(frame)
-        row.pack(fill="x", padx=10, pady=2)
-        ttk.Label(row, text=label, font=default_font).pack(side="left", padx=5)
-        entry = ttk.Entry(row, font=default_font, width=20, textvariable=string_var)
-        entry.pack(side="left", fill="x", expand=True)
-        ttk.Label(row, text=unit, font=default_font).pack(side="left", padx=5)
+        
+        row = BoxLayout(orientation='horizontal', size_hint_y=None, height=dp(35), spacing=dp(5))
+        
+        label_widget = Label(
+            text=label,
+            size_hint_x=0.4,
+            font_size='10sp'
+        )
+        row.add_widget(label_widget)
+        
+        entry = TextInput(
+            text=str(defaults.get(label, "")),
+            multiline=False,
+            size_hint_x=0.4,
+            font_size='10sp'
+        )
+        row.add_widget(entry)
+        
+        unit_label = Label(
+            text=unit,
+            size_hint_x=0.2,
+            font_size='10sp'
+        )
+        row.add_widget(unit_label)
+        
+        container.add_widget(row)
         widgets[label] = entry
-        string_vars[label] = string_var
-    return widgets, string_vars
+        
+        # Create callback that can be bound to entry.text
+        def make_callback(entry_widget, label_key):
+            def callback(instance, value):
+                # Placeholder for string_var behavior
+                pass
+            return callback
+        
+        callbacks[label] = make_callback(entry, label)
+    
+    return widgets, callbacks

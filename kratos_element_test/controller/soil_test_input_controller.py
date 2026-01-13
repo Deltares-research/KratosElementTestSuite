@@ -91,13 +91,15 @@ class SoilTestInputController:
         )
 
     def bind_drainage_combo_box(self, combo_box):
-        def _sync_drainage_from_combobox(*_):
-            val = combo_box.get().strip().lower()
+        def _sync_drainage_from_combobox(instance, value):
+            # Kivy version - value is the selected text
+            val = value.strip().lower()
             self._soil_test_input_manager.update_drainage(
                 "drained" if val.startswith("drained") else "undrained"
             )
 
-        combo_box.bind("<<ComboboxSelected>>", lambda e: _sync_drainage_from_combobox())
+        # Kivy binding
+        combo_box.bind(text=_sync_drainage_from_combobox)
 
     def set_current_test_type(self, test_type: str) -> None:
         self._soil_test_input_manager.set_current_test_type(test_type)

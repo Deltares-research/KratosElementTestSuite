@@ -3,275 +3,190 @@
 # Contact kratos@deltares.nl
 
 import os
-import tkinter as tk
-from tkinter import filedialog, messagebox, Menu
-import ttkbootstrap as ttk
-from ttkbootstrap.scrolled import ScrolledText
-from platformdirs import user_data_dir
+from kivy.app import App
+from kivy.uix.boxlayout import BoxLayout
+from kivy.uix.spinner import Spinner
+from kivy.uix.popup import Popup
+from kivy.uix.label import Label
+from kivy.uix.button import Button
+from kivy.uix.scrollview import ScrollView
+from kivy.uix.textinput import TextInput
+from kivy.metrics import dp
 from pathlib import Path
+from platformdirs import user_data_dir
 
 from kratos_element_test.controller.element_test_controller import ElementTestController
 from kratos_element_test.plotters.matplotlib_plotter import MatplotlibPlotter
 from kratos_element_test.view.ui_builder import GeotechTestUI
-from kratos_element_test.model.io.udsm_parser import udsm_parser
 from kratos_element_test.view.ui_utils import _asset_path
 from kratos_element_test.view.ui_constants import (APP_TITLE, APP_VERSION, APP_NAME, APP_AUTHOR, SELECT_UDSM,
-                                                 LINEAR_ELASTIC, MOHR_COULOMB, HELP_MENU_FONT, DEFAULT_TKINTER_DPI)
+                                                  LINEAR_ELASTIC, MOHR_COULOMB)
 from kratos_element_test.view.ui_logger import log_message
-
-import ctypes
-ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID("deltares.ElementTestSuite.ui")
 
 data_dir = Path(user_data_dir(APP_NAME, APP_AUTHOR))
 data_dir.mkdir(parents=True, exist_ok=True)
-
 LICENSE_FLAG_PATH = data_dir / "license_accepted.flag"
 
-class MainUI:
-    def __init__(self):
+
+class MainUI(App):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.title = f"{APP_TITLE} - {APP_VERSION}"
         self.main_frame = None
+        self.controller = None
+        self.model_source_spinner = None
+        self.last_model_source = LINEAR_ELASTIC
+
+    def build(self):
+        if not os.path.exists(LICENSE_FLAG_PATH):
+            self.show_license_agreement()
+        
+        self.controller = ElementTestController(
+            logger=log_message,
+            plotter_factory=lambda axes: MatplotlibPlotter(axes, logger=log_message, line_color='#3498db')
+        )
+
+        root_layout = BoxLayout(orientation='vertical')
+        
+        # Top frame with model selector
+        top_frame = BoxLayout(orientation='horizontal', size_hint_y=None, height=dp(50), padding=dp(10))
+        self.model_source_spinner = Spinner(
+            text="Select Model Source",
+            values=[SELECT_UDSM, LINEAR_ELASTIC, MOHR_COULOMB],
+            size_hint_x=0.3
+        )
+        self.model_source_spinner.bind(text=self.handle_model_source_selection)
+        top_frame.add_widget(self.model_source_spinner)
+        root_layout.add_widget(top_frame)
+        
+        # Main content area (will be populated by model selection)
+        self.content_area = BoxLayout(orientation='vertical')
+        root_layout.add_widget(self.content_area)
+        
+        return root_layout
+
+    def handle_model_source_selection(self, spinner, text):
+        if text == SELECT_UDSM:
+            self.load_dll()
+        elif text == LINEAR_ELASTIC:
+            self.load_linear_elastic()
+        elif text == MOHR_COULOMB:
+            self.load_mohr_coulomb()
+
+    def load_dll(self):
+        # For POC, just show message that file dialog would open
+        popup = Popup(title='Info',
+                     content=Label(text='File dialog would open here to select DLL\n(use plyer.filechooser)'),
+                     size_hint=(0.6, 0.4))
+        popup.open()
+        self.model_source_spinner.text = self.last_model_source
+
+    def load_linear_elastic(self):
+        self.last_model_source = LINEAR_ELASTIC
+        model_dict = {
+            "model_name": [LINEAR_ELASTIC],
+            "num_params": [2],
+            "param_names": [["Young's Modulus", "Poisson's Ratio"]],
+            "param_units": [["kN/m²", "–"]]
+        }
+        self._load_model(model_dict, None)
+
+    def load_mohr_coulomb(self):
+        self.last_model_source = MOHR_COULOMB
+        model_dict = {
+            "model_name": [MOHR_COULOMB],
+            "num_params": [4],
+            "param_names": [[
+                "Young's Modulus",
+                "Poisson's Ratio",
+                "Cohesion",
+                "Friction Angle",
+                "Tensile Strength",
+                "Dilatancy Angle",
+            ]],
+            "param_units": [["kN/m²", "-", "kN/m²", "deg", "kN/m²", "deg"]],
+        }
+        self._load_model(model_dict, None)
+
+    def _load_model(self, model_dict, dll_path):
+        self.content_area.clear_widgets()
+        self.main_frame = GeotechTestUI(
+            self.root, 
+            test_name="Triaxial", 
+            dll_path=dll_path, 
+            model_dict=model_dict,
+            controller=self.controller, 
+            external_widgets=[self.model_source_spinner]
+        )
+        self.content_area.add_widget(self.main_frame)
+
     def show_license_agreement(self, readonly=False):
         license_file_path = _asset_path("license.txt")
         try:
             with open(license_file_path, "r", encoding="utf-8") as f:
                 license_text = f.read()
         except Exception as e:
-            messagebox.showerror("Error", f"Could not load license file: {e}")
-            os._exit(1)
+            popup = Popup(title='Error',
+                         content=Label(text=f"Could not load license file: {e}"),
+                         size_hint=(0.6, 0.4))
+            popup.open()
+            return
 
-        license_window = tk.Toplevel()
-        license_window.title("Pre-Release License Agreement")
-        license_window.geometry("800x600")
-        license_window.grab_set()
+        content = BoxLayout(orientation='vertical', padding=dp(10), spacing=dp(10))
+        content.add_widget(Label(text="Pre-Release Software License Agreement", bold=True, size_hint_y=None, height=dp(30)))
+        content.add_widget(Label(text="Please review and accept the agreement to continue.", size_hint_y=None, height=dp(30)))
+        
+        scroll = ScrollView()
+        text_area = TextInput(text=license_text, readonly=True, multiline=True)
+        scroll.add_widget(text_area)
+        content.add_widget(scroll)
 
         if not readonly:
-            license_window.protocol("WM_DELETE_WINDOW", lambda: os._exit(0))
-
-        tk.Label(license_window, text="Pre-Release Software License Agreement",
-                 font=(HELP_MENU_FONT, 12, "bold"), pady=10).pack()
-
-        tk.Label(license_window, text="Please review and accept the agreement to continue.",
-                 font=(HELP_MENU_FONT, 12, "bold"), pady=10).pack()
-
-        text_area = ScrolledText(license_window, wrap="word", autohide=True)
-        text_area.text.config(font=("Courier", 10))
-        text_area.text.insert("1.0", license_text)
-        text_area.text.config(state="disabled")
-        text_area.pack(expand=True, fill="both", padx=10, pady=10)
-
-        button_frame = tk.Frame(license_window)
-        button_frame.pack(pady=10)
-
-        if readonly:
-            ttk.Button(button_frame, text="Close", width=15, command=license_window.destroy).pack()
-        else:
-            def accept():
+            button_box = BoxLayout(size_hint_y=None, height=dp(50), spacing=dp(10))
+            accept_btn = Button(text="Accept")
+            decline_btn = Button(text="Decline")
+            
+            def accept_license(*args):
                 try:
                     with open(LICENSE_FLAG_PATH, "w") as f:
                         f.write("ACCEPTED")
+                    license_popup.dismiss()
                 except Exception as e:
-                    messagebox.showerror("Error", f"Could not save license acceptance: {e}")
-                    os._exit(1)
-                license_window.destroy()
+                    print(f"Error saving license: {e}")
+            
+            def decline_license(*args):
+                import sys
+                sys.exit(0)
+            
+            accept_btn.bind(on_press=accept_license)
+            decline_btn.bind(on_press=decline_license)
+            button_box.add_widget(accept_btn)
+            button_box.add_widget(decline_btn)
+            content.add_widget(button_box)
 
-            def decline():
-                messagebox.showinfo("Exit", "You must accept the license agreement to use this software.")
-                os._exit(0)
-
-            tk.Button(button_frame, text="Accept", width=15, command=accept).pack(side="left", padx=10)
-            tk.Button(button_frame, text="Decline", width=15, command=decline).pack(side="right", padx=10)
+        license_popup = Popup(title='License Agreement', content=content, size_hint=(0.9, 0.9))
+        if not readonly:
+            license_popup.bind(on_dismiss=lambda x: decline_license())
+        license_popup.open()
 
     def show_about_window(self):
-        about_win = tk.Toplevel()
-        about_win.title("About")
-        about_win.geometry("500x400")
-        about_win.resizable(False, False)
-        about_win.grab_set()
-
-        tk.Label(about_win, text=APP_TITLE, font=(HELP_MENU_FONT, 14, "bold")).pack(pady=(20, 5))
-        tk.Label(about_win, text=APP_VERSION, font=(HELP_MENU_FONT, 12)).pack(pady=(0, 5))
-        tk.Label(about_win, text="Powered by:", font=(HELP_MENU_FONT, 12)).pack(pady=(0, 5))
-
-        image_frame = tk.Frame(about_win)
-        image_frame.pack(pady=10)
-
-        try:
-            path1 = _asset_path("kratos.png")
-            path2 = _asset_path("deltares.png")
-
-            photo1 = tk.PhotoImage(file=path1)
-            photo2 = tk.PhotoImage(file=path2)
-
-            label1 = tk.Label(image_frame, image=photo1)
-            label1.image = photo1
-            label1.pack(pady=2)
-
-            label2 = tk.Label(image_frame, image=photo2)
-            label2.image = photo2
-            label2.pack(pady=15)
-
-        except Exception:
-            tk.Label(about_win, text="[One or both images could not be loaded]", fg="red").pack()
-
-        tk.Label(about_win, text="Contact: kratos@deltares.nl", font=(HELP_MENU_FONT, 12)).pack(pady=(0, 2))
-        ttk.Button(about_win, text="Close", command=about_win.destroy).pack(pady=10)
-
+        content = BoxLayout(orientation='vertical', padding=dp(20), spacing=dp(10))
+        content.add_widget(Label(text=APP_TITLE, bold=True, font_size='14sp'))
+        content.add_widget(Label(text=APP_VERSION, font_size='12sp'))
+        content.add_widget(Label(text="Powered by: Kratos & Deltares", font_size='12sp'))
+        content.add_widget(Label(text="Contact: kratos@deltares.nl", font_size='12sp'))
+        
+        close_btn = Button(text="Close", size_hint_y=None, height=dp(50))
+        about_popup = Popup(title='About', content=content, size_hint=(0.6, 0.6))
+        close_btn.bind(on_press=about_popup.dismiss)
+        content.add_widget(close_btn)
+        about_popup.open()
 
     def create_menu(self):
-        root = ttk.Window(themename="superhero")
-        
-        # Get theme colors for plotter
-        style = ttk.Style.get_instance()
-        primary_color = style.colors.primary
-        
-        controller = ElementTestController(
-            logger=log_message,
-            plotter_factory=lambda axes: MatplotlibPlotter(axes, logger=log_message, line_color=primary_color)
-        )
-
-        last_model_source = LINEAR_ELASTIC
-
-        root.bind_class("TCombobox", "<MouseWheel>", lambda e: "break")
-        root.bind_class("TCombobox", "<Shift-MouseWheel>", lambda e: "break")
-
-        pixels_per_inch = root.winfo_fpixels('1i')
-        scaling_factor = pixels_per_inch / DEFAULT_TKINTER_DPI
-
-        if scaling_factor > 1.25:
-            root.tk.call('tk', 'scaling', scaling_factor)
-
-        menubar = Menu(root)
-        root.config(menu=menubar)
-
-        file_menu = Menu(menubar, tearoff=0)
-        file_menu.add_command(label="Exit", command=lambda: root.quit())
-        menubar.add_cascade(label="File", menu=file_menu)
-
-        export_menu = Menu(menubar, tearoff=0)
-        export_menu.add_command(label="Export Results (Excel)", command=controller.export_latest_results)
-        menubar.add_cascade(label="Export", menu=export_menu)
-
-        about_menu = Menu(menubar, tearoff=0)
-        about_menu.add_command(label="License", command=lambda: self.show_license_agreement(readonly=True))
-        about_menu.add_command(label="About", command=self.show_about_window)
-        menubar.add_cascade(label="Help", menu=about_menu)
-
-        if not os.path.exists(LICENSE_FLAG_PATH):
-            self.show_license_agreement()
-
-        try:
-            icon_path = _asset_path("icon.ico")
-            root.iconbitmap(default=icon_path)
-        except Exception as e:
-            print(f"Could not set icon: {e}")
-
-        root.title(f"{APP_TITLE} - {APP_VERSION}")
-        root.state('zoomed')
-        root.resizable(True, True)
-
-        top_frame = ttk.Frame(root, padding="10")
-        top_frame.pack(side="top", fill="x")
-
-        def load_dll():
-            nonlocal last_model_source
-            dll_path = filedialog.askopenfilename(title=SELECT_UDSM, filetypes=[("DLL files", "*.dll")])
-            if not dll_path:
-                messagebox.showerror("Error", "No DLL file selected.")
-                model_source_var.set(last_model_source)
-                return
-
-            try:
-                model_dict = udsm_parser(dll_path)
-            except Exception as e:
-                messagebox.showerror("DLL Error", f"Failed to parse DLL: {e}")
-                model_source_var.set(last_model_source)
-                return
-            last_model_source = SELECT_UDSM
-
-            if self.main_frame:
-                for widget in self.main_frame.winfo_children():
-                    widget.destroy()
-                self.main_frame.destroy()
-
-            self.main_frame = GeotechTestUI(root, test_name="Triaxial", dll_path=dll_path, model_dict=model_dict,
-                                            controller=controller, external_widgets=[model_source_menu])
-
-        def load_linear_elastic():
-            nonlocal last_model_source
-            model_dict = {
-                "model_name": [LINEAR_ELASTIC],
-                "num_params": [2],
-                "param_names": [["Young's Modulus", "Poisson's Ratio"]],
-                "param_units": [["kN/m²", "–"]]
-            }
-            last_model_source = LINEAR_ELASTIC
-
-            if self.main_frame:
-                for widget in self.main_frame.winfo_children():
-                    widget.destroy()
-                self.main_frame.destroy()
-
-
-            self.main_frame = GeotechTestUI(root, test_name="Triaxial", dll_path=None, model_dict=model_dict,
-                                            controller=controller, external_widgets=[model_source_menu])
-
-        def load_mohr_coulomb():
-            nonlocal last_model_source
-            model_dict = {
-                "model_name": [MOHR_COULOMB],
-                "num_params": [4],
-                "param_names": [[
-                    "Young's Modulus",
-                    "Poisson's Ratio",
-                    "Cohesion",
-                    "Friction Angle",
-                    "Tensile Strength",
-                    "Dilatancy Angle",
-                ]],
-                "param_units": [["kN/m²", "-", "kN/m²", "deg", "kN/m²", "deg"]],
-            }
-            last_model_source = MOHR_COULOMB
-
-            if self.main_frame:
-                for widget in self.main_frame.winfo_children():
-                    widget.destroy()
-                self.main_frame.destroy()
-
-            self.main_frame = GeotechTestUI(root, test_name="Triaxial", dll_path=None, model_dict=model_dict,
-                                            controller=controller, external_widgets=[model_source_menu])
-
-        def handle_model_source_selection(event):
-            choice = model_source_var.get()
-            if choice == SELECT_UDSM:
-                load_dll()
-            elif choice == LINEAR_ELASTIC:
-                load_linear_elastic()
-            elif choice == MOHR_COULOMB:
-                load_mohr_coulomb()
-
-        model_source_var = tk.StringVar(value="Select Model Source")
-        model_source_menu = ttk.Combobox(
-            top_frame,
-            textvariable=model_source_var,
-            values=[SELECT_UDSM, LINEAR_ELASTIC, MOHR_COULOMB],
-            state="readonly"
-        )
-        model_source_menu.bind("<<ComboboxSelected>>", handle_model_source_selection)
-        model_source_menu.pack(side="left", padx=5)
-
-        def on_close():
-            root.quit()
-            root.destroy()
-            os._exit(0)
-
-        def refresh_plot_frame():
-            root.update_idletasks()
-            root.event_generate("<Configure>")
-
-        root.protocol("WM_DELETE_WINDOW", on_close)
-        root.mainloop()
+        """Legacy method for compatibility"""
+        self.run()
 
 
 if __name__ == "__main__":
     ui = MainUI()
-    ui.create_menu()
+    ui.run()
