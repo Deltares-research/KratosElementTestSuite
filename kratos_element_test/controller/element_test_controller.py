@@ -90,7 +90,13 @@ class ElementTestController:
                 phi_index=self._mc_indices[1],
             )
 
-            self._main_model.run_simulation(model_name, dll_path, udsm_number, mohr_coulomb_options, material_parameters)
+            self._main_model.run_simulation(
+                model_name,
+                dll_path,
+                udsm_number,
+                mohr_coulomb_options,
+                material_parameters,
+            )
             self.latest_results = self._main_model.get_latest_results()
 
             plotter = self._plotter_factory(axes)
