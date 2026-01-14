@@ -10,9 +10,12 @@ class MainModelTest(unittest.TestCase):
 
         youngs_modulus = 9e5
         poisson_ratio = 0.3
-        material_parameters = [youngs_modulus, poisson_ratio]
         model.run_simulation(
-            "linear elastic model", None, 0, MohrCoulombOptions(), material_parameters
+            model_name="linear elastic model",
+            dll_path=None,
+            udsm_number=0,
+            mohr_coulomb_options=MohrCoulombOptions(),
+            material_parameters=[youngs_modulus, poisson_ratio],
         )
 
         results = model.get_latest_results()

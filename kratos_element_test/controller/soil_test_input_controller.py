@@ -61,7 +61,7 @@ class SoilTestInputController:
         string_vars[DURATION_LABEL].trace_add(
             "write",
             lambda _var_name, _index, _operation: self._soil_test_input_manager.update_duration(
-                new_duration=float(string_vars[DURATION_LABEL].get()),
+                new_duration_in_seconds=float(string_vars[DURATION_LABEL].get()),
                 test_type=test_type,
             ),
         )

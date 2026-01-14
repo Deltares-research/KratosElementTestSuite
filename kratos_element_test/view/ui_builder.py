@@ -235,11 +235,10 @@ class GeotechTestUI(ttk.Frame):
             if success:
                 self.plot_frame.draw()
                 test_type = self.controller.get_current_test_type()
-                tt = TEST_NAME_TO_TYPE.get(test_type, "triaxial")
                 log_message(f"{test_type} test completed successfully.", "info")
                 if hasattr(self.controller, "latest_results"):
                     self.latest_results = self.controller.latest_results
-                self.latest_test_type = tt
+                self.latest_test_type = TEST_NAME_TO_TYPE.get(test_type, "triaxial")
 
         except Exception:
             log_message("An error occurred during simulation:", "error")
@@ -278,7 +277,7 @@ class GeotechTestUI(ttk.Frame):
         if hasattr(self, "scrollbar"):
             self._original_scroll_cmd = self.scrollbar.cget("command")
             self.scrollbar.config(command=lambda *args: None)
-        self.soil_test_input_view.disable()
+        self.soil_test_input_view.disable_test_type_menu()
         self.scroll_canvas.unbind_all("<MouseWheel>")
 
     def _enable_gui(self):
