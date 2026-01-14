@@ -88,6 +88,8 @@ class SoilTestInputManager:
         return self._current_test_type
 
     def set_current_test_type(self, test_type: str) -> None:
+        if test_type not in [TRIAXIAL, DIRECT_SHEAR, CRS]:
+            raise ValueError(f"Trying to set a non-existent test type {test_type}")
         self._current_test_type = test_type
 
     def get_current_test_inputs(self):

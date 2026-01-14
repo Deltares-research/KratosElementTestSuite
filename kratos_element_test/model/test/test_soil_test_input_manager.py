@@ -76,19 +76,19 @@ class SoilTestInputManagerTest(unittest.TestCase):
         self.assertEqual(1, new_count)
 
     @parameterized.expand([TRIAXIAL, DIRECT_SHEAR])
-    def test_update_duration(self,test_type):
+    def test_update_duration(self, test_type):
         self.input_manager.update_duration(2.5, test_type)
         updated = self.input_manager.input_data[test_type].duration_in_seconds
         self.assertEqual(updated, 2.5)
 
     @parameterized.expand([TRIAXIAL, DIRECT_SHEAR])
-    def test_update_num_steps(self,test_type):
+    def test_update_num_steps(self, test_type):
         self.input_manager.update_num_steps(250, test_type)
         updated = self.input_manager.input_data[test_type].number_of_steps
         self.assertEqual(updated, 250)
 
     @parameterized.expand([TRIAXIAL, DIRECT_SHEAR])
-    def test_update_max_strain(self,test_type):
+    def test_update_max_strain(self, test_type):
         self.input_manager.update_max_strain(15.0, test_type)
         updated = self.input_manager.input_data[test_type].maximum_strain
         self.assertEqual(updated, 15.0)
@@ -115,6 +115,12 @@ class SoilTestInputManagerTest(unittest.TestCase):
         self.assertEqual(inputs.maximum_strain, 0.0)
         self.assertEqual(inputs.duration_in_seconds, 18000.0)
         self.assertEqual(inputs.number_of_steps, 500)
+
+    def test_setting_non_existent_test_type_throws(self):
+        self.assertRaises(
+            ValueError, lambda: self.input_manager.set_current_test_type("Non-existent")
+        )
+
 
 if __name__ == "__main__":
     unittest.main()
