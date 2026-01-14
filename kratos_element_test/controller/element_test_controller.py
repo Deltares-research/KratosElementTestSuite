@@ -77,9 +77,7 @@ class ElementTestController:
         udsm_number: Optional[int],
         material_parameters: List[float],
     ) -> bool:
-        test_type = TEST_NAME_TO_TYPE.get(
-            self._main_model.soil_test_input_manager.get_current_test_type()
-        )
+        test_type = TEST_NAME_TO_TYPE.get(self.get_current_test_type())
 
         try:
             self._logger(f"MC indices: {self._mc_tuple()}", "info")
