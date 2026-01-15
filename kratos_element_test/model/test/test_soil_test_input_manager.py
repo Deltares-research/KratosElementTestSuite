@@ -2,6 +2,7 @@ import unittest
 
 from parameterized import parameterized
 
+from kratos_element_test.model.models import StrainIncrement
 from kratos_element_test.model.soil_test_input_manager import SoilTestInputManager
 from kratos_element_test.view.ui_constants import TRIAXIAL, DIRECT_SHEAR
 
@@ -102,11 +103,14 @@ class SoilTestInputManagerTest(unittest.TestCase):
         self.assertEqual(updated, 250.0)
 
     def test_get_current_default_inputs(self):
+        self.assertEqual(self.input_manager.get_current_test_type(), TRIAXIAL)
         inputs = self.input_manager.get_current_test_inputs()
         self.assertIsNotNone(inputs)
         self.assertEqual(inputs.maximum_strain, 20.0)
         self.assertEqual(inputs.duration_in_seconds, 1.0)
         self.assertEqual(inputs.number_of_steps, 100)
+        self.assertEqual(inputs.initial_effective_cell_pressure, 100.0)
+        self.assertEqual(inputs.drainage, "drained")
 
     def test_get_current_default_inputs_for_crs(self):
         self.input_manager.set_current_test_type("CRS")
@@ -115,6 +119,10 @@ class SoilTestInputManagerTest(unittest.TestCase):
         self.assertEqual(inputs.maximum_strain, 0.0)
         self.assertEqual(inputs.duration_in_seconds, 18000.0)
         self.assertEqual(inputs.number_of_steps, 500)
+        self.assertEqual(inputs.initial_effective_cell_pressure, 0.0)
+        self.assertEqual(len(inputs.strain_increments), 5)
+        for increment in inputs.strain_increments:
+            self.assertEqual(increment, StrainIncrement())
 
     def test_setting_non_existent_test_type_throws(self):
         self.assertRaises(
