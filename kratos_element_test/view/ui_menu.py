@@ -119,7 +119,9 @@ class MainUI:
 
     def create_menu(self):
         root = ttk.Window(themename="superhero")
-        
+        # root = ttk.Window(themename="solar")
+        # root = ttk.Window(themename="litera")
+
         # Get theme colors for plotter
         style = ttk.Style.get_instance()
         primary_color = style.colors.primary
