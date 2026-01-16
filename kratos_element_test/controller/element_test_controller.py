@@ -32,7 +32,7 @@ class ElementTestController:
         self._main_model = MainModel(logger)
 
         self._soil_test_input_controller = SoilTestInputController(
-            self._main_model.soil_test_input_manager
+            self._main_model._soil_test_input_manager
         )
         self._result_controller = ResultController(self._main_model.get_result_manager())
 

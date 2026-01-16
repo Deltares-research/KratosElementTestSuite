@@ -9,13 +9,13 @@ from kratos_element_test.model.soil_test_input_manager import SoilTestInputManag
 class MainModel:
     def __init__(self, logger: Callable[[str, str], None]):
         self._logger = logger
-        self.soil_test_input_manager = SoilTestInputManager()
+        self._soil_test_input_manager = SoilTestInputManager()
         self._result_manager = ResultManager(
-            self.soil_test_input_manager.get_current_test_type
+            self._soil_test_input_manager.get_current_test_type
         )
 
     def get_current_test_type(self) -> str:
-        return self.soil_test_input_manager.get_current_test_type()
+        return self._soil_test_input_manager.get_current_test_type()
 
     def run_simulation(
         self,
@@ -26,7 +26,7 @@ class MainModel:
         material_parameters,
     ) -> None:
 
-        inputs = self.soil_test_input_manager.get_current_test_inputs()
+        inputs = self._soil_test_input_manager.get_current_test_inputs()
         try:
             inputs.validate()
         except ValueError:
