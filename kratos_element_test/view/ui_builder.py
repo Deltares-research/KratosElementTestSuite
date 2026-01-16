@@ -254,7 +254,6 @@ class GeotechTestUI(ttk.Frame):
             udsm_number = self.model_dict["model_name"].index(self.model_var.get()) + 1 if self.dll_path else None
 
             success = self.controller.run(
-                axes=self.plot_frame.axes,
                 model_name=self.model_var.get(),
                 dll_path=self.dll_path or "",
                 udsm_number=udsm_number,
