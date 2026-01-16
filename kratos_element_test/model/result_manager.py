@@ -1,4 +1,4 @@
-from typing import Callable, Dict, List
+from typing import Callable, Dict, List, Optional
 
 
 class ResultManager:
@@ -13,8 +13,8 @@ class ResultManager:
         self._simulation_results: Dict[str, Dict[str, List[float]]] = {}
         self._active_test_getter = active_test_getter
 
-    def get_results_of_active_test_type(self) -> Dict[str, List[float]]:
-        return self._simulation_results.get(self._active_test_getter(), {})
+    def get_results_of_active_test_type(self) -> Optional[Dict[str, List[float]]]:
+        return self._simulation_results.get(self._active_test_getter())
 
     def set_results_of_active_test_type(self, results: Dict[str, List[float]]):
         self._simulation_results[self._active_test_getter()] = results

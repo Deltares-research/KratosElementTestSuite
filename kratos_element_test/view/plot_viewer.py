@@ -51,7 +51,7 @@ class PlotViewer(ttk.Frame):
 
     def draw(self):
         results = self._result_controller.get_latest_results()
-        if len(results) == 0:
+        if not results:
             return
 
         test_type = TEST_NAME_TO_TYPE.get(self._result_controller.get_current_test())

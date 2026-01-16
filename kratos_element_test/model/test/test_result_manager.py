@@ -10,13 +10,12 @@ from kratos_element_test.view.ui_constants import TRIAXIAL, DIRECT_SHEAR, CRS
 class ResultManagerTest(unittest.TestCase):
 
     @parameterized.expand([TRIAXIAL, DIRECT_SHEAR, CRS])
-    def test_results_are_empty_dictionary_initially(self, test_name):
+    def test_results_are_none_initially(self, test_name):
         current_test_getter = lambda: test_name
         result_manager = ResultManager(current_test_getter)
 
         test_results = result_manager.get_results_of_active_test_type()
-        self.assertIsInstance(test_results, Dict)
-        self.assertEqual(len(test_results), 0)
+        self.assertIsNone(test_results)
 
     def test_results_can_be_set_and_retrieved(self):
         current_test_getter = lambda: TRIAXIAL
