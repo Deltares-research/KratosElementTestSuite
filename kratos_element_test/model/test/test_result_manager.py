@@ -31,6 +31,22 @@ class ResultManagerTest(unittest.TestCase):
             result_manager.get_results_of_active_test_type(), expected_results
         )
 
+    def test_clear_results(self):
+        # Arrange
+        current_test_getter = lambda: TRIAXIAL
+        result_manager = ResultManager(current_test_getter)
+        expected_results = {
+            "values_variable_1": [1, 2, 3],
+            "values_variable_2": [4, 5, 6],
+        }
+        result_manager.set_results_of_active_test_type(expected_results)
+
+        # Act
+        result_manager.clear_results()
+
+        # Assert
+        self.assertIsNone(result_manager.get_results_of_active_test_type())
+
 
 if __name__ == "__main__":
     unittest.main()
