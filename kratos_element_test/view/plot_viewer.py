@@ -12,9 +12,9 @@ from kratos_element_test.view.ui_constants import TEST_NAME_TO_TYPE
 class PlotViewer(ttk.Frame):
     def __init__(self, result_controller, root, padding, width, height):
         super().__init__(root, padding=padding, width=width, height=height)
-        self._plotter = MatplotlibPlotter(self._axes, logger=None)
         self._result_controller = result_controller
         self._axes = []
+        self._plotter = None
         self._canvas = None
         self._grid_spec = None
         self._figure = None
@@ -26,8 +26,13 @@ class PlotViewer(ttk.Frame):
         rows = math.ceil(math.sqrt(num_plots))
         cols = math.ceil(num_plots / rows)
 
-        self._grid_spec = GridSpec(rows, cols, figure=self._figure, wspace=0.4, hspace=0.6)
-        self._axes = [self._figure.add_subplot(self._grid_spec[i]) for i in range(num_plots)]
+        self._grid_spec = GridSpec(
+            rows, cols, figure=self._figure, wspace=0.4, hspace=0.6
+        )
+        self._axes = [
+            self._figure.add_subplot(self._grid_spec[i]) for i in range(num_plots)
+        ]
+        self._plotter = MatplotlibPlotter(self._axes, logger=None)
         self._canvas = FigureCanvasTkAgg(self._figure, master=self)
         self._canvas.draw()
         toolbar = NavigationToolbar2Tk(self._canvas, self)
