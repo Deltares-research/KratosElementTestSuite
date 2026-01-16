@@ -1,4 +1,4 @@
-from typing import Callable
+from typing import Callable, Dict, List, Optional
 
 from kratos_element_test.model.models import MohrCoulombOptions
 from kratos_element_test.model.pipeline.run_simulation import RunSimulation
@@ -29,10 +29,9 @@ class MainModel:
         inputs = self.soil_test_input_manager.get_current_test_inputs()
         try:
             inputs.validate()
-        except ValueError as e:
+        except ValueError:
             self._logger("Calculation stopped due to invalid input.", "error")
-            self._logger(str(e), "error")
-            raise e
+            raise
 
         sim = RunSimulation(
             test_inputs=inputs,

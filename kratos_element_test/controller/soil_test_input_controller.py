@@ -1,4 +1,7 @@
-from kratos_element_test.model.models import TriaxialAndShearSimulationInputs
+from kratos_element_test.model.models import (
+    TriaxialAndShearSimulationInputs,
+    CRSSimulationInputs,
+)
 from kratos_element_test.model.soil_test_input_manager import SoilTestInputManager
 from kratos_element_test.view.ui_constants import (
     TRIAXIAL,
@@ -26,7 +29,9 @@ class SoilTestInputController:
     def get_crs_inputs(self):
         return self._soil_test_input_manager.input_data.get(CRS)
 
-    def get_current_test_inputs(self):
+    def get_current_test_inputs(
+        self,
+    ) -> TriaxialAndShearSimulationInputs | CRSSimulationInputs:
         return self._soil_test_input_manager.get_current_test_inputs()
 
     def add_crs_strain_increment(self) -> None:
@@ -61,7 +66,7 @@ class SoilTestInputController:
         string_vars[DURATION_LABEL].trace_add(
             "write",
             lambda _var_name, _index, _operation: self._soil_test_input_manager.update_duration(
-                new_duration=float(string_vars[DURATION_LABEL].get()),
+                new_duration_in_seconds=float(string_vars[DURATION_LABEL].get()),
                 test_type=test_type,
             ),
         )

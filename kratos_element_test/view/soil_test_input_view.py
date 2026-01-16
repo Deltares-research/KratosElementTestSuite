@@ -75,7 +75,7 @@ class SoilTestInputView(ttk.Frame):
 
         self._switch_test(TRIAXIAL)
 
-    def disable(self):
+    def disable_test_type_menu(self):
         if hasattr(self, "test_type_menu") and self.test_type_menu.winfo_exists():
             self.test_type_menu.config(state="disabled")
 
@@ -108,21 +108,21 @@ class SoilTestInputView(ttk.Frame):
                 DURATION_LABEL: inputs.duration_in_seconds,
             }
             self.triaxial_widgets, self.triaxial_string_vars = create_entries(
-                self.test_input_frame,
-                "",
-                [
+                frame=self.test_input_frame,
+                title="",
+                labels=[
                     INIT_PRESSURE_LABEL,
                     MAX_STRAIN_LABEL,
                     NUM_STEPS_LABEL,
                     DURATION_LABEL,
                 ],
-                [
+                units=[
                     FL2_UNIT_LABEL,
                     PERCENTAGE_UNIT_LABEL,
                     WITHOUT_UNIT_LABEL,
                     SECONDS_UNIT_LABEL,
                 ],
-                input_values,
+                defaults=input_values,
             )
 
             self._soil_test_input_controller.bind_test_input_fields_to_update_functions(
@@ -206,7 +206,7 @@ class SoilTestInputView(ttk.Frame):
 
             for increment in crs_input.strain_increments:
                 self._add_crs_row(
-                    duration=increment.duration_in_hours,
+                    duration_in_hours=increment.duration_in_hours,
                     strain_inc=increment.strain_increment,
                     steps=increment.steps,
                 )
@@ -230,7 +230,7 @@ class SoilTestInputView(ttk.Frame):
 
         self._soil_test_input_controller.bind_drainage_combo_box(self.test_type_menu)
 
-    def _add_crs_row(self, duration=1.0, strain_inc=0.0, steps=100):
+    def _add_crs_row(self, duration_in_hours=1.0, strain_inc=0.0, steps=100):
         row = {}
         string_vars = {}
         row_frame = ttk.Frame(self.crs_table_frame)
@@ -243,7 +243,7 @@ class SoilTestInputView(ttk.Frame):
             [DURATION_LABEL, STRAIN_INCREMENT_LABEL, STEPS_LABEL],
             [10, 10, 10],
             ["hours ,", "% ,", ""],
-            [duration, strain_inc, steps],
+            [duration_in_hours, strain_inc, steps],
         ):
             string_var = tk.StringVar()
             string_var.set(str(default))
@@ -271,7 +271,7 @@ class SoilTestInputView(ttk.Frame):
         crs_input = test_input_controller.get_crs_inputs()
 
         self._add_crs_row(
-            duration=crs_input.strain_increments[-1].duration_in_hours,
+            duration_in_hours=crs_input.strain_increments[-1].duration_in_hours,
             strain_inc=crs_input.strain_increments[-1].strain_increment,
             steps=crs_input.strain_increments[-1].steps,
         )

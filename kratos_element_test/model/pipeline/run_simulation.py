@@ -62,19 +62,16 @@ class RunSimulation:
             if type(test_inputs) is TriaxialAndShearSimulationInputs
             else None
         )
-        self.stage_durations = None
-        self.step_counts = None
-        self.strain_incs = None
 
-        if isinstance(test_inputs, CRSSimulationInputs):
-            self.stage_durations = [
-                hours_to_seconds(inc.duration_in_hours)
-                for inc in test_inputs.strain_increments
-            ]
-            self.step_counts = [inc.steps for inc in test_inputs.strain_increments]
-            self.strain_incs = [
-                inc.strain_increment for inc in test_inputs.strain_increments
-            ]
+        is_crs_test = isinstance(test_inputs, CRSSimulationInputs)
+        self.stage_durations = [
+            hours_to_seconds(inc.duration_in_hours)
+            for inc in test_inputs.strain_increments
+        ] if is_crs_test else None
+        self.step_counts = [inc.steps for inc in test_inputs.strain_increments] if is_crs_test else None
+        self.strain_incs = [
+            inc.strain_increment for inc in test_inputs.strain_increments
+        ] if is_crs_test else None
 
         self.keep_tmp = keep_tmp
 
@@ -259,7 +256,7 @@ class RunSimulation:
         else:
             time_step = (
                 (self.stage_durations[0] / self.step_counts[0])
-                if (self.step_counts and self.stage_durations)
+                if self.stage_durations
                 else (self.end_time / self.num_steps)
             )
             editor.update_property("time_step", time_step)
@@ -276,7 +273,7 @@ class RunSimulation:
         editor.update_maximum_strain(self.maximum_strain)
         editor.update_end_time(self.end_time)
 
-        if self.step_counts and self.stage_durations:
+        if self.stage_durations:
             first_timestep = self.stage_durations[0] / self.step_counts[0]
         else:
             first_timestep = self.end_time / self.num_steps
