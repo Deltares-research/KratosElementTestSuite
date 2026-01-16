@@ -32,9 +32,11 @@ class ElementTestController:
         self._main_model = MainModel(logger)
 
         self._soil_test_input_controller = SoilTestInputController(
-            self._main_model._soil_test_input_manager
+            self._main_model.get_soil_test_input_manager()
         )
-        self._result_controller = ResultController(self._main_model.get_result_manager())
+        self._result_controller = ResultController(
+            self._main_model.get_result_manager()
+        )
 
     def set_mohr_enabled(self, enabled: bool) -> None:
         self._mc_enabled = bool(enabled)

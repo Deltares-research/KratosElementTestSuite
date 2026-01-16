@@ -54,5 +54,8 @@ class MainModel:
     def get_result_manager(self) -> ResultManager:
         return self._result_manager
 
+    def get_soil_test_input_manager(self):
+        return self._soil_test_input_manager
+
     def clear_results(self) -> None:
         self._result_manager.clear_results()
