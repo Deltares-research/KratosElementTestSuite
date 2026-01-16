@@ -2,6 +2,7 @@ import unittest
 
 from parameterized import parameterized
 
+from kratos_element_test.model.models import StrainIncrement
 from kratos_element_test.model.soil_test_input_manager import SoilTestInputManager
 from kratos_element_test.view.ui_constants import TRIAXIAL, DIRECT_SHEAR
 
@@ -76,19 +77,19 @@ class SoilTestInputManagerTest(unittest.TestCase):
         self.assertEqual(1, new_count)
 
     @parameterized.expand([TRIAXIAL, DIRECT_SHEAR])
-    def test_update_duration(self,test_type):
+    def test_update_duration(self, test_type):
         self.input_manager.update_duration(2.5, test_type)
-        updated = self.input_manager.input_data[test_type].duration
+        updated = self.input_manager.input_data[test_type].duration_in_seconds
         self.assertEqual(updated, 2.5)
 
     @parameterized.expand([TRIAXIAL, DIRECT_SHEAR])
-    def test_update_num_steps(self,test_type):
+    def test_update_num_steps(self, test_type):
         self.input_manager.update_num_steps(250, test_type)
         updated = self.input_manager.input_data[test_type].number_of_steps
         self.assertEqual(updated, 250)
 
     @parameterized.expand([TRIAXIAL, DIRECT_SHEAR])
-    def test_update_max_strain(self,test_type):
+    def test_update_max_strain(self, test_type):
         self.input_manager.update_max_strain(15.0, test_type)
         updated = self.input_manager.input_data[test_type].maximum_strain
         self.assertEqual(updated, 15.0)
@@ -100,6 +101,33 @@ class SoilTestInputManagerTest(unittest.TestCase):
             test_type
         ].initial_effective_cell_pressure
         self.assertEqual(updated, 250.0)
+
+    def test_get_current_default_inputs(self):
+        self.assertEqual(self.input_manager.get_current_test_type(), TRIAXIAL)
+        inputs = self.input_manager.get_current_test_inputs()
+        self.assertIsNotNone(inputs)
+        self.assertEqual(inputs.maximum_strain, 20.0)
+        self.assertEqual(inputs.duration_in_seconds, 1.0)
+        self.assertEqual(inputs.number_of_steps, 100)
+        self.assertEqual(inputs.initial_effective_cell_pressure, 100.0)
+        self.assertEqual(inputs.drainage, "drained")
+
+    def test_get_current_default_inputs_for_crs(self):
+        self.input_manager.set_current_test_type("CRS")
+        inputs = self.input_manager.get_current_test_inputs()
+        self.assertIsNotNone(inputs)
+        self.assertEqual(inputs.maximum_strain, 0.0)
+        self.assertEqual(inputs.duration_in_seconds, 18000.0)
+        self.assertEqual(inputs.number_of_steps, 500)
+        self.assertEqual(inputs.initial_effective_cell_pressure, 0.0)
+        self.assertEqual(len(inputs.strain_increments), 5)
+        for increment in inputs.strain_increments:
+            self.assertEqual(increment, StrainIncrement())
+
+    def test_setting_non_existent_test_type_throws(self):
+        self.assertRaises(
+            ValueError, lambda: self.input_manager.set_current_test_type("Non-existent")
+        )
 
 
 if __name__ == "__main__":

@@ -7,10 +7,14 @@ import shutil
 import tempfile
 from pathlib import Path
 from typing import Callable, Dict, List, Optional, Tuple
-from kratos_element_test.model.core_utils import _fallback_log
+from kratos_element_test.model.core_utils import _fallback_log, hours_to_seconds
 from kratos_element_test.model.io.material_editor import MaterialEditor
 from kratos_element_test.model.io.project_parameter_editor import ProjectParameterEditor
 from kratos_element_test.model.io.mdpa_editor import MdpaEditor
+from kratos_element_test.model.models import (
+    TriaxialAndShearSimulationInputs,
+    CRSSimulationInputs,
+)
 from kratos_element_test.model.pipeline.generic_test_runner import GenericTestRunner
 from kratos_element_test.model.pipeline.result_collector import ResultCollector
 
@@ -31,38 +35,44 @@ class RunSimulation:
     def __init__(
         self,
         *,
-        test_type: str,
+        test_inputs: TriaxialAndShearSimulationInputs | CRSSimulationInputs,
         model_name: Optional[str],
         dll_path: Optional[str],
         udsm_number: Optional[int],
         material_parameters: List[float],
-        num_steps: int | List[int],
-        end_time: float,
-        maximum_strain: float,
-        initial_effective_cell_pressure: float,
         cohesion_phi_indices: Optional[Tuple[int, int]] = None,
         logger: Optional[Callable[[str, str], None]] = None,
-        drainage: Optional[str] = None,
-        stage_durations: Optional[List[float]] = None,
-        step_counts: Optional[List[int]] = None,
-        strain_incs: Optional[List[float]] = None,
         keep_tmp: bool = False,
     ):
-        self.test_type = test_type.lower()
+        self.test_type = test_inputs.test_type.lower()
         self.model_name = model_name
         self.dll_path = dll_path
         self.udsm_number = udsm_number
         self.material_parameters = material_parameters
-        self.num_steps = num_steps
-        self.end_time = end_time
-        self.maximum_strain = maximum_strain
-        self.initial_effective_cell_pressure = initial_effective_cell_pressure
+        self.num_steps = test_inputs.number_of_steps
+        self.end_time = test_inputs.duration_in_seconds
+        self.maximum_strain = test_inputs.maximum_strain
+        self.initial_effective_cell_pressure = (
+            test_inputs.initial_effective_cell_pressure
+        )
         self.cohesion_phi_indices = cohesion_phi_indices
         self.log = logger or _fallback_log
-        self.drainage = drainage
-        self.stage_durations = stage_durations
-        self.step_counts = step_counts
-        self.strain_incs = strain_incs
+        self.drainage = (
+            test_inputs.drainage
+            if type(test_inputs) is TriaxialAndShearSimulationInputs
+            else None
+        )
+
+        is_crs_test = isinstance(test_inputs, CRSSimulationInputs)
+        self.stage_durations = [
+            hours_to_seconds(inc.duration_in_hours)
+            for inc in test_inputs.strain_increments
+        ] if is_crs_test else None
+        self.step_counts = [inc.steps for inc in test_inputs.strain_increments] if is_crs_test else None
+        self.strain_incs = [
+            inc.strain_increment for inc in test_inputs.strain_increments
+        ] if is_crs_test else None
+
         self.keep_tmp = keep_tmp
 
         self.tmp_dir = Path(tempfile.mkdtemp(prefix=f"{self.test_type}_"))
@@ -206,14 +216,16 @@ class RunSimulation:
                 editor.set_constitutive_law("GeoLinearElasticPlaneStrain2DLaw")
 
             if self.model_name.strip().lower() == "mohr-coulomb model":
-                editor.update_material_properties({
-                    "YOUNG_MODULUS": self.material_parameters[0],
-                    "POISSON_RATIO": self.material_parameters[1],
-                    "GEO_COHESION": self.material_parameters[2],
-                    "GEO_FRICTION_ANGLE": self.material_parameters[3],
-                    "GEO_TENSILE_STRENGTH": self.material_parameters[4],
-                    "GEO_DILATANCY_ANGLE": self.material_parameters[5],
-                })
+                editor.update_material_properties(
+                    {
+                        "YOUNG_MODULUS": self.material_parameters[0],
+                        "POISSON_RATIO": self.material_parameters[1],
+                        "GEO_COHESION": self.material_parameters[2],
+                        "GEO_FRICTION_ANGLE": self.material_parameters[3],
+                        "GEO_TENSILE_STRENGTH": self.material_parameters[4],
+                        "GEO_DILATANCY_ANGLE": self.material_parameters[5],
+                    }
+                )
                 editor.set_constitutive_law("GeoMohrCoulombWithTensionCutOff2D")
 
     def _set_project_parameters(self) -> None:
@@ -223,10 +235,10 @@ class RunSimulation:
         editor = ProjectParameterEditor(str(self.project_json_path))
 
         if "stages" in data:
-            if self.stage_durations and isinstance(self.num_steps, list):
-                if len(self.stage_durations) != len(self.num_steps):
+            if self.stage_durations and self.step_counts:
+                if len(self.stage_durations) != len(self.step_counts):
                     raise ValueError(
-                        f"Mismatch: {len(self.stage_durations)} stage durations but {len(self.num_steps)} step counts provided."
+                        f"Mismatch: {len(self.stage_durations)} stage durations but {len(self.step_counts)} step counts provided."
                     )
 
                 cumulative_end_times = []
@@ -236,15 +248,15 @@ class RunSimulation:
                     cumulative_end_times.append(total)
 
                 editor.update_stage_timings(
-                    cumulative_end_times, self.num_steps, start_time=0.0
+                    cumulative_end_times, self.step_counts, start_time=0.0
                 )
 
                 if len(cumulative_end_times) > 1:
                     editor.update_top_displacement_table_numbers()
         else:
             time_step = (
-                (self.stage_durations[0] / self.num_steps[0])
-                if (isinstance(self.num_steps, list) and self.stage_durations)
+                (self.stage_durations[0] / self.step_counts[0])
+                if self.stage_durations
                 else (self.end_time / self.num_steps)
             )
             editor.update_property("time_step", time_step)
@@ -261,8 +273,8 @@ class RunSimulation:
         editor.update_maximum_strain(self.maximum_strain)
         editor.update_end_time(self.end_time)
 
-        if isinstance(self.num_steps, list) and self.stage_durations:
-            first_timestep = self.stage_durations[0] / self.num_steps[0]
+        if self.stage_durations:
+            first_timestep = self.stage_durations[0] / self.step_counts[0]
         else:
             first_timestep = self.end_time / self.num_steps
         editor.update_first_timestep(first_timestep)
