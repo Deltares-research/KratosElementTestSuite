@@ -20,7 +20,7 @@ class MainModelTest(unittest.TestCase):
 
         results = model.get_latest_results()
         self.assertIsNotNone(results)
-        self.assertTrue(len(results)>0)
+        self.assertTrue(len(results) > 0)
 
 
 if __name__ == "__main__":

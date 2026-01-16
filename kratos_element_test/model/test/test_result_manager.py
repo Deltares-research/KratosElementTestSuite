@@ -28,7 +28,9 @@ class ResultManagerTest(unittest.TestCase):
 
         result_manager.set_results_of_active_test_type(expected_results)
 
-        self.assertDictEqual(result_manager.get_results_of_active_test_type(), expected_results)
+        self.assertDictEqual(
+            result_manager.get_results_of_active_test_type(), expected_results
+        )
 
 
 if __name__ == "__main__":

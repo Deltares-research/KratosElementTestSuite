@@ -5,6 +5,7 @@ class ResultManager:
     """
     This class manages all results that can be displayed or exported in the GUI.
     """
+
     def __init__(self, active_test_getter: Callable[[], str]):
         """
         :param active_test_getter: callable which returns the currently active test
