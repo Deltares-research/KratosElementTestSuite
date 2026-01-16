@@ -24,10 +24,8 @@ class ElementTestController:
     def __init__(
         self,
         logger: Callable[[str, str], None],
-        plotter_factory: Callable[[object], object],
     ):
         self._logger = logger
-        self._plotter_factory = plotter_factory
 
         self._mc_enabled: bool = False
         self._mc_indices: Tuple[Optional[int], Optional[int]] = (None, None)
@@ -37,7 +35,7 @@ class ElementTestController:
         self._soil_test_input_controller = SoilTestInputController(
             self._main_model.soil_test_input_manager
         )
-        self._result_controller = ResultController(self._main_model._result_manager)
+        self._result_controller = ResultController(self._main_model.get_result_manager())
 
     def set_mohr_enabled(self, enabled: bool) -> None:
         self._mc_enabled = bool(enabled)
@@ -114,4 +112,4 @@ class ElementTestController:
             messagebox.showerror("Export Error", f"Failed to export Excel file.\n\n{e}")
 
     def clear_results(self) -> None:
-        self._main_model._result_manager.clear_results()
+        self._main_model.clear_results()

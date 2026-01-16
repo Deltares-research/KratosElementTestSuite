@@ -48,5 +48,11 @@ class MainModel:
             sim.post_process_results(),
         )
 
-    def get_latest_results(self):
+    def get_latest_results(self) -> Dict[str, List[float]]:
         return self._result_manager.get_results_of_active_test_type()
+
+    def get_result_manager(self) -> ResultManager:
+        return self._result_manager
+
+    def clear_results(self) -> None:
+        self._result_manager.clear_results()

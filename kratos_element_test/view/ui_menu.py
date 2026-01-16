@@ -162,7 +162,6 @@ class MainUI:
     def create_menu(self):
         controller = ElementTestController(
             logger=log_message,
-            plotter_factory=lambda axes: MatplotlibPlotter(axes, logger=log_message),
         )
 
         last_model_source = LINEAR_ELASTIC
