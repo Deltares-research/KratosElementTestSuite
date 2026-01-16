@@ -2,17 +2,17 @@
 # This is a prototype version
 # Contact kratos@deltares.nl
 
+import ctypes
 import os
 import tkinter as tk
-from tkinter import filedialog, messagebox, ttk, scrolledtext, Menu
-from platformdirs import user_data_dir
 from pathlib import Path
+from tkinter import filedialog, messagebox, ttk, scrolledtext, Menu
+
+from platformdirs import user_data_dir
 
 from kratos_element_test.controller.element_test_controller import ElementTestController
-from kratos_element_test.plotters.matplotlib_plotter import MatplotlibPlotter
-from kratos_element_test.view.ui_builder import GeotechTestUI
 from kratos_element_test.model.io.udsm_parser import udsm_parser
-from kratos_element_test.view.ui_utils import _asset_path
+from kratos_element_test.view.ui_builder import GeotechTestUI
 from kratos_element_test.view.ui_constants import (
     APP_TITLE,
     APP_VERSION,
@@ -25,8 +25,7 @@ from kratos_element_test.view.ui_constants import (
     DEFAULT_TKINTER_DPI,
 )
 from kratos_element_test.view.ui_logger import log_message
-
-import ctypes
+from kratos_element_test.view.ui_utils import _asset_path
 
 ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(
     "deltares.ElementTestSuite.ui"
