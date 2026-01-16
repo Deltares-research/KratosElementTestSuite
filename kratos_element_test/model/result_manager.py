@@ -14,7 +14,7 @@ class ResultManager:
         self._active_test_getter = active_test_getter
 
     def get_results_of_active_test_type(self) -> Optional[Dict[str, List[float]]]:
-        return self._simulation_results.get(self._active_test_getter())
+        return self._simulation_results.get(self.get_current_test())
 
     def set_results_of_active_test_type(self, results: Dict[str, List[float]]):
         self._simulation_results[self._active_test_getter()] = results
