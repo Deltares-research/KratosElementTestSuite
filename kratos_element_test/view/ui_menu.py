@@ -40,6 +40,9 @@ LICENSE_FLAG_PATH = data_dir / "license_accepted.flag"
 
 class MainUI:
     def __init__(self):
+        self.controller = ElementTestController(
+            logger=log_message,
+        )
         self.main_frame = None
 
     def show_license_agreement(self, readonly=False):
@@ -160,9 +163,6 @@ class MainUI:
         tk.Button(about_win, text="Close", command=about_win.destroy).pack(pady=10)
 
     def create_menu(self):
-        controller = ElementTestController(
-            logger=log_message,
-        )
 
         last_model_source = LINEAR_ELASTIC
         root = tk.Tk()
@@ -185,7 +185,7 @@ class MainUI:
 
         export_menu = Menu(menubar, tearoff=0)
         export_menu.add_command(
-            label="Export Results (Excel)", command=controller.export_latest_results
+            label="Export Results (Excel)", command=self._export_latest_results
         )
         menubar.add_cascade(label="Export", menu=export_menu)
 
@@ -234,13 +234,13 @@ class MainUI:
                 for widget in self.main_frame.winfo_children():
                     widget.destroy()
                 self.main_frame.destroy()
-            controller.clear_results()
+            self.controller.clear_results()
             self.main_frame = GeotechTestUI(
                 root,
                 test_name="Triaxial",
                 dll_path=dll_path,
                 model_dict=model_dict,
-                controller=controller,
+                controller=self.controller,
                 external_widgets=[model_source_menu],
             )
 
@@ -259,13 +259,13 @@ class MainUI:
                     widget.destroy()
                 self.main_frame.destroy()
 
-            controller.clear_results()
+            self.controller.clear_results()
             self.main_frame = GeotechTestUI(
                 root,
                 test_name="Triaxial",
                 dll_path=None,
                 model_dict=model_dict,
-                controller=controller,
+                controller=self.controller,
                 external_widgets=[model_source_menu],
             )
 
@@ -293,13 +293,13 @@ class MainUI:
                     widget.destroy()
                 self.main_frame.destroy()
 
-            controller.clear_results()
+            self.controller.clear_results()
             self.main_frame = GeotechTestUI(
                 root,
                 test_name="Triaxial",
                 dll_path=None,
                 model_dict=model_dict,
-                controller=controller,
+                controller=self.controller,
                 external_widgets=[model_source_menu],
             )
 
@@ -327,12 +327,14 @@ class MainUI:
             root.destroy()
             os._exit(0)
 
-        def refresh_plot_frame():
-            root.update_idletasks()
-            root.event_generate("<Configure>")
-
         root.protocol("WM_DELETE_WINDOW", on_close)
         root.mainloop()
+
+    def _export_latest_results(self):
+        try:
+            self.controller.export_latest_results()
+        except Exception as e:
+            messagebox.showerror("Export Error", f"Failed to export Excel file.\n\n{e}")
 
 
 if __name__ == "__main__":

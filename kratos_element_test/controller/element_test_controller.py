@@ -1,7 +1,6 @@
 # ©Deltares 2025
 # This is a prototype version
 # Contact kratos@deltares.nl
-from tkinter import messagebox
 from typing import Optional, Callable, List, Tuple
 
 from kratos_element_test.controller.result_controller import ResultController
@@ -106,10 +105,7 @@ class ElementTestController:
         test_type = TEST_NAME_TO_TYPE.get(self._result_controller.get_current_test())
         if not results or not test_type:
             return
-        try:
-            export_excel_by_test_type(results, test_type)
-        except Exception as e:
-            messagebox.showerror("Export Error", f"Failed to export Excel file.\n\n{e}")
+        export_excel_by_test_type(results, test_type)
 
     def clear_results(self) -> None:
         self._main_model.clear_results()
