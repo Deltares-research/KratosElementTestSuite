@@ -92,5 +92,7 @@ class SoilTestInputManager:
             raise ValueError(f"Trying to set a non-existent test type {test_type}")
         self._current_test_type = test_type
 
-    def get_current_test_inputs(self):
+    def get_current_test_inputs(
+        self,
+    ) -> TriaxialAndShearSimulationInputs | CRSSimulationInputs:
         return self.input_data[self._current_test_type]
