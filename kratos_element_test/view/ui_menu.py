@@ -11,8 +11,9 @@ from kratos_element_test.view.ui_builder import GeotechTestUI
 from kratos_element_test.model.io.udsm_parser import udsm_parser
 from kratos_element_test.view.ui_utils import asset_path, soil_models_dir
 from kratos_element_test.view.result_exporter import export_latest_results
-from kratos_element_test.view.ui_constants import (APP_TITLE, APP_VERSION, APP_NAME, APP_AUTHOR, SELECT_UDSM,
-                                                 LINEAR_ELASTIC, MOHR_COULOMB, HELP_MENU_FONT, DEFAULT_TKINTER_DPI)
+from kratos_element_test.view.ui_constants import (APP_TITLE, APP_VERSION, APP_NAME, APP_AUTHOR,
+                                                   SELECT_UDSM, SELECT_UMAT, LINEAR_ELASTIC, MOHR_COULOMB,
+                                                   HELP_MENU_FONT, DEFAULT_TKINTER_DPI)
 
 import ctypes
 ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID("deltares.ElementTestSuite.ui")
@@ -175,7 +176,7 @@ class MainUI:
                 filetypes=[("DLL files", "*.dll")],
             )
             if not dll_path:
-                messagebox.showerror("Error", "No DLL file selected.")
+                messagebox.showerror("Error", "No UDSM DLL file selected.")
                 model_source_var.set(last_model_source)
                 return
 
@@ -186,6 +187,35 @@ class MainUI:
                 model_source_var.set(last_model_source)
                 return
             last_model_source = SELECT_UDSM
+
+            if self.main_frame:
+                for widget in self.main_frame.winfo_children():
+                    widget.destroy()
+                self.main_frame.destroy()
+
+            self.main_frame = GeotechTestUI(root, test_name="Triaxial", dll_path=dll_path, model_dict=model_dict,
+                          external_widgets=[model_source_menu])
+
+        def load_umat():
+            nonlocal last_model_source
+            model_dict = {
+                "model_name": ["UMAT"],
+                "backend": "umat",
+                "param_mode": "manual",
+                "default_param_rows": 3,
+                "manual_unit": "–",
+            }
+            dll_path = filedialog.askopenfilename(
+                title=SELECT_UMAT,
+                initialdir=_safe_udsm_initialdir(),
+                filetypes=[("DLL files", "*.dll")],
+            )
+            if not dll_path:
+                messagebox.showerror("Error", "No UMAT DLL file selected.")
+                model_source_var.set(last_model_source)
+                return
+
+            last_model_source = SELECT_UMAT
 
             if self.main_frame:
                 for widget in self.main_frame.winfo_children():
@@ -243,6 +273,8 @@ class MainUI:
             choice = model_source_var.get()
             if choice == SELECT_UDSM:
                 load_dll()
+            elif choice == SELECT_UMAT:
+                load_umat()
             elif choice == LINEAR_ELASTIC:
                 load_linear_elastic()
             elif choice == MOHR_COULOMB:
@@ -252,7 +284,7 @@ class MainUI:
         model_source_menu = ttk.Combobox(
             top_frame,
             textvariable=model_source_var,
-            values=[SELECT_UDSM, LINEAR_ELASTIC, MOHR_COULOMB],
+            values=[SELECT_UDSM, SELECT_UMAT, LINEAR_ELASTIC, MOHR_COULOMB],
             state="readonly"
         )
         model_source_menu.bind("<<ComboboxSelected>>", handle_model_source_selection)

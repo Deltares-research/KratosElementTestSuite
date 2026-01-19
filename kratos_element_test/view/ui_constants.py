@@ -52,6 +52,7 @@ WITHOUT_UNIT_LABEL = ""
 
 # Menu labels
 SELECT_UDSM = "Select UDSM File"
+SELECT_UMAT = "Select UMAT File"
 LINEAR_ELASTIC = "Linear Elastic Model"
 MOHR_COULOMB = "Mohr-Coulomb Model"
 
