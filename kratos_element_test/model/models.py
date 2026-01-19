@@ -45,7 +45,7 @@ class TriaxialAndShearSimulationInputs:
     maximum_strain: float = 20.0
     initial_effective_cell_pressure: float = 100.0
     number_of_steps: int = 100
-    duration: float = 1.0
+    duration_in_seconds: float = 1.0
     drainage: str = "drained"
 
     def validate(self) -> None:
@@ -55,8 +55,10 @@ class TriaxialAndShearSimulationInputs:
             raise ValueError(
                 f"Number of steps must be > 0, but got {self.number_of_steps}."
             )
-        if self.duration <= 0:
-            raise ValueError(f"Duration must be > 0, but got {self.duration}.")
+        if self.duration_in_seconds <= 0:
+            raise ValueError(
+                f"Duration must be > 0, but got {self.duration_in_seconds}."
+            )
         if self.drainage not in ("drained", "undrained"):
             raise ValueError(f"Unsupported drainage type: {self.drainage}.")
 

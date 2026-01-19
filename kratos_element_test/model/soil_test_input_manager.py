@@ -24,6 +24,7 @@ class SoilTestInputManager:
             CRS: CRSSimulationInputs(test_type=TEST_NAME_TO_TYPE.get(CRS)),
         }
         self.update_crs_totals()
+        self._current_test_type = TRIAXIAL
 
     def update_crs_totals(self):
         crs_inputs = self.input_data.get(CRS)
@@ -67,11 +68,11 @@ class SoilTestInputManager:
     def update_num_steps(self, new_steps: int, test_type: str) -> None:
         self.input_data[test_type].number_of_steps = new_steps
 
-    def update_duration(self, new_duration: float, test_type: str) -> None:
-        self.input_data[test_type].duration = new_duration
+    def update_duration(self, new_duration_in_seconds: float, test_type: str) -> None:
+        self.input_data[test_type].duration_in_seconds = new_duration_in_seconds
 
-    def update_drainage(self, new_drainage: str, test_type: str) -> None:
-        self.input_data[test_type].drainage = new_drainage
+    def update_drainage(self, new_drainage: str) -> None:
+        self.get_current_test_inputs().drainage = new_drainage
 
     def add_strain_increment(self):
         crs_inputs = self.input_data.get(CRS)
@@ -82,3 +83,16 @@ class SoilTestInputManager:
     def remove_last_crs_strain_increment(self):
         if len(self.input_data[CRS].strain_increments) > 1:
             self.input_data[CRS].strain_increments.pop()
+
+    def get_current_test_type(self) -> str:
+        return self._current_test_type
+
+    def set_current_test_type(self, test_type: str) -> None:
+        if test_type not in [TRIAXIAL, DIRECT_SHEAR, CRS]:
+            raise ValueError(f"Trying to set a non-existent test type {test_type}")
+        self._current_test_type = test_type
+
+    def get_current_test_inputs(
+        self,
+    ) -> TriaxialAndShearSimulationInputs | CRSSimulationInputs:
+        return self.input_data[self._current_test_type]
