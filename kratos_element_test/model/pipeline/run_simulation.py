@@ -178,16 +178,32 @@ class RunSimulation:
 
     def _set_material_constitutive_law(self) -> None:
         editor = MaterialEditor(str(self.material_json_path))
+
         if self.dll_path:
-            editor.update_material_properties(
-                {
-                    "IS_FORTRAN_UDSM": True,
-                    "UMAT_PARAMETERS": self.material_parameters,
-                    "UDSM_NAME": self.dll_path,
-                    "UDSM_NUMBER": self.udsm_number,
-                }
-            )
-            editor.set_constitutive_law("SmallStrainUDSM2DPlaneStrainLaw")
+            is_umat = self.udsm_number is None
+
+            if is_umat:
+                editor.update_material_properties(
+                    {
+                        "IS_FORTRAN_UDSM": True,
+                        "UMAT_PARAMETERS": self.material_parameters,
+                        "UDSM_NAME": self.dll_path,
+                        "STATE_VARIABLES": [0.0]
+                    }
+                )
+                editor.set_constitutive_law("SmallStrainUMAT2DPlaneStrainLaw")
+            else:
+                editor.update_material_properties(
+                    {
+                        "IS_FORTRAN_UDSM": True,
+                        "UMAT_PARAMETERS": self.material_parameters,
+                        "UDSM_NAME": self.dll_path,
+                        "UDSM_NUMBER": self.udsm_number
+                    }
+                )
+                editor.set_constitutive_law("SmallStrainUDSM2DPlaneStrainLaw")
+            return
+
         if self.model_name:
             if self.model_name.strip().lower() == "linear elastic model":
                 editor.update_material_properties(
