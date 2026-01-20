@@ -200,9 +200,8 @@ class MainUI:
             nonlocal last_model_source
             model_dict = {
                 "model_name": ["UMAT"],
-                "backend": "umat",
                 "param_mode": "manual",
-                "default_param_rows": 3,
+                "default_param_rows": 5,
                 "manual_unit": "–",
             }
             dll_path = filedialog.askopenfilename(
