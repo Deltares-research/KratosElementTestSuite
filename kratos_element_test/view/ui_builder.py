@@ -32,6 +32,7 @@ class GeotechTestUI(ttk.Frame):
         self.model_dict = model_dict
         self.is_linear_elastic = model_dict["model_name"][0].lower() == "linear elastic model"
         self.is_mohr_coulomb = model_dict["model_name"][0].lower() == "mohr-coulomb model"
+        self.is_manual_material_params = model_dict.get("param_mode") == "manual"
 
         self.model_var = tk.StringVar(root)
         self.model_var.set(model_dict["model_name"][0])
@@ -119,15 +120,24 @@ class GeotechTestUI(ttk.Frame):
         for w in self.param_frame.winfo_children() + self.button_frame.winfo_children():
             w.destroy()
 
-        index = self.model_dict["model_name"].index(self.model_var.get())
-        params = self.model_dict["param_names"][index]
-        units = self.model_dict.get("param_units", [[]])[index]
+        clear_log()
 
-        default_values = {}
-        # For now the string_vars are not used yet, but they'll be useful for adding a trace
-        # later (similar to the test input fields)
-        self.entry_widgets, string_vars = create_entries(self.param_frame, "Soil Input Parameters",
-                                                  params, units, default_values)
+        if self.is_manual_material_params:
+            default_rows = int(self.model_dict.get("default_param_rows", 5))
+            unit_label = self.model_dict.get("manual_unit", "–")
+            self._init_manual_material_params(default_rows=default_rows, unit_label=unit_label)
+
+            params = self._manual_param_labels()
+        else:
+            index = self.model_dict["model_name"].index(self.model_var.get())
+            params = self.model_dict["param_names"][index]
+            units = self.model_dict.get("param_units", [[]])[index]
+
+            default_values = {}
+            # For now the string_vars are not used yet, but they'll be useful for adding a trace
+            # later (similar to the test input fields)
+            self.entry_widgets, string_vars = create_entries(self.param_frame, "Soil Input Parameters",
+                                                       params, units, default_values)
 
         self.setup_mohr_coulomb_controls(params)
 
@@ -137,6 +147,113 @@ class GeotechTestUI(ttk.Frame):
 
         self.run_button = ttk.Button(self.button_frame, text="Run Calculation", command=self._start_simulation_thread)
         self.run_button.pack(pady=5)
+
+    def _init_manual_material_params(self, *, default_rows: int, unit_label: str) -> None:
+        ttk.Label(
+            self.param_frame,
+            text="Soil Input Parameters",
+            font=(INPUT_SECTION_FONT, 12, "bold"),
+        ).pack(anchor="w", padx=5, pady=5)
+
+        btn_frame = ttk.Frame(self.param_frame)
+        btn_frame.pack(fill="x", padx=10, pady=(5, 5))
+
+        self._manual_add_btn = ttk.Button(btn_frame, text="Add Row", command=self._add_manual_param_row)
+        self._manual_add_btn.pack(side="left", padx=(0, 5))
+
+        self._manual_remove_btn = ttk.Button(btn_frame, text="Remove Row", command=self._remove_manual_param_row)
+        self._manual_remove_btn.pack(side="left")
+
+        self._manual_param_table = ttk.Frame(self.param_frame)
+        self._manual_param_table.pack(fill="x", padx=10, pady=5)
+
+        self._manual_param_rows = []
+        self._manual_unit_label = unit_label
+
+        for _ in range(max(1, default_rows)):
+            self._add_manual_param_row()
+
+        self._sync_manual_remove_button_state()
+
+    def _manual_param_labels(self):
+        n = len(getattr(self, "_manual_param_rows", []))
+        return [f"Prop {i + 1}" for i in range(n)]
+
+    def _add_manual_param_row(self) -> None:
+        if self._manual_param_table is None:
+            return
+
+        row_frame = ttk.Frame(self._manual_param_table)
+        row_frame.pack(fill="x", pady=2)
+
+        idx = len(self._manual_param_rows) + 1
+
+        name_lbl = ttk.Label(row_frame, text=f"Prop {idx}")
+        name_lbl.pack(side="left", padx=(0, 8))
+
+        sv = tk.StringVar(value="")
+        entry = ttk.Entry(row_frame, width=20, textvariable=sv)
+        entry.pack(side="left", fill="x", expand=True, padx=(0, 8))
+
+        ttk.Label(row_frame, text=self._manual_unit_label).pack(side="left")
+
+        self._manual_param_rows.append((row_frame, entry, sv))
+
+        self._refresh_mc_dropdown_values()
+        self._sync_manual_remove_button_state()
+
+    def _remove_manual_param_row(self) -> None:
+        min_rows = 1
+        if len(self._manual_param_rows) <= min_rows:
+            self._sync_manual_remove_button_state()
+            return
+
+        row_frame, _, _ = self._manual_param_rows.pop()
+        row_frame.destroy()
+
+        for i, (rf, _, _) in enumerate(self._manual_param_rows, start=1):
+            children = rf.winfo_children()
+            if children:
+                if isinstance(children[0], ttk.Label):
+                    children[0].configure(text=f"Prop {i}")
+
+        self._refresh_mc_dropdown_values()
+        self._sync_manual_remove_button_state()
+
+    def _sync_manual_remove_button_state(self) -> None:
+        if self._manual_remove_btn is None:
+            return
+        min_rows = 1
+        self._manual_remove_btn.config(
+            state=("disabled" if len(self._manual_param_rows) <= min_rows else "normal")
+        )
+
+    def _refresh_mc_dropdown_values(self) -> None:
+        if not hasattr(self, "c_dropdown") or not hasattr(self, "phi_dropdown"):
+            return
+        n = len(getattr(self, "_manual_param_rows", []))
+        if n <= 0:
+            return
+        values = [str(i + 1) for i in range(n)]
+        self.c_dropdown.configure(values=values)
+        self.phi_dropdown.configure(values=values)
+
+        try:
+            c_val = int(self.cohesion_var.get()) if self.cohesion_var.get() else 1
+        except ValueError:
+            c_val = 1
+        try:
+            p_val = int(self.phi_var.get()) if self.phi_var.get() else 1
+        except ValueError:
+            p_val = 1
+
+        if c_val > n:
+            self.cohesion_var.set(str(n))
+        if p_val > n:
+            self.phi_var.set(str(n))
+
+        c_idx, phi_idx = self._parse_mc_indices()
+        self.controller.set_mohr_mapping(c_idx, phi_idx)
 
     def _create_mohr_options(self, params):
         self.mohr_frame = ttk.Frame(self.param_frame)
@@ -222,8 +339,16 @@ class GeotechTestUI(ttk.Frame):
             self.root.update_idletasks()
 
             self.soil_test_input_view.validate(self.controller.get_current_test_type())
-            material_params = [e.get() for e in self.entry_widgets.values()]
-            udsm_number = self.model_dict["model_name"].index(self.model_var.get()) + 1 if self.dll_path else None
+
+            if self.is_manual_material_params:
+                material_params = [sv.get() for (_, _, sv) in self._manual_param_rows]
+            else:
+                material_params = [e.get() for e in self.entry_widgets.values()]
+
+            if self.dll_path and not self.is_manual_material_params:
+                udsm_number = self.model_dict["model_name"].index(self.model_var.get()) + 1
+            else:
+                udsm_number = None
 
             success = self.controller.run(
                 axes=self.plot_frame.axes,
@@ -294,6 +419,9 @@ class GeotechTestUI(ttk.Frame):
             self.model_menu.configure(state="disabled")
         else:
             self.model_menu.configure(state="readonly")
+
+        if self.is_manual_material_params:
+            self._sync_manual_remove_button_state()
 
     def _on_mousewheel(self, event):
         if event.delta > 0:
