@@ -168,7 +168,7 @@ class MainUI:
             root = Path.cwd().anchor
             return root if root else os.path.abspath(os.sep)
 
-        def load_dll():
+        def load_udsm():
             nonlocal last_model_source
             dll_path = filedialog.askopenfilename(
                 title=SELECT_UDSM,
@@ -271,7 +271,7 @@ class MainUI:
         def handle_model_source_selection(event):
             choice = model_source_var.get()
             if choice == SELECT_UDSM:
-                load_dll()
+                load_udsm()
             elif choice == SELECT_UMAT:
                 load_umat()
             elif choice == LINEAR_ELASTIC:
