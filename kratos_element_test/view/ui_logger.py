@@ -4,9 +4,11 @@
 
 _log_widget = None
 
+
 def init_log_widget(widget):
     global _log_widget
     _log_widget = widget
+
 
 def log_message(msg, level="info"):
     if _log_widget is None:
@@ -18,6 +20,7 @@ def log_message(msg, level="info"):
     _log_widget.insert("end", f"{prefix.get(level, '[INFO]')} {msg}\n")
     _log_widget.see("end")
     _log_widget.config(state="normal")
+
 
 def clear_log():
     if _log_widget is not None:
