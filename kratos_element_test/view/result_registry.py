@@ -26,7 +26,7 @@ PLOT_MAPPING = {
         ("von_mises", "mean_stress", "q (kPa)", "p′ (kPa)"),
         ("mohr_circle", None, "τ (kPa)", "σ′ (kPa)"),
         ("yy_strain", "time_steps", "Vertical Strain εyy", "Time (h)"),
-    ]
+    ],
 }
 
 
