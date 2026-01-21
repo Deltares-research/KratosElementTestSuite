@@ -292,6 +292,10 @@ class SoilTestInputView(ttk.Frame):
 
         self._prevent_removal_last_crs_row()
 
+    def sync_row_buttons_state(self):
+        if hasattr(self, "remove_row_button") and self.remove_row_button.winfo_exists():
+            self.remove_row_button.config(state="normal" if len(getattr(self, "crs_rows", [])) > 1 else "disabled")
+
     def validate(self, current_test_type):
         widget_dicts = []
         if current_test_type == TRIAXIAL:
