@@ -168,6 +168,9 @@ class MainUI:
             root = Path.cwd().anchor
             return root if root else os.path.abspath(os.sep)
 
+        def _dll_display(prefix: str, dll_path: str) -> str:
+            return f"{prefix}: {Path(dll_path).name}"
+
         def load_udsm():
             nonlocal last_model_source
             dll_path = filedialog.askopenfilename(
@@ -186,7 +189,10 @@ class MainUI:
                 messagebox.showerror("DLL Error", f"Failed to parse DLL: {e}")
                 model_source_var.set(last_model_source)
                 return
-            last_model_source = SELECT_UDSM
+
+            display = _dll_display("UDSM", dll_path)
+            last_model_source = display
+            model_source_var.set(display)
 
             if self.main_frame:
                 for widget in self.main_frame.winfo_children():
@@ -214,7 +220,9 @@ class MainUI:
                 model_source_var.set(last_model_source)
                 return
 
-            last_model_source = SELECT_UMAT
+            display = _dll_display("UMAT", dll_path)
+            last_model_source = display
+            model_source_var.set(display)
 
             if self.main_frame:
                 for widget in self.main_frame.winfo_children():
