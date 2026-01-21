@@ -111,7 +111,7 @@ class GeotechTestUI(ttk.Frame):
         self.model_menu.pack(side="top", fill="x", expand=True, padx=5)
         self.model_var.trace("w", lambda *args: self._create_input_fields())
 
-        if self.is_linear_elastic or self.is_mohr_coulomb:
+        if self.is_linear_elastic or self.is_mohr_coulomb or self.is_manual_material_params:
             self.model_menu.configure(state="disabled")
         else:
             self.model_menu.configure(state="readonly")
@@ -414,7 +414,7 @@ class GeotechTestUI(ttk.Frame):
             self.scrollbar.config(command=self._original_scroll_cmd)
         self.scroll_canvas.bind_all("<MouseWheel>", self._on_mousewheel)
 
-        if self.is_linear_elastic or self.is_mohr_coulomb:
+        if self.is_linear_elastic or self.is_mohr_coulomb or self.is_manual_material_params:
             self.mohr_frame.pack_forget()
             self.model_menu.configure(state="disabled")
         else:
