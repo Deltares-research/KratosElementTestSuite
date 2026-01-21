@@ -157,7 +157,7 @@ class MainUI:
         top_frame = ttk.Frame(root, padding="10")
         top_frame.pack(side="top", fill="x")
 
-        def _safe_udsm_initialdir() -> str:
+        def _safe_soil_model_initial_dir() -> str:
             try:
                 p = Path(soil_models_dir())
                 if p.is_dir():
@@ -175,7 +175,7 @@ class MainUI:
             nonlocal last_model_source
             dll_path = filedialog.askopenfilename(
                 title=SELECT_UDSM,
-                initialdir=_safe_udsm_initialdir(),
+                initialdir=_safe_soil_model_initial_dir(),
                 filetypes=[("DLL files", "*.dll")],
             )
             if not dll_path:
@@ -212,7 +212,7 @@ class MainUI:
             }
             dll_path = filedialog.askopenfilename(
                 title=SELECT_UMAT,
-                initialdir=_safe_udsm_initialdir(),
+                initialdir=_safe_soil_model_initial_dir(),
                 filetypes=[("DLL files", "*.dll")],
             )
             if not dll_path:
