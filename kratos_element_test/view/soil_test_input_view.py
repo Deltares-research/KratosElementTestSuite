@@ -23,7 +23,7 @@ from kratos_element_test.view.ui_constants import (
     STEPS_LABEL,
 )
 from kratos_element_test.view.ui_logger import log_message
-from kratos_element_test.view.ui_utils import _asset_path
+from kratos_element_test.view.ui_utils import asset_path
 import tkinter.font as tkFont
 
 from kratos_element_test.view.widget_creation_utils import create_entries
@@ -42,7 +42,7 @@ class SoilTestInputView(ttk.Frame):
         self.test_buttons = {}
 
         image_paths = {
-            name: _asset_path(filename) for name, filename in TEST_IMAGE_FILES.items()
+            name: asset_path(filename) for name, filename in TEST_IMAGE_FILES.items()
         }
 
         self.test_images = {}
