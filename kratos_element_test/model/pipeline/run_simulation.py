@@ -182,22 +182,24 @@ class RunSimulation:
         if self.dll_path:
             is_umat = self.udsm_number is None
 
+            editor.update_material_properties(
+                {
+                    "IS_FORTRAN_UDSM": True,
+                    "UMAT_PARAMETERS": self.material_parameters,
+                    "UDSM_NAME": self.dll_path,
+                }
+            )
             if is_umat:
                 editor.update_material_properties(
                     {
-                        "IS_FORTRAN_UDSM": True,
-                        "UMAT_PARAMETERS": self.material_parameters,
-                        "UDSM_NAME": self.dll_path,
                         "STATE_VARIABLES": [0.0]
                     }
                 )
                 editor.set_constitutive_law("SmallStrainUMAT2DPlaneStrainLaw")
+
             else:
                 editor.update_material_properties(
                     {
-                        "IS_FORTRAN_UDSM": True,
-                        "UMAT_PARAMETERS": self.material_parameters,
-                        "UDSM_NAME": self.dll_path,
                         "UDSM_NUMBER": self.udsm_number
                     }
                 )
