@@ -34,4 +34,4 @@ class MaterialInputManager:
                 f"This material parameter ({key}) is not available for the current material type ({self.get_current_material_type()})"
             )
 
-        current_material_inputs[key] = value
+        current_material_inputs[key].value = value

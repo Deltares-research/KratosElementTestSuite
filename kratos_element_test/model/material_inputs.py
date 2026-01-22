@@ -27,8 +27,8 @@ class LinearElasticMaterialInputs:
     kratos_law_name: str = "GeoLinearElasticPlaneStrain2DLaw"
     changeable_material_parameters: Dict = field(
         default_factory=lambda: {
-            "YOUNG_MODULUS": 0.0,
-            "POISSON_RATIO": 0.0,
+            "YOUNG_MODULUS": Parameter(value=0.0, unit="kN/m²"),
+            "POISSON_RATIO": Parameter(value=0.0, unit="-"),
         }
     )
 
@@ -40,12 +40,12 @@ class MohrCoulombMaterialInputs:
     kratos_law_name: str = "GeoMohrCoulombWithTensionCutOff2D"
     changeable_material_parameters: Dict = field(
         default_factory=lambda: {
-            "YOUNG_MODULUS": 0.0,
-            "POISSON_RATIO": 0.0,
-            "GEO_COHESION": 0.0,
-            "GEO_FRICTION_ANGLE": 0.0,
-            "GEO_TENSILE_STRENGTH": 0.0,
-            "GEO_DILATANCY_ANGLE": 0.0,
+            "YOUNG_MODULUS": Parameter(value=0.0, unit="kN/m²"),
+            "POISSON_RATIO": Parameter(value=0.0, unit="-"),
+            "GEO_COHESION": Parameter(value=0.0, unit="kN/m²"),
+            "GEO_FRICTION_ANGLE": Parameter(value=0.0, unit="deg"),
+            "GEO_TENSILE_STRENGTH": Parameter(value=0.0, unit="kN/m²"),
+            "GEO_DILATANCY_ANGLE": Parameter(value=0.0, unit="deg"),
         }
     )
     mohr_coulomb_options: MohrCoulombOptions = field(

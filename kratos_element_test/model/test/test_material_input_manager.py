@@ -7,6 +7,7 @@ from kratos_element_test.model.material_inputs import (
     LinearElasticMaterialInputs,
     MohrCoulombMaterialInputs,
     UDSMMaterialInputs,
+    Parameter,
 )
 
 
@@ -50,7 +51,8 @@ class MaterialInputManagerTest(unittest.TestCase):
         )
 
         self.assertEqual(
-            linear_elastic_material_inputs.get_kratos_inputs()["YOUNG_MODULUS"], 9e5
+            linear_elastic_material_inputs.get_kratos_inputs()["YOUNG_MODULUS"],
+            Parameter(value=9e5, unit="kN/m²"),
         )
 
     def tests_changing_nonexisting_material_inputs_throws(self):
