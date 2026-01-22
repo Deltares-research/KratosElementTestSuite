@@ -8,7 +8,7 @@ from kratos_element_test.controller.soil_test_input_controller import (
     SoilTestInputController,
 )
 from kratos_element_test.model.main_model import MainModel
-from kratos_element_test.model.models import MohrCoulombOptions
+from kratos_element_test.model.material_inputs import MohrCoulombOptions
 from kratos_element_test.model.pipeline.run_simulation import RunSimulation
 from kratos_element_test.view.ui_constants import (
     VALID_TEST_TYPES,

@@ -1,6 +1,6 @@
 from typing import Callable, Dict, List, Optional
 
-from kratos_element_test.model.models import MohrCoulombOptions
+from kratos_element_test.model.material_inputs import MohrCoulombOptions
 from kratos_element_test.model.pipeline.run_simulation import RunSimulation
 from kratos_element_test.model.soil_test_input_manager import SoilTestInputManager
 

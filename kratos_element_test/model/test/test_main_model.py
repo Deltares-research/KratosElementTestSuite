@@ -1,7 +1,7 @@
 import unittest
 
 from kratos_element_test.model.main_model import MainModel
-from kratos_element_test.model.models import MohrCoulombOptions
+from kratos_element_test.model.material_inputs import MohrCoulombOptions
 
 
 class MainModelTest(unittest.TestCase):
