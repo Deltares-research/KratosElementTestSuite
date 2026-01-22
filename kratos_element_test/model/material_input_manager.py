@@ -16,6 +16,12 @@ class MaterialInputManager:
         return self._material_inputs[self.get_current_material_type()]
 
     def update_material_parameter_of_current_type(self, key, value):
-        self._material_inputs[self.get_current_material_type()].material_parameters[
-            key
-        ] = value
+        current_material_inputs = self._material_inputs[
+            self.get_current_material_type()
+        ].material_parameters
+        if key not in current_material_inputs:
+            raise ValueError(
+                f"This material parameter ({key}) is not available for the current material type ({self.get_current_material_type()})"
+            )
+
+        current_material_inputs[key] = value
