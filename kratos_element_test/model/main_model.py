@@ -36,7 +36,7 @@ class MainModel:
         sim = RunSimulation(
             test_inputs=inputs,
             model_name=model_name,
-            dll_path=dll_path or "",
+            dll_path=dll_path,
             udsm_number=udsm_number,
             material_parameters=material_parameters,
             cohesion_phi_indices=mohr_coulomb_options.to_indices(),
