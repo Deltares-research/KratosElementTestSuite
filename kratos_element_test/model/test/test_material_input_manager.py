@@ -50,7 +50,7 @@ class MaterialInputManagerTest(unittest.TestCase):
         )
 
         self.assertEqual(
-            linear_elastic_material_inputs.material_parameters["YOUNG_MODULUS"], 9e5
+            linear_elastic_material_inputs.get_kratos_inputs()["YOUNG_MODULUS"], 9e5
         )
 
     def tests_changing_nonexisting_material_inputs_throws(self):

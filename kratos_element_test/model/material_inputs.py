@@ -17,22 +17,28 @@ class MohrCoulombOptions:
             return None
         return self.c_index, self.phi_index
 
+@dataclass
+class Parameter:
+    value: float | str = 0.0
+    unit: str = "-"
 
 @dataclass
 class LinearElasticMaterialInputs:
     kratos_law_name: str = "GeoLinearElasticPlaneStrain2DLaw"
-    material_parameters: Dict = field(
+    changeable_material_parameters: Dict = field(
         default_factory=lambda: {
             "YOUNG_MODULUS": 0.0,
             "POISSON_RATIO": 0.0,
         }
     )
 
+    def get_kratos_inputs(self) -> Dict:
+        return self.changeable_material_parameters
 
 @dataclass
 class MohrCoulombMaterialInputs:
     kratos_law_name: str = "GeoMohrCoulombWithTensionCutOff2D"
-    material_parameters: Dict = field(
+    changeable_material_parameters: Dict = field(
         default_factory=lambda: {
             "YOUNG_MODULUS": 0.0,
             "POISSON_RATIO": 0.0,
@@ -46,10 +52,14 @@ class MohrCoulombMaterialInputs:
         default_factory=lambda: MohrCoulombOptions(enabled=True, c_index=3, phi_index=4)
     )
 
+    def get_kratos_inputs(self) -> Dict:
+        return self.changeable_material_parameters
+
 
 @dataclass
 class UDSMMaterialInputs:
     kratos_law_name: str = "SmallStrainUDSM2DPlaneStrainLaw"
+    changeable_material_parameters = Dict
     material_parameters: Dict = field(
         default_factory=lambda: {
             "IS_FORTRAN_UDSM": True,
@@ -59,3 +69,8 @@ class UDSMMaterialInputs:
         }
     )
     mohr_coulomb_options: MohrCoulombOptions | None = None
+
+    def get_kratos_inputs(self) -> Dict:
+        result = self.material_parameters
+        result["UMAT_PARAMETERS"] = self.changeable_material_parameters.values()
+        return result
