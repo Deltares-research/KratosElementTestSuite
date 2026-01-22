@@ -285,7 +285,7 @@ class GeotechTestUI(ttk.Frame):
         self._set_widget_state(self.left_frame, "normal")
 
         if hasattr(self, "soil_test_input_view"):
-            self.soil_test_input_view.sync_row_buttons_state()
+            self.soil_test_input_view.prevent_removal_last_crs_row()
 
         self.run_button.config(state="normal")
 
