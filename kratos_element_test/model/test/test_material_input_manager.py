@@ -9,6 +9,7 @@ from kratos_element_test.model.material_inputs import (
     UDSMMaterialInputs,
 )
 
+
 class MaterialInputManagerTest(unittest.TestCase):
     def test_get_and_set_of_current_material_type(self):
         material_input_manager = MaterialInputManager()
@@ -60,6 +61,13 @@ class MaterialInputManagerTest(unittest.TestCase):
             lambda: material_input_manager.update_material_parameter_of_current_type(
                 "NONEXISTING", 9e5
             ),
+        )
+
+    def test_setting_nonexistent_material_type_throws(self):
+        material_input_manager = MaterialInputManager()
+        self.assertRaises(
+            ValueError,
+            lambda: material_input_manager.set_current_material_type("nonexistent"),
         )
 
 

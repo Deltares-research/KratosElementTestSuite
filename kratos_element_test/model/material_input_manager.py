@@ -15,6 +15,8 @@ class MaterialInputManager:
         }
 
     def set_current_material_type(self, material_type: str) -> None:
+        if material_type not in self._material_inputs:
+            raise ValueError(f"Invalid material type {material_type}")
         self._current_material_type = material_type
 
     def get_current_material_type(self) -> str:
