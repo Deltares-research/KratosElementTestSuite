@@ -2,8 +2,8 @@
 # This is a prototype version
 # Contact kratos@deltares.nl
 
-from dataclasses import dataclass
-from typing import Optional, Tuple
+from dataclasses import dataclass, field
+from typing import Optional, Tuple, Dict
 
 
 @dataclass
@@ -17,3 +17,13 @@ class MohrCoulombOptions:
             return None
         return self.c_index, self.phi_index
 
+
+@dataclass
+class LinearElasticMaterialInputs:
+    kratos_law_name: str = "GeoLinearElasticPlaneStrain2DLaw"
+    material_parameters: Dict = field(
+        default_factory=lambda: {
+            "YOUNG_MODULUS": 0.0,
+            "POISSON_RATIO": 0.0,
+        }
+    )
