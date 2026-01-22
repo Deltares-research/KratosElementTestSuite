@@ -14,3 +14,8 @@ class MaterialInputManager:
 
     def get_current_material_inputs(self):
         return self._material_inputs[self.get_current_material_type()]
+
+    def update_material_parameter_of_current_type(self, key, value):
+        self._material_inputs[self.get_current_material_type()].material_parameters[
+            key
+        ] = value
