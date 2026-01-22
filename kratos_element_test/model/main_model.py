@@ -1,18 +1,21 @@
-from typing import Callable, Dict, List, Optional
+from typing import Callable, Dict, List
 
 from kratos_element_test.model.material_inputs import MohrCoulombOptions
 from kratos_element_test.model.pipeline.run_simulation import RunSimulation
+from kratos_element_test.model.result_manager import ResultManager
 from kratos_element_test.model.soil_test_input_manager import SoilTestInputManager
 
 
 class MainModel:
     def __init__(self, logger: Callable[[str, str], None]):
         self._logger = logger
-        self.soil_test_input_manager = SoilTestInputManager()
-        self._latest_results = None
+        self._soil_test_input_manager = SoilTestInputManager()
+        self._result_manager = ResultManager(
+            self._soil_test_input_manager.get_current_test_type
+        )
 
     def get_current_test_type(self) -> str:
-        return self.soil_test_input_manager.get_current_test_type()
+        return self._soil_test_input_manager.get_current_test_type()
 
     def run_simulation(
         self,
@@ -23,7 +26,7 @@ class MainModel:
         material_parameters,
     ) -> None:
 
-        inputs = self.soil_test_input_manager.get_current_test_inputs()
+        inputs = self._soil_test_input_manager.get_current_test_inputs()
         try:
             inputs.validate()
         except ValueError:
@@ -41,7 +44,18 @@ class MainModel:
         )
 
         sim.run()
-        self._latest_results = sim.post_process_results()
+        self._result_manager.set_results_of_active_test_type(
+            sim.post_process_results(),
+        )
 
-    def get_latest_results(self) -> Optional[Dict[str, List[float]]]:
-        return self._latest_results
+    def get_latest_results(self) -> Dict[str, List[float]]:
+        return self._result_manager.get_results_of_active_test_type()
+
+    def get_result_manager(self) -> ResultManager:
+        return self._result_manager
+
+    def get_soil_test_input_manager(self):
+        return self._soil_test_input_manager
+
+    def clear_results(self) -> None:
+        self._result_manager.clear_results()
