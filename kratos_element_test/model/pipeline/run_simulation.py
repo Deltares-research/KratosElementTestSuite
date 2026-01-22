@@ -121,35 +121,18 @@ class RunSimulation:
                     self.log(f"Failed to clean tmp dir: {e}", "warn")
 
     @staticmethod
-    def _candidate_template_dirs(test_type: str) -> List[Path]:
+    def _template_dir(test_type: str) -> Path:
         here = Path(__file__).resolve()
-        candidates = [
-            here.parent / f"test_{test_type}",  # legacy: alongside run_simulation.py
-            here.parents[1]
-            / "templates"
-            / f"test_{test_type}",  # NEW: model/templates/test_*
-            here.parents[1] / f"test_{test_type}",  # legacy: under model/
-            here.parents[2] / f"test_{test_type}",  # legacy: under project root
-        ]
-        if _res_files:
-            try:
-                pkg_path = (
-                    _res_files("kratos_element_test.model.templates")
-                    / f"test_{test_type}"
-                )
-                candidates.append(Path(str(pkg_path)))
-            except Exception:
-                pass
-        return candidates
+        return here.parents[1] / "simulation_assets" / "templates" / f"test_{test_type}"
 
     @classmethod
     def _find_template_dir(cls, test_type: str) -> Path:
-        for p in cls._candidate_template_dirs(test_type):
-            if p.exists():
-                return p
+        template_dir = cls._template_dir(test_type)
+        if template_dir.is_dir():
+            return template_dir
         raise FileNotFoundError(
-            f"Could not locate templates for '{test_type}'."
-            f"Tried:\n  - " + "\n  - ".join(cls._candidate_template_dirs(test_type))
+            f"Could not locate templates for '{test_type}'. Expected directory:\n"
+            f"  - {template_dir}"
         )
 
     def _copy_simulation_files(self) -> None:

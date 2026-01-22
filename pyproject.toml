@@ -8,9 +8,9 @@ readme = "README.md"
 homepage = "https://github.com/Deltares-research/KratosElementTestSuite"
 requires-python = ">=3.10"
 # Use a list syntax:
-include = ["kratos_element_test/assets/**", 
-           "kratos_element_test/test_triaxial/**",
-           "kratos_element_test/test_direct_shear/**"]
+include = ["kratos_element_test/view/assets/**",
+           "kratos_element_test/model/simulation_assets/templates/**",
+           "kratos_element_test/model/simulation_assets/soil_models/**"]
            
 [tool.poetry.dependencies]
 python = ">=3.10,<3.15"

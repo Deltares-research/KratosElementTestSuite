@@ -14,6 +14,7 @@ from kratos_element_test.view.soil_test_input_view import SoilTestInputView
 from kratos_element_test.view.ui_constants import INPUT_SECTION_FONT
 from kratos_element_test.view.ui_logger import log_message, clear_log
 from kratos_element_test.view.widget_creation_utils import create_entries
+from kratos_element_test.view.ui_utils import asset_path
 
 
 class GeotechTestUI(ttk.Frame):
