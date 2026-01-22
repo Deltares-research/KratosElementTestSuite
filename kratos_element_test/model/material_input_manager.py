@@ -1,10 +1,18 @@
-from kratos_element_test.model.material_inputs import LinearElasticMaterialInputs
+from kratos_element_test.model.material_inputs import (
+    LinearElasticMaterialInputs,
+    MohrCoulombMaterialInputs,
+    UDSMMaterialInputs,
+)
 
 
 class MaterialInputManager:
     def __init__(self):
         self._current_material_type = ""
-        self._material_inputs = {"linear_elastic": LinearElasticMaterialInputs()}
+        self._material_inputs = {
+            "linear_elastic": LinearElasticMaterialInputs(),
+            "mohr_coulomb": MohrCoulombMaterialInputs(),
+            "udsm": UDSMMaterialInputs(),
+        }
 
     def set_current_material_type(self, material_type: str) -> None:
         self._current_material_type = material_type
@@ -20,7 +28,7 @@ class MaterialInputManager:
             self.get_current_material_type()
         ].material_parameters
         if key not in current_material_inputs:
-            raise ValueError(
+            raise KeyError(
                 f"This material parameter ({key}) is not available for the current material type ({self.get_current_material_type()})"
             )
 

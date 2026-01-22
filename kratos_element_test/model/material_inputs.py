@@ -27,3 +27,35 @@ class LinearElasticMaterialInputs:
             "POISSON_RATIO": 0.0,
         }
     )
+
+
+@dataclass
+class MohrCoulombMaterialInputs:
+    kratos_law_name: str = "GeoMohrCoulombWithTensionCutOff2D"
+    material_parameters: Dict = field(
+        default_factory=lambda: {
+            "YOUNG_MODULUS": 0.0,
+            "POISSON_RATIO": 0.0,
+            "GEO_COHESION": 0.0,
+            "GEO_FRICTION_ANGLE": 0.0,
+            "GEO_TENSILE_STRENGTH": 0.0,
+            "GEO_DILATANCY_ANGLE": 0.0,
+        }
+    )
+    mohr_coulomb_options: MohrCoulombOptions = field(
+        default_factory=lambda: MohrCoulombOptions(enabled=True, c_index=3, phi_index=4)
+    )
+
+
+@dataclass
+class UDSMMaterialInputs:
+    kratos_law_name: str = "SmallStrainUDSM2DPlaneStrainLaw"
+    material_parameters: Dict = field(
+        default_factory=lambda: {
+            "IS_FORTRAN_UDSM": True,
+            "UMAT_PARAMETERS": [],
+            "UDSM_NAME": "",
+            "UDSM_NUMBER": 0,
+        }
+    )
+    mohr_coulomb_options: MohrCoulombOptions | None = None
