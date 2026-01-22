@@ -105,8 +105,8 @@ class ElementTestController:
     def export_latest_results(self):
         results = self._result_controller.get_latest_results()
         test_type = TEST_NAME_TO_TYPE.get(self._result_controller.get_current_test())
-        if not results or not test_type:
-            return
+        if not results:
+            raise ValueError("No results available for export")
         export_excel_by_test_type(results, test_type)
 
     def clear_results(self) -> None:

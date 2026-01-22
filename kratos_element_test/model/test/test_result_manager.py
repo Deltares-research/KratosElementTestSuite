@@ -31,6 +31,28 @@ class ResultManagerTest(unittest.TestCase):
             result_manager.get_results_of_active_test_type(), expected_results
         )
 
+    def test_workflow_with_results_for_multiple_test_types(self):
+        current_test_type = TRIAXIAL
+        current_test_getter = lambda: current_test_type
+        result_manager = ResultManager(current_test_getter)
+        expected_triaxial_results = {
+            "values_variable_1": [1, 2, 3],
+            "values_variable_2": [4, 5, 6],
+        }
+        result_manager.set_results_of_active_test_type(expected_triaxial_results)
+
+        current_test_type = CRS
+        expected_crs_data = {"some_other_data": [7, 8, 9]}
+        result_manager.set_results_of_active_test_type(expected_crs_data)
+        self.assertDictEqual(
+            result_manager.get_results_of_active_test_type(), expected_crs_data
+        )
+
+        current_test_type = TRIAXIAL
+        self.assertDictEqual(
+            result_manager.get_results_of_active_test_type(), expected_triaxial_results
+        )
+
     def test_clear_results(self):
         # Arrange
         current_test_getter = lambda: TRIAXIAL
