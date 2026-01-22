@@ -311,6 +311,10 @@ class GeotechTestUI(ttk.Frame):
 
     def _enable_gui(self):
         self._set_widget_state(self.left_frame, "normal")
+
+        if hasattr(self, "soil_test_input_view"):
+            self.soil_test_input_view.prevent_removal_last_crs_row()
+
         self.run_button.config(state="normal")
 
         if hasattr(self, "scrollbar") and hasattr(self, "_original_scroll_cmd"):
