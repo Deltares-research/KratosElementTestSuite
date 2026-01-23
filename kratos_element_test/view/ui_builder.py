@@ -139,22 +139,42 @@ class GeotechTestUI(ttk.Frame):
             w.destroy()
 
         index = self.model_dict["model_name"].index(self.model_var.get())
-        params = self.model_dict["param_names"][index]
-        units = self.model_dict.get("param_units", [[]])[index]
-
+        params = []
+        units = []
         default_values = {}
+        if self.is_linear_elastic:
+            inputs = (
+                self.controller._material_input_controller.get_current_material_inputs()
+            )
+            for key, parameter in inputs.changeable_material_parameters.items():
+                params.append(key)
+                units.append(parameter.unit)
+                default_values[key] = parameter.value
+        else:
+            params = self.model_dict["param_names"][index]
+            units = self.model_dict.get("param_units", [[]])[index]
+
         # For now the string_vars are not used yet, but they'll be useful for adding a trace
         # later (similar to the test input fields)
-        self.entry_widgets, string_vars = create_entries(self.param_frame, "Soil Input Parameters",
-                                                  params, units, default_values)
+        self.entry_widgets, self.string_vars = create_entries(
+            frame=self.param_frame,title= "Soil Input Parameters", labels=params, units=units, defaults=default_values
+        )
 
         self.setup_mohr_coulomb_controls(params)
 
-        self.soil_test_input_view = SoilTestInputView(self.controller._soil_test_input_controller, self._init_plot_canvas, self.param_frame)
+        self.soil_test_input_view = SoilTestInputView(
+            self.controller._soil_test_input_controller,
+            self._init_plot_canvas,
+            self.param_frame,
+        )
 
         clear_log()
 
-        self.run_button = ttk.Button(self.button_frame, text="Run Calculation", command=self._start_simulation_thread)
+        self.run_button = ttk.Button(
+            self.button_frame,
+            text="Run Calculation",
+            command=self._start_simulation_thread,
+        )
         self.run_button.pack(pady=5)
 
     def _create_mohr_options(self, params):
@@ -252,13 +272,17 @@ class GeotechTestUI(ttk.Frame):
 
             self.soil_test_input_view.validate(self.controller.get_current_test_type())
             material_params = [e.get() for e in self.entry_widgets.values()]
-            udsm_number = self.model_dict["model_name"].index(self.model_var.get()) + 1 if self.dll_path else None
+            udsm_number = (
+                self.model_dict["model_name"].index(self.model_var.get()) + 1
+                if self.dll_path
+                else None
+            )
 
             success = self.controller.run(
                 model_name=self.model_var.get(),
                 dll_path=self.dll_path or "",
                 udsm_number=udsm_number,
-                material_parameters=[float(x) for x in material_params]
+                material_parameters=[float(x) for x in material_params],
             )
 
             if success:

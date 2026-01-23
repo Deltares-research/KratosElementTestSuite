@@ -3,6 +3,9 @@
 # Contact kratos@deltares.nl
 from typing import Optional, Callable, List, Tuple
 
+from kratos_element_test.controller.material_input_controller import (
+    MaterialInputController,
+)
 from kratos_element_test.controller.result_controller import ResultController
 from kratos_element_test.controller.soil_test_input_controller import (
     SoilTestInputController,
@@ -36,6 +39,10 @@ class ElementTestController:
         )
         self._result_controller = ResultController(
             self._main_model.get_result_manager()
+        )
+
+        self._material_input_controller = MaterialInputController(
+            self._main_model.get_material_input_manager()
         )
 
     def set_mohr_enabled(self, enabled: bool) -> None:
@@ -112,5 +119,5 @@ class ElementTestController:
     def clear_results(self) -> None:
         self._main_model.clear_results()
 
-    def set_material_type(self, material_type:str) -> None:
+    def set_material_type(self, material_type: str) -> None:
         self._main_model.set_material_type(material_type)

@@ -23,7 +23,7 @@ class MaterialInputManager:
     def get_current_material_type(self) -> str:
         return self._current_material_type
 
-    def get_current_material_inputs(self):
+    def get_current_material_inputs(self) -> LinearElasticMaterialInputs:
         return self._material_inputs[self.get_current_material_type()]
 
     def update_material_parameter_of_current_type(self, key, value):
@@ -36,3 +36,4 @@ class MaterialInputManager:
             )
 
         current_material_inputs[key].value = value
+        print(f"Changed {key} to {value}")

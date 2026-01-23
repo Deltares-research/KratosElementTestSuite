@@ -66,3 +66,6 @@ class MainModel:
         self._material_input_manager.set_current_material_type(material_type)
         self.clear_results()
 
+    def get_material_input_manager(self) -> MaterialInputManager:
+        return self._material_input_manager
+
