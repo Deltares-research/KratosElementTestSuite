@@ -1,5 +1,6 @@
 from typing import Callable, Dict, List
 
+from kratos_element_test.model.material_input_manager import MaterialInputManager
 from kratos_element_test.model.material_inputs import MohrCoulombOptions
 from kratos_element_test.model.pipeline.run_simulation import RunSimulation
 from kratos_element_test.model.result_manager import ResultManager
@@ -9,6 +10,7 @@ from kratos_element_test.model.soil_test_input_manager import SoilTestInputManag
 class MainModel:
     def __init__(self, logger: Callable[[str, str], None]):
         self._logger = logger
+        self._material_input_manager = MaterialInputManager()
         self._soil_test_input_manager = SoilTestInputManager()
         self._result_manager = ResultManager(
             self._soil_test_input_manager.get_current_test_type
@@ -59,3 +61,8 @@ class MainModel:
 
     def clear_results(self) -> None:
         self._result_manager.clear_results()
+
+    def set_material_type(self, material_type : str):
+        self._material_input_manager.set_current_material_type(material_type)
+        self.clear_results()
+

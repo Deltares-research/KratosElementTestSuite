@@ -39,7 +39,7 @@ LICENSE_FLAG_PATH = data_dir / "license_accepted.flag"
 
 class MainUI:
     def __init__(self):
-        self.controller = ElementTestController(
+        self._controller = ElementTestController(
             logger=log_message,
         )
         self.main_frame = None
@@ -246,17 +246,18 @@ class MainUI:
                 for widget in self.main_frame.winfo_children():
                     widget.destroy()
                 self.main_frame.destroy()
-            self.controller.clear_results()
+            self._controller.clear_results()
             self.main_frame = GeotechTestUI(
                 root,
                 test_name="Triaxial",
                 dll_path=dll_path,
                 model_dict=model_dict,
-                controller=self.controller,
+                controller=self._controller,
                 external_widgets=[model_source_menu],
             )
 
         def load_linear_elastic():
+            self._controller.set_material_type("linear_elastic")
             nonlocal last_model_source
             model_dict = {
                 "model_name": [LINEAR_ELASTIC],
@@ -271,13 +272,12 @@ class MainUI:
                     widget.destroy()
                 self.main_frame.destroy()
 
-            self.controller.clear_results()
             self.main_frame = GeotechTestUI(
                 root,
                 test_name="Triaxial",
                 dll_path=None,
                 model_dict=model_dict,
-                controller=self.controller,
+                controller=self._controller,
                 external_widgets=[model_source_menu],
             )
 
@@ -305,13 +305,13 @@ class MainUI:
                     widget.destroy()
                 self.main_frame.destroy()
 
-            self.controller.clear_results()
+            self._controller.clear_results()
             self.main_frame = GeotechTestUI(
                 root,
                 test_name="Triaxial",
                 dll_path=None,
                 model_dict=model_dict,
-                controller=self.controller,
+                controller=self._controller,
                 external_widgets=[model_source_menu],
             )
 
@@ -344,7 +344,7 @@ class MainUI:
 
     def _export_latest_results(self):
         try:
-            self.controller.export_latest_results()
+            self._controller.export_latest_results()
         except Exception as e:
             messagebox.showerror("Export Error", f"Failed to export Excel file.\n\n{e}")
 

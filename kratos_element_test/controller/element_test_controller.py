@@ -111,3 +111,6 @@ class ElementTestController:
 
     def clear_results(self) -> None:
         self._main_model.clear_results()
+
+    def set_material_type(self, material_type:str) -> None:
+        self._main_model.set_material_type(material_type)
