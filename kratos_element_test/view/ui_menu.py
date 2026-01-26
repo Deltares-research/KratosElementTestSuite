@@ -282,6 +282,7 @@ class MainUI:
             )
 
         def load_mohr_coulomb():
+            self._controller.set_material_type("mohr_coulomb")
             nonlocal last_model_source
             model_dict = {
                 "model_name": [MOHR_COULOMB],

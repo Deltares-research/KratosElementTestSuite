@@ -56,8 +56,10 @@ class MohrCoulombMaterialInputs:
     )
 
     def get_kratos_inputs(self) -> Dict:
-        return self.changeable_material_parameters
-
+        result = {}
+        for name, parameter in self.changeable_material_parameters.items():
+            result[name] = parameter.value
+        return result
 
 @dataclass
 class UDSMMaterialInputs:

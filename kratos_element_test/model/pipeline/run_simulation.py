@@ -11,8 +11,11 @@ from kratos_element_test.model.core_utils import _fallback_log, hours_to_seconds
 from kratos_element_test.model.io.material_editor import MaterialEditor
 from kratos_element_test.model.io.project_parameter_editor import ProjectParameterEditor
 from kratos_element_test.model.io.mdpa_editor import MdpaEditor
-from kratos_element_test.model.material_inputs import LinearElasticMaterialInputs, MohrCoulombMaterialInputs, \
-    UDSMMaterialInputs
+from kratos_element_test.model.material_inputs import (
+    LinearElasticMaterialInputs,
+    MohrCoulombMaterialInputs,
+    UDSMMaterialInputs,
+)
 from kratos_element_test.model.models import (
     TriaxialAndShearSimulationInputs,
     CRSSimulationInputs,
@@ -38,7 +41,9 @@ class RunSimulation:
         self,
         *,
         test_inputs: TriaxialAndShearSimulationInputs | CRSSimulationInputs,
-        material_inputs : LinearElasticMaterialInputs | MohrCoulombMaterialInputs | UDSMMaterialInputs,
+        material_inputs: (
+            LinearElasticMaterialInputs | MohrCoulombMaterialInputs | UDSMMaterialInputs
+        ),
         model_name: Optional[str],
         dll_path: Optional[str],
         udsm_number: Optional[int],
@@ -68,14 +73,24 @@ class RunSimulation:
         )
 
         is_crs_test = isinstance(test_inputs, CRSSimulationInputs)
-        self.stage_durations = [
-            hours_to_seconds(inc.duration_in_hours)
-            for inc in test_inputs.strain_increments
-        ] if is_crs_test else None
-        self.step_counts = [inc.steps for inc in test_inputs.strain_increments] if is_crs_test else None
-        self.strain_incs = [
-            inc.strain_increment for inc in test_inputs.strain_increments
-        ] if is_crs_test else None
+        self.stage_durations = (
+            [
+                hours_to_seconds(inc.duration_in_hours)
+                for inc in test_inputs.strain_increments
+            ]
+            if is_crs_test
+            else None
+        )
+        self.step_counts = (
+            [inc.steps for inc in test_inputs.strain_increments]
+            if is_crs_test
+            else None
+        )
+        self.strain_incs = (
+            [inc.strain_increment for inc in test_inputs.strain_increments]
+            if is_crs_test
+            else None
+        )
 
         self.keep_tmp = keep_tmp
 
@@ -193,24 +208,14 @@ class RunSimulation:
             )
             editor.set_constitutive_law("SmallStrainUDSM2DPlaneStrainLaw")
         if self.model_name:
-            if self.model_name.strip().lower() == "linear elastic model":
+            if (
+                self.model_name.strip().lower() == "linear elastic model"
+                or self.model_name.strip().lower() == "mohr-coulomb model"
+            ):
                 editor.update_material_properties(
                     self.material_inputs.get_kratos_inputs()
                 )
                 editor.set_constitutive_law(self.material_inputs.kratos_law_name)
-
-            if self.model_name.strip().lower() == "mohr-coulomb model":
-                editor.update_material_properties(
-                    {
-                        "YOUNG_MODULUS": self.material_parameters[0],
-                        "POISSON_RATIO": self.material_parameters[1],
-                        "GEO_COHESION": self.material_parameters[2],
-                        "GEO_FRICTION_ANGLE": self.material_parameters[3],
-                        "GEO_TENSILE_STRENGTH": self.material_parameters[4],
-                        "GEO_DILATANCY_ANGLE": self.material_parameters[5],
-                    }
-                )
-                editor.set_constitutive_law("GeoMohrCoulombWithTensionCutOff2D")
 
     def _set_project_parameters(self) -> None:
         with open(self.project_json_path, "r") as f:

@@ -142,7 +142,7 @@ class GeotechTestUI(ttk.Frame):
         params = []
         units = []
         default_values = {}
-        if self.is_linear_elastic:
+        if self.is_linear_elastic or self.is_mohr_coulomb:
             inputs = (
                 self.controller._material_input_controller.get_current_material_inputs()
             )
@@ -160,7 +160,7 @@ class GeotechTestUI(ttk.Frame):
             frame=self.param_frame,title= "Soil Input Parameters", labels=params, units=units, defaults=default_values
         )
 
-        if self.is_linear_elastic:
+        if self.is_linear_elastic or self.is_mohr_coulomb:
             self.controller._material_input_controller.bind_test_input_fields_to_update_functions(
                 self.string_vars
             )
