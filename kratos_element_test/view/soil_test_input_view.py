@@ -276,13 +276,15 @@ class SoilTestInputView(ttk.Frame):
             steps=crs_input.strain_increments[-1].steps,
         )
 
-    def _prevent_removal_last_crs_row(self):
+    def prevent_removal_last_crs_row(self):
+        if self._soil_test_input_controller.get_current_test_type() != CRS:
+            return
         minimum_number_of_rows = 1
         if len(self.crs_rows) <= minimum_number_of_rows:
             self.remove_row_button.config(state="disabled")
 
     def _remove_crs_row(self):
-        self._prevent_removal_last_crs_row()
+        self.prevent_removal_last_crs_row()
 
         if self.crs_rows:
             row = self.crs_rows.pop()
@@ -290,7 +292,7 @@ class SoilTestInputView(ttk.Frame):
             row_frame.destroy()
         self._soil_test_input_controller.remove_last_crs_strain_increment()
 
-        self._prevent_removal_last_crs_row()
+        self.prevent_removal_last_crs_row()
 
     def validate(self, current_test_type):
         widget_dicts = []
