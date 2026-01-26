@@ -277,6 +277,8 @@ class SoilTestInputView(ttk.Frame):
         )
 
     def prevent_removal_last_crs_row(self):
+        if self._soil_test_input_controller.get_current_test_type() != CRS:
+            return
         minimum_number_of_rows = 1
         if len(self.crs_rows) <= minimum_number_of_rows:
             self.remove_row_button.config(state="disabled")
