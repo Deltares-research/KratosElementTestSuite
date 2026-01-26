@@ -160,6 +160,11 @@ class GeotechTestUI(ttk.Frame):
             frame=self.param_frame,title= "Soil Input Parameters", labels=params, units=units, defaults=default_values
         )
 
+        if self.is_linear_elastic:
+            self.controller._material_input_controller.bind_test_input_fields_to_update_functions(
+                self.string_vars
+            )
+
         self.setup_mohr_coulomb_controls(params)
 
         self.soil_test_input_view = SoilTestInputView(

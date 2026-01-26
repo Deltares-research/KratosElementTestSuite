@@ -11,6 +11,8 @@ from kratos_element_test.model.core_utils import _fallback_log, hours_to_seconds
 from kratos_element_test.model.io.material_editor import MaterialEditor
 from kratos_element_test.model.io.project_parameter_editor import ProjectParameterEditor
 from kratos_element_test.model.io.mdpa_editor import MdpaEditor
+from kratos_element_test.model.material_inputs import LinearElasticMaterialInputs, MohrCoulombMaterialInputs, \
+    UDSMMaterialInputs
 from kratos_element_test.model.models import (
     TriaxialAndShearSimulationInputs,
     CRSSimulationInputs,
@@ -36,6 +38,7 @@ class RunSimulation:
         self,
         *,
         test_inputs: TriaxialAndShearSimulationInputs | CRSSimulationInputs,
+        material_inputs : LinearElasticMaterialInputs | MohrCoulombMaterialInputs | UDSMMaterialInputs,
         model_name: Optional[str],
         dll_path: Optional[str],
         udsm_number: Optional[int],
@@ -48,6 +51,7 @@ class RunSimulation:
         self.model_name = model_name
         self.dll_path = dll_path
         self.udsm_number = udsm_number
+        self.material_inputs = material_inputs
         self.material_parameters = material_parameters
         self.num_steps = test_inputs.number_of_steps
         self.end_time = test_inputs.duration_in_seconds
@@ -191,12 +195,9 @@ class RunSimulation:
         if self.model_name:
             if self.model_name.strip().lower() == "linear elastic model":
                 editor.update_material_properties(
-                    {
-                        "YOUNG_MODULUS": self.material_parameters[0],
-                        "POISSON_RATIO": self.material_parameters[1],
-                    }
+                    self.material_inputs.get_kratos_inputs()
                 )
-                editor.set_constitutive_law("GeoLinearElasticPlaneStrain2DLaw")
+                editor.set_constitutive_law(self.material_inputs.kratos_law_name)
 
             if self.model_name.strip().lower() == "mohr-coulomb model":
                 editor.update_material_properties(

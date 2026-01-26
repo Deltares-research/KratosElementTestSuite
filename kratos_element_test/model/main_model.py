@@ -37,6 +37,7 @@ class MainModel:
 
         sim = RunSimulation(
             test_inputs=inputs,
+            material_inputs = self._material_input_manager.get_current_material_inputs(),
             model_name=model_name,
             dll_path=dll_path,
             udsm_number=udsm_number,
