@@ -32,7 +32,7 @@ class MaterialEditor:
 
     def load_json(self):
         try:
-            with open(self.json_path, "r") as f:
+            with open(self.json_path, 'r') as f:
                 return json.load(f)
         except (FileNotFoundError, json.JSONDecodeError) as e:
             raise RuntimeError(f"Failed to load JSON file: {e}")
@@ -52,5 +52,5 @@ class MaterialEditor:
         self.save()
 
     def save(self):
-        with open(self.json_path, "w") as f:
+        with open(self.json_path, 'w') as f:
             json.dump(self.data, f, indent=4)

@@ -14,7 +14,9 @@ from kratos_element_test.view.plot_viewer import PlotViewer
 from kratos_element_test.view.result_registry import register_ui_instance
 from kratos_element_test.view.soil_parameter_entries import SoilParameterEntries
 from kratos_element_test.view.soil_test_input_view import SoilTestInputView
-from kratos_element_test.view.ui_constants import TEST_NAME_TO_TYPE, INPUT_SECTION_FONT
+from kratos_element_test.view.ui_constants import (
+    TEST_NAME_TO_TYPE, INPUT_SECTION_FONT
+)
 from kratos_element_test.view.ui_logger import log_message, clear_log
 from kratos_element_test.view.widget_creation_utils import create_entries
 from kratos_element_test.view.ui_utils import asset_path
@@ -28,12 +30,8 @@ class GeotechTestUI(ttk.Frame):
         self.test_name = test_name
         self.dll_path = dll_path
         self.model_dict = model_dict
-        self.is_linear_elastic = (
-            model_dict["model_name"][0].lower() == "linear elastic model"
-        )
-        self.is_mohr_coulomb = (
-            model_dict["model_name"][0].lower() == "mohr-coulomb model"
-        )
+        self.is_linear_elastic = model_dict["model_name"][0].lower() == "linear elastic model"
+        self.is_mohr_coulomb = model_dict["model_name"][0].lower() == "mohr-coulomb model"
 
         self.model_var = tk.StringVar(root)
         self.model_var.set(model_dict["model_name"][0])
@@ -49,7 +47,7 @@ class GeotechTestUI(ttk.Frame):
 
         self.controller = ElementTestController(
             logger=log_message,
-            plotter_factory=lambda axes: MatplotlibPlotter(axes, logger=log_message),
+            plotter_factory=lambda axes: MatplotlibPlotter(axes, logger=log_message)
         )
 
         register_ui_instance(self)
@@ -71,29 +69,19 @@ class GeotechTestUI(ttk.Frame):
         self.scrollable_container = ttk.Frame(self.left_panel)
         self.scrollable_container.pack(fill="both", expand=True)
 
-        self.scroll_canvas = tk.Canvas(
-            self.scrollable_container, borderwidth=0, highlightthickness=0
-        )
+        self.scroll_canvas = tk.Canvas(self.scrollable_container, borderwidth=0, highlightthickness=0)
         self.scroll_canvas.pack(side="left", fill="both", expand=True)
 
-        self.scrollbar = ttk.Scrollbar(
-            self.scrollable_container,
-            orient="vertical",
-            command=self.scroll_canvas.yview,
-        )
+        self.scrollbar = ttk.Scrollbar(self.scrollable_container, orient="vertical", command=self.scroll_canvas.yview)
         self.scrollbar.pack(side="right", fill="y")
         self.scroll_canvas.configure(yscrollcommand=self.scrollbar.set)
 
         self.left_frame = ttk.Frame(self.scroll_canvas)
-        self.canvas_window = self.scroll_canvas.create_window(
-            (0, 0), window=self.left_frame, anchor="nw"
-        )
+        self.canvas_window = self.scroll_canvas.create_window((0, 0), window=self.left_frame, anchor="nw")
 
         self.left_frame.bind(
             "<Configure>",
-            lambda e: self.scroll_canvas.configure(
-                scrollregion=self.scroll_canvas.bbox("all")
-            ),
+            lambda e: self.scroll_canvas.configure(scrollregion=self.scroll_canvas.bbox("all"))
         )
         self.scroll_canvas.bind_all("<MouseWheel>", self._on_mousewheel)
 
@@ -106,11 +94,7 @@ class GeotechTestUI(ttk.Frame):
         self.button_frame = ttk.Frame(self.left_panel, padding="10")
         self.button_frame.pack(fill="x", pady=(0, 5))
 
-        self.run_button = ttk.Button(
-            self.button_frame,
-            text="Run Calculation",
-            command=self._start_simulation_thread,
-        )
+        self.run_button = ttk.Button(self.button_frame, text="Run Calculation", command=self._start_simulation_thread)
         self.run_button.pack(pady=5, fill="x")
 
         self._init_log_section()
@@ -119,17 +103,10 @@ class GeotechTestUI(ttk.Frame):
         self.plot_frame.initialize(num_plots)
 
     def _init_dropdown_section(self):
-        ttk.Label(
-            self.dropdown_frame,
-            text="Select a Model:",
-            font=(INPUT_SECTION_FONT, 12, "bold"),
-        ).pack(anchor="w", padx=5, pady=5)
-        self.model_menu = ttk.Combobox(
-            self.dropdown_frame,
-            textvariable=self.model_var,
-            values=self.model_dict["model_name"],
-            state="readonly",
-        )
+        ttk.Label(self.dropdown_frame, text="Select a Model:",
+                  font=(INPUT_SECTION_FONT, 12, "bold")).pack(anchor="w", padx=5, pady=5)
+        self.model_menu = ttk.Combobox(self.dropdown_frame, textvariable=self.model_var,
+                                       values=self.model_dict["model_name"], state="readonly")
         self.model_menu.pack(side="top", fill="x", expand=True, padx=5)
         self.model_var.trace("w", lambda *args: self._create_input_fields())
 
@@ -149,25 +126,16 @@ class GeotechTestUI(ttk.Frame):
         default_values = {}
         # For now the string_vars are not used yet, but they'll be useful for adding a trace
         # later (similar to the test input fields)
-        self.entry_widgets, string_vars = create_entries(
-            self.param_frame, "Soil Input Parameters", params, units, default_values
-        )
+        self.entry_widgets, string_vars = create_entries(self.param_frame, "Soil Input Parameters",
+                                                  params, units, default_values)
 
         self.setup_mohr_coulomb_controls(params)
 
-        self.soil_test_input_view = SoilTestInputView(
-            self.controller._soil_test_input_controller,
-            self._init_plot_canvas,
-            self.param_frame,
-        )
+        self.soil_test_input_view = SoilTestInputView(self.controller._soil_test_input_controller, self._init_plot_canvas, self.param_frame)
 
         clear_log()
 
-        self.run_button = ttk.Button(
-            self.button_frame,
-            text="Run Calculation",
-            command=self._start_simulation_thread,
-        )
+        self.run_button = ttk.Button(self.button_frame, text="Run Calculation", command=self._start_simulation_thread)
         self.run_button.pack(pady=5)
 
     def _create_mohr_options(self, params):
@@ -178,27 +146,17 @@ class GeotechTestUI(ttk.Frame):
             self.mohr_frame,
             text="Mohr-Coulomb Model",
             variable=self.mohr_checkbox,
-            command=self._toggle_mohr_options,
+            command=self._toggle_mohr_options
         )
         self.mohr_checkbox_widget.pack(side="left")
 
         self.c_label = ttk.Label(self.mohr_frame, text="Indices (1-based): Cohesion")
-        self.c_dropdown = ttk.Combobox(
-            self.mohr_frame,
-            textvariable=self.cohesion_var,
-            values=[str(i + 1) for i in range(len(params))],
-            state="readonly",
-            width=2,
-        )
+        self.c_dropdown = ttk.Combobox(self.mohr_frame, textvariable=self.cohesion_var,
+                                       values=[str(i+1) for i in range(len(params))], state="readonly", width=2)
 
         self.phi_label = ttk.Label(self.mohr_frame, text="Friction Angle")
-        self.phi_dropdown = ttk.Combobox(
-            self.mohr_frame,
-            textvariable=self.phi_var,
-            values=[str(i + 1) for i in range(len(params))],
-            state="readonly",
-            width=2,
-        )
+        self.phi_dropdown = ttk.Combobox(self.mohr_frame, textvariable=self.phi_var,
+                                         values=[str(i+1) for i in range(len(params))], state="readonly", width=2)
 
         def _sync_mapping(*_):
             c_idx, phi_idx = self._parse_mc_indices()
@@ -265,18 +223,14 @@ class GeotechTestUI(ttk.Frame):
 
             self.soil_test_input_view.validate(self.controller.get_current_test_type())
             material_params = [e.get() for e in self.entry_widgets.values()]
-            udsm_number = (
-                self.model_dict["model_name"].index(self.model_var.get()) + 1
-                if self.dll_path
-                else None
-            )
+            udsm_number = self.model_dict["model_name"].index(self.model_var.get()) + 1 if self.dll_path else None
 
             success = self.controller.run(
                 axes=self.plot_frame.axes,
                 model_name=self.model_var.get(),
                 dll_path=self.dll_path or "",
                 udsm_number=udsm_number,
-                material_parameters=[float(x) for x in material_params],
+                material_parameters=[float(x) for x in material_params]
             )
 
             if success:
@@ -302,10 +256,7 @@ class GeotechTestUI(ttk.Frame):
         for child in parent.winfo_children():
             if isinstance(child, ttk.Combobox):
                 child.configure(state="readonly")
-            elif isinstance(
-                child,
-                (ttk.Entry, tk.Button, ttk.Button, tk.Checkbutton, ttk.Checkbutton),
-            ):
+            elif isinstance(child, (ttk.Entry, tk.Button, ttk.Button, tk.Checkbutton, ttk.Checkbutton)):
                 child.configure(state=state)
             elif isinstance(child, scrolledtext.ScrolledText):
                 child.config(state=state if state == "normal" else "disabled")

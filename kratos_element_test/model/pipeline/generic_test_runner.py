@@ -6,9 +6,7 @@ import os
 import json
 import importlib
 import KratosMultiphysics as Kratos
-from KratosMultiphysics.GeoMechanicsApplication.geomechanics_analysis import (
-    GeoMechanicsAnalysis,
-)
+from KratosMultiphysics.GeoMechanicsApplication.geomechanics_analysis import GeoMechanicsAnalysis
 from KratosMultiphysics.project import Project
 from kratos_element_test.view.ui_logger import log_message as fallback_log
 import KratosMultiphysics.GeoMechanicsApplication.context_managers as context_managers
@@ -42,9 +40,7 @@ class GenericTestRunner:
         if os.path.exists(legacy_path):
             return [self._load_kratos_parameters_from_file(legacy_path)]
 
-        raise FileNotFoundError(
-            "Neither ProjectParametersOrchestrator.json nor ProjectParameters.json found."
-        )
+        raise FileNotFoundError("Neither ProjectParametersOrchestrator.json nor ProjectParameters.json found.")
 
     def _execute_analysis_stages(self, parameters):
         model = Kratos.Model()
@@ -58,9 +54,7 @@ class GenericTestRunner:
             os.chdir(original_cwd)
 
     def _has_orchestrator(self):
-        orchestrator_path = os.path.join(
-            self.work_dir, "ProjectParametersOrchestrator.json"
-        )
+        orchestrator_path = os.path.join(self.work_dir, "ProjectParametersOrchestrator.json")
 
         if os.path.isfile(orchestrator_path):
             return True

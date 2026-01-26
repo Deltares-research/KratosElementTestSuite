@@ -23,11 +23,11 @@ class ProjectParameterEditor:
         """
         self.json_path = json_path
         self._log = logger or _fallback_log
-        with open(self.json_path, "r") as f:
+        with open(self.json_path, 'r') as f:
             self.raw_text = f.read()
 
     def _write_back(self):
-        with open(self.json_path, "w") as f:
+        with open(self.json_path, 'w') as f:
             f.write(self.raw_text)
 
     def _load_json(self):
@@ -42,8 +42,9 @@ class ProjectParameterEditor:
 
             loads_list = data.get("processes", {}).get("loads_process_list", [])
             for process in loads_list:
-                if process.get("python_module") == module_name and key in process.get(
-                    "Parameters", {}
+                if (
+                    process.get("python_module") == module_name
+                    and key in process.get("Parameters", {})
                 ):
                     process["Parameters"][key] = new_list
                     self.raw_text = json.dumps(data, indent=4)
@@ -53,26 +54,19 @@ class ProjectParameterEditor:
             self._log(f"Could not find '{key}' under '{module_name}'.", "warn")
 
         except Exception as e:
-            raise RuntimeError(
-                f"Failed to update '{key}' under '{module_name}': {e}"
-            ) from e
+            raise RuntimeError(f"Failed to update '{key}' under '{module_name}': {e}") from e
 
     def update_property(self, property_name, new_value):
         pattern = rf'("{property_name}"\s*:\s*)([0-9eE+\.\-]+)'
-        replacement = rf"\g<1>{new_value}"
+        replacement = rf'\g<1>{new_value}'
         self.raw_text, count = re.subn(pattern, replacement, self.raw_text)
         if count == 0:
             self._log(f"Could not find '{property_name}' to update.", "warn")
         elif count > 1:
-            self._log(
-                f"Multiple occurrences of '{property_name}' found. Updated all {count}.",
-                "warn",
-            )
+            self._log(f"Multiple occurrences of '{property_name}' found. Updated all {count}.", "warn")
         self._write_back()
 
-    def update_stage_timings(
-        self, end_times: list[float], step_counts: list[int], start_time: float = 0.0
-    ):
+    def update_stage_timings(self, end_times: list[float], step_counts: list[int], start_time: float = 0.0):
         """
         Applies staged start/end time logic.
         end_times: List of end_time values for each stage.
@@ -84,9 +78,7 @@ class ProjectParameterEditor:
 
             stage_names = list(data["stages"].keys())
 
-            for stage_name, end_time, step_count in zip(
-                stage_names, end_times, step_counts, strict=True
-            ):
+            for stage_name, end_time, step_count in zip(stage_names, end_times, step_counts, strict=True):
                 stage = data["stages"][stage_name]
                 settings = stage.get("stage_settings", {})
 
@@ -94,14 +86,11 @@ class ProjectParameterEditor:
                 settings["problem_data"]["end_time"] = end_time
 
                 delta_t = (end_time - start_time) / step_count
-                settings.setdefault("solver_settings", {}).setdefault(
-                    "time_stepping", {}
-                )["time_step"] = delta_t
+                settings.setdefault("solver_settings", {}).setdefault("time_stepping", {})["time_step"] = delta_t
 
                 self._log(
                     f"Updated {stage_name}: start_time={start_time}, end_time={end_time}, time_step={delta_t}",
-                    "info",
-                )
+                    "info")
                 start_time = end_time
 
             self.raw_text = json.dumps(data, indent=4)
@@ -131,16 +120,11 @@ class ProjectParameterEditor:
         previous_end_time = new_stage["stage_settings"]["problem_data"]["end_time"]
 
         new_stage["stage_settings"]["problem_data"]["start_time"] = previous_end_time
-        new_stage["stage_settings"]["problem_data"]["end_time"] = (
-            previous_end_time + duration
-        )
-        new_stage["stage_settings"]["solver_settings"]["time_stepping"]["time_step"] = (
-            duration / steps
-        )
+        new_stage["stage_settings"]["problem_data"]["end_time"] = previous_end_time + duration
+        new_stage["stage_settings"]["solver_settings"]["time_stepping"]["time_step"] = duration / steps
 
         new_stage["stage_settings"]["output_processes"]["gid_output"][0]["Parameters"][
-            "output_name"
-        ] = f"gid_output/output_stage{new_stage_index}"
+            "output_name"] = f"gid_output/output_stage{new_stage_index}"
 
         data["stages"][new_stage_key] = new_stage
         data["orchestrator"]["settings"]["execution_list"].append(new_stage_key)
@@ -162,16 +146,10 @@ class ProjectParameterEditor:
             for i, stage_name in enumerate(stage_names):
                 stage = data["stages"][stage_name]
                 table_index_list = [0, i + 1, 0]
-                for process in (
-                    stage.get("stage_settings", {})
-                    .get("processes", {})
-                    .get("constraints_process_list", [])
-                ):
+                for process in stage.get("stage_settings", {}).get("processes", {}).get("constraints_process_list", []):
                     if (
-                        process.get("python_module")
-                        == "apply_vector_constraint_table_process"
-                        and process.get("Parameters", {}).get("model_part_name")
-                        == "PorousDomain.top_displacement"
+                            process.get("python_module") == "apply_vector_constraint_table_process"
+                            and process.get("Parameters", {}).get("model_part_name") == "PorousDomain.top_displacement"
                     ):
                         process["Parameters"]["table"] = table_index_list
 
