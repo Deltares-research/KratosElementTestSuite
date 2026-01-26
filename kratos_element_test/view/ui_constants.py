@@ -3,7 +3,7 @@
 # Contact kratos@deltares.nl
 
 
-#-----------------------UI labels---------------------------
+# -----------------------UI labels---------------------------
 
 # Application data
 APP_TITLE = "Deltares Soil Element Test Suite"
