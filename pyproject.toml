@@ -24,7 +24,7 @@ KratosGeoMechanicsApplication = ">=10.2.3"
 pytest = "*"
 parameterized = "*"
 pylint = "*"
-black = "*"
+black = "26.1.0"
 
 [tool.poetry.scripts]
 startElementTest = "kratos_element_test.view.kratos_element_test_gui:main"
