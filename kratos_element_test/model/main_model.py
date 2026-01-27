@@ -37,7 +37,7 @@ class MainModel:
 
         sim = RunSimulation(
             test_inputs=inputs,
-            material_inputs = self._material_input_manager.get_current_material_inputs(),
+            material_inputs=self._material_input_manager.get_current_material_inputs(),
             model_name=model_name,
             dll_path=dll_path,
             udsm_number=udsm_number,
@@ -63,10 +63,9 @@ class MainModel:
     def clear_results(self) -> None:
         self._result_manager.clear_results()
 
-    def set_material_type(self, material_type : str):
+    def set_material_type(self, material_type: str):
         self._material_input_manager.set_current_material_type(material_type)
         self.clear_results()
 
     def get_material_input_manager(self) -> MaterialInputManager:
         return self._material_input_manager
-

@@ -65,7 +65,9 @@ class RunSimulation:
             test_inputs.initial_effective_cell_pressure
         )
         if isinstance(self.material_inputs, MohrCoulombMaterialInputs):
-            self.cohesion_phi_indices = self.material_inputs.mohr_coulomb_options.to_indices()
+            self.cohesion_phi_indices = (
+                self.material_inputs.mohr_coulomb_options.to_indices()
+            )
         else:
             self.cohesion_phi_indices = cohesion_phi_indices
         self.log = logger or _fallback_log

@@ -17,10 +17,12 @@ class MohrCoulombOptions:
             return None
         return self.c_index, self.phi_index
 
+
 @dataclass
 class Parameter:
     value: float | str = 0.0
     unit: str = "-"
+
 
 @dataclass
 class LinearElasticMaterialInputs:
@@ -37,6 +39,7 @@ class LinearElasticMaterialInputs:
         for name, parameter in self.changeable_material_parameters.items():
             result[name] = parameter.value
         return result
+
 
 @dataclass
 class MohrCoulombMaterialInputs:
@@ -60,6 +63,7 @@ class MohrCoulombMaterialInputs:
         for name, parameter in self.changeable_material_parameters.items():
             result[name] = parameter.value
         return result
+
 
 @dataclass
 class UDSMMaterialInputs:

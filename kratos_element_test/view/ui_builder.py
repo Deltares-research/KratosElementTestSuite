@@ -157,7 +157,11 @@ class GeotechTestUI(ttk.Frame):
         # For now the string_vars are not used yet, but they'll be useful for adding a trace
         # later (similar to the test input fields)
         self.entry_widgets, self.string_vars = create_entries(
-            frame=self.param_frame,title= "Soil Input Parameters", labels=params, units=units, defaults=default_values
+            frame=self.param_frame,
+            title="Soil Input Parameters",
+            labels=params,
+            units=units,
+            defaults=default_values,
         )
 
         if self.is_linear_elastic or self.is_mohr_coulomb:

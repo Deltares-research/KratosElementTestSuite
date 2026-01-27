@@ -1,7 +1,10 @@
 import unittest
 
 from kratos_element_test.model.main_model import MainModel
-from kratos_element_test.model.material_inputs import MohrCoulombOptions, LinearElasticMaterialInputs
+from kratos_element_test.model.material_inputs import (
+    MohrCoulombOptions,
+    LinearElasticMaterialInputs,
+)
 
 
 class MainModelTest(unittest.TestCase):
@@ -9,8 +12,12 @@ class MainModelTest(unittest.TestCase):
         model = MainModel(logger=lambda msg, level: None)
 
         model.get_material_input_manager().set_current_material_type("linear_elastic")
-        model.get_material_input_manager().update_material_parameter_of_current_type("YOUNG_MODULUS", 9e5)
-        model.get_material_input_manager().update_material_parameter_of_current_type("POISSON_RATIO", 0.3)
+        model.get_material_input_manager().update_material_parameter_of_current_type(
+            "YOUNG_MODULUS", 9e5
+        )
+        model.get_material_input_manager().update_material_parameter_of_current_type(
+            "POISSON_RATIO", 0.3
+        )
 
         model.run_simulation(
             model_name="linear elastic model",
