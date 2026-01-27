@@ -41,5 +41,7 @@ jobs:
         run: pip install --upgrade pip .
       - name: Run code quality checks
         run: pylint kratos_element_test --output-format=github --fail-under 5 --fail-on E
+      - name: Check formatting
+        run: black kratos_element_test --check
   
     
