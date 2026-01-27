@@ -64,14 +64,24 @@ class RunSimulation:
         )
 
         is_crs_test = isinstance(test_inputs, CRSSimulationInputs)
-        self.stage_durations = [
-            hours_to_seconds(inc.duration_in_hours)
-            for inc in test_inputs.strain_increments
-        ] if is_crs_test else None
-        self.step_counts = [inc.steps for inc in test_inputs.strain_increments] if is_crs_test else None
-        self.strain_incs = [
-            inc.strain_increment for inc in test_inputs.strain_increments
-        ] if is_crs_test else None
+        self.stage_durations = (
+            [
+                hours_to_seconds(inc.duration_in_hours)
+                for inc in test_inputs.strain_increments
+            ]
+            if is_crs_test
+            else None
+        )
+        self.step_counts = (
+            [inc.steps for inc in test_inputs.strain_increments]
+            if is_crs_test
+            else None
+        )
+        self.strain_incs = (
+            [inc.strain_increment for inc in test_inputs.strain_increments]
+            if is_crs_test
+            else None
+        )
 
         self.keep_tmp = keep_tmp
 
