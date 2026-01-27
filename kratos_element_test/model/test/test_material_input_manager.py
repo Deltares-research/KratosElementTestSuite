@@ -52,7 +52,7 @@ class MaterialInputManagerTest(unittest.TestCase):
 
         self.assertEqual(
             linear_elastic_material_inputs.get_kratos_inputs()["YOUNG_MODULUS"],
-            Parameter(value=9e5, unit="kN/m²"),
+            9e5,
         )
 
     def tests_changing_nonexisting_material_inputs_throws(self):
