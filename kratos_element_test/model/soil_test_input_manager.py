@@ -72,7 +72,9 @@ class SoilTestInputManager:
         self.input_data[test_type].duration_in_seconds = new_duration_in_seconds
 
     def update_drainage(self, new_drainage: str) -> None:
-        self.get_current_test_inputs().drainage = new_drainage
+        inputs = self.get_current_test_inputs()
+        if hasattr(inputs, "drainage"):
+            inputs.drainage = new_drainage
 
     def add_strain_increment(self):
         crs_inputs = self.input_data.get(CRS)

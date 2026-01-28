@@ -98,9 +98,13 @@ class SoilTestInputController:
     def bind_drainage_combo_box(self, combo_box):
         def _sync_drainage_from_combobox(*_):
             val = combo_box.get().strip().lower()
-            self._soil_test_input_manager.update_drainage(
-                "drained" if val.startswith("drained") else "undrained"
-            )
+            if val.startswith("drained"):
+                drainage = "drained"
+            elif val.startswith("undrained"):
+                drainage = "undrained"
+            else:
+                return
+            self._soil_test_input_manager.update_drainage(drainage)
 
         combo_box.bind("<<ComboboxSelected>>", lambda e: _sync_drainage_from_combobox())
 

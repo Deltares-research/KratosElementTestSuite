@@ -218,11 +218,15 @@ class SoilTestInputView(ttk.Frame):
             parent, text="Type of Test:", font=(INPUT_SECTION_FONT, 10, "bold")
         ).pack(anchor="w", padx=5, pady=(5, 2))
 
-        self.test_type_var = tk.StringVar(value="Drained")
+        inputs = self._soil_test_input_controller.get_current_test_inputs()
+        drainage = getattr(inputs, "drainage", "drained")
+        initial_label = "Undrained" if str(drainage).strip().lower() == "undrained" else "Drained"
+
+        self.test_type_var = tk.StringVar(value=initial_label)
         self.test_type_menu = ttk.Combobox(
             parent,
             textvariable=self.test_type_var,
-            values=["Drained"],
+            values=["Drained", "Undrained"],
             state="readonly",
             width=12,
         )
