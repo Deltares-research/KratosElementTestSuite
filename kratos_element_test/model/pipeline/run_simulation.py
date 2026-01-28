@@ -202,25 +202,10 @@ class RunSimulation:
 
     def _set_material_constitutive_law(self) -> None:
         editor = MaterialEditor(str(self.material_json_path))
-        if self.dll_path:
-            editor.update_material_properties(
-                {
-                    "IS_FORTRAN_UDSM": True,
-                    "UMAT_PARAMETERS": self.material_parameters,
-                    "UDSM_NAME": self.dll_path,
-                    "UDSM_NUMBER": self.udsm_number,
-                }
-            )
-            editor.set_constitutive_law("SmallStrainUDSM2DPlaneStrainLaw")
-        if self.model_name:
-            if (
-                self.model_name.strip().lower() == "linear elastic model"
-                or self.model_name.strip().lower() == "mohr-coulomb model"
-            ):
-                editor.update_material_properties(
-                    self.material_inputs.get_kratos_inputs()
-                )
-                editor.set_constitutive_law(self.material_inputs.kratos_law_name)
+        editor.update_material_properties(
+            self.material_inputs.get_kratos_inputs()
+        )
+        editor.set_constitutive_law(self.material_inputs.kratos_law_name)
 
     def _set_project_parameters(self) -> None:
         with open(self.project_json_path, "r") as f:

@@ -121,3 +121,7 @@ class ElementTestController:
 
     def set_material_type(self, material_type: str) -> None:
         self._main_model.set_material_type(material_type)
+
+    def parse_udsm(self, dll_path):
+        self._main_model.initialize_udsm(dll_path)
+

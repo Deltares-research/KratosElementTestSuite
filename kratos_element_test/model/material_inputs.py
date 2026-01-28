@@ -74,12 +74,12 @@ class UDSMMaterialInputs:
             "IS_FORTRAN_UDSM": True,
             "UMAT_PARAMETERS": [],
             "UDSM_NAME": "",
-            "UDSM_NUMBER": 0,
+            "UDSM_NUMBER": 1,
         }
     )
     mohr_coulomb_options: MohrCoulombOptions | None = None
 
     def get_kratos_inputs(self) -> Dict:
         result = self.material_parameters
-        result["UMAT_PARAMETERS"] = self.changeable_material_parameters.values()
+        result["UMAT_PARAMETERS"] = [parameter.value for parameter in self.changeable_material_parameters.values()]
         return result

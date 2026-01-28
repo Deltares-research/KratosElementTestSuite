@@ -138,21 +138,16 @@ class GeotechTestUI(ttk.Frame):
         for w in self.param_frame.winfo_children() + self.button_frame.winfo_children():
             w.destroy()
 
-        index = self.model_dict["model_name"].index(self.model_var.get())
         params = []
         units = []
         default_values = {}
-        if self.is_linear_elastic or self.is_mohr_coulomb:
-            inputs = (
-                self.controller._material_input_controller.get_current_material_inputs()
-            )
-            for key, parameter in inputs.changeable_material_parameters.items():
-                params.append(key)
-                units.append(parameter.unit)
-                default_values[key] = parameter.value
-        else:
-            params = self.model_dict["param_names"][index]
-            units = self.model_dict.get("param_units", [[]])[index]
+        inputs = (
+            self.controller._material_input_controller.get_current_material_inputs()
+        )
+        for key, parameter in inputs.changeable_material_parameters.items():
+            params.append(key)
+            units.append(parameter.unit)
+            default_values[key] = parameter.value
 
         # For now the string_vars are not used yet, but they'll be useful for adding a trace
         # later (similar to the test input fields)
@@ -164,10 +159,9 @@ class GeotechTestUI(ttk.Frame):
             defaults=default_values,
         )
 
-        if self.is_linear_elastic or self.is_mohr_coulomb:
-            self.controller._material_input_controller.bind_test_input_fields_to_update_functions(
-                self.string_vars
-            )
+        self.controller._material_input_controller.bind_test_input_fields_to_update_functions(
+            self.string_vars
+        )
 
         self.setup_mohr_coulomb_controls(params)
 

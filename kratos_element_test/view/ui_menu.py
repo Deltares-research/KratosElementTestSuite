@@ -223,6 +223,7 @@ class MainUI:
             return root if root else os.path.abspath(os.sep)
 
         def load_dll():
+            self._controller.set_material_type("udsm")
             nonlocal last_model_source
             dll_path = filedialog.askopenfilename(
                 title=SELECT_UDSM,
@@ -235,6 +236,7 @@ class MainUI:
                 return
 
             try:
+                self._controller.parse_udsm(dll_path)
                 model_dict = udsm_parser(dll_path)
             except Exception as e:
                 messagebox.showerror("DLL Error", f"Failed to parse DLL: {e}")
