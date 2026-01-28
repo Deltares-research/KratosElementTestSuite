@@ -283,7 +283,6 @@ class GeotechTestUI(ttk.Frame):
 
             success = self.controller.run(
                 model_name=self.model_var.get(),
-                dll_path=self.dll_path or "",
                 udsm_number=udsm_number,
                 material_parameters=[float(x) for x in material_params],
             )

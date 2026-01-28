@@ -80,7 +80,6 @@ class ElementTestController:
         self,
         *,
         model_name: Optional[str] = None,
-        dll_path: str,
         udsm_number: Optional[int],
         material_parameters: List[float],
     ) -> bool:
@@ -95,7 +94,6 @@ class ElementTestController:
 
             self._main_model.run_simulation(
                 model_name,
-                dll_path,
                 udsm_number,
                 mohr_coulomb_options,
                 material_parameters,

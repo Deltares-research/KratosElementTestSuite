@@ -45,7 +45,6 @@ class RunSimulation:
             LinearElasticMaterialInputs | MohrCoulombMaterialInputs | UDSMMaterialInputs
         ),
         model_name: Optional[str],
-        dll_path: Optional[str],
         udsm_number: Optional[int],
         material_parameters: List[float],
         cohesion_phi_indices: Optional[Tuple[int, int]] = None,
@@ -54,7 +53,6 @@ class RunSimulation:
     ):
         self.test_type = test_inputs.test_type.lower()
         self.model_name = model_name
-        self.dll_path = dll_path
         self.udsm_number = udsm_number
         self.material_inputs = material_inputs
         self.material_parameters = material_parameters

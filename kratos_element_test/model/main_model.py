@@ -22,7 +22,6 @@ class MainModel:
     def run_simulation(
         self,
         model_name: str,
-        dll_path: str | None,
         udsm_number: int,
         mohr_coulomb_options: MohrCoulombOptions,
         material_parameters,
@@ -39,7 +38,6 @@ class MainModel:
             test_inputs=inputs,
             material_inputs=self._material_input_manager.get_current_material_inputs(),
             model_name=model_name,
-            dll_path=dll_path,
             udsm_number=udsm_number,
             material_parameters=material_parameters,
             cohesion_phi_indices=mohr_coulomb_options.to_indices(),
