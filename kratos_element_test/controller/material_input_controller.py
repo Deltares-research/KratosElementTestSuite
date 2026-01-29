@@ -17,3 +17,6 @@ class MaterialInputController:
                     key=changed_variable, value=float(string_var_test.get())
                 ),
             )
+
+    def set_current_udsm_model(self, model_name):
+        self._material_input_manager.set_current_udsm_model(model_name)

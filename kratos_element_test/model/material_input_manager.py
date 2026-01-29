@@ -88,3 +88,7 @@ class MaterialInputManager:
                 "UDSM material inputs have not been initialized. Please initialize UDSM first."
             )
         return [udsm_inputs.model_name for udsm_inputs in self._material_inputs["udsm"]]
+
+    def set_current_udsm_model(self, model_name):
+        self._current_udsm_number = self.get_udsm_model_names().index(model_name)
+        print(f"Set current UDSM model to {model_name} and the number to {self._current_udsm_number}")

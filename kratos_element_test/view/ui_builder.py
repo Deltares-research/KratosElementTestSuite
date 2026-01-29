@@ -135,6 +135,8 @@ class GeotechTestUI(ttk.Frame):
             self.model_menu.configure(state="readonly")
 
     def _create_input_fields(self):
+        self.controller.set_udsm_model(self.model_var.get())
+
         for w in self.param_frame.winfo_children() + self.button_frame.winfo_children():
             w.destroy()
 

@@ -122,3 +122,6 @@ class ElementTestController:
 
     def parse_udsm(self, dll_path):
         self._main_model.initialize_udsm(dll_path)
+
+    def set_udsm_model(self, model_name: str) -> None:
+        self._material_input_controller.set_current_udsm_model(model_name)
