@@ -139,6 +139,16 @@ class MaterialInputManagerTest(unittest.TestCase):
             udsm_material_inputs.get_kratos_inputs()["UMAT_PARAMETERS"], [0.0] * len(expected_changeable_material_parameters)
         )
 
+    def test_getting_udsm_model_names(self):
+        material_input_manager = MaterialInputManager()
+        material_input_manager.initialize_udsm(
+            "../simulation_assets/soil_models/sclay1creep.dll"
+        )
+
+        self.assertEqual(
+            material_input_manager.get_udsm_model_names(),
+            ["Deltares-SClay1S", "Deltares-SClay1S-Fibres"],
+        )
 
 
 

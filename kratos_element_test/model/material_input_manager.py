@@ -81,3 +81,13 @@ class MaterialInputManager:
 
     def set_current_udsm_number(self, udsm_number):
         self._current_udsm_number = udsm_number
+
+    def get_udsm_model_names(self):
+        if len(self._material_inputs["udsm"]) == 0:
+            raise RuntimeError(
+                "UDSM material inputs have not been initialized. Please initialize UDSM first."
+            )
+        return [
+            udsm_inputs.model_name
+            for udsm_inputs in self._material_inputs["udsm"]
+        ]
