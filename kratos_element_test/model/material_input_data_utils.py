@@ -14,4 +14,3 @@ def get_cohesion_and_phi(
         return material_inputs.get_cohesion_and_phi()
     except AttributeError:
         return None, None
-

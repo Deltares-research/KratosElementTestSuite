@@ -67,6 +67,5 @@ class MaterialInputUtilsTest(unittest.TestCase):
         self.assertIsNone(phi)
 
 
-
 if __name__ == "__main__":
     unittest.main()
