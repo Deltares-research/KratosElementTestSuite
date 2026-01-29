@@ -12,13 +12,10 @@ from kratos_element_test.controller.soil_test_input_controller import (
     SoilTestInputController,
 )
 from kratos_element_test.model.main_model import MainModel
-from kratos_element_test.model.material_input_data_models import MohrCoulombOptions
 from kratos_element_test.view.result_exporter import (
     export_excel_by_test_type,
 )
 from kratos_element_test.view.ui_constants import (
-    VALID_TEST_TYPES,
-    VALID_DRAINAGE_TYPES,
     TEST_NAME_TO_TYPE,
 )
 
@@ -29,10 +26,6 @@ class ElementTestController:
         logger: Callable[[str, str], None],
     ):
         self._logger = logger
-
-        self._mc_enabled: bool = False
-        self._mc_indices: Tuple[Optional[int], Optional[int]] = (None, None)
-
         self._main_model = MainModel(logger)
 
         self._soil_test_input_controller = SoilTestInputController(
@@ -41,13 +34,11 @@ class ElementTestController:
         self._result_controller = ResultController(
             self._main_model.get_result_manager()
         )
-
         self._material_input_controller = MaterialInputController(
             self._main_model.get_material_input_manager()
         )
 
     def set_mohr_enabled(self, enabled: bool) -> None:
-        self._mc_enabled = bool(enabled)
         self._material_input_controller.set_mohr_enabled(enabled)
         self._logger(
             f"Mohr-Coulomb model {'enabled' if enabled else 'disabled'}.", "info"
@@ -56,7 +47,6 @@ class ElementTestController:
     def set_mohr_mapping(
         self, c_index: Optional[int], phi_index: Optional[int]
     ) -> None:
-        self._mc_indices = (c_index, phi_index)
         self._material_input_controller.set_mohr_mapping(c_index, phi_index)
 
     def run(self) -> bool:
