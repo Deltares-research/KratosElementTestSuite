@@ -1,6 +1,7 @@
 # ©Deltares 2025
 # This is a prototype version
 # Contact kratos@deltares.nl
+from pathlib import Path
 from typing import Optional, Callable, List, Tuple
 
 from kratos_element_test.controller.material_input_controller import (
@@ -80,7 +81,6 @@ class ElementTestController:
         self,
         *,
         model_name: Optional[str] = None,
-        udsm_number: Optional[int],
         material_parameters: List[float],
     ) -> bool:
         try:
@@ -94,7 +94,6 @@ class ElementTestController:
 
             self._main_model.run_simulation(
                 model_name,
-                udsm_number,
                 mohr_coulomb_options,
                 material_parameters,
             )
@@ -120,8 +119,11 @@ class ElementTestController:
     def set_material_type(self, material_type: str) -> None:
         self._main_model.set_material_type(material_type)
 
-    def parse_udsm(self, dll_path):
+    def parse_udsm(self, dll_path: Path):
         self._main_model.initialize_udsm(dll_path)
 
     def set_udsm_model(self, model_name: str) -> None:
         self._material_input_controller.set_current_udsm_model(model_name)
+
+    def get_udsm_model_names(self) -> List[str]:
+        return self._material_input_controller.get_udsm_model_names()

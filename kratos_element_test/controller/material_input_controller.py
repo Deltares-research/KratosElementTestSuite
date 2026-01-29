@@ -20,3 +20,6 @@ class MaterialInputController:
 
     def set_current_udsm_model(self, model_name):
         self._material_input_manager.set_current_udsm_model(model_name)
+
+    def get_udsm_model_names(self):
+        return self._material_input_manager.get_udsm_model_names()

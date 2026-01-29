@@ -123,7 +123,7 @@ class GeotechTestUI(ttk.Frame):
         self.model_menu = ttk.Combobox(
             self.dropdown_frame,
             textvariable=self.model_var,
-            values=self.model_dict["model_name"],
+            values=self.controller.get_udsm_model_names(),
             state="readonly",
         )
         self.model_menu.pack(side="top", fill="x", expand=True, padx=5)
@@ -275,15 +275,9 @@ class GeotechTestUI(ttk.Frame):
 
             self.soil_test_input_view.validate(self.controller.get_current_test_type())
             material_params = [e.get() for e in self.entry_widgets.values()]
-            udsm_number = (
-                self.model_dict["model_name"].index(self.model_var.get()) + 1
-                if self.dll_path
-                else None
-            )
 
             success = self.controller.run(
                 model_name=self.model_var.get(),
-                udsm_number=udsm_number,
                 material_parameters=[float(x) for x in material_params],
             )
 

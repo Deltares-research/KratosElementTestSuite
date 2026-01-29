@@ -236,7 +236,7 @@ class MainUI:
                 return
 
             try:
-                self._controller.parse_udsm(dll_path)
+                self._controller.parse_udsm(Path(dll_path))
                 model_dict = udsm_parser(dll_path)
             except Exception as e:
                 messagebox.showerror("DLL Error", f"Failed to parse DLL: {e}")

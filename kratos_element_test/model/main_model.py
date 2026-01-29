@@ -1,3 +1,4 @@
+from pathlib import Path
 from typing import Callable, Dict, List
 
 from kratos_element_test.model.material_input_manager import MaterialInputManager
@@ -22,7 +23,6 @@ class MainModel:
     def run_simulation(
         self,
         model_name: str,
-        udsm_number: int,
         mohr_coulomb_options: MohrCoulombOptions,
         material_parameters,
     ) -> None:
@@ -38,7 +38,6 @@ class MainModel:
             test_inputs=inputs,
             material_inputs=self._material_input_manager.get_current_material_inputs(),
             model_name=model_name,
-            udsm_number=udsm_number,
             material_parameters=material_parameters,
             cohesion_phi_indices=mohr_coulomb_options.to_indices(),
             logger=self._logger,
@@ -68,5 +67,5 @@ class MainModel:
     def get_material_input_manager(self) -> MaterialInputManager:
         return self._material_input_manager
 
-    def initialize_udsm(self, dll_path):
+    def initialize_udsm(self, dll_path : Path):
         self._material_input_manager.initialize_udsm(dll_path)
