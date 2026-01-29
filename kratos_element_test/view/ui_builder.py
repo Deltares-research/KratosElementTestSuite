@@ -149,8 +149,6 @@ class GeotechTestUI(ttk.Frame):
             units.append(parameter.unit)
             default_values[key] = parameter.value
 
-        # For now the string_vars are not used yet, but they'll be useful for adding a trace
-        # later (similar to the test input fields)
         self.entry_widgets, self.string_vars = create_entries(
             frame=self.param_frame,
             title="Soil Input Parameters",
