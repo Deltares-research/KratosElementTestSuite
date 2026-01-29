@@ -16,6 +16,7 @@ from kratos_element_test.model.material_input_data_models import (
     MohrCoulombMaterialInputs,
     UDSMMaterialInputs,
 )
+from kratos_element_test.model.material_input_data_utils import get_cohesion_and_phi
 from kratos_element_test.model.models import (
     TriaxialAndShearSimulationInputs,
     CRSSimulationInputs,
@@ -122,9 +123,9 @@ class RunSimulation:
             self.log("Collecting results...", "info")
 
             output_file_strings = [str(p) for p in self._output_file_paths()]
-
+            cohesion, phi = get_cohesion_and_phi(self.material_inputs)
             # TODO pass the actual cohesion and phi values if needed
-            collector = ResultCollector(output_file_strings, None, None)
+            collector = ResultCollector(output_file_strings, cohesion, phi)
             results = collector.collect_results()
             self.log("Rendering complete.", "info")
             return results

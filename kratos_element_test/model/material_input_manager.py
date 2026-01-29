@@ -74,7 +74,7 @@ class MaterialInputManager:
             for name, unit in zip(parameter_names, parameter_units):
                 changeableparameters[name] = Parameter(0.0, unit)
             inputs = UDSMMaterialInputs()
-            inputs.material_parameters["UDSM_NAME"] = dll_path
+            inputs.material_parameters["UDSM_NAME"] = str(dll_path.resolve())
             inputs.material_parameters["UDSM_NUMBER"] = index
             index += 1
             inputs.changeable_material_parameters = changeableparameters
@@ -98,7 +98,10 @@ class MaterialInputManager:
         )
 
     def set_mohr_mapping(self, c_index, phi_index):
-        if self.get_current_material_type() == "mohr_coulomb" or "udsm":
+        if (
+            self.get_current_material_type() == "mohr_coulomb"
+            or self.get_current_material_type() == "udsm"
+        ):
             material_inputs = self.get_current_material_inputs()
             material_inputs.mohr_coulomb_options.c_index = c_index
             material_inputs.mohr_coulomb_options.phi_index = phi_index
@@ -107,7 +110,10 @@ class MaterialInputManager:
             )
 
     def set_mohr_enabled(self, enabled):
-        if self.get_current_material_type() == "mohr_coulomb" or "udsm":
+        if (
+            self.get_current_material_type() == "mohr_coulomb"
+            or self.get_current_material_type() == "udsm"
+        ):
             material_inputs = self.get_current_material_inputs()
             material_inputs.mohr_coulomb_options.enabled = enabled
             print(f"Set Mohr-Coulomb enabled to {enabled}")

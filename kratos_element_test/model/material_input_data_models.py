@@ -64,6 +64,11 @@ class MohrCoulombMaterialInputs:
             result[name] = parameter.value
         return result
 
+    def get_cohesion_and_phi(self) -> Tuple[float, float]:
+        cohesion = self.changeable_material_parameters["GEO_COHESION"].value
+        phi = self.changeable_material_parameters["GEO_FRICTION_ANGLE"].value
+        return cohesion, phi
+
 
 @dataclass
 class UDSMMaterialInputs:
@@ -89,3 +94,15 @@ class UDSMMaterialInputs:
             for parameter in self.changeable_material_parameters.values()
         ]
         return result
+
+    def get_cohesion_and_phi(self) -> Tuple[float, float] | Tuple[None, None]:
+        if not self.mohr_coulomb_options.enabled:
+            return None, None
+        c_index = self.mohr_coulomb_options.c_index
+        phi_index = self.mohr_coulomb_options.phi_index
+        if c_index is None or phi_index is None:
+            return None, None
+        material_parameters_list = list(self.changeable_material_parameters.values())
+        cohesion = material_parameters_list[c_index - 1].value
+        phi = material_parameters_list[phi_index - 1].value
+        return cohesion, phi
