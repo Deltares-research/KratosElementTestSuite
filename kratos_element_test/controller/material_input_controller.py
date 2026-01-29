@@ -29,3 +29,6 @@ class MaterialInputController:
 
     def set_mohr_mapping(self, c_index, phi_index):
         self._material_input_manager.set_mohr_mapping(c_index, phi_index)
+
+    def set_mohr_enabled(self, enabled):
+        self._material_input_manager.set_mohr_enabled(enabled)

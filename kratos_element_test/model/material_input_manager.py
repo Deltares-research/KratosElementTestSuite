@@ -105,3 +105,9 @@ class MaterialInputManager:
             print(
                 f"Set Mohr-Coulomb mapping to c_index: {c_index}, phi_index: {phi_index}"
             )
+
+    def set_mohr_enabled(self, enabled):
+        if self.get_current_material_type() == "mohr_coulomb" or "udsm":
+            material_inputs = self.get_current_material_inputs()
+            material_inputs.mohr_coulomb_options.enabled = enabled
+            print(f"Set Mohr-Coulomb enabled to {enabled}")
