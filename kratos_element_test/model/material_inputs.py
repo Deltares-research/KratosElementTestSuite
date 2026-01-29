@@ -81,5 +81,8 @@ class UDSMMaterialInputs:
 
     def get_kratos_inputs(self) -> Dict:
         result = self.material_parameters
-        result["UMAT_PARAMETERS"] = [parameter.value for parameter in self.changeable_material_parameters.values()]
+        result["UMAT_PARAMETERS"] = [
+            parameter.value
+            for parameter in self.changeable_material_parameters.values()
+        ]
         return result

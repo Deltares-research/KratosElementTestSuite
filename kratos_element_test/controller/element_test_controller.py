@@ -122,4 +122,3 @@ class ElementTestController:
 
     def parse_udsm(self, dll_path):
         self._main_model.initialize_udsm(dll_path)
-

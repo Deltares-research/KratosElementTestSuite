@@ -200,9 +200,7 @@ class RunSimulation:
 
     def _set_material_constitutive_law(self) -> None:
         editor = MaterialEditor(str(self.material_json_path))
-        editor.update_material_properties(
-            self.material_inputs.get_kratos_inputs()
-        )
+        editor.update_material_properties(self.material_inputs.get_kratos_inputs())
         editor.set_constitutive_law(self.material_inputs.kratos_law_name)
 
     def _set_project_parameters(self) -> None:

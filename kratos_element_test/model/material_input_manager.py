@@ -6,6 +6,7 @@ from kratos_element_test.model.material_inputs import (
     Parameter,
 )
 
+
 class MaterialInputManager:
     def __init__(self):
         self._current_material_type = ""
@@ -24,7 +25,9 @@ class MaterialInputManager:
     def get_current_material_type(self) -> str:
         return self._current_material_type
 
-    def get_current_material_inputs(self) -> LinearElasticMaterialInputs | MohrCoulombMaterialInputs | UDSMMaterialInputs:
+    def get_current_material_inputs(
+        self,
+    ) -> LinearElasticMaterialInputs | MohrCoulombMaterialInputs | UDSMMaterialInputs:
         return self._material_inputs[self.get_current_material_type()]
 
     def update_material_parameter_of_current_type(self, key, value):
@@ -49,5 +52,7 @@ class MaterialInputManager:
         for name, unit in zip(names_of_first_model, parameters_of_first_model):
             changeableparameters[name] = Parameter(0.0, unit)
 
-        self.get_current_material_inputs().changeable_material_parameters = changeableparameters
+        self.get_current_material_inputs().changeable_material_parameters = (
+            changeableparameters
+        )
         self.get_current_material_inputs().material_parameters["UDSM_NAME"] = dll_path
