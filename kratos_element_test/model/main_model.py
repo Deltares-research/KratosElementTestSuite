@@ -65,5 +65,5 @@ class MainModel:
     def get_material_input_manager(self) -> MaterialInputManager:
         return self._material_input_manager
 
-    def initialize_udsm(self, dll_path : Path):
+    def initialize_udsm(self, dll_path: Path):
         self._material_input_manager.initialize_udsm(dll_path)
