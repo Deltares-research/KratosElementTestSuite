@@ -9,6 +9,7 @@ from kratos_element_test.model.material_inputs import (
     UDSMMaterialInputs,
     Parameter,
 )
+from kratos_element_test.view.ui_utils import asset_path
 
 
 class MaterialInputManagerTest(unittest.TestCase):
@@ -25,18 +26,23 @@ class MaterialInputManagerTest(unittest.TestCase):
         [
             ["linear_elastic", LinearElasticMaterialInputs()],
             ["mohr_coulomb", MohrCoulombMaterialInputs()],
-            ["udsm", UDSMMaterialInputs()],
         ]
     )
     def test_default_input_for_materials(self, name, expected_defaults):
         material_input_manager = MaterialInputManager()
         material_input_manager.set_current_material_type(name)
 
-        linear_elastic_material_inputs = (
-            material_input_manager.get_current_material_inputs()
-        )
+        material_inputs = material_input_manager.get_current_material_inputs()
 
-        self.assertEqual(linear_elastic_material_inputs, expected_defaults)
+        self.assertEqual(material_inputs, expected_defaults)
+
+    def test_getting_udsm_material_inputs_without_initializing_udsm_throws(self):
+        material_input_manager = MaterialInputManager()
+        material_input_manager.set_current_material_type("udsm")
+
+        self.assertRaises(
+            RuntimeError, material_input_manager.get_current_material_inputs
+        )
 
     def test_changing_linear_elastic_material_inputs(self):
         material_input_manager = MaterialInputManager()
@@ -71,6 +77,69 @@ class MaterialInputManagerTest(unittest.TestCase):
             ValueError,
             lambda: material_input_manager.set_current_material_type("nonexistent"),
         )
+
+    def test_loading_udsm_initializes_material_inputs(self):
+        material_input_manager = MaterialInputManager()
+        material_input_manager.initialize_udsm(
+            "../simulation_assets/soil_models/sclay1creep.dll"
+        )
+
+        material_input_manager.set_current_material_type("udsm")
+
+        udsm_material_inputs = material_input_manager.get_current_material_inputs()
+
+        self.assertIsInstance(udsm_material_inputs, UDSMMaterialInputs)
+        self.assertEqual(udsm_material_inputs.model_name, "Deltares-SClay1S")
+        self.assertEqual(udsm_material_inputs.material_parameters["UDSM_NUMBER"], 1)
+
+        expected_changeable_material_parameters = {'k': Parameter(value=0.0, unit='-'),
+                                                   'l': Parameter(value=0.0, unit='-'),
+                                                   'm': Parameter(value=0.0, unit='-'),
+                                                   'n': Parameter(value=0.0, unit='-'),
+                                                   'fₜ𝒸': Parameter(value=0.0, unit='Degrees'),
+                                                   'r': Parameter(value=0.0, unit='-'),
+                                                   'w': Parameter(value=0.0, unit='-'),
+                                                   'w𝒹': Parameter(value=0.0, unit='-'),
+                                                   't': Parameter(value=0.0, unit='days'),
+                                                   'a₀': Parameter(value=0.0, unit='-'),
+                                                   'OCR': Parameter(value=0.0, unit='-'),
+                                                   'e₀': Parameter(value=0.0, unit='-')}
+
+        self.assertEqual(udsm_material_inputs.changeable_material_parameters, expected_changeable_material_parameters)
+        self.assertEqual(
+            udsm_material_inputs.get_kratos_inputs()["UMAT_PARAMETERS"], [0.0] * len(expected_changeable_material_parameters)
+        )
+
+        material_input_manager.set_current_udsm_number(1)
+
+        udsm_material_inputs = material_input_manager.get_current_material_inputs()
+        self.assertIsInstance(udsm_material_inputs, UDSMMaterialInputs)
+        self.assertEqual(udsm_material_inputs.model_name, "Deltares-SClay1S-Fibres")
+        self.assertEqual(udsm_material_inputs.material_parameters["UDSM_NUMBER"], 2)
+
+        expected_changeable_material_parameters = {'k': Parameter(value=0.0, unit='-'),
+                                                   'l': Parameter(value=0.0, unit='-'),
+                                                   'm': Parameter(value=0.0, unit='-'),
+                                                   'n': Parameter(value=0.0, unit='-'),
+                                                   'fₜ𝒸': Parameter(value=0.0, unit='Degrees'),
+                                                   'r': Parameter(value=0.0, unit='-'),
+                                                   'w': Parameter(value=0.0, unit='-'),
+                                                   'w𝒹': Parameter(value=0.0, unit='-'),
+                                                   't': Parameter(value=0.0, unit='days'),
+                                                   'a₀': Parameter(value=0.0, unit='-'),
+                                                   'OCR': Parameter(value=0.0, unit='-'),
+                                                   'e₀': Parameter(value=0.0, unit='-'),
+                                                   'Efib': Parameter(value=0.0, unit='kN/m'),
+                                                   'sₜₑₙ': Parameter(value=0.0, unit='kN/m'),
+                                                   's𝒸ₒₘ': Parameter(value=0.0, unit='kN/m'),
+                                                   'a': Parameter(value=0.0, unit='[Degrees]')}
+
+        self.assertEqual(udsm_material_inputs.changeable_material_parameters, expected_changeable_material_parameters)
+        self.assertEqual(
+            udsm_material_inputs.get_kratos_inputs()["UMAT_PARAMETERS"], [0.0] * len(expected_changeable_material_parameters)
+        )
+
+
 
 
 if __name__ == "__main__":
