@@ -79,9 +79,7 @@ class UDSMMaterialInputs:
         }
     )
     mohr_coulomb_options: MohrCoulombOptions = field(
-        default_factory=lambda: MohrCoulombOptions(
-            enabled=False, c_index=None, phi_index=None
-        )
+        default_factory=lambda: MohrCoulombOptions()
     )
 
     def get_kratos_inputs(self) -> Dict:

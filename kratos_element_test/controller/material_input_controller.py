@@ -1,5 +1,7 @@
 from kratos_element_test.model.material_input_manager import MaterialInputManager
-from kratos_element_test.model.material_input_data_models import LinearElasticMaterialInputs
+from kratos_element_test.model.material_input_data_models import (
+    LinearElasticMaterialInputs,
+)
 
 
 class MaterialInputController:
