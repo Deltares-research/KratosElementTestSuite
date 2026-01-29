@@ -59,7 +59,7 @@ class MaterialInputManager:
         current_material_inputs[key].value = value
         print(f"Changed {key} to {value}")
 
-    def initialize_udsm(self, dll_path : Path):
+    def initialize_udsm(self, dll_path: Path):
         self.set_current_material_type("udsm")
         self._material_inputs["udsm"].clear()
         self._current_udsm_number = 0
@@ -93,4 +93,6 @@ class MaterialInputManager:
 
     def set_current_udsm_model(self, model_name):
         self._current_udsm_number = self.get_udsm_model_names().index(model_name)
-        print(f"Set current UDSM model to {model_name} and the number to {self._current_udsm_number}")
+        print(
+            f"Set current UDSM model to {model_name} and the number to {self._current_udsm_number}"
+        )

@@ -81,7 +81,9 @@ class MaterialInputManagerTest(unittest.TestCase):
 
     def test_loading_udsm_initializes_material_inputs(self):
         material_input_manager = MaterialInputManager()
-        material_input_manager.initialize_udsm(Path(soil_models_dir()) / "sclay1creep.dll")
+        material_input_manager.initialize_udsm(
+            Path(soil_models_dir()) / "sclay1creep.dll"
+        )
 
         material_input_manager.set_current_material_type("udsm")
 
@@ -152,7 +154,9 @@ class MaterialInputManagerTest(unittest.TestCase):
 
     def test_getting_udsm_model_names(self):
         material_input_manager = MaterialInputManager()
-        material_input_manager.initialize_udsm(Path(soil_models_dir()) / "sclay1creep.dll")
+        material_input_manager.initialize_udsm(
+            Path(soil_models_dir()) / "sclay1creep.dll"
+        )
 
         self.assertEqual(
             material_input_manager.get_udsm_model_names(),
