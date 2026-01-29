@@ -46,26 +46,17 @@ class RunSimulation:
         material_inputs: (
             LinearElasticMaterialInputs | MohrCoulombMaterialInputs | UDSMMaterialInputs
         ),
-        material_parameters: List[float],
-        cohesion_phi_indices: Optional[Tuple[int, int]] = None,
         logger: Optional[Callable[[str, str], None]] = None,
         keep_tmp: bool = False,
     ):
         self.test_type = test_inputs.test_type.lower()
         self.material_inputs = material_inputs
-        self.material_parameters = material_parameters
         self.num_steps = test_inputs.number_of_steps
         self.end_time = test_inputs.duration_in_seconds
         self.maximum_strain = test_inputs.maximum_strain
         self.initial_effective_cell_pressure = (
             test_inputs.initial_effective_cell_pressure
         )
-        if isinstance(self.material_inputs, MohrCoulombMaterialInputs):
-            self.cohesion_phi_indices = (
-                self.material_inputs.mohr_coulomb_options.to_indices()
-            )
-        else:
-            self.cohesion_phi_indices = cohesion_phi_indices
         self.log = logger or _fallback_log
         self.drainage = (
             test_inputs.drainage

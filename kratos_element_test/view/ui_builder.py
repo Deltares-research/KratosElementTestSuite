@@ -277,11 +277,8 @@ class GeotechTestUI(ttk.Frame):
             self.root.update_idletasks()
 
             self.soil_test_input_view.validate(self.controller.get_current_test_type())
-            material_params = [e.get() for e in self.entry_widgets.values()]
 
-            success = self.controller.run(
-                material_parameters=[float(x) for x in material_params],
-            )
+            success = self.controller.run()
 
             if success:
                 self.plot_frame.draw()

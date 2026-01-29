@@ -79,24 +79,9 @@ class ElementTestController:
         self._logger(f"Unknown drainage: {drainage}", "warn")
         return False
 
-    def run(
-        self,
-        *,
-        material_parameters: List[float],
-    ) -> bool:
+    def run(self) -> bool:
         try:
-            self._logger(f"MC indices: {self._mc_tuple()}", "info")
-
-            mohr_coulomb_options = MohrCoulombOptions(
-                enabled=self._mc_enabled,
-                c_index=self._mc_indices[0],
-                phi_index=self._mc_indices[1],
-            )
-
-            self._main_model.run_simulation(
-                mohr_coulomb_options,
-                material_parameters,
-            )
+            self._main_model.run_simulation()
 
         except Exception as e:
             self._logger(f"Simulation failed: {e}", "error")

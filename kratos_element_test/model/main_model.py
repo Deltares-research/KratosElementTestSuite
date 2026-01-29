@@ -20,11 +20,7 @@ class MainModel:
     def get_current_test_type(self) -> str:
         return self._soil_test_input_manager.get_current_test_type()
 
-    def run_simulation(
-        self,
-        mohr_coulomb_options: MohrCoulombOptions,
-        material_parameters,
-    ) -> None:
+    def run_simulation(self) -> None:
 
         inputs = self._soil_test_input_manager.get_current_test_inputs()
         try:
@@ -36,8 +32,6 @@ class MainModel:
         sim = RunSimulation(
             test_inputs=inputs,
             material_inputs=self._material_input_manager.get_current_material_inputs(),
-            material_parameters=material_parameters,
-            cohesion_phi_indices=mohr_coulomb_options.to_indices(),
             logger=self._logger,
         )
 

@@ -16,10 +16,7 @@ class MainModelTest(unittest.TestCase):
             "POISSON_RATIO", 0.3
         )
 
-        model.run_simulation(
-            mohr_coulomb_options=MohrCoulombOptions(),
-            material_parameters=[],
-        )
+        model.run_simulation()
 
         results = model.get_latest_results()
         self.assertIsNotNone(results)
