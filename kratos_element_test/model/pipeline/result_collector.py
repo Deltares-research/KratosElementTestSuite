@@ -11,13 +11,11 @@ from kratos_element_test.view.ui_logger import log_message as fallback_log
 
 
 class ResultCollector:
-    def __init__(
-        self, output_file_paths, cohesion=None, phi=None, logger=None
-    ):
+    def __init__(self, output_file_paths, cohesion=None, phi=None, logger=None):
         self.output_file_paths = output_file_paths
         self._log = logger or fallback_log
-        self.cohesion=cohesion
-        self.phi=phi
+        self.cohesion = cohesion
+        self.phi = phi
 
     def collect_results(self):
         all_tensors = {}

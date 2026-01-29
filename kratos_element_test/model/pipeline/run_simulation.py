@@ -124,9 +124,7 @@ class RunSimulation:
             output_file_strings = [str(p) for p in self._output_file_paths()]
 
             # TODO pass the actual cohesion and phi values if needed
-            collector = ResultCollector(
-                output_file_strings, None, None
-            )
+            collector = ResultCollector(output_file_strings, None, None)
             results = collector.collect_results()
             self.log("Rendering complete.", "info")
             return results
