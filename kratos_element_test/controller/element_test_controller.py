@@ -80,7 +80,6 @@ class ElementTestController:
     def run(
         self,
         *,
-        model_name: Optional[str] = None,
         material_parameters: List[float],
     ) -> bool:
         try:
@@ -93,7 +92,6 @@ class ElementTestController:
             )
 
             self._main_model.run_simulation(
-                model_name,
                 mohr_coulomb_options,
                 material_parameters,
             )
@@ -127,3 +125,6 @@ class ElementTestController:
 
     def get_udsm_model_names(self) -> List[str]:
         return self._material_input_controller.get_udsm_model_names()
+
+    def get_current_material_type(self) -> str:
+        return self._material_input_controller.get_current_material_type()

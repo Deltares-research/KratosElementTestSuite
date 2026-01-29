@@ -23,3 +23,6 @@ class MaterialInputController:
 
     def get_udsm_model_names(self):
         return self._material_input_manager.get_udsm_model_names()
+
+    def get_current_material_type(self):
+        return self._material_input_manager.get_current_material_type()

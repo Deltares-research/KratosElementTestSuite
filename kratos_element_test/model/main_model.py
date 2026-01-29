@@ -22,7 +22,6 @@ class MainModel:
 
     def run_simulation(
         self,
-        model_name: str,
         mohr_coulomb_options: MohrCoulombOptions,
         material_parameters,
     ) -> None:
@@ -37,7 +36,6 @@ class MainModel:
         sim = RunSimulation(
             test_inputs=inputs,
             material_inputs=self._material_input_manager.get_current_material_inputs(),
-            model_name=model_name,
             material_parameters=material_parameters,
             cohesion_phi_indices=mohr_coulomb_options.to_indices(),
             logger=self._logger,

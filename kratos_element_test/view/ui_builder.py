@@ -115,27 +115,30 @@ class GeotechTestUI(ttk.Frame):
         self.plot_frame.initialize(num_plots)
 
     def _init_dropdown_section(self):
-        ttk.Label(
-            self.dropdown_frame,
-            text="Select a Model:",
-            font=(INPUT_SECTION_FONT, 12, "bold"),
-        ).pack(anchor="w", padx=5, pady=5)
-        self.model_menu = ttk.Combobox(
-            self.dropdown_frame,
-            textvariable=self.model_var,
-            values=self.controller.get_udsm_model_names(),
-            state="readonly",
-        )
-        self.model_menu.pack(side="top", fill="x", expand=True, padx=5)
-        self.model_var.trace("w", lambda *args: self._create_input_fields())
+        material_type = self.controller.get_current_material_type()
+        if material_type == "udsm":
+            ttk.Label(
+                self.dropdown_frame,
+                text="Select a Model:",
+                font=(INPUT_SECTION_FONT, 12, "bold"),
+            ).pack(anchor="w", padx=5, pady=5)
+            self.model_menu = ttk.Combobox(
+                self.dropdown_frame,
+                textvariable=self.model_var,
+                values=self.controller.get_udsm_model_names(),
+                state="readonly",
+            )
+            self.model_menu.pack(side="top", fill="x", expand=True, padx=5)
+            self.model_var.trace("w", lambda *args: self._create_input_fields())
 
-        if self.is_linear_elastic or self.is_mohr_coulomb:
-            self.model_menu.configure(state="disabled")
-        else:
-            self.model_menu.configure(state="readonly")
+            if self.is_linear_elastic or self.is_mohr_coulomb:
+                self.model_menu.configure(state="disabled")
+            else:
+                self.model_menu.configure(state="readonly")
 
     def _create_input_fields(self):
-        self.controller.set_udsm_model(self.model_var.get())
+        if self.controller.get_current_material_type() == "udsm":
+            self.controller.set_udsm_model(self.model_var.get())
 
         for w in self.param_frame.winfo_children() + self.button_frame.winfo_children():
             w.destroy()
@@ -277,7 +280,6 @@ class GeotechTestUI(ttk.Frame):
             material_params = [e.get() for e in self.entry_widgets.values()]
 
             success = self.controller.run(
-                model_name=self.model_var.get(),
                 material_parameters=[float(x) for x in material_params],
             )
 
@@ -319,7 +321,8 @@ class GeotechTestUI(ttk.Frame):
 
     def _disable_gui(self):
         self._set_widget_state(self.left_frame, "disabled")
-        self.model_menu.config(state="disabled")
+        if hasattr(self, "model_menu"):
+            self.model_menu.config(state="disabled")
         self.c_dropdown.config(state="disabled")
         self.phi_dropdown.config(state="disabled")
         self._set_widget_state(self.button_frame, "disabled")

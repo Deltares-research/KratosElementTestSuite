@@ -37,6 +37,7 @@ REQUIRED_FILES = [
 
 
 class RunSimulation:
+
     def __init__(
         self,
         *,
@@ -44,14 +45,12 @@ class RunSimulation:
         material_inputs: (
             LinearElasticMaterialInputs | MohrCoulombMaterialInputs | UDSMMaterialInputs
         ),
-        model_name: Optional[str],
         material_parameters: List[float],
         cohesion_phi_indices: Optional[Tuple[int, int]] = None,
         logger: Optional[Callable[[str, str], None]] = None,
         keep_tmp: bool = False,
     ):
         self.test_type = test_inputs.test_type.lower()
-        self.model_name = model_name
         self.material_inputs = material_inputs
         self.material_parameters = material_parameters
         self.num_steps = test_inputs.number_of_steps

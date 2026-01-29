@@ -17,7 +17,6 @@ class MainModelTest(unittest.TestCase):
         )
 
         model.run_simulation(
-            model_name="linear elastic model",
             mohr_coulomb_options=MohrCoulombOptions(),
             material_parameters=[],
         )
