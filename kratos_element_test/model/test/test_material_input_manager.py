@@ -1,4 +1,5 @@
 import unittest
+from pathlib import Path
 
 from parameterized import parameterized
 
@@ -9,7 +10,7 @@ from kratos_element_test.model.material_inputs import (
     UDSMMaterialInputs,
     Parameter,
 )
-from kratos_element_test.view.ui_utils import asset_path
+from kratos_element_test.view.ui_utils import asset_path, soil_models_dir
 
 
 class MaterialInputManagerTest(unittest.TestCase):
@@ -80,9 +81,7 @@ class MaterialInputManagerTest(unittest.TestCase):
 
     def test_loading_udsm_initializes_material_inputs(self):
         material_input_manager = MaterialInputManager()
-        material_input_manager.initialize_udsm(
-            "../simulation_assets/soil_models/sclay1creep.dll"
-        )
+        material_input_manager.initialize_udsm(Path(soil_models_dir()) / "sclay1creep.dll")
 
         material_input_manager.set_current_material_type("udsm")
 
@@ -153,9 +152,7 @@ class MaterialInputManagerTest(unittest.TestCase):
 
     def test_getting_udsm_model_names(self):
         material_input_manager = MaterialInputManager()
-        material_input_manager.initialize_udsm(
-            "../simulation_assets/soil_models/sclay1creep.dll"
-        )
+        material_input_manager.initialize_udsm(Path(soil_models_dir()) / "sclay1creep.dll")
 
         self.assertEqual(
             material_input_manager.get_udsm_model_names(),
