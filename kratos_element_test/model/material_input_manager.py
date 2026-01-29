@@ -13,8 +13,9 @@ class MaterialInputManager:
         self._material_inputs = {
             "linear_elastic": LinearElasticMaterialInputs(),
             "mohr_coulomb": MohrCoulombMaterialInputs(),
-            "udsm": UDSMMaterialInputs(),
+            "udsm": [],
         }
+        self._current_udsm_number = 0
 
     def set_current_material_type(self, material_type: str) -> None:
         if material_type not in self._material_inputs:
@@ -28,7 +29,13 @@ class MaterialInputManager:
     def get_current_material_inputs(
         self,
     ) -> LinearElasticMaterialInputs | MohrCoulombMaterialInputs | UDSMMaterialInputs:
-        return self._material_inputs[self.get_current_material_type()]
+        return (
+            self._material_inputs[self.get_current_material_type()][
+                self._current_udsm_number
+            ]
+            if self.get_current_material_type() == "udsm"
+            else self._material_inputs[self.get_current_material_type()]
+        )
 
     def update_material_parameter_of_current_type(self, key, value):
         current_material_inputs = self._material_inputs[
@@ -44,15 +51,15 @@ class MaterialInputManager:
 
     def initialize_udsm(self, dll_path):
         self.set_current_material_type("udsm")
+        self._material_inputs["udsm"].clear()
         model_dict = udsm_parser(dll_path)
-        print(model_dict)
-        names_of_first_model = model_dict["param_names"][0]
-        parameters_of_first_model = model_dict["param_units"][0]
-        changeableparameters = {}
-        for name, unit in zip(names_of_first_model, parameters_of_first_model):
-            changeableparameters[name] = Parameter(0.0, unit)
 
-        self.get_current_material_inputs().changeable_material_parameters = (
-            changeableparameters
-        )
-        self.get_current_material_inputs().material_parameters["UDSM_NAME"] = dll_path
+        for parameter_names, parameter_units, model_name in zip(model_dict["param_names"], model_dict["param_units"], model_dict["model_name"]):
+            changeableparameters = {}
+            for name, unit in zip(parameter_names, parameter_units):
+                changeableparameters[name] = Parameter(0.0, unit)
+            inputs = UDSMMaterialInputs()
+            inputs.material_parameters["UDSM_NAME"] = dll_path
+            inputs.changeable_material_parameters = changeableparameters
+            inputs.model_name = model_name
+            self._material_inputs["udsm"].append(inputs)
