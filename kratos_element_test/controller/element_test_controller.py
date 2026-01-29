@@ -56,6 +56,7 @@ class ElementTestController:
         self, c_index: Optional[int], phi_index: Optional[int]
     ) -> None:
         self._mc_indices = (c_index, phi_index)
+        self._material_input_controller.set_mohr_mapping(c_index, phi_index)
 
     def _mc_tuple(self) -> Optional[Tuple[int, int]]:
         if not self._mc_enabled:

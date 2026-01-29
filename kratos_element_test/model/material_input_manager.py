@@ -96,3 +96,12 @@ class MaterialInputManager:
         print(
             f"Set current UDSM model to {model_name} and the number to {self._current_udsm_number}"
         )
+
+    def set_mohr_mapping(self, c_index, phi_index):
+        if self.get_current_material_type() == "mohr_coulomb" or "udsm":
+            material_inputs = self.get_current_material_inputs()
+            material_inputs.mohr_coulomb_options.c_index = c_index
+            material_inputs.mohr_coulomb_options.phi_index = phi_index
+            print(
+                f"Set Mohr-Coulomb mapping to c_index: {c_index}, phi_index: {phi_index}"
+            )
