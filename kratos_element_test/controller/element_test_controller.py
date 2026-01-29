@@ -59,30 +59,9 @@ class ElementTestController:
         self._mc_indices = (c_index, phi_index)
         self._material_input_controller.set_mohr_mapping(c_index, phi_index)
 
-    def _mc_tuple(self) -> Optional[Tuple[int, int]]:
-        if not self._mc_enabled:
-            return None
-        c_idx, phi_idx = self._mc_indices
-        if c_idx is None or phi_idx is None:
-            return None
-        return c_idx, phi_idx
-
-    def _is_valid_test_type(self, test_type: Optional[str]) -> bool:
-        if test_type in VALID_TEST_TYPES:
-            return True
-        self._logger(f"Unknown test type: {test_type}", "warn")
-        return False
-
-    def _is_valid_drainage(self, drainage: Optional[str]) -> bool:
-        if drainage in VALID_DRAINAGE_TYPES:
-            return True
-        self._logger(f"Unknown drainage: {drainage}", "warn")
-        return False
-
     def run(self) -> bool:
         try:
             self._main_model.run_simulation()
-
         except Exception as e:
             self._logger(f"Simulation failed: {e}", "error")
             return False
