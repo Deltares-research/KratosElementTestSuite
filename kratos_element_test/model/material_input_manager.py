@@ -87,7 +87,4 @@ class MaterialInputManager:
             raise RuntimeError(
                 "UDSM material inputs have not been initialized. Please initialize UDSM first."
             )
-        return [
-            udsm_inputs.model_name
-            for udsm_inputs in self._material_inputs["udsm"]
-        ]
+        return [udsm_inputs.model_name for udsm_inputs in self._material_inputs["udsm"]]

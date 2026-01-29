@@ -92,22 +92,28 @@ class MaterialInputManagerTest(unittest.TestCase):
         self.assertEqual(udsm_material_inputs.model_name, "Deltares-SClay1S")
         self.assertEqual(udsm_material_inputs.material_parameters["UDSM_NUMBER"], 1)
 
-        expected_changeable_material_parameters = {'k': Parameter(value=0.0, unit='-'),
-                                                   'l': Parameter(value=0.0, unit='-'),
-                                                   'm': Parameter(value=0.0, unit='-'),
-                                                   'n': Parameter(value=0.0, unit='-'),
-                                                   'fₜ𝒸': Parameter(value=0.0, unit='Degrees'),
-                                                   'r': Parameter(value=0.0, unit='-'),
-                                                   'w': Parameter(value=0.0, unit='-'),
-                                                   'w𝒹': Parameter(value=0.0, unit='-'),
-                                                   't': Parameter(value=0.0, unit='days'),
-                                                   'a₀': Parameter(value=0.0, unit='-'),
-                                                   'OCR': Parameter(value=0.0, unit='-'),
-                                                   'e₀': Parameter(value=0.0, unit='-')}
+        expected_changeable_material_parameters = {
+            "k": Parameter(value=0.0, unit="-"),
+            "l": Parameter(value=0.0, unit="-"),
+            "m": Parameter(value=0.0, unit="-"),
+            "n": Parameter(value=0.0, unit="-"),
+            "fₜ𝒸": Parameter(value=0.0, unit="Degrees"),
+            "r": Parameter(value=0.0, unit="-"),
+            "w": Parameter(value=0.0, unit="-"),
+            "w𝒹": Parameter(value=0.0, unit="-"),
+            "t": Parameter(value=0.0, unit="days"),
+            "a₀": Parameter(value=0.0, unit="-"),
+            "OCR": Parameter(value=0.0, unit="-"),
+            "e₀": Parameter(value=0.0, unit="-"),
+        }
 
-        self.assertEqual(udsm_material_inputs.changeable_material_parameters, expected_changeable_material_parameters)
         self.assertEqual(
-            udsm_material_inputs.get_kratos_inputs()["UMAT_PARAMETERS"], [0.0] * len(expected_changeable_material_parameters)
+            udsm_material_inputs.changeable_material_parameters,
+            expected_changeable_material_parameters,
+        )
+        self.assertEqual(
+            udsm_material_inputs.get_kratos_inputs()["UMAT_PARAMETERS"],
+            [0.0] * len(expected_changeable_material_parameters),
         )
 
         material_input_manager.set_current_udsm_number(1)
@@ -117,26 +123,32 @@ class MaterialInputManagerTest(unittest.TestCase):
         self.assertEqual(udsm_material_inputs.model_name, "Deltares-SClay1S-Fibres")
         self.assertEqual(udsm_material_inputs.material_parameters["UDSM_NUMBER"], 2)
 
-        expected_changeable_material_parameters = {'k': Parameter(value=0.0, unit='-'),
-                                                   'l': Parameter(value=0.0, unit='-'),
-                                                   'm': Parameter(value=0.0, unit='-'),
-                                                   'n': Parameter(value=0.0, unit='-'),
-                                                   'fₜ𝒸': Parameter(value=0.0, unit='Degrees'),
-                                                   'r': Parameter(value=0.0, unit='-'),
-                                                   'w': Parameter(value=0.0, unit='-'),
-                                                   'w𝒹': Parameter(value=0.0, unit='-'),
-                                                   't': Parameter(value=0.0, unit='days'),
-                                                   'a₀': Parameter(value=0.0, unit='-'),
-                                                   'OCR': Parameter(value=0.0, unit='-'),
-                                                   'e₀': Parameter(value=0.0, unit='-'),
-                                                   'Efib': Parameter(value=0.0, unit='kN/m'),
-                                                   'sₜₑₙ': Parameter(value=0.0, unit='kN/m'),
-                                                   's𝒸ₒₘ': Parameter(value=0.0, unit='kN/m'),
-                                                   'a': Parameter(value=0.0, unit='[Degrees]')}
+        expected_changeable_material_parameters = {
+            "k": Parameter(value=0.0, unit="-"),
+            "l": Parameter(value=0.0, unit="-"),
+            "m": Parameter(value=0.0, unit="-"),
+            "n": Parameter(value=0.0, unit="-"),
+            "fₜ𝒸": Parameter(value=0.0, unit="Degrees"),
+            "r": Parameter(value=0.0, unit="-"),
+            "w": Parameter(value=0.0, unit="-"),
+            "w𝒹": Parameter(value=0.0, unit="-"),
+            "t": Parameter(value=0.0, unit="days"),
+            "a₀": Parameter(value=0.0, unit="-"),
+            "OCR": Parameter(value=0.0, unit="-"),
+            "e₀": Parameter(value=0.0, unit="-"),
+            "Efib": Parameter(value=0.0, unit="kN/m"),
+            "sₜₑₙ": Parameter(value=0.0, unit="kN/m"),
+            "s𝒸ₒₘ": Parameter(value=0.0, unit="kN/m"),
+            "a": Parameter(value=0.0, unit="[Degrees]"),
+        }
 
-        self.assertEqual(udsm_material_inputs.changeable_material_parameters, expected_changeable_material_parameters)
         self.assertEqual(
-            udsm_material_inputs.get_kratos_inputs()["UMAT_PARAMETERS"], [0.0] * len(expected_changeable_material_parameters)
+            udsm_material_inputs.changeable_material_parameters,
+            expected_changeable_material_parameters,
+        )
+        self.assertEqual(
+            udsm_material_inputs.get_kratos_inputs()["UMAT_PARAMETERS"],
+            [0.0] * len(expected_changeable_material_parameters),
         )
 
     def test_getting_udsm_model_names(self):
@@ -149,7 +161,6 @@ class MaterialInputManagerTest(unittest.TestCase):
             material_input_manager.get_udsm_model_names(),
             ["Deltares-SClay1S", "Deltares-SClay1S-Fibres"],
         )
-
 
 
 if __name__ == "__main__":
