@@ -1,3 +1,5 @@
+from pathlib import Path
+
 from kratos_element_test.model.io.udsm_parser import udsm_parser
 from kratos_element_test.model.material_inputs import (
     LinearElasticMaterialInputs,
@@ -57,11 +59,11 @@ class MaterialInputManager:
         current_material_inputs[key].value = value
         print(f"Changed {key} to {value}")
 
-    def initialize_udsm(self, dll_path):
+    def initialize_udsm(self, dll_path : Path):
         self.set_current_material_type("udsm")
         self._material_inputs["udsm"].clear()
         self._current_udsm_number = 0
-        model_dict = udsm_parser(dll_path)
+        model_dict = udsm_parser(str(dll_path.resolve()))
         index = 1
         for parameter_names, parameter_units, model_name in zip(
             model_dict["param_names"],
