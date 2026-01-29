@@ -11,7 +11,7 @@ from kratos_element_test.model.core_utils import _fallback_log, hours_to_seconds
 from kratos_element_test.model.io.material_editor import MaterialEditor
 from kratos_element_test.model.io.project_parameter_editor import ProjectParameterEditor
 from kratos_element_test.model.io.mdpa_editor import MdpaEditor
-from kratos_element_test.model.material_inputs import (
+from kratos_element_test.model.material_input_data_models import (
     LinearElasticMaterialInputs,
     MohrCoulombMaterialInputs,
     UDSMMaterialInputs,

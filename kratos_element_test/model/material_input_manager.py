@@ -1,7 +1,7 @@
 from pathlib import Path
 
 from kratos_element_test.model.io.udsm_parser import udsm_parser
-from kratos_element_test.model.material_inputs import (
+from kratos_element_test.model.material_input_data_models import (
     LinearElasticMaterialInputs,
     MohrCoulombMaterialInputs,
     UDSMMaterialInputs,
