@@ -115,7 +115,6 @@ class RunSimulation:
 
             output_file_strings = [str(p) for p in self._output_file_paths()]
             cohesion, phi = get_cohesion_and_phi(self.material_inputs)
-            # TODO pass the actual cohesion and phi values if needed
             collector = ResultCollector(output_file_strings, cohesion, phi)
             results = collector.collect_results()
             self.log("Rendering complete.", "info")
