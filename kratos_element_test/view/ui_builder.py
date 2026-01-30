@@ -9,7 +9,7 @@ from tkinter import ttk, scrolledtext
 
 from kratos_element_test.view.log_viewer import LogViewer
 from kratos_element_test.view.plot_viewer import PlotViewer
-from kratos_element_test.view.soil_parameter_entries import SoilParameterEntries
+from kratos_element_test.view.material_input_view import MaterialInputView
 from kratos_element_test.view.soil_test_input_view import SoilTestInputView
 from kratos_element_test.view.ui_constants import INPUT_SECTION_FONT
 from kratos_element_test.view.ui_logger import log_message, clear_log
@@ -90,7 +90,7 @@ class GeotechTestUI(ttk.Frame):
         self.dropdown_frame = ttk.Frame(self.left_frame)
         self.dropdown_frame.pack(fill="x")
 
-        self.param_frame = SoilParameterEntries(self.left_frame, padding="10")
+        self.param_frame = MaterialInputView(self.left_frame, padding="10")
         self.param_frame.pack(fill="both", expand=True, pady=10)
 
         self.button_frame = ttk.Frame(self.left_panel, padding="10")
