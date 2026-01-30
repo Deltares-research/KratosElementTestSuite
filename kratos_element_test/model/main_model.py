@@ -2,7 +2,6 @@ from pathlib import Path
 from typing import Callable, Dict, List
 
 from kratos_element_test.model.material_input_manager import MaterialInputManager
-from kratos_element_test.model.material_input_data_models import MohrCoulombOptions
 from kratos_element_test.model.pipeline.run_simulation import RunSimulation
 from kratos_element_test.model.result_manager import ResultManager
 from kratos_element_test.model.soil_test_input_manager import SoilTestInputManager
