@@ -38,17 +38,6 @@ class ElementTestController:
             self._main_model.get_material_input_manager()
         )
 
-    def set_mohr_enabled(self, enabled: bool) -> None:
-        self._material_input_controller.set_mohr_enabled(enabled)
-        self._logger(
-            f"Mohr-Coulomb model {'enabled' if enabled else 'disabled'}.", "info"
-        )
-
-    def set_mohr_mapping(
-        self, c_index: Optional[int], phi_index: Optional[int]
-    ) -> None:
-        self._material_input_controller.set_mohr_mapping(c_index, phi_index)
-
     def run(self) -> bool:
         try:
             self._main_model.run_simulation()
