@@ -73,7 +73,6 @@ class GeotechTestUI(ttk.Frame):
         )
         self.scroll_canvas.bind_all("<MouseWheel>", self._on_mousewheel)
 
-
         self.material_input_view = MaterialInputView(
             self.controller._material_input_controller, self.left_frame, padding="10"
         )
@@ -95,7 +94,7 @@ class GeotechTestUI(ttk.Frame):
         self.plot_frame.initialize(num_plots)
 
     def _create_input_fields(self):
-        for w in (self.button_frame.winfo_children()):
+        for w in self.button_frame.winfo_children():
             w.destroy()
 
         self.material_input_view.refresh()

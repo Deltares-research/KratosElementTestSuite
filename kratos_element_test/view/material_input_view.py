@@ -58,7 +58,9 @@ class MaterialInputView(ttk.Frame):
     def setup_material_inputs(self):
         if self._controller.get_current_material_type() == "udsm":
             self._controller.set_current_udsm_model(self.model_var.get())
-        for entry in self.entry_frame.winfo_children() + self.mohr_frame.winfo_children():
+        for entry in (
+            self.entry_frame.winfo_children() + self.mohr_frame.winfo_children()
+        ):
             entry.destroy()
 
         params = []

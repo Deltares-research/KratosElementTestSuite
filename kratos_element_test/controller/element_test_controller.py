@@ -2,7 +2,7 @@
 # This is a prototype version
 # Contact kratos@deltares.nl
 from pathlib import Path
-from typing import Optional, Callable, List, Tuple
+from typing import Optional, Callable
 
 from kratos_element_test.controller.material_input_controller import (
     MaterialInputController,
@@ -75,12 +75,3 @@ class ElementTestController:
 
     def parse_udsm(self, dll_path: Path):
         self._main_model.initialize_udsm(dll_path)
-
-    def set_udsm_model(self, model_name: str) -> None:
-        self._material_input_controller.set_current_udsm_model(model_name)
-
-    def get_udsm_model_names(self) -> List[str]:
-        return self._material_input_controller.get_udsm_model_names()
-
-    def get_current_material_type(self) -> str:
-        return self._material_input_controller.get_current_material_type()
