@@ -79,14 +79,15 @@ class UDSMMaterialInputs:
         }
     )
     mohr_coulomb_options: MohrCoulombOptions = field(
-        default_factory=lambda: MohrCoulombOptions(enabled=False, c_index=3, phi_index=4)
+        default_factory=lambda: MohrCoulombOptions(
+            enabled=False, c_index=3, phi_index=4
+        )
     )
 
     def get_kratos_inputs(self) -> Dict:
         result = self.material_parameters
         result["UMAT_PARAMETERS"] = [
-            parameter.value
-            for parameter in self.user_defined_parameters.values()
+            parameter.value for parameter in self.user_defined_parameters.values()
         ]
         return result
 

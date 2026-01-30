@@ -13,9 +13,7 @@ class MaterialInputUtilsTest(unittest.TestCase):
     def test_get_c_and_phi_from_mohr_coulomb_model(self):
         mohr_coulomb_inputs = MohrCoulombMaterialInputs()
         mohr_coulomb_inputs.user_defined_parameters["GEO_COHESION"].value = 1.0
-        mohr_coulomb_inputs.user_defined_parameters[
-            "GEO_FRICTION_ANGLE"
-        ].value = 25.0
+        mohr_coulomb_inputs.user_defined_parameters["GEO_FRICTION_ANGLE"].value = 25.0
 
         c, phi = get_cohesion_and_phi(mohr_coulomb_inputs)
 
