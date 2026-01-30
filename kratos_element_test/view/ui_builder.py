@@ -8,12 +8,10 @@ import traceback
 from tkinter import ttk, scrolledtext
 
 from kratos_element_test.view.log_viewer import LogViewer
-from kratos_element_test.view.plot_viewer import PlotViewer
 from kratos_element_test.view.material_input_view import MaterialInputView
+from kratos_element_test.view.plot_viewer import PlotViewer
 from kratos_element_test.view.soil_test_input_view import SoilTestInputView
-from kratos_element_test.view.ui_constants import INPUT_SECTION_FONT
 from kratos_element_test.view.ui_logger import log_message, clear_log
-from kratos_element_test.view.widget_creation_utils import create_entries
 
 
 class GeotechTestUI(ttk.Frame):
@@ -47,7 +45,6 @@ class GeotechTestUI(ttk.Frame):
         self.is_running = False
         self.external_widgets = external_widgets if external_widgets else []
 
-        self._init_dropdown_section()
         self._create_input_fields()
 
     def _start_simulation_thread(self):
@@ -91,8 +88,7 @@ class GeotechTestUI(ttk.Frame):
         )
         self.scroll_canvas.bind_all("<MouseWheel>", self._on_mousewheel)
 
-        self.dropdown_frame = ttk.Frame(self.left_frame)
-        self.dropdown_frame.pack(fill="x")
+
         self.material_input_view = MaterialInputView(
             self.controller._material_input_controller, self.left_frame, padding="10"
         )
@@ -113,30 +109,9 @@ class GeotechTestUI(ttk.Frame):
     def _init_plot_canvas(self, num_plots):
         self.plot_frame.initialize(num_plots)
 
-    def _init_dropdown_section(self):
-        material_type = self.controller.get_current_material_type()
-        if material_type == "udsm":
-            ttk.Label(
-                self.dropdown_frame,
-                text="Select a Model:",
-                font=(INPUT_SECTION_FONT, 12, "bold"),
-            ).pack(anchor="w", padx=5, pady=5)
-            self.model_menu = ttk.Combobox(
-                self.dropdown_frame,
-                textvariable=self.model_var,
-                values=self.controller.get_udsm_model_names(),
-                state="readonly",
-            )
-            self.model_menu.pack(side="top", fill="x", expand=True, padx=5)
-            self.model_var.trace("w", lambda *args: self._create_input_fields())
-            self.model_menu.configure(state="readonly")
-
     def _create_input_fields(self):
         for w in (self.button_frame.winfo_children()):
             w.destroy()
-
-        if self.controller.get_current_material_type() == "udsm":
-            self.controller.set_udsm_model(self.model_var.get())
 
         self.material_input_view.refresh()
 
