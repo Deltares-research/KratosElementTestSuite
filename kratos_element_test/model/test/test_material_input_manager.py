@@ -109,7 +109,7 @@ class MaterialInputManagerTest(unittest.TestCase):
         }
 
         self.assertEqual(
-            udsm_material_inputs.changeable_material_parameters,
+            udsm_material_inputs.user_defined_parameters,
             expected_changeable_material_parameters,
         )
         self.assertEqual(
@@ -144,7 +144,7 @@ class MaterialInputManagerTest(unittest.TestCase):
         }
 
         self.assertEqual(
-            udsm_material_inputs.changeable_material_parameters,
+            udsm_material_inputs.user_defined_parameters,
             expected_changeable_material_parameters,
         )
         self.assertEqual(

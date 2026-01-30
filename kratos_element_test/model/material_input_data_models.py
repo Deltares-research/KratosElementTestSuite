@@ -22,7 +22,7 @@ class Parameter:
 @dataclass
 class LinearElasticMaterialInputs:
     kratos_law_name: str = "GeoLinearElasticPlaneStrain2DLaw"
-    changeable_material_parameters: Dict = field(
+    user_defined_parameters: Dict = field(
         default_factory=lambda: {
             "YOUNG_MODULUS": Parameter(value=0.0, unit="kN/m²"),
             "POISSON_RATIO": Parameter(value=0.0, unit="-"),
@@ -31,7 +31,7 @@ class LinearElasticMaterialInputs:
 
     def get_kratos_inputs(self) -> Dict:
         result = {}
-        for name, parameter in self.changeable_material_parameters.items():
+        for name, parameter in self.user_defined_parameters.items():
             result[name] = parameter.value
         return result
 
@@ -39,7 +39,7 @@ class LinearElasticMaterialInputs:
 @dataclass
 class MohrCoulombMaterialInputs:
     kratos_law_name: str = "GeoMohrCoulombWithTensionCutOff2D"
-    changeable_material_parameters: Dict = field(
+    user_defined_parameters: Dict = field(
         default_factory=lambda: {
             "YOUNG_MODULUS": Parameter(value=0.0, unit="kN/m²"),
             "POISSON_RATIO": Parameter(value=0.0, unit="-"),
@@ -55,13 +55,13 @@ class MohrCoulombMaterialInputs:
 
     def get_kratos_inputs(self) -> Dict:
         result = {}
-        for name, parameter in self.changeable_material_parameters.items():
+        for name, parameter in self.user_defined_parameters.items():
             result[name] = parameter.value
         return result
 
     def get_cohesion_and_phi(self) -> Tuple[float, float]:
-        cohesion = self.changeable_material_parameters["GEO_COHESION"].value
-        phi = self.changeable_material_parameters["GEO_FRICTION_ANGLE"].value
+        cohesion = self.user_defined_parameters["GEO_COHESION"].value
+        phi = self.user_defined_parameters["GEO_FRICTION_ANGLE"].value
         return cohesion, phi
 
 
@@ -69,7 +69,7 @@ class MohrCoulombMaterialInputs:
 class UDSMMaterialInputs:
     kratos_law_name: str = "SmallStrainUDSM2DPlaneStrainLaw"
     model_name: str = ""
-    changeable_material_parameters = Dict
+    user_defined_parameters = Dict
     material_parameters: Dict = field(
         default_factory=lambda: {
             "IS_FORTRAN_UDSM": True,
@@ -86,7 +86,7 @@ class UDSMMaterialInputs:
         result = self.material_parameters
         result["UMAT_PARAMETERS"] = [
             parameter.value
-            for parameter in self.changeable_material_parameters.values()
+            for parameter in self.user_defined_parameters.values()
         ]
         return result
 
@@ -99,7 +99,7 @@ class UDSMMaterialInputs:
         if c_index is None or phi_index is None:
             return None, None
 
-        material_parameters_list = list(self.changeable_material_parameters.values())
+        material_parameters_list = list(self.user_defined_parameters.values())
         cohesion = material_parameters_list[c_index - 1].value
         phi = material_parameters_list[phi_index - 1].value
 

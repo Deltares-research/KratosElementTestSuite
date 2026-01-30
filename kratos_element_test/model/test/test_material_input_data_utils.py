@@ -12,8 +12,8 @@ from kratos_element_test.model.material_input_data_utils import get_cohesion_and
 class MaterialInputUtilsTest(unittest.TestCase):
     def test_get_c_and_phi_from_mohr_coulomb_model(self):
         mohr_coulomb_inputs = MohrCoulombMaterialInputs()
-        mohr_coulomb_inputs.changeable_material_parameters["GEO_COHESION"].value = 1.0
-        mohr_coulomb_inputs.changeable_material_parameters[
+        mohr_coulomb_inputs.user_defined_parameters["GEO_COHESION"].value = 1.0
+        mohr_coulomb_inputs.user_defined_parameters[
             "GEO_FRICTION_ANGLE"
         ].value = 25.0
 
@@ -30,7 +30,7 @@ class MaterialInputUtilsTest(unittest.TestCase):
             "Param3": Parameter(value=3.0),
             "Param4": Parameter(value=4.0),
         }
-        udsm_inputs.changeable_material_parameters = user_defined_parameters
+        udsm_inputs.user_defined_parameters = user_defined_parameters
         udsm_inputs.mohr_coulomb_options.enabled = True
         udsm_inputs.mohr_coulomb_options.c_index = 2
         udsm_inputs.mohr_coulomb_options.phi_index = 3
@@ -48,7 +48,7 @@ class MaterialInputUtilsTest(unittest.TestCase):
             "Param3": Parameter(value=3.0),
             "Param4": Parameter(value=4.0),
         }
-        udsm_inputs.changeable_material_parameters = user_defined_parameters
+        udsm_inputs.user_defined_parameters = user_defined_parameters
         udsm_inputs.mohr_coulomb_options.enabled = False
         udsm_inputs.mohr_coulomb_options.c_index = 2
         udsm_inputs.mohr_coulomb_options.phi_index = 3

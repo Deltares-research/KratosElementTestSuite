@@ -67,7 +67,7 @@ class MaterialInputView(ttk.Frame):
         units = []
         default_values = {}
         inputs = self._controller.get_current_material_inputs()
-        for key, parameter in inputs.changeable_material_parameters.items():
+        for key, parameter in inputs.user_defined_parameters.items():
             params.append(key)
             units.append(parameter.unit)
             default_values[key] = parameter.value

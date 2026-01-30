@@ -49,7 +49,7 @@ class MaterialInputManager:
 
     def update_material_parameter_of_current_type(self, key, value):
         current_material_inputs = (
-            self.get_current_material_inputs().changeable_material_parameters
+            self.get_current_material_inputs().user_defined_parameters
         )
         if key not in current_material_inputs:
             raise KeyError(
@@ -77,7 +77,7 @@ class MaterialInputManager:
             inputs.material_parameters["UDSM_NAME"] = str(dll_path.resolve())
             inputs.material_parameters["UDSM_NUMBER"] = index
             index += 1
-            inputs.changeable_material_parameters = changeableparameters
+            inputs.user_defined_parameters = changeableparameters
             inputs.model_name = model_name
             self._material_inputs["udsm"].append(inputs)
 
