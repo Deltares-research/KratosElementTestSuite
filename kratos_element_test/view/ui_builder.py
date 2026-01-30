@@ -18,25 +18,20 @@ from kratos_element_test.view.ui_utils import asset_path
 
 
 class GeotechTestUI(ttk.Frame):
-    def __init__(
-        self, root, test_name, dll_path, model_dict, controller, external_widgets=None
-    ):
+    def __init__(self, root, controller, external_widgets=None):
         self.controller = controller
         super().__init__(root)
         self.pack(side="top", fill="both", expand=True)
         self.root = root
-        self.test_name = test_name
-        self.dll_path = dll_path
-        self.model_dict = model_dict
         self.is_linear_elastic = (
-            model_dict["model_name"][0].lower() == "linear elastic model"
+            self.controller.get_current_material_type() == "linear_elastic"
         )
         self.is_mohr_coulomb = (
-            model_dict["model_name"][0].lower() == "mohr-coulomb model"
+            self.controller.get_current_material_type() == "mohr_coulomb"
         )
 
         self.model_var = tk.StringVar(root)
-        self.model_var.set(model_dict["model_name"][0])
+        self.model_var.set(self.controller.get_udsm_model_names()[0] if self.controller.get_current_material_type() == "udsm" else "")
         self.test_input_history = {}
 
         self._init_frames()
@@ -130,11 +125,7 @@ class GeotechTestUI(ttk.Frame):
             )
             self.model_menu.pack(side="top", fill="x", expand=True, padx=5)
             self.model_var.trace("w", lambda *args: self._create_input_fields())
-
-            if self.is_linear_elastic or self.is_mohr_coulomb:
-                self.model_menu.configure(state="disabled")
-            else:
-                self.model_menu.configure(state="readonly")
+            self.model_menu.configure(state="readonly")
 
     def _create_input_fields(self):
         if self.controller.get_current_material_type() == "udsm":

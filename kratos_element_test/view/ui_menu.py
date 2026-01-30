@@ -11,7 +11,6 @@ from tkinter import filedialog, messagebox, ttk, scrolledtext, Menu
 from platformdirs import user_data_dir
 
 from kratos_element_test.controller.element_test_controller import ElementTestController
-from kratos_element_test.model.io.udsm_parser import udsm_parser
 from kratos_element_test.view.ui_builder import GeotechTestUI
 from kratos_element_test.view.ui_constants import (
     APP_TITLE,
@@ -237,7 +236,6 @@ class MainUI:
 
             try:
                 self._controller.parse_udsm(Path(dll_path))
-                model_dict = udsm_parser(dll_path)
             except Exception as e:
                 messagebox.showerror("DLL Error", f"Failed to parse DLL: {e}")
                 model_source_var.set(last_model_source)
@@ -248,12 +246,8 @@ class MainUI:
                 for widget in self.main_frame.winfo_children():
                     widget.destroy()
                 self.main_frame.destroy()
-            self._controller.clear_results()
             self.main_frame = GeotechTestUI(
                 root,
-                test_name="Triaxial",
-                dll_path=dll_path,
-                model_dict=model_dict,
                 controller=self._controller,
                 external_widgets=[model_source_menu],
             )
@@ -261,12 +255,6 @@ class MainUI:
         def load_linear_elastic():
             self._controller.set_material_type("linear_elastic")
             nonlocal last_model_source
-            model_dict = {
-                "model_name": [LINEAR_ELASTIC],
-                "num_params": [2],
-                "param_names": [["Young's Modulus", "Poisson's Ratio"]],
-                "param_units": [["kN/m²", "–"]],
-            }
             last_model_source = LINEAR_ELASTIC
 
             if self.main_frame:
@@ -276,9 +264,6 @@ class MainUI:
 
             self.main_frame = GeotechTestUI(
                 root,
-                test_name="Triaxial",
-                dll_path=None,
-                model_dict=model_dict,
                 controller=self._controller,
                 external_widgets=[model_source_menu],
             )
@@ -286,21 +271,6 @@ class MainUI:
         def load_mohr_coulomb():
             self._controller.set_material_type("mohr_coulomb")
             nonlocal last_model_source
-            model_dict = {
-                "model_name": [MOHR_COULOMB],
-                "num_params": [4],
-                "param_names": [
-                    [
-                        "Young's Modulus",
-                        "Poisson's Ratio",
-                        "Cohesion",
-                        "Friction Angle",
-                        "Tensile Strength",
-                        "Dilatancy Angle",
-                    ]
-                ],
-                "param_units": [["kN/m²", "-", "kN/m²", "deg", "kN/m²", "deg"]],
-            }
             last_model_source = MOHR_COULOMB
 
             if self.main_frame:
@@ -308,12 +278,8 @@ class MainUI:
                     widget.destroy()
                 self.main_frame.destroy()
 
-            self._controller.clear_results()
             self.main_frame = GeotechTestUI(
                 root,
-                test_name="Triaxial",
-                dll_path=None,
-                model_dict=model_dict,
                 controller=self._controller,
                 external_widgets=[model_source_menu],
             )
