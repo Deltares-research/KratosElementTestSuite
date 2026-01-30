@@ -30,7 +30,11 @@ class GeotechTestUI(ttk.Frame):
         )
 
         self.model_var = tk.StringVar(root)
-        self.model_var.set(self.controller.get_udsm_model_names()[0] if self.controller.get_current_material_type() == "udsm" else "")
+        self.model_var.set(
+            self.controller.get_udsm_model_names()[0]
+            if self.controller.get_current_material_type() == "udsm"
+            else ""
+        )
         self.test_input_history = {}
 
         self._init_frames()
@@ -89,9 +93,10 @@ class GeotechTestUI(ttk.Frame):
 
         self.dropdown_frame = ttk.Frame(self.left_frame)
         self.dropdown_frame.pack(fill="x")
-
-        self.param_frame = MaterialInputView(self.left_frame, padding="10")
-        self.param_frame.pack(fill="both", expand=True, pady=10)
+        self.material_input_view = MaterialInputView(
+            self.controller._material_input_controller, self.left_frame, padding="10"
+        )
+        self.material_input_view.pack(fill="both", expand=True, pady=10)
 
         self.button_frame = ttk.Frame(self.left_panel, padding="10")
         self.button_frame.pack(fill="x", pady=(0, 5))
@@ -127,11 +132,13 @@ class GeotechTestUI(ttk.Frame):
             self.model_menu.configure(state="readonly")
 
     def _create_input_fields(self):
+        for w in (self.material_input_view.winfo_children() + self.button_frame.winfo_children()):
+            w.destroy()
+
         if self.controller.get_current_material_type() == "udsm":
             self.controller.set_udsm_model(self.model_var.get())
 
-        for w in self.param_frame.winfo_children() + self.button_frame.winfo_children():
-            w.destroy()
+        self.material_input_view.initialize()
 
         params = []
         units = []
@@ -144,24 +151,12 @@ class GeotechTestUI(ttk.Frame):
             units.append(parameter.unit)
             default_values[key] = parameter.value
 
-        self.entry_widgets, self.string_vars = create_entries(
-            frame=self.param_frame,
-            title="Soil Input Parameters",
-            labels=params,
-            units=units,
-            defaults=default_values,
-        )
-
-        self.controller._material_input_controller.bind_test_input_fields_to_update_functions(
-            self.string_vars
-        )
-
         self.setup_mohr_coulomb_controls(params)
 
         self.soil_test_input_view = SoilTestInputView(
             self.controller._soil_test_input_controller,
             self._init_plot_canvas,
-            self.param_frame,
+            self.material_input_view,
         )
 
         clear_log()
@@ -174,7 +169,7 @@ class GeotechTestUI(ttk.Frame):
         self.run_button.pack(pady=5)
 
     def _create_mohr_options(self, params):
-        self.mohr_frame = ttk.Frame(self.param_frame)
+        self.mohr_frame = ttk.Frame(self.material_input_view)
         self.mohr_frame.pack(fill="x", padx=10, pady=5)
 
         self.mohr_checkbox_widget = ttk.Checkbutton(
