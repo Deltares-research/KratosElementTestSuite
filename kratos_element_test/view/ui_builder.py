@@ -142,7 +142,7 @@ class GeotechTestUI(ttk.Frame):
     def _set_widget_state(self, parent, state):
         for child in parent.winfo_children():
             if isinstance(child, ttk.Combobox):
-                child.configure(state="readonly")
+                child.configure(state="readonly" if state == "normal" else "disabled")
             elif isinstance(
                 child,
                 (ttk.Entry, tk.Button, ttk.Button, tk.Checkbutton, ttk.Checkbutton),
@@ -161,10 +161,6 @@ class GeotechTestUI(ttk.Frame):
 
     def _disable_gui(self):
         self._set_widget_state(self.left_frame, "disabled")
-        if hasattr(self, "model_menu"):
-            self.model_menu.config(state="disabled")
-        # self.c_dropdown.config(state="disabled")
-        # self.phi_dropdown.config(state="disabled")
         self._set_widget_state(self.button_frame, "disabled")
         if hasattr(self, "scrollbar"):
             self._original_scroll_cmd = self.scrollbar.cget("command")
@@ -183,7 +179,6 @@ class GeotechTestUI(ttk.Frame):
         if hasattr(self, "scrollbar") and hasattr(self, "_original_scroll_cmd"):
             self.scrollbar.config(command=self._original_scroll_cmd)
         self.scroll_canvas.bind_all("<MouseWheel>", self._on_mousewheel)
-        self.model_menu.configure(state="readonly")
 
     def _on_mousewheel(self, event):
         if event.delta > 0:

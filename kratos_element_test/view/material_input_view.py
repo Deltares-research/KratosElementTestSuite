@@ -8,9 +8,9 @@ from kratos_element_test.view.widget_creation_utils import create_entries
 class MaterialInputView(ttk.Frame):
     def __init__(self, material_input_controller, master, **kwargs):
         super().__init__(master, **kwargs)
-        self.entry_widgets = {}
-        self.dropdown_frame = None
         self._controller = material_input_controller
+
+        self.dropdown_frame = None
         self.entry_frame = None
         self.is_linear_elastic = (
             self._controller.get_current_material_type() == "linear_elastic"
@@ -72,7 +72,7 @@ class MaterialInputView(ttk.Frame):
             units.append(parameter.unit)
             default_values[key] = parameter.value
 
-        self.entry_widgets, self.string_vars = create_entries(
+        _, string_vars = create_entries(
             frame=self.entry_frame,
             title="Soil Input Parameters",
             labels=params,
@@ -80,7 +80,7 @@ class MaterialInputView(ttk.Frame):
             defaults=default_values,
         )
 
-        self._controller.bind_test_input_fields_to_update_functions(self.string_vars)
+        self._controller.bind_test_input_fields_to_update_functions(string_vars)
         self.setup_mohr_coulomb_controls(params)
 
     def _create_mohr_options(self, params):
