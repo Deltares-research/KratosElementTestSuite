@@ -1,23 +1,21 @@
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Tuple
 
 import numpy as np
-
-from kratos_element_test.model.core_utils import seconds_to_hours
-from kratos_element_test.view.ui_logger import log_message as fallback_log
 from KratosMultiphysics.GeoMechanicsApplication.gid_output_file_reader import (
     GiDOutputFileReader,
 )
 
+from kratos_element_test.model.core_utils import seconds_to_hours
+from kratos_element_test.view.ui_logger import log_message as fallback_log
+
 
 class ResultCollector:
-    def __init__(
-        self, output_file_paths, material_parameters, cohesion_phi_indices, logger=None
-    ):
+    def __init__(self, output_file_paths, cohesion=None, phi=None, logger=None):
         self.output_file_paths = output_file_paths
         self._log = logger or fallback_log
-        self.material_parameters = material_parameters
-        self.cohesion_phi_indices = cohesion_phi_indices
+        self.cohesion = cohesion
+        self.phi = phi
 
     def collect_results(self):
         all_tensors = {}
@@ -58,9 +56,6 @@ class ResultCollector:
         all_yy_strain = self._apply_cumulative_strain_offset(yy_strain_stages)
 
         sigma_1, sigma_3 = self._calculate_principal_stresses(all_tensors)
-        cohesion, phi = self._get_cohesion_phi(
-            self.material_parameters, self.cohesion_phi_indices
-        )
 
         return {
             "yy_strain": all_yy_strain,
@@ -71,8 +66,8 @@ class ResultCollector:
             "shear_strain_xy": all_shear_strain_xy,
             "mean_stress": all_mean_stress,
             "von_mises": all_von_mises,
-            "cohesion": cohesion,
-            "phi": phi,
+            "cohesion": self.cohesion,
+            "phi": self.phi,
             "sigma_xx": all_sigma_xx,
             "sigma_yy": all_sigma_yy,
             "time_steps": all_time_steps,
@@ -234,12 +229,3 @@ class ResultCollector:
                 sigma_1.append(float(np.min(eigenvalues)))
                 sigma_3.append(float(np.max(eigenvalues)))
         return sigma_1, sigma_3
-
-    @staticmethod
-    def _get_cohesion_phi(
-        umat_parameters: List[float], indices: Optional[Tuple[int, int]]
-    ) -> Tuple[Optional[float], Optional[float]]:
-        if not indices:
-            return None, None
-        c_idx, phi_idx = indices
-        return float(umat_parameters[c_idx - 1]), float(umat_parameters[phi_idx - 1])

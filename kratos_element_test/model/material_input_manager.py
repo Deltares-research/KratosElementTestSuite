@@ -1,0 +1,133 @@
+from pathlib import Path
+
+from kratos_element_test.model.io.udsm_parser import udsm_parser
+from kratos_element_test.model.material_input_data_models import (
+    LinearElasticMaterialInputs,
+    MohrCoulombMaterialInputs,
+    UDSMMaterialInputs,
+    Parameter,
+)
+
+
+class MaterialInputManager:
+    def __init__(self):
+        self._current_material_type = ""
+        self._material_inputs = {
+            "linear_elastic": LinearElasticMaterialInputs(),
+            "mohr_coulomb": MohrCoulombMaterialInputs(),
+            "udsm": [],
+        }
+        self._current_udsm_number = 0
+
+    def set_current_material_type(self, material_type: str) -> None:
+        if material_type not in self._material_inputs:
+            raise ValueError(f"Invalid material type {material_type}")
+        self._current_material_type = material_type
+        print(f"Set material type to {material_type}")
+
+    def get_current_material_type(self) -> str:
+        return self._current_material_type
+
+    def get_current_material_inputs(
+        self,
+    ) -> LinearElasticMaterialInputs | MohrCoulombMaterialInputs | UDSMMaterialInputs:
+        if (
+            self.get_current_material_type() == "udsm"
+            and len(self._material_inputs["udsm"]) == 0
+        ):
+            raise RuntimeError(
+                "UDSM material inputs have not been initialized. Please initialize UDSM first."
+            )
+
+        return (
+            self._material_inputs[self.get_current_material_type()][
+                self._current_udsm_number
+            ]
+            if self.get_current_material_type() == "udsm"
+            else self._material_inputs[self.get_current_material_type()]
+        )
+
+    def update_material_parameter_of_current_type(self, key, value):
+        current_material_inputs = (
+            self.get_current_material_inputs().user_defined_parameters
+        )
+        if key not in current_material_inputs:
+            raise KeyError(
+                f"This material parameter ({key}) is not available for the current material type ({self.get_current_material_type()})"
+            )
+
+        current_material_inputs[key].value = value
+        print(f"Changed {key} to {value}")
+
+    def initialize_udsm(self, dll_path: Path):
+        self.set_current_material_type("udsm")
+        self._material_inputs["udsm"].clear()
+        self._current_udsm_number = 0
+        model_dict = udsm_parser(str(dll_path.resolve()))
+        index = 1
+        for parameter_names, parameter_units, model_name in zip(
+            model_dict["param_names"],
+            model_dict["param_units"],
+            model_dict["model_name"],
+        ):
+            changeableparameters = {}
+            for name, unit in zip(parameter_names, parameter_units):
+                changeableparameters[name] = Parameter(0.0, unit)
+            inputs = UDSMMaterialInputs()
+            inputs.material_parameters["UDSM_NAME"] = str(dll_path.resolve())
+            inputs.material_parameters["UDSM_NUMBER"] = index
+            index += 1
+            inputs.user_defined_parameters = changeableparameters
+            inputs.model_name = model_name
+            self._material_inputs["udsm"].append(inputs)
+
+    def set_current_udsm_number(self, udsm_number):
+        self._current_udsm_number = udsm_number
+
+    def get_udsm_model_names(self):
+        if len(self._material_inputs["udsm"]) == 0:
+            raise RuntimeError(
+                "UDSM material inputs have not been initialized. Please initialize UDSM first."
+            )
+        return [udsm_inputs.model_name for udsm_inputs in self._material_inputs["udsm"]]
+
+    def set_current_udsm_model(self, model_name):
+        self._current_udsm_number = self.get_udsm_model_names().index(model_name)
+        print(
+            f"Set current UDSM model to {model_name} and the number to {self._current_udsm_number}"
+        )
+
+    def set_mohr_enabled(self, enabled):
+        if (
+            self.get_current_material_type() == "mohr_coulomb"
+            or self.get_current_material_type() == "udsm"
+        ):
+            material_inputs = self.get_current_material_inputs()
+            material_inputs.mohr_coulomb_options.enabled = enabled
+            print(f"Set Mohr-Coulomb enabled to {enabled}")
+
+    def set_cohesion_index(self, cohesion_index):
+        if (
+            self.get_current_material_type() == "mohr_coulomb"
+            or self.get_current_material_type() == "udsm"
+        ):
+            material_inputs = self.get_current_material_inputs()
+            material_inputs.mohr_coulomb_options.c_index = cohesion_index
+            print(f"Set Mohr-Coulomb cohesion index to {cohesion_index}")
+
+    def set_phi_index(self, phi_index):
+        if (
+            self.get_current_material_type() == "mohr_coulomb"
+            or self.get_current_material_type() == "udsm"
+        ):
+            material_inputs = self.get_current_material_inputs()
+            material_inputs.mohr_coulomb_options.phi_index = phi_index
+            print(f"Set Mohr-Coulomb phi index to {phi_index}")
+
+    def get_mohr_enabled(self):
+        if (
+            self.get_current_material_type() == "mohr_coulomb"
+            or self.get_current_material_type() == "udsm"
+        ):
+            material_inputs = self.get_current_material_inputs()
+            return material_inputs.mohr_coulomb_options.enabled
