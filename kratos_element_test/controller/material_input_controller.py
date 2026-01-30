@@ -29,8 +29,14 @@ class MaterialInputController:
     def get_current_material_type(self):
         return self._material_input_manager.get_current_material_type()
 
-    def set_mohr_mapping(self, c_index, phi_index):
-        self._material_input_manager.set_mohr_mapping(c_index, phi_index)
-
     def set_mohr_enabled(self, enabled):
         self._material_input_manager.set_mohr_enabled(enabled)
+
+    def get_mohr_enabled(self):
+        return self._material_input_manager.get_mohr_enabled()
+
+    def set_cohesion_index(self, cohesion_index):
+        self._material_input_manager.set_cohesion_index(cohesion_index)
+
+    def set_phi_index(self, phi_index):
+        self._material_input_manager.set_phi_index(phi_index)

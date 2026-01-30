@@ -97,18 +97,6 @@ class MaterialInputManager:
             f"Set current UDSM model to {model_name} and the number to {self._current_udsm_number}"
         )
 
-    def set_mohr_mapping(self, c_index, phi_index):
-        if (
-            self.get_current_material_type() == "mohr_coulomb"
-            or self.get_current_material_type() == "udsm"
-        ):
-            material_inputs = self.get_current_material_inputs()
-            material_inputs.mohr_coulomb_options.c_index = c_index
-            material_inputs.mohr_coulomb_options.phi_index = phi_index
-            print(
-                f"Set Mohr-Coulomb mapping to c_index: {c_index}, phi_index: {phi_index}"
-            )
-
     def set_mohr_enabled(self, enabled):
         if (
             self.get_current_material_type() == "mohr_coulomb"
@@ -117,3 +105,29 @@ class MaterialInputManager:
             material_inputs = self.get_current_material_inputs()
             material_inputs.mohr_coulomb_options.enabled = enabled
             print(f"Set Mohr-Coulomb enabled to {enabled}")
+
+    def set_cohesion_index(self, cohesion_index):
+        if (
+            self.get_current_material_type() == "mohr_coulomb"
+            or self.get_current_material_type() == "udsm"
+        ):
+            material_inputs = self.get_current_material_inputs()
+            material_inputs.mohr_coulomb_options.c_index = cohesion_index
+            print(f"Set Mohr-Coulomb cohesion index to {cohesion_index}")
+
+    def set_phi_index(self, phi_index):
+        if (
+            self.get_current_material_type() == "mohr_coulomb"
+            or self.get_current_material_type() == "udsm"
+        ):
+            material_inputs = self.get_current_material_inputs()
+            material_inputs.mohr_coulomb_options.phi_index = phi_index
+            print(f"Set Mohr-Coulomb phi index to {phi_index}")
+
+    def get_mohr_enabled(self):
+        if (
+            self.get_current_material_type() == "mohr_coulomb"
+            or self.get_current_material_type() == "udsm"
+        ):
+            material_inputs = self.get_current_material_inputs()
+            return material_inputs.mohr_coulomb_options.enabled

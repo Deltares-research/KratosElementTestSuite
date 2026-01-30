@@ -1,5 +1,5 @@
-from tkinter import ttk
 import tkinter as tk
+from tkinter import ttk
 
 from kratos_element_test.view.ui_constants import INPUT_SECTION_FONT
 from kratos_element_test.view.widget_creation_utils import create_entries
@@ -81,7 +81,9 @@ class MaterialInputView(ttk.Frame):
         )
 
         self._controller.bind_test_input_fields_to_update_functions(string_vars)
-        self.setup_mohr_coulomb_controls(params)
+
+        if self._controller.get_current_material_type() == "udsm":
+            self.setup_mohr_coulomb_controls(params)
 
     def _create_mohr_options(self, params):
         self.mohr_checkbox_widget = ttk.Checkbutton(
@@ -100,6 +102,12 @@ class MaterialInputView(ttk.Frame):
             state="readonly",
             width=2,
         )
+        self.cohesion_var.trace_add(
+            "write",
+            lambda _var_name, _index, _operation: self._controller.set_cohesion_index(
+                self.cohesion_var.get()
+            ),
+        )
 
         self.phi_label = ttk.Label(self.mohr_frame, text="Friction Angle")
         self.phi_dropdown = ttk.Combobox(
@@ -109,54 +117,35 @@ class MaterialInputView(ttk.Frame):
             state="readonly",
             width=2,
         )
+        self.phi_var.trace_add(
+            "write",
+            lambda _var_name, _index, _operation: self._controller.set_phi_index(
+                self.phi_var.get()
+            ),
+        )
 
-        def _sync_mapping(*_):
-            c_idx, phi_idx = self._parse_mc_indices()
-            self._controller.set_mohr_mapping(c_idx, phi_idx)
-
-        self.c_dropdown.bind("<<ComboboxSelected>>", _sync_mapping)
-        self.phi_dropdown.bind("<<ComboboxSelected>>", _sync_mapping)
-
-        _sync_mapping()
-
-    def _parse_mc_indices(self):
-        try:
-            c_idx = int(self.cohesion_var.get()) if self.cohesion_var.get() else None
-            phi_idx = int(self.phi_var.get()) if self.phi_var.get() else None
-        except ValueError:
-            c_idx, phi_idx = None, None
-
-        return c_idx, phi_idx
+        self._toggle_mohr_options()
 
     def _toggle_mohr_options(self):
         widgets = [self.c_label, self.c_dropdown, self.phi_label, self.phi_dropdown]
+        self._controller.set_mohr_enabled(self.mohr_checkbox.get())
+
         if self.mohr_checkbox.get():
-
-            self._controller.set_mohr_enabled(True)
-            c_idx, phi_idx = self._parse_mc_indices()
-            self._controller.set_mohr_mapping(c_idx, phi_idx)
-
             for w in widgets:
                 w.pack(side="left", padx=5)
-
         else:
-            self._controller.set_mohr_enabled(False)
-            self._controller.set_mohr_mapping(None, None)
-
             for w in widgets:
                 w.pack_forget()
 
     def setup_mohr_coulomb_controls(self, params):
-        self.mohr_checkbox = tk.BooleanVar()
-        self.cohesion_var = tk.StringVar(value="3")
-        self.phi_var = tk.StringVar(value="4")
+        material_inputs = self._controller.get_current_material_inputs()
+
+        self.mohr_checkbox = tk.BooleanVar(value=self._controller.get_mohr_enabled())
+        self.cohesion_var = tk.StringVar(
+            value=material_inputs.mohr_coulomb_options.c_index
+        )
+        self.phi_var = tk.StringVar(
+            value=material_inputs.mohr_coulomb_options.phi_index
+        )
         self._create_mohr_options(params)
-
-        if self.is_linear_elastic:
-            self.mohr_frame.pack_forget()
-
-        elif self.is_mohr_coulomb:
-            self.mohr_frame.pack_forget()
-
-        else:
-            self.mohr_checkbox_widget.configure(state="normal")
+        self.mohr_checkbox_widget.configure(state="normal")
