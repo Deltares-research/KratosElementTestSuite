@@ -132,26 +132,13 @@ class GeotechTestUI(ttk.Frame):
             self.model_menu.configure(state="readonly")
 
     def _create_input_fields(self):
-        for w in (self.material_input_view.winfo_children() + self.button_frame.winfo_children()):
+        for w in (self.button_frame.winfo_children()):
             w.destroy()
 
         if self.controller.get_current_material_type() == "udsm":
             self.controller.set_udsm_model(self.model_var.get())
 
-        self.material_input_view.initialize()
-
-        params = []
-        units = []
-        default_values = {}
-        inputs = (
-            self.controller._material_input_controller.get_current_material_inputs()
-        )
-        for key, parameter in inputs.changeable_material_parameters.items():
-            params.append(key)
-            units.append(parameter.unit)
-            default_values[key] = parameter.value
-
-        self.setup_mohr_coulomb_controls(params)
+        self.material_input_view.refresh()
 
         self.soil_test_input_view = SoilTestInputView(
             self.controller._soil_test_input_controller,
@@ -167,94 +154,6 @@ class GeotechTestUI(ttk.Frame):
             command=self._start_simulation_thread,
         )
         self.run_button.pack(pady=5)
-
-    def _create_mohr_options(self, params):
-        self.mohr_frame = ttk.Frame(self.material_input_view)
-        self.mohr_frame.pack(fill="x", padx=10, pady=5)
-
-        self.mohr_checkbox_widget = ttk.Checkbutton(
-            self.mohr_frame,
-            text="Mohr-Coulomb Model",
-            variable=self.mohr_checkbox,
-            command=self._toggle_mohr_options,
-        )
-        self.mohr_checkbox_widget.pack(side="left")
-
-        self.c_label = ttk.Label(self.mohr_frame, text="Indices (1-based): Cohesion")
-        self.c_dropdown = ttk.Combobox(
-            self.mohr_frame,
-            textvariable=self.cohesion_var,
-            values=[str(i + 1) for i in range(len(params))],
-            state="readonly",
-            width=2,
-        )
-
-        self.phi_label = ttk.Label(self.mohr_frame, text="Friction Angle")
-        self.phi_dropdown = ttk.Combobox(
-            self.mohr_frame,
-            textvariable=self.phi_var,
-            values=[str(i + 1) for i in range(len(params))],
-            state="readonly",
-            width=2,
-        )
-
-        def _sync_mapping(*_):
-            c_idx, phi_idx = self._parse_mc_indices()
-            self.controller.set_mohr_mapping(c_idx, phi_idx)
-
-        self.c_dropdown.bind("<<ComboboxSelected>>", _sync_mapping)
-        self.phi_dropdown.bind("<<ComboboxSelected>>", _sync_mapping)
-
-        _sync_mapping()
-
-    def _parse_mc_indices(self):
-        try:
-            c_idx = int(self.cohesion_var.get()) if self.cohesion_var.get() else None
-            phi_idx = int(self.phi_var.get()) if self.phi_var.get() else None
-        except ValueError:
-            c_idx, phi_idx = None, None
-
-        return c_idx, phi_idx
-
-    def _toggle_mohr_options(self):
-        widgets = [self.c_label, self.c_dropdown, self.phi_label, self.phi_dropdown]
-        if self.mohr_checkbox.get():
-
-            self.controller.set_mohr_enabled(True)
-            c_idx, phi_idx = self._parse_mc_indices()
-            self.controller.set_mohr_mapping(c_idx, phi_idx)
-
-            for w in widgets:
-                w.pack(side="left", padx=5)
-
-        else:
-            self.controller.set_mohr_enabled(False)
-            self.controller.set_mohr_mapping(None, None)
-
-            for w in widgets:
-                w.pack_forget()
-
-    def setup_mohr_coulomb_controls(self, params):
-        self.mohr_checkbox = tk.BooleanVar()
-        self.cohesion_var = tk.StringVar(value="3")
-        self.phi_var = tk.StringVar(value="4")
-        self._create_mohr_options(params)
-
-        if self.is_linear_elastic:
-            self.controller.set_mohr_enabled(False)
-            self.controller.set_mohr_mapping(None, None)
-            self.mohr_frame.pack_forget()
-
-        elif self.is_mohr_coulomb:
-            self.controller.set_mohr_enabled(True)
-
-            c_idx, phi_idx = self._parse_mc_indices()
-            self.controller.set_mohr_mapping(c_idx, phi_idx)
-
-            self.mohr_frame.pack_forget()
-
-        else:
-            self.mohr_checkbox_widget.configure(state="normal")
 
     def _run_simulation(self):
         try:
@@ -305,8 +204,8 @@ class GeotechTestUI(ttk.Frame):
         self._set_widget_state(self.left_frame, "disabled")
         if hasattr(self, "model_menu"):
             self.model_menu.config(state="disabled")
-        self.c_dropdown.config(state="disabled")
-        self.phi_dropdown.config(state="disabled")
+        # self.c_dropdown.config(state="disabled")
+        # self.phi_dropdown.config(state="disabled")
         self._set_widget_state(self.button_frame, "disabled")
         if hasattr(self, "scrollbar"):
             self._original_scroll_cmd = self.scrollbar.cget("command")
@@ -327,7 +226,7 @@ class GeotechTestUI(ttk.Frame):
         self.scroll_canvas.bind_all("<MouseWheel>", self._on_mousewheel)
 
         if self.is_linear_elastic or self.is_mohr_coulomb:
-            self.mohr_frame.pack_forget()
+            # self.mohr_frame.pack_forget()
             self.model_menu.configure(state="disabled")
         else:
             self.model_menu.configure(state="readonly")
