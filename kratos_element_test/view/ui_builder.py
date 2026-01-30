@@ -20,21 +20,6 @@ class GeotechTestUI(ttk.Frame):
         super().__init__(root)
         self.pack(side="top", fill="both", expand=True)
         self.root = root
-        self.is_linear_elastic = (
-            self.controller.get_current_material_type() == "linear_elastic"
-        )
-        self.is_mohr_coulomb = (
-            self.controller.get_current_material_type() == "mohr_coulomb"
-        )
-
-        self.model_var = tk.StringVar(root)
-        self.model_var.set(
-            self.controller.get_udsm_model_names()[0]
-            if self.controller.get_current_material_type() == "udsm"
-            else ""
-        )
-        self.test_input_history = {}
-
         self._init_frames()
 
         self.plot_frame = PlotViewer(
@@ -199,12 +184,7 @@ class GeotechTestUI(ttk.Frame):
         if hasattr(self, "scrollbar") and hasattr(self, "_original_scroll_cmd"):
             self.scrollbar.config(command=self._original_scroll_cmd)
         self.scroll_canvas.bind_all("<MouseWheel>", self._on_mousewheel)
-
-        if self.is_linear_elastic or self.is_mohr_coulomb:
-            # self.mohr_frame.pack_forget()
-            self.model_menu.configure(state="disabled")
-        else:
-            self.model_menu.configure(state="readonly")
+        self.model_menu.configure(state="readonly")
 
     def _on_mousewheel(self, event):
         if event.delta > 0:

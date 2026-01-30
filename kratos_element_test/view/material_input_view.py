@@ -34,7 +34,7 @@ class MaterialInputView(ttk.Frame):
         self.entry_frame = ttk.Frame(self)
         self.entry_frame.pack(fill="x")
         material_type = self._controller.get_current_material_type()
-        if material_type == "udsm":
+        if material_type == "udsm" and len(self._controller.get_udsm_model_names()) > 1:
             ttk.Label(
                 self.dropdown_frame,
                 text="Select a Model:",
