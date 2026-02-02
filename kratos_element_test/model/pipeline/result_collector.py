@@ -5,7 +5,10 @@ import numpy as np
 
 from kratos_element_test.model.core_utils import seconds_to_hours
 from kratos_element_test.view.ui_logger import log_message as fallback_log
-from KratosMultiphysics.GeoMechanicsApplication.gid_output_file_reader import GiDOutputFileReader
+from KratosMultiphysics.GeoMechanicsApplication.gid_output_file_reader import (
+    GiDOutputFileReader,
+)
+
 
 class ResultCollector:
     def __init__(
@@ -51,9 +54,7 @@ class ResultCollector:
             all_mean_stress.extend(mean_stress_values)
             all_sigma_xx.extend(sigma_xx)
             all_sigma_yy.extend(sigma_yy)
-            all_time_steps.extend(
-                [seconds_to_hours(t) for t in time_steps]
-            )
+            all_time_steps.extend([seconds_to_hours(t) for t in time_steps])
 
         all_yy_strain = self._apply_cumulative_strain_offset(yy_strain_stages)
 
@@ -117,9 +118,7 @@ class ResultCollector:
                     water_pressure=water_pressure,
                 )
 
-        time_steps = GiDOutputFileReader.get_time_steps_from_first_valid_result(
-            output
-        )
+        time_steps = GiDOutputFileReader.get_time_steps_from_first_valid_result(output)
 
         return stress, mean_stress, von_mises, displacement, strain, water_pressure, time_steps
 

@@ -20,10 +20,11 @@ platformdirs = "*"
 Pillow = "*"
 pandas = "*"
 openpyxl = "*"
-KratosGeoMechanicsApplication = ">=10.2.3"
+KratosGeoMechanicsApplication = "10.4.0"
 pytest = "*"
 parameterized = "*"
 pylint = "*"
+black = "26.1.0"
 
 [tool.poetry.scripts]
 startElementTest = "kratos_element_test.view.kratos_element_test_gui:main"
