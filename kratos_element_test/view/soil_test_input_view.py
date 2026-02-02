@@ -229,7 +229,9 @@ class SoilTestInputView(ttk.Frame):
                 self._soil_test_input_controller.update_drainage("drained")
         else:
             initial_label = (
-                "Undrained" if str(drainage).strip().lower() == "undrained" else "Drained"
+                "Undrained"
+                if str(drainage).strip().lower() == "undrained"
+                else "Drained"
             )
 
         self.test_type_var = tk.StringVar(value=initial_label)
@@ -243,7 +245,9 @@ class SoilTestInputView(ttk.Frame):
         self.test_type_menu.pack(anchor="w", padx=10, pady=(0, 10))
 
         self._soil_test_input_controller.bind_drainage_combo_box(self.test_type_menu)
-        self.test_type_menu.bind("<<ComboboxSelected>>", self._on_drainage_change, add="+")
+        self.test_type_menu.bind(
+            "<<ComboboxSelected>>", self._on_drainage_change, add="+"
+        )
 
     def _on_drainage_change(self, event=None):
         current_test = self._soil_test_input_controller.get_current_test_type()
