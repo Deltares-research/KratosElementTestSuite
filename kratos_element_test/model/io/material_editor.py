@@ -51,6 +51,10 @@ class MaterialEditor:
         self.data["properties"][0]["Material"]["constitutive_law"]["name"] = law_name
         self.save()
 
+    def set_undrained_flag(self, value: bool):
+        self.data["properties"][0]["Material"]["Variables"]["IGNORE_UNDRAINED"] = value
+        self.save()
+
     def save(self):
         with open(self.json_path, 'w') as f:
             json.dump(self.data, f, indent=4)
