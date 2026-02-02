@@ -85,8 +85,6 @@ class MaterialInputManagerTest(unittest.TestCase):
             Path(soil_models_dir()) / "sclay1creep.dll"
         )
 
-        material_input_manager.set_current_material_type("udsm")
-
         udsm_material_inputs = material_input_manager.get_current_material_inputs()
 
         self.assertIsInstance(udsm_material_inputs, UDSMMaterialInputs)

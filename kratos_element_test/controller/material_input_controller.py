@@ -19,7 +19,7 @@ class MaterialInputController:
                 lambda _var_name, _index, _operation, changed_variable=key, string_var_test=string_var:
 
                 self._material_input_manager.update_material_parameter_of_current_type(
-                    key=UI_NAME_TO_KRATOS_NAME.get(changed_variable),
+                    key=UI_NAME_TO_KRATOS_NAME.get(changed_variable, changed_variable),
                     value=float(string_var_test.get()),
                 ),
             )

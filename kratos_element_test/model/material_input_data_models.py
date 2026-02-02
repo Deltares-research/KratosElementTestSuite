@@ -49,9 +49,6 @@ class MohrCoulombMaterialInputs:
             "GEO_DILATANCY_ANGLE": Parameter(value=0.0, unit="deg"),
         }
     )
-    mohr_coulomb_options: MohrCoulombOptions = field(
-        default_factory=lambda: MohrCoulombOptions(enabled=True, c_index=3, phi_index=4)
-    )
 
     def get_kratos_inputs(self) -> Dict:
         result = {}

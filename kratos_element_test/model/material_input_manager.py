@@ -62,20 +62,20 @@ class MaterialInputManager:
         self._material_inputs["udsm"].clear()
         self._current_udsm_number = 0
         model_dict = udsm_parser(str(dll_path.resolve()))
-        index = 1
+        udsm_number = 1
         for parameter_names, parameter_units, model_name in zip(
             model_dict["param_names"],
             model_dict["param_units"],
             model_dict["model_name"],
         ):
-            changeableparameters = {}
+            user_defined_parameters = {}
             for name, unit in zip(parameter_names, parameter_units):
-                changeableparameters[name] = Parameter(0.0, unit)
+                user_defined_parameters[name] = Parameter(0.0, unit)
             inputs = UDSMMaterialInputs()
             inputs.material_parameters["UDSM_NAME"] = str(dll_path.resolve())
-            inputs.material_parameters["UDSM_NUMBER"] = index
-            index += 1
-            inputs.user_defined_parameters = changeableparameters
+            inputs.material_parameters["UDSM_NUMBER"] = udsm_number
+            udsm_number += 1
+            inputs.user_defined_parameters = user_defined_parameters
             inputs.model_name = model_name
             self._material_inputs["udsm"].append(inputs)
 
@@ -93,33 +93,21 @@ class MaterialInputManager:
         self._current_udsm_number = self.get_udsm_model_names().index(model_name)
 
     def set_mohr_enabled(self, enabled):
-        if (
-            self.get_current_material_type() == "mohr_coulomb"
-            or self.get_current_material_type() == "udsm"
-        ):
+        if self.get_current_material_type() == "udsm":
             material_inputs = self.get_current_material_inputs()
             material_inputs.mohr_coulomb_options.enabled = enabled
 
     def set_cohesion_index(self, cohesion_index):
-        if (
-            self.get_current_material_type() == "mohr_coulomb"
-            or self.get_current_material_type() == "udsm"
-        ):
+        if self.get_current_material_type() == "udsm":
             material_inputs = self.get_current_material_inputs()
             material_inputs.mohr_coulomb_options.c_index = cohesion_index
 
     def set_phi_index(self, phi_index):
-        if (
-            self.get_current_material_type() == "mohr_coulomb"
-            or self.get_current_material_type() == "udsm"
-        ):
+        if self.get_current_material_type() == "udsm":
             material_inputs = self.get_current_material_inputs()
             material_inputs.mohr_coulomb_options.phi_index = phi_index
 
     def get_mohr_enabled(self):
-        if (
-            self.get_current_material_type() == "mohr_coulomb"
-            or self.get_current_material_type() == "udsm"
-        ):
+        if self.get_current_material_type() == "udsm":
             material_inputs = self.get_current_material_inputs()
             return material_inputs.mohr_coulomb_options.enabled
