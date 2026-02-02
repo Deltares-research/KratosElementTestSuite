@@ -11,7 +11,7 @@ from kratos_element_test.plotters.plotter_labels import (
     TITLE_SIGMA1_VS_SIGMA3, TITLE_DIFF_PRINCIPAL_SIGMA_VS_STRAIN, TITLE_VOL_VS_VERT_STRAIN,
     TITLE_MOHR, TITLE_P_VS_Q, TITLE_SHEAR_VS_STRAIN, TITLE_VERTICAL_STRAIN_VS_TIME,
     TITLE_VERTICAL_STRESS_VS_VERTICAL_STRAIN, TITLE_VERTICAL_STRESS_VS_HORIZONTAL_STRESS,
-    LEGEND_MC, LEGEND_MC_FAILURE
+    LEGEND_MC, LEGEND_MC_FAILURE, TITLE_EPP_VS_STRAIN, EXCESS_PORE_PRESSURE_LABEL
 )
 
 
@@ -40,9 +40,10 @@ class MatplotlibPlotter:
         # 4: Mohr's Circle
         self.plot_mohr_circle_triaxial(self.axes[4], sigma1[-1], sigma3[-1], cohesion, phi)
 
-    def direct_shear(self, gamma_xy, tau_xy, sigma1, sigma3, p_list, q_list, cohesion=None, phi=None):
+    def direct_shear(self, gamma_xy, tau_xy, sigma1, sigma3, p_list, q_list, cohesion=None, phi=None,
+                     excess_pore_pressure=None):
         self._clear()
-        # 0: τ vs γ
+        # 0: τₓᵧ vs γₓᵧ
         self.plot_strain_stress_direct_shear(self.axes[0], gamma_xy, tau_xy)
         # 1: σ1 vs σ3
         self.plot_principal_stresses_direct_shear(self.axes[1], sigma1, sigma3)
@@ -50,6 +51,9 @@ class MatplotlibPlotter:
         self.plot_p_q_direct_shear(self.axes[2], p_list, q_list)
         # 3: Mohr's Circle
         self.plot_mohr_circle_direct_shear(self.axes[3], sigma1[-1], sigma3[-1], cohesion, phi)
+        # 4: uₑ vs γₓᵧ (Undrained)
+        if excess_pore_pressure:
+            self.plot_excess_pore_pressure_vs_strain_direct_shear(self.axes[4], gamma_xy, excess_pore_pressure)
 
     def crs(self, yy_strain, time_steps, sigma_yy, sigma_xx, p_list, q_list, sigma1, sigma3, cohesion=None, phi=None):
         self._clear()
@@ -310,6 +314,16 @@ class MatplotlibPlotter:
         ax.set_title(TITLE_VERTICAL_STRAIN_VS_TIME)
         ax.set_xlabel(TIME_HOURS_LABEL)
         ax.set_ylabel(VERTICAL_STRAIN_LABEL)
+        ax.grid(True)
+        ax.locator_params(nbins=8)
+        ax.minorticks_on()
+
+    def plot_excess_pore_pressure_vs_strain_direct_shear(self, ax, shear_strain_xy, excess_pore_pressure):
+        gamma_xy = 2 * np.array(shear_strain_xy)
+        ax.plot(np.abs(gamma_xy), excess_pore_pressure, '-', color='blue', label=TITLE_EPP_VS_STRAIN)
+        ax.set_title(TITLE_EPP_VS_STRAIN)
+        ax.set_xlabel(SHEAR_STRAIN_LABEL)
+        ax.set_ylabel(EXCESS_PORE_PRESSURE_LABEL)
         ax.grid(True)
         ax.locator_params(nbins=8)
         ax.minorticks_on()
