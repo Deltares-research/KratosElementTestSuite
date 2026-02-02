@@ -23,7 +23,6 @@ class MaterialInputManager:
         if material_type not in self._material_inputs:
             raise ValueError(f"Invalid material type {material_type}")
         self._current_material_type = material_type
-        print(f"Set material type to {material_type}")
 
     def get_current_material_type(self) -> str:
         return self._current_material_type
@@ -57,7 +56,6 @@ class MaterialInputManager:
             )
 
         current_material_inputs[key].value = value
-        print(f"Changed {key} to {value}")
 
     def initialize_udsm(self, dll_path: Path):
         self.set_current_material_type("udsm")
@@ -93,9 +91,6 @@ class MaterialInputManager:
 
     def set_current_udsm_model(self, model_name):
         self._current_udsm_number = self.get_udsm_model_names().index(model_name)
-        print(
-            f"Set current UDSM model to {model_name} and the number to {self._current_udsm_number}"
-        )
 
     def set_mohr_enabled(self, enabled):
         if (
@@ -104,7 +99,6 @@ class MaterialInputManager:
         ):
             material_inputs = self.get_current_material_inputs()
             material_inputs.mohr_coulomb_options.enabled = enabled
-            print(f"Set Mohr-Coulomb enabled to {enabled}")
 
     def set_cohesion_index(self, cohesion_index):
         if (
@@ -113,7 +107,6 @@ class MaterialInputManager:
         ):
             material_inputs = self.get_current_material_inputs()
             material_inputs.mohr_coulomb_options.c_index = cohesion_index
-            print(f"Set Mohr-Coulomb cohesion index to {cohesion_index}")
 
     def set_phi_index(self, phi_index):
         if (
@@ -122,7 +115,6 @@ class MaterialInputManager:
         ):
             material_inputs = self.get_current_material_inputs()
             material_inputs.mohr_coulomb_options.phi_index = phi_index
-            print(f"Set Mohr-Coulomb phi index to {phi_index}")
 
     def get_mohr_enabled(self):
         if (
