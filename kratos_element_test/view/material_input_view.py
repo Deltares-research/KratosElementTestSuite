@@ -71,9 +71,10 @@ class MaterialInputView(ttk.Frame):
         default_values = {}
         inputs = self._controller.get_current_material_inputs()
         for key, parameter in inputs.user_defined_parameters.items():
-            params.append(KRATOS_NAME_TO_UI_NAME.get(key, key))
+            ui_name = KRATOS_NAME_TO_UI_NAME.get(key, key)
+            params.append(ui_name)
             units.append(parameter.unit)
-            default_values[key] = parameter.value
+            default_values[ui_name] = parameter.value
 
         self.entries, string_vars = create_entries(
             frame=self.entry_frame,
