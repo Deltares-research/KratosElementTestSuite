@@ -150,16 +150,13 @@ class MaterialInputView(ttk.Frame):
         self._create_mohr_options(params)
         self.mohr_checkbox_widget.configure(state="normal")
 
-
     def validate(self):
-        widget_dicts = [self.entries]
-        self._validate_entries_are_convertible_to_numbers(widget_dicts)
+        self._validate_entries_are_convertible_to_numbers(self.entries)
 
     @staticmethod
-    def _validate_entries_are_convertible_to_numbers(widget_dicts):
-        for widget_dict in widget_dicts:
-            for key, widget in widget_dict.items():
-                try:
-                    float(widget.get())
-                except ValueError:
-                    raise ValueError(f"Could not convert entry to number for '{key}'.")
+    def _validate_entries_are_convertible_to_numbers(entries: dict):
+        for key, widget in entries.items():
+            try:
+                float(widget.get())
+            except ValueError:
+                raise ValueError(f"Could not convert entry to number for '{key}'.")
