@@ -119,6 +119,7 @@ class GeotechTestUI(ttk.Frame):
             log_message("Starting calculation... Please wait...", "info")
             self.root.update_idletasks()
 
+            self.material_input_view.validate()
             self.soil_test_input_view.validate(self.controller.get_current_test_type())
 
             success = self.controller.run()

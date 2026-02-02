@@ -72,7 +72,7 @@ class MaterialInputView(ttk.Frame):
             units.append(parameter.unit)
             default_values[key] = parameter.value
 
-        _, string_vars = create_entries(
+        self.entries, string_vars = create_entries(
             frame=self.entry_frame,
             title="Soil Input Parameters",
             labels=params,
@@ -149,3 +149,17 @@ class MaterialInputView(ttk.Frame):
         )
         self._create_mohr_options(params)
         self.mohr_checkbox_widget.configure(state="normal")
+
+
+    def validate(self):
+        widget_dicts = [self.entries]
+        self._validate_entries_are_convertible_to_numbers(widget_dicts)
+
+    @staticmethod
+    def _validate_entries_are_convertible_to_numbers(widget_dicts):
+        for widget_dict in widget_dicts:
+            for key, widget in widget_dict.items():
+                try:
+                    float(widget.get())
+                except ValueError:
+                    raise ValueError(f"Could not convert entry to number for '{key}'.")
