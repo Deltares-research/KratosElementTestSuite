@@ -42,7 +42,7 @@ class RunSimulation:
         material_parameters: List[float],
         cohesion_phi_indices: Optional[Tuple[int, int]] = None,
         logger: Optional[Callable[[str, str], None]] = None,
-        keep_tmp: bool = True,
+        keep_tmp: bool = False,
     ):
         self.test_type = test_inputs.test_type.lower()
         self.model_name = model_name
@@ -104,7 +104,10 @@ class RunSimulation:
 
             output_file_strings = [str(p) for p in self._output_file_paths()]
             collector = ResultCollector(
-                output_file_strings, self.material_parameters, self.cohesion_phi_indices
+                output_file_strings,
+                self.material_parameters,
+                self.cohesion_phi_indices,
+                drainage_type=self.drainage,
             )
             results = collector.collect_results()
             self.log("Rendering complete.", "info")
@@ -166,9 +169,11 @@ class RunSimulation:
         if overlay_dir:
             _copy_from(overlay_dir)
 
-        # Resolve project parameters
         if "ProjectParametersOrchestrator.json" in copied:
             self.project_json_path = copied["ProjectParametersOrchestrator.json"]
+            legacy_param_file = self.tmp_dir / "ProjectParameters.json"
+            if legacy_param_file.exists():
+                legacy_param_file.unlink()
         elif "ProjectParameters.json" in copied:
             self.project_json_path = copied["ProjectParameters.json"]
         else:
