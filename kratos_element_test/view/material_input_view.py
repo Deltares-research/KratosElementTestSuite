@@ -1,7 +1,10 @@
 import tkinter as tk
 from tkinter import ttk
 
-from kratos_element_test.view.ui_constants import INPUT_SECTION_FONT
+from kratos_element_test.view.ui_constants import (
+    INPUT_SECTION_FONT,
+    KRATOS_NAME_TO_UI_NAME,
+)
 from kratos_element_test.view.widget_creation_utils import create_entries
 
 
@@ -68,7 +71,7 @@ class MaterialInputView(ttk.Frame):
         default_values = {}
         inputs = self._controller.get_current_material_inputs()
         for key, parameter in inputs.user_defined_parameters.items():
-            params.append(key)
+            params.append(KRATOS_NAME_TO_UI_NAME.get(key, key))
             units.append(parameter.unit)
             default_values[key] = parameter.value
 
