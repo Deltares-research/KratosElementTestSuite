@@ -105,7 +105,7 @@ class MaterialInputView(ttk.Frame):
         self.cohesion_var.trace_add(
             "write",
             lambda _var_name, _index, _operation: self._controller.set_cohesion_index(
-                self.cohesion_var.get()
+                int(self.cohesion_var.get())
             ),
         )
 
@@ -120,7 +120,7 @@ class MaterialInputView(ttk.Frame):
         self.phi_var.trace_add(
             "write",
             lambda _var_name, _index, _operation: self._controller.set_phi_index(
-                self.phi_var.get()
+                int(self.phi_var.get())
             ),
         )
 
