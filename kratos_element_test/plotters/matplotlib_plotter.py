@@ -67,7 +67,16 @@ class MatplotlibPlotter:
         )
 
     def direct_shear(
-        self, gamma_xy, tau_xy, sigma1, sigma3, p_list, q_list, cohesion=None, phi=None, excess_pore_pressure=None
+        self,
+        gamma_xy,
+        tau_xy,
+        sigma1,
+        sigma3,
+        p_list,
+        q_list,
+        cohesion=None,
+        phi=None,
+        excess_pore_pressure=None,
     ):
         self._clear()
         # 0: τₓᵧ vs γₓᵧ
@@ -80,10 +89,11 @@ class MatplotlibPlotter:
         self.plot_mohr_circle_direct_shear(
             self.axes[3], sigma1[-1], sigma3[-1], cohesion, phi
         )
-        self.plot_mohr_circle_direct_shear(self.axes[3], sigma1[-1], sigma3[-1], cohesion, phi)
         # 4: uₑ vs γₓᵧ (Undrained)
         if excess_pore_pressure:
-            self.plot_excess_pore_pressure_vs_strain_direct_shear(self.axes[4], gamma_xy, excess_pore_pressure)
+            self.plot_excess_pore_pressure_vs_strain_direct_shear(
+                self.axes[4], gamma_xy, excess_pore_pressure
+            )
 
     def crs(
         self,
@@ -409,9 +419,17 @@ class MatplotlibPlotter:
         ax.locator_params(nbins=8)
         ax.minorticks_on()
 
-    def plot_excess_pore_pressure_vs_strain_direct_shear(self, ax, shear_strain_xy, excess_pore_pressure):
+    def plot_excess_pore_pressure_vs_strain_direct_shear(
+        self, ax, shear_strain_xy, excess_pore_pressure
+    ):
         gamma_xy = 2 * np.array(shear_strain_xy)
-        ax.plot(np.abs(gamma_xy), excess_pore_pressure, '-', color='blue', label=TITLE_EPP_VS_STRAIN)
+        ax.plot(
+            np.abs(gamma_xy),
+            excess_pore_pressure,
+            "-",
+            color="blue",
+            label=TITLE_EPP_VS_STRAIN,
+        )
         ax.set_title(TITLE_EPP_VS_STRAIN)
         ax.set_xlabel(SHEAR_STRAIN_LABEL)
         ax.set_ylabel(EXCESS_PORE_PRESSURE_LABEL)
