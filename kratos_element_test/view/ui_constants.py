@@ -60,6 +60,10 @@ KRATOS_NAME_TO_UI_NAME = {
     "GEO_DILATANCY_ANGLE": "Dilatancy Angle",
 }
 
+UI_NAME_TO_KRATOS_NAME = {
+    v: k for k, v in KRATOS_NAME_TO_UI_NAME.items()
+}
+
 # Menu labels
 SELECT_UDSM = "Select UDSM File"
 LINEAR_ELASTIC = "Linear Elastic Model"

@@ -1,8 +1,8 @@
-from kratos_element_test.model.material_input_manager import MaterialInputManager
 from kratos_element_test.model.material_input_data_models import (
     LinearElasticMaterialInputs,
 )
-from kratos_element_test.view.ui_constants import KRATOS_NAME_TO_UI_NAME
+from kratos_element_test.model.material_input_manager import MaterialInputManager
+from kratos_element_test.view.ui_constants import UI_NAME_TO_KRATOS_NAME
 
 
 class MaterialInputController:
@@ -16,10 +16,10 @@ class MaterialInputController:
         for key, string_var in string_vars.items():
             string_var.trace_add(
                 "write",
-                lambda _var_name, _index, _operation, changed_variable=key, string_var_test=string_var: self._material_input_manager.update_material_parameter_of_current_type(
-                    key=list(KRATOS_NAME_TO_UI_NAME.keys())[
-                        list(KRATOS_NAME_TO_UI_NAME.values()).index(changed_variable)
-                    ],
+                lambda _var_name, _index, _operation, changed_variable=key, string_var_test=string_var:
+
+                self._material_input_manager.update_material_parameter_of_current_type(
+                    key=UI_NAME_TO_KRATOS_NAME.get(changed_variable),
                     value=float(string_var_test.get()),
                 ),
             )
