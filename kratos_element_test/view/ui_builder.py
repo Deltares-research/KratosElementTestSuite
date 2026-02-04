@@ -42,7 +42,7 @@ class GeotechTestUI(ttk.Frame):
     def _init_frames(self):
         self.left_panel = ttk.Frame(self, width=555)
         self.left_panel.pack_propagate(False)
-        self.left_panel.pack(side="left", fill="y", padx=10, pady=10)
+        self.left_panel.pack(side="left", fill="y", padx=10, pady=0)
 
         self.scrollable_container = ttk.Frame(self.left_panel)
         self.scrollable_container.pack(fill="both", expand=True)
@@ -76,7 +76,7 @@ class GeotechTestUI(ttk.Frame):
         self.material_input_view = MaterialInputView(
             self.controller._material_input_controller, self.left_frame, padding="10"
         )
-        self.material_input_view.pack(fill="both", expand=True, pady=10)
+        self.material_input_view.pack(fill="both", expand=True, pady=0)
 
         self.button_frame = ttk.Frame(self.left_panel, padding="10")
         self.button_frame.pack(fill="x", pady=(0, 5))

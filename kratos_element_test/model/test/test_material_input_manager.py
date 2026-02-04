@@ -62,7 +62,7 @@ class MaterialInputManagerTest(unittest.TestCase):
             9e5,
         )
 
-    def tests_changing_nonexisting_material_inputs_throws(self):
+    def test_changing_nonexisting_material_inputs_throws(self):
         material_input_manager = MaterialInputManager()
         material_input_manager.set_current_material_type("linear_elastic")
         self.assertRaises(

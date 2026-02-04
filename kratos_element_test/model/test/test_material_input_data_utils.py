@@ -6,7 +6,10 @@ from kratos_element_test.model.material_input_data_models import (
     Parameter,
     LinearElasticMaterialInputs,
 )
-from kratos_element_test.model.material_input_data_utils import get_cohesion_and_phi
+from kratos_element_test.model.material_input_data_utils import (
+    get_cohesion_and_phi,
+    convert_user_inputs_to_kratos_inputs,
+)
 
 
 class MaterialInputUtilsTest(unittest.TestCase):
@@ -63,6 +66,21 @@ class MaterialInputUtilsTest(unittest.TestCase):
 
         self.assertIsNone(c)
         self.assertIsNone(phi)
+
+    def test_convert_user_inputs_to_kratos_inputs(self):
+        user_defined_parameters = {
+            "YOUNG_MODULUS": Parameter(value=1e6, unit="kN/m²"),
+            "POISSON_RATIO": Parameter(value=0.3, unit="-"),
+        }
+
+        expected_kratos_inputs = {
+            "YOUNG_MODULUS": 1e6,
+            "POISSON_RATIO": 0.3,
+        }
+
+        kratos_inputs = convert_user_inputs_to_kratos_inputs(user_defined_parameters)
+
+        self.assertEqual(kratos_inputs, expected_kratos_inputs)
 
 
 if __name__ == "__main__":

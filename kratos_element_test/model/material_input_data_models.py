@@ -30,10 +30,11 @@ class LinearElasticMaterialInputs:
     )
 
     def get_kratos_inputs(self) -> Dict:
-        result = {}
-        for name, parameter in self.user_defined_parameters.items():
-            result[name] = parameter.value
-        return result
+        from kratos_element_test.model.material_input_data_utils import (
+            convert_user_inputs_to_kratos_inputs,
+        )
+
+        return convert_user_inputs_to_kratos_inputs(self.user_defined_parameters)
 
 
 @dataclass
@@ -51,10 +52,11 @@ class MohrCoulombMaterialInputs:
     )
 
     def get_kratos_inputs(self) -> Dict:
-        result = {}
-        for name, parameter in self.user_defined_parameters.items():
-            result[name] = parameter.value
-        return result
+        from kratos_element_test.model.material_input_data_utils import (
+            convert_user_inputs_to_kratos_inputs,
+        )
+
+        return convert_user_inputs_to_kratos_inputs(self.user_defined_parameters)
 
     def get_cohesion_and_phi(self) -> Tuple[float, float]:
         cohesion = self.user_defined_parameters["GEO_COHESION"].value

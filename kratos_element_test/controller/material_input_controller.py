@@ -1,5 +1,7 @@
 from kratos_element_test.model.material_input_data_models import (
     LinearElasticMaterialInputs,
+    MohrCoulombMaterialInputs,
+    UDSMMaterialInputs,
 )
 from kratos_element_test.model.material_input_manager import MaterialInputManager
 from kratos_element_test.view.ui_constants import UI_NAME_TO_KRATOS_NAME
@@ -9,16 +11,20 @@ class MaterialInputController:
     def __init__(self, material_input_manager: MaterialInputManager):
         self._material_input_manager = material_input_manager
 
-    def get_current_material_inputs(self) -> LinearElasticMaterialInputs:
+    def get_current_material_inputs(
+        self,
+    ) -> LinearElasticMaterialInputs | MohrCoulombMaterialInputs | UDSMMaterialInputs:
         return self._material_input_manager.get_current_material_inputs()
 
-    def bind_test_input_fields_to_update_functions(self, string_vars) -> None:
+    def bind_material_input_fields_to_update_functions(self, string_vars) -> None:
         for key, string_var in string_vars.items():
             string_var.trace_add(
                 "write",
-                lambda _var_name, _index, _operation, changed_variable=key, string_var_test=string_var: self._material_input_manager.update_material_parameter_of_current_type(
-                    key=UI_NAME_TO_KRATOS_NAME.get(changed_variable, changed_variable),
-                    value=float(string_var_test.get()),
+                lambda _var_name, _index, _operation, captured_changed_variable=key, captured_string_var=string_var: self._material_input_manager.update_material_parameter_of_current_type(
+                    key=UI_NAME_TO_KRATOS_NAME.get(
+                        captured_changed_variable, captured_changed_variable
+                    ),
+                    value=float(captured_string_var.get()),
                 ),
             )
 

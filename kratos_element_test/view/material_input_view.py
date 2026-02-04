@@ -15,12 +15,6 @@ class MaterialInputView(ttk.Frame):
 
         self.dropdown_frame = None
         self.entry_frame = None
-        self.is_linear_elastic = (
-            self._controller.get_current_material_type() == "linear_elastic"
-        )
-        self.is_mohr_coulomb = (
-            self._controller.get_current_material_type() == "mohr_coulomb"
-        )
         self.model_var = tk.StringVar(self)
         self.model_var.set(
             self._controller.get_udsm_model_names()[0]
@@ -33,7 +27,7 @@ class MaterialInputView(ttk.Frame):
             w.destroy()
 
         self.dropdown_frame = ttk.Frame(self)
-        self.dropdown_frame.pack(fill="x")
+        self.dropdown_frame.pack(fill="x", pady=(0, 25))
         self.entry_frame = ttk.Frame(self)
         self.entry_frame.pack(fill="x")
         material_type = self._controller.get_current_material_type()
@@ -84,7 +78,7 @@ class MaterialInputView(ttk.Frame):
             defaults=default_values,
         )
 
-        self._controller.bind_test_input_fields_to_update_functions(string_vars)
+        self._controller.bind_material_input_fields_to_update_functions(string_vars)
 
         if self._controller.get_current_material_type() == "udsm":
             self.setup_mohr_coulomb_controls(params)
