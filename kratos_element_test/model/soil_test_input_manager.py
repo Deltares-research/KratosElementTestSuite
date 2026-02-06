@@ -9,12 +9,13 @@ from kratos_element_test.view.ui_constants import (
     DIRECT_SHEAR,
     TEST_NAME_TO_TYPE,
     CRS,
-    VALID_DRAINAGE_TYPES
+    VALID_DRAINAGE_TYPES,
 )
 
 
 class SoilTestInputManager:
-    def __init__(self):
+    def __init__(self, on_inputs_changed=None):
+        self._on_inputs_changed = on_inputs_changed
         self.input_data = {
             TRIAXIAL: TriaxialAndShearSimulationInputs(
                 test_type=TEST_NAME_TO_TYPE.get(TRIAXIAL)
@@ -26,6 +27,10 @@ class SoilTestInputManager:
         }
         self.update_crs_totals()
         self._current_test_type = TRIAXIAL
+
+    def _notify_inputs_changed(self) -> None:
+        if self._on_inputs_changed is not None:
+            self._on_inputs_changed()
 
     def update_crs_totals(self):
         crs_inputs = self.input_data.get(CRS)
@@ -76,6 +81,10 @@ class SoilTestInputManager:
         inputs = self.get_current_test_inputs()
         if hasattr(inputs, "drainage"):
             inputs.drainage = new_drainage
+
+        if getattr(inputs, "drainage", None) != new_drainage:
+            inputs.drainage = new_drainage
+            self._notify_inputs_changed()
 
         if new_drainage not in VALID_DRAINAGE_TYPES:
             raise ValueError(

@@ -1,3 +1,4 @@
+from typing import Callable, Optional
 from kratos_element_test.model.models import (
     TriaxialAndShearSimulationInputs,
     CRSSimulationInputs,
@@ -95,12 +96,21 @@ class SoilTestInputController:
             ),
         )
 
-    def bind_drainage_combo_box(self, combo_box):
-        def _sync_drainage_from_combobox(*_):
+    def bind_drainage_combo_box(
+        self, combo_box, on_drainage_changed: Optional[Callable[[int], None]] = None
+    ):
+        def _sync_drainage_from_combobox(event=None) -> None:
             val = combo_box.get().strip().lower()
             self._soil_test_input_manager.update_drainage(val)
 
-        combo_box.bind("<<ComboboxSelected>>", lambda e: _sync_drainage_from_combobox())
+            if (
+                on_drainage_changed is not None
+                and self.get_current_test_type() == DIRECT_SHEAR
+            ):
+                num_plots = 5 if val == "undrained" else 4
+                on_drainage_changed(num_plots=num_plots)
+
+        combo_box.bind("<<ComboboxSelected>>", _sync_drainage_from_combobox)
 
     def set_current_test_type(self, test_type: str) -> None:
         self._soil_test_input_manager.set_current_test_type(test_type)

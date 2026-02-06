@@ -244,19 +244,10 @@ class SoilTestInputView(ttk.Frame):
         )
         self.test_type_menu.pack(anchor="w", padx=10, pady=(0, 10))
 
-        self._soil_test_input_controller.bind_drainage_combo_box(self.test_type_menu)
-        self.test_type_menu.bind(
-            "<<ComboboxSelected>>", self._on_drainage_change, add="+"
+        self._soil_test_input_controller.bind_drainage_combo_box(
+            self.test_type_menu,
+            on_drainage_changed=self.update_plots_callback,
         )
-
-    def _on_drainage_change(self, event=None):
-        current_test = self._soil_test_input_controller.get_current_test_type()
-        val = self.test_type_var.get().strip().lower()
-        is_undrained = val == "undrained"
-
-        if current_test == DIRECT_SHEAR:
-            num_plots = 5 if is_undrained else 4
-            self.update_plots_callback(num_plots=num_plots)
 
     def _add_crs_row(self, duration_in_hours=1.0, strain_inc=0.0, steps=100):
         row = {}
