@@ -98,6 +98,8 @@ class RunSimulation:
         if self.test_type == "crs":
             self._prepare_crs_stages()
 
+        self._set_material_undrained()
+        self._unfix_water_pressure_for_undrained()
         self._set_material_constitutive_law()
         self._set_project_parameters()
         self._set_mdpa()
@@ -114,7 +116,10 @@ class RunSimulation:
 
             output_file_strings = [str(p) for p in self._output_file_paths()]
             collector = ResultCollector(
-                output_file_strings, self.material_parameters, self.cohesion_phi_indices
+                output_file_strings,
+                self.material_parameters,
+                self.cohesion_phi_indices,
+                drainage_type=self.drainage,
             )
             results = collector.collect_results()
             self.log("Rendering complete.", "info")
@@ -220,6 +225,16 @@ class RunSimulation:
                     }
                 )
                 editor.set_constitutive_law("GeoMohrCoulombWithTensionCutOff2D")
+
+    def _set_material_undrained(self) -> None:
+        if self.drainage and self.drainage == "undrained":
+            editor = MaterialEditor(str(self.material_json_path))
+            editor.set_undrained_flag(False)
+
+    def _unfix_water_pressure_for_undrained(self) -> None:
+        if self.drainage and self.drainage == "undrained":
+            editor = ProjectParameterEditor(str(self.project_json_path))
+            editor.set_water_pressure_constraint_unfixed()
 
     def _set_project_parameters(self) -> None:
         with open(self.project_json_path, "r") as f:

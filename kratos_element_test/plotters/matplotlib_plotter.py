@@ -18,6 +18,7 @@ from kratos_element_test.plotters.plotter_labels import (
     MOBILIZED_SHEAR_STRESS_LABEL,
     P_STRESS_LABEL,
     Q_STRESS_LABEL,
+    EXCESS_PORE_PRESSURE_LABEL,
     TIME_HOURS_LABEL,
     TITLE_SIGMA1_VS_SIGMA3,
     TITLE_DIFF_PRINCIPAL_SIGMA_VS_STRAIN,
@@ -28,6 +29,7 @@ from kratos_element_test.plotters.plotter_labels import (
     TITLE_VERTICAL_STRAIN_VS_TIME,
     TITLE_VERTICAL_STRESS_VS_VERTICAL_STRAIN,
     TITLE_VERTICAL_STRESS_VS_HORIZONTAL_STRESS,
+    TITLE_EPP_VS_STRAIN,
     LEGEND_MC,
     LEGEND_MC_FAILURE,
 )
@@ -65,10 +67,19 @@ class MatplotlibPlotter:
         )
 
     def direct_shear(
-        self, gamma_xy, tau_xy, sigma1, sigma3, p_list, q_list, cohesion=None, phi=None
+        self,
+        gamma_xy,
+        tau_xy,
+        sigma1,
+        sigma3,
+        p_list,
+        q_list,
+        cohesion=None,
+        phi=None,
+        excess_pore_pressure=None,
     ):
         self._clear()
-        # 0: τ vs γ
+        # 0: τₓᵧ vs γₓᵧ
         self.plot_strain_stress_direct_shear(self.axes[0], gamma_xy, tau_xy)
         # 1: σ1 vs σ3
         self.plot_principal_stresses_direct_shear(self.axes[1], sigma1, sigma3)
@@ -78,6 +89,11 @@ class MatplotlibPlotter:
         self.plot_mohr_circle_direct_shear(
             self.axes[3], sigma1[-1], sigma3[-1], cohesion, phi
         )
+        # 4: uₑ vs γₓᵧ (Undrained)
+        if excess_pore_pressure:
+            self.plot_excess_pore_pressure_vs_strain_direct_shear(
+                self.axes[4], gamma_xy, excess_pore_pressure
+            )
 
     def crs(
         self,
@@ -399,6 +415,24 @@ class MatplotlibPlotter:
         ax.set_title(TITLE_VERTICAL_STRAIN_VS_TIME)
         ax.set_xlabel(TIME_HOURS_LABEL)
         ax.set_ylabel(VERTICAL_STRAIN_LABEL)
+        ax.grid(True)
+        ax.locator_params(nbins=8)
+        ax.minorticks_on()
+
+    def plot_excess_pore_pressure_vs_strain_direct_shear(
+        self, ax, shear_strain_xy, excess_pore_pressure
+    ):
+        gamma_xy = 2 * np.array(shear_strain_xy)
+        ax.plot(
+            np.abs(gamma_xy),
+            excess_pore_pressure,
+            "-",
+            color="blue",
+            label=TITLE_EPP_VS_STRAIN,
+        )
+        ax.set_title(TITLE_EPP_VS_STRAIN)
+        ax.set_xlabel(SHEAR_STRAIN_LABEL)
+        ax.set_ylabel(EXCESS_PORE_PRESSURE_LABEL)
         ax.grid(True)
         ax.locator_params(nbins=8)
         ax.minorticks_on()
