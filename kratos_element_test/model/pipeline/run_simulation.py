@@ -99,6 +99,7 @@ class RunSimulation:
             self._prepare_crs_stages()
 
         self._set_material_undrained()
+        self._unfix_water_pressure_for_undrained()
         self._set_material_constitutive_law()
         self._set_project_parameters()
         self._set_mdpa()
@@ -226,9 +227,14 @@ class RunSimulation:
                 editor.set_constitutive_law("GeoMohrCoulombWithTensionCutOff2D")
 
     def _set_material_undrained(self) -> None:
-        if self.drainage and str(self.drainage).strip().lower() == "undrained":
+        if self.drainage and self.drainage == "undrained":
             editor = MaterialEditor(str(self.material_json_path))
             editor.set_undrained_flag(False)
+
+    def _unfix_water_pressure_for_undrained(self) -> None:
+        if self.drainage and self.drainage == "undrained":
+            editor = ProjectParameterEditor(str(self.project_json_path))
+            editor.set_water_pressure_constraint_unfixed()
 
     def _set_project_parameters(self) -> None:
         with open(self.project_json_path, "r") as f:
