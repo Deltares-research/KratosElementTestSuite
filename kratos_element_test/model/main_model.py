@@ -1,6 +1,7 @@
+from pathlib import Path
 from typing import Callable, Dict, List
 
-from kratos_element_test.model.models import MohrCoulombOptions
+from kratos_element_test.model.material_input_manager import MaterialInputManager
 from kratos_element_test.model.pipeline.run_simulation import RunSimulation
 from kratos_element_test.model.result_manager import ResultManager
 from kratos_element_test.model.soil_test_input_manager import SoilTestInputManager
@@ -9,6 +10,7 @@ from kratos_element_test.model.soil_test_input_manager import SoilTestInputManag
 class MainModel:
     def __init__(self, logger: Callable[[str, str], None]):
         self._logger = logger
+        self._material_input_manager = MaterialInputManager()
         self._soil_test_input_manager = SoilTestInputManager()
         self._result_manager = ResultManager(
             self._soil_test_input_manager.get_current_test_type
@@ -17,14 +19,7 @@ class MainModel:
     def get_current_test_type(self) -> str:
         return self._soil_test_input_manager.get_current_test_type()
 
-    def run_simulation(
-        self,
-        model_name: str,
-        dll_path: str | None,
-        udsm_number: int,
-        mohr_coulomb_options: MohrCoulombOptions,
-        material_parameters,
-    ) -> None:
+    def run_simulation(self) -> None:
 
         inputs = self._soil_test_input_manager.get_current_test_inputs()
         try:
@@ -35,11 +30,7 @@ class MainModel:
 
         sim = RunSimulation(
             test_inputs=inputs,
-            model_name=model_name,
-            dll_path=dll_path,
-            udsm_number=udsm_number,
-            material_parameters=material_parameters,
-            cohesion_phi_indices=mohr_coulomb_options.to_indices(),
+            material_inputs=self._material_input_manager.get_current_material_inputs(),
             logger=self._logger,
         )
 
@@ -59,3 +50,13 @@ class MainModel:
 
     def clear_results(self) -> None:
         self._result_manager.clear_results()
+
+    def set_material_type(self, material_type: str):
+        self._material_input_manager.set_current_material_type(material_type)
+        self.clear_results()
+
+    def get_material_input_manager(self) -> MaterialInputManager:
+        return self._material_input_manager
+
+    def initialize_udsm(self, dll_path: Path):
+        self._material_input_manager.initialize_udsm(dll_path)

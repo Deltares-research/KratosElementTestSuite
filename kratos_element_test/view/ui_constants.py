@@ -7,7 +7,7 @@
 
 # Application data
 APP_TITLE = "Deltares Soil Element Test Suite"
-APP_VERSION = "Version 0.5.2 ~ Alpha Release"
+APP_VERSION = "Version 0.5.3 ~ Alpha Release"
 APP_NAME = "SoilElementSuite"
 APP_AUTHOR = "Deltares"
 
@@ -49,6 +49,18 @@ FL2_UNIT_LABEL = "kN/m²"
 SECONDS_UNIT_LABEL = "s"
 PERCENTAGE_UNIT_LABEL = "%"
 WITHOUT_UNIT_LABEL = ""
+
+# Material Input labels
+KRATOS_NAME_TO_UI_NAME = {
+    "YOUNG_MODULUS": "Young's Modulus",
+    "POISSON_RATIO": "Poisson's Ratio",
+    "GEO_COHESION": "Cohesion",
+    "GEO_FRICTION_ANGLE": "Friction Angle",
+    "GEO_TENSILE_STRENGTH": "Tensile Strength",
+    "GEO_DILATANCY_ANGLE": "Dilatancy Angle",
+}
+
+UI_NAME_TO_KRATOS_NAME = {v: k for k, v in KRATOS_NAME_TO_UI_NAME.items()}
 
 # Menu labels
 SELECT_UDSM = "Select UDSM File"

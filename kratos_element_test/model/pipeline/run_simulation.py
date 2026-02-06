@@ -11,6 +11,12 @@ from kratos_element_test.model.core_utils import _fallback_log, hours_to_seconds
 from kratos_element_test.model.io.material_editor import MaterialEditor
 from kratos_element_test.model.io.project_parameter_editor import ProjectParameterEditor
 from kratos_element_test.model.io.mdpa_editor import MdpaEditor
+from kratos_element_test.model.material_input_data_models import (
+    LinearElasticMaterialInputs,
+    MohrCoulombMaterialInputs,
+    UDSMMaterialInputs,
+)
+from kratos_element_test.model.material_input_data_utils import get_cohesion_and_phi
 from kratos_element_test.model.models import (
     TriaxialAndShearSimulationInputs,
     CRSSimulationInputs,
@@ -36,26 +42,20 @@ class RunSimulation:
         self,
         *,
         test_inputs: TriaxialAndShearSimulationInputs | CRSSimulationInputs,
-        model_name: Optional[str],
-        dll_path: Optional[str],
-        udsm_number: Optional[int],
-        material_parameters: List[float],
-        cohesion_phi_indices: Optional[Tuple[int, int]] = None,
+        material_inputs: (
+            LinearElasticMaterialInputs | MohrCoulombMaterialInputs | UDSMMaterialInputs
+        ),
         logger: Optional[Callable[[str, str], None]] = None,
         keep_tmp: bool = False,
     ):
         self.test_type = test_inputs.test_type.lower()
-        self.model_name = model_name
-        self.dll_path = dll_path
-        self.udsm_number = udsm_number
-        self.material_parameters = material_parameters
+        self.material_inputs = material_inputs
         self.num_steps = test_inputs.number_of_steps
         self.end_time = test_inputs.duration_in_seconds
         self.maximum_strain = test_inputs.maximum_strain
         self.initial_effective_cell_pressure = (
             test_inputs.initial_effective_cell_pressure
         )
-        self.cohesion_phi_indices = cohesion_phi_indices
         self.log = logger or _fallback_log
         self.drainage = (
             test_inputs.drainage
@@ -113,9 +113,8 @@ class RunSimulation:
             self.log("Collecting results...", "info")
 
             output_file_strings = [str(p) for p in self._output_file_paths()]
-            collector = ResultCollector(
-                output_file_strings, self.material_parameters, self.cohesion_phi_indices
-            )
+            cohesion, phi = get_cohesion_and_phi(self.material_inputs)
+            collector = ResultCollector(output_file_strings, cohesion, phi)
             results = collector.collect_results()
             self.log("Rendering complete.", "info")
             return results
@@ -188,38 +187,8 @@ class RunSimulation:
 
     def _set_material_constitutive_law(self) -> None:
         editor = MaterialEditor(str(self.material_json_path))
-        if self.dll_path:
-            editor.update_material_properties(
-                {
-                    "IS_FORTRAN_UDSM": True,
-                    "UMAT_PARAMETERS": self.material_parameters,
-                    "UDSM_NAME": self.dll_path,
-                    "UDSM_NUMBER": self.udsm_number,
-                }
-            )
-            editor.set_constitutive_law("SmallStrainUDSM2DPlaneStrainLaw")
-        if self.model_name:
-            if self.model_name.strip().lower() == "linear elastic model":
-                editor.update_material_properties(
-                    {
-                        "YOUNG_MODULUS": self.material_parameters[0],
-                        "POISSON_RATIO": self.material_parameters[1],
-                    }
-                )
-                editor.set_constitutive_law("GeoLinearElasticPlaneStrain2DLaw")
-
-            if self.model_name.strip().lower() == "mohr-coulomb model":
-                editor.update_material_properties(
-                    {
-                        "YOUNG_MODULUS": self.material_parameters[0],
-                        "POISSON_RATIO": self.material_parameters[1],
-                        "GEO_COHESION": self.material_parameters[2],
-                        "GEO_FRICTION_ANGLE": self.material_parameters[3],
-                        "GEO_TENSILE_STRENGTH": self.material_parameters[4],
-                        "GEO_DILATANCY_ANGLE": self.material_parameters[5],
-                    }
-                )
-                editor.set_constitutive_law("GeoMohrCoulombWithTensionCutOff2D")
+        editor.update_material_properties(self.material_inputs.get_kratos_inputs())
+        editor.set_constitutive_law(self.material_inputs.kratos_law_name)
 
     def _set_project_parameters(self) -> None:
         with open(self.project_json_path, "r") as f:
