@@ -113,7 +113,7 @@ class MaterialInputManagerTest(unittest.TestCase):
             [0.0] * len(expected_changeable_material_parameters),
         )
 
-        material_input_manager.set_current_udsm_number(1)
+        material_input_manager.set_current_udsm_model("Deltares-SClay1S-Fibres")
 
         udsm_material_inputs = material_input_manager.get_current_material_inputs()
         self.assertIsInstance(udsm_material_inputs, UDSMMaterialInputs)

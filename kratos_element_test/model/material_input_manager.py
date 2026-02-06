@@ -77,12 +77,6 @@ class MaterialInputManager:
             inputs.model_name = model_name
             self._material_inputs["udsm"].append(inputs)
 
-    def set_current_udsm_number(self, udsm_number):
-        assert (
-            0 <= udsm_number < len(self._material_inputs["udsm"])
-        ), "UDSM number out of range"
-        self._current_udsm_index = udsm_number
-
     def get_udsm_model_names(self):
         assert (
             len(self._material_inputs["udsm"]) > 0
