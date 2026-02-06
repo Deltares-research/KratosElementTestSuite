@@ -68,7 +68,7 @@ class MohrCoulombMaterialInputs:
 class UDSMMaterialInputs:
     kratos_law_name: str = "SmallStrainUDSM2DPlaneStrainLaw"
     model_name: str = ""
-    user_defined_parameters = Dict
+    user_defined_parameters: Dict = field(default_factory=lambda: {})
     material_parameters: Dict = field(
         default_factory=lambda: {
             "IS_FORTRAN_UDSM": True,

@@ -59,6 +59,26 @@ class MaterialInputUtilsTest(unittest.TestCase):
         self.assertIsNone(c)
         self.assertIsNone(phi)
 
+    def test_get_c_and_phi_from_udsm_model_returns_none_if_one_of_the_indices_is_none(
+        self,
+    ):
+        udsm_inputs = UDSMMaterialInputs()
+        user_defined_parameters = {
+            "Param1": Parameter(value=1.0),
+            "Param2": Parameter(value=2.0),
+            "Param3": Parameter(value=3.0),
+            "Param4": Parameter(value=4.0),
+        }
+        udsm_inputs.user_defined_parameters = user_defined_parameters
+        udsm_inputs.mohr_coulomb_options.enabled = True
+        udsm_inputs.mohr_coulomb_options.c_index = None
+        udsm_inputs.mohr_coulomb_options.phi_index = 3
+
+        c, phi = get_cohesion_and_phi(udsm_inputs)
+
+        self.assertIsNone(c)
+        self.assertIsNone(phi)
+
     def test_get_c_and_phi_from_linear_elastic_model(self):
         linear_elastic_inputs = LinearElasticMaterialInputs()
 

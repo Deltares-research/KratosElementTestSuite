@@ -212,7 +212,7 @@ class MainUI:
 
         def _safe_udsm_initialdir() -> str:
             try:
-                p = Path(soil_models_dir())
+                p = soil_models_dir()
                 if p.is_dir():
                     return str(p)
             except Exception:

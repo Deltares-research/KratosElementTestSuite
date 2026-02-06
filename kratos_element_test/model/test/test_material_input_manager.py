@@ -25,8 +25,8 @@ class MaterialInputManagerTest(unittest.TestCase):
 
     @parameterized.expand(
         [
-            ["linear_elastic", LinearElasticMaterialInputs()],
-            ["mohr_coulomb", MohrCoulombMaterialInputs()],
+            ("linear_elastic", LinearElasticMaterialInputs()),
+            ("mohr_coulomb", MohrCoulombMaterialInputs()),
         ]
     )
     def test_default_input_for_materials(self, name, expected_defaults):
@@ -42,7 +42,7 @@ class MaterialInputManagerTest(unittest.TestCase):
         material_input_manager.set_current_material_type("udsm")
 
         self.assertRaises(
-            RuntimeError, material_input_manager.get_current_material_inputs
+            AssertionError, material_input_manager.get_current_material_inputs
         )
 
     def test_changing_linear_elastic_material_inputs(self):
@@ -57,7 +57,7 @@ class MaterialInputManagerTest(unittest.TestCase):
             material_input_manager.get_current_material_inputs()
         )
 
-        self.assertEqual(
+        self.assertAlmostEqual(
             linear_elastic_material_inputs.get_kratos_inputs()["YOUNG_MODULUS"],
             9e5,
         )
@@ -81,9 +81,7 @@ class MaterialInputManagerTest(unittest.TestCase):
 
     def test_loading_udsm_initializes_material_inputs(self):
         material_input_manager = MaterialInputManager()
-        material_input_manager.initialize_udsm(
-            Path(soil_models_dir()) / "sclay1creep.dll"
-        )
+        material_input_manager.initialize_udsm(soil_models_dir() / "sclay1creep.dll")
 
         udsm_material_inputs = material_input_manager.get_current_material_inputs()
 
@@ -152,9 +150,7 @@ class MaterialInputManagerTest(unittest.TestCase):
 
     def test_getting_udsm_model_names(self):
         material_input_manager = MaterialInputManager()
-        material_input_manager.initialize_udsm(
-            Path(soil_models_dir()) / "sclay1creep.dll"
-        )
+        material_input_manager.initialize_udsm(soil_models_dir() / "sclay1creep.dll")
 
         self.assertEqual(
             material_input_manager.get_udsm_model_names(),

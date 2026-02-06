@@ -38,7 +38,6 @@ REQUIRED_FILES = [
 
 
 class RunSimulation:
-
     def __init__(
         self,
         *,
