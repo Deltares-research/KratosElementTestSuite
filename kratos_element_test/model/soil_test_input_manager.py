@@ -9,6 +9,7 @@ from kratos_element_test.view.ui_constants import (
     DIRECT_SHEAR,
     TEST_NAME_TO_TYPE,
     CRS,
+    VALID_DRAINAGE_TYPES
 )
 
 
@@ -75,6 +76,11 @@ class SoilTestInputManager:
         inputs = self.get_current_test_inputs()
         if hasattr(inputs, "drainage"):
             inputs.drainage = new_drainage
+
+        if new_drainage not in VALID_DRAINAGE_TYPES:
+            raise ValueError(
+                f"Invalid drainage '{new_drainage}'. Expected 'drained' or 'undrained'."
+            )
 
     def add_strain_increment(self):
         crs_inputs = self.input_data.get(CRS)
