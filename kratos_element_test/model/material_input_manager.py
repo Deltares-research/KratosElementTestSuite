@@ -58,7 +58,7 @@ class MaterialInputManager:
         self._material_inputs["udsm"].clear()
         self._current_udsm_index = 0
         model_dict = udsm_parser(str(dll_path.resolve()))
-        for index, (parameter_names, parameter_units, model_name) in enumerate(
+        for udsm_number, (parameter_names, parameter_units, model_name) in enumerate(
             zip(
                 model_dict["param_names"],
                 model_dict["param_units"],
@@ -71,7 +71,7 @@ class MaterialInputManager:
                 user_defined_parameters[name] = Parameter(0.0, unit)
             inputs = UDSMMaterialInputs()
             inputs.material_parameters["UDSM_NAME"] = str(dll_path.resolve())
-            inputs.material_parameters["UDSM_NUMBER"] = index
+            inputs.material_parameters["UDSM_NUMBER"] = udsm_number
             inputs.user_defined_parameters = user_defined_parameters
             inputs.model_name = model_name
             self._material_inputs["udsm"].append(inputs)
