@@ -38,8 +38,8 @@ class ResultCollectorTest(unittest.TestCase):
 
         collector = ResultCollector(
             [self.test_path],
-            material_parameters=[1.0, 2.0, 3.0, 4.0],
-            cohesion_phi_indices=(3, 4),
+            cohesion=3.0,
+            phi=4.0,
         )
         results = collector.collect_results()
         np.testing.assert_array_almost_equal(results[variable_name], expected_values)
@@ -47,8 +47,8 @@ class ResultCollectorTest(unittest.TestCase):
     def test_collector_does_not_throw_when_result_file_does_not_exist(self):
         collector = ResultCollector(
             [Path("non_existent_file.res")],
-            material_parameters=[1.0, 2.0, 3.0, 4.0],
-            cohesion_phi_indices=(3, 4),
+            cohesion=3.0,
+            phi=4.0,
         )
         try:
             results = collector.collect_results()
@@ -57,11 +57,7 @@ class ResultCollectorTest(unittest.TestCase):
             self.fail(f"collect_results raised an exception unexpectedly: {e}")
 
     def test_c_phi_are_none_when_indices_are_not_defined(self):
-        collector = ResultCollector(
-            [self.test_path],
-            material_parameters=[1.0, 2.0, 3.0, 4.0],
-            cohesion_phi_indices=(),
-        )
+        collector = ResultCollector([self.test_path])
 
         results = collector.collect_results()
         self.assertTrue(results["cohesion"] is None)
@@ -70,8 +66,8 @@ class ResultCollectorTest(unittest.TestCase):
     def test_collector_appends_results_of_multiple_stages(self):
         collector = ResultCollector(
             [self.test_path, self.test_path],
-            material_parameters=[1.0, 2.0, 3.0, 4.0],
-            cohesion_phi_indices=(3, 4),
+            cohesion=3.0,
+            phi=4.0,
         )
         results = collector.collect_results()
 

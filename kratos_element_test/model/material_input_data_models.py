@@ -1,0 +1,106 @@
+# ©Deltares 2025
+# This is a prototype version
+# Contact kratos@deltares.nl
+
+from dataclasses import dataclass, field
+from typing import Optional, Tuple, Dict
+
+
+@dataclass
+class MohrCoulombOptions:
+    enabled: bool = False
+    c_index: Optional[int] = None  # 1-based index from the UDSM mapping
+    phi_index: Optional[int] = None
+
+
+@dataclass
+class Parameter:
+    value: float | str = 0.0
+    unit: str = "-"
+
+
+@dataclass
+class LinearElasticMaterialInputs:
+    kratos_law_name: str = "GeoLinearElasticPlaneStrain2DLaw"
+    user_defined_parameters: Dict = field(
+        default_factory=lambda: {
+            "YOUNG_MODULUS": Parameter(value=0.0, unit="kN/m²"),
+            "POISSON_RATIO": Parameter(value=0.0, unit="-"),
+        }
+    )
+
+    def get_kratos_inputs(self) -> Dict:
+        from kratos_element_test.model.material_input_data_utils import (
+            convert_user_inputs_to_kratos_inputs,
+        )
+
+        return convert_user_inputs_to_kratos_inputs(self.user_defined_parameters)
+
+
+@dataclass
+class MohrCoulombMaterialInputs:
+    kratos_law_name: str = "GeoMohrCoulombWithTensionCutOff2D"
+    user_defined_parameters: Dict = field(
+        default_factory=lambda: {
+            "YOUNG_MODULUS": Parameter(value=0.0, unit="kN/m²"),
+            "POISSON_RATIO": Parameter(value=0.0, unit="-"),
+            "GEO_COHESION": Parameter(value=0.0, unit="kN/m²"),
+            "GEO_FRICTION_ANGLE": Parameter(value=0.0, unit="deg"),
+            "GEO_TENSILE_STRENGTH": Parameter(value=0.0, unit="kN/m²"),
+            "GEO_DILATANCY_ANGLE": Parameter(value=0.0, unit="deg"),
+        }
+    )
+
+    def get_kratos_inputs(self) -> Dict:
+        from kratos_element_test.model.material_input_data_utils import (
+            convert_user_inputs_to_kratos_inputs,
+        )
+
+        return convert_user_inputs_to_kratos_inputs(self.user_defined_parameters)
+
+    def get_cohesion_and_phi(self) -> Tuple[float, float]:
+        cohesion = self.user_defined_parameters["GEO_COHESION"].value
+        phi = self.user_defined_parameters["GEO_FRICTION_ANGLE"].value
+        return cohesion, phi
+
+
+@dataclass
+class UDSMMaterialInputs:
+    kratos_law_name: str = "SmallStrainUDSM2DPlaneStrainLaw"
+    model_name: str = ""
+    user_defined_parameters: Dict = field(default_factory=lambda: {})
+    material_parameters: Dict = field(
+        default_factory=lambda: {
+            "IS_FORTRAN_UDSM": True,
+            "UMAT_PARAMETERS": [],
+            "UDSM_NAME": "",
+            "UDSM_NUMBER": 1,
+        }
+    )
+    mohr_coulomb_options: MohrCoulombOptions = field(
+        default_factory=lambda: MohrCoulombOptions(
+            enabled=False, c_index=3, phi_index=4
+        )
+    )
+
+    def get_kratos_inputs(self) -> Dict:
+        result = self.material_parameters
+        result["UMAT_PARAMETERS"] = [
+            parameter.value for parameter in self.user_defined_parameters.values()
+        ]
+        return result
+
+    def get_cohesion_and_phi(self) -> Tuple[float, float] | Tuple[None, None]:
+        if not self.mohr_coulomb_options.enabled:
+            return None, None
+
+        c_index = self.mohr_coulomb_options.c_index
+        phi_index = self.mohr_coulomb_options.phi_index
+        if c_index is None or phi_index is None:
+            return None, None
+
+        material_parameters_list = list(self.user_defined_parameters.values())
+        cohesion = material_parameters_list[c_index - 1].value
+        phi = material_parameters_list[phi_index - 1].value
+
+        return cohesion, phi
