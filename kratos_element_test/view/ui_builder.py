@@ -102,7 +102,7 @@ class GeotechTestUI(ttk.Frame):
         self.soil_test_input_view = SoilTestInputView(
             self.controller._soil_test_input_controller,
             self._init_plot_canvas,
-            self.material_input_view,
+            self.left_frame,
         )
 
         clear_log()
@@ -191,3 +191,6 @@ class GeotechTestUI(ttk.Frame):
     def _init_log_section(self):
         self.log_viewer = LogViewer(self.left_panel, padding="5")
         self.log_viewer.pack(fill="x", padx=10, pady=(0, 10))
+
+    def refresh_material_inputs(self):
+        self.material_input_view.refresh()

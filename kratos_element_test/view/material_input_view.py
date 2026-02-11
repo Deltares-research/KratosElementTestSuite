@@ -24,6 +24,7 @@ class MaterialInputView(ttk.Frame):
 
     def refresh(self):
         for w in self.winfo_children():
+            print(w)
             w.destroy()
 
         self.dropdown_frame = ttk.Frame(self)
@@ -44,6 +45,11 @@ class MaterialInputView(ttk.Frame):
                 state="readonly",
             )
             self.model_menu.pack(side="top", fill="x", expand=True, padx=5)
+            self.model_var.set(
+                self._controller.get_udsm_model_names()[0]
+                if self._controller.get_current_material_type() == "udsm"
+                else ""
+            )
             self.model_var.trace("w", lambda *args: self.setup_material_inputs())
             self.model_menu.configure(state="readonly")
 
