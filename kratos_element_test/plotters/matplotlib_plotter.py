@@ -422,10 +422,16 @@ class MatplotlibPlotter:
     def plot_excess_pore_pressure_vs_strain_direct_shear(
         self, ax, shear_strain_xy, excess_pore_pressure
     ):
+        _ZERO_TOL = 1e-6
+        epp = np.asarray(excess_pore_pressure, dtype=float)
+        if epp.size and np.nanmax(np.abs(epp)) < _ZERO_TOL:
+            epp = np.zeros_like(epp)
+
         gamma_xy = 2 * np.array(shear_strain_xy)
+
         ax.plot(
             np.abs(gamma_xy),
-            excess_pore_pressure,
+            epp,
             "-",
             color="blue",
             label=TITLE_EPP_VS_STRAIN,
