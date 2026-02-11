@@ -11,7 +11,14 @@ from kratos_element_test.view.ui_logger import log_message as fallback_log
 
 
 class ResultCollector:
-    def __init__(self, output_file_paths, cohesion=None, phi=None, drainage_type="drained", logger=None):
+    def __init__(
+        self,
+        output_file_paths,
+        cohesion=None,
+        phi=None,
+        drainage_type="drained",
+        logger=None,
+    ):
         self.output_file_paths = output_file_paths
         self._log = logger or fallback_log
         self.cohesion = cohesion
@@ -29,6 +36,7 @@ class ResultCollector:
         all_sigma_xx = []
         all_sigma_yy = []
         all_time_steps = []
+        all_water_pressures = []
 
         for result_path in self.output_file_paths:
             s, ms, vm, d, e, wp, t = self._read_results(result_path)
@@ -40,6 +48,7 @@ class ResultCollector:
             mean_stress_values = self._compute_scalar_stresses(ms)
             sigma_xx, sigma_yy = self._extract_sigma_xx_yy(s)
             time_steps = t
+            all_water_pressures.extend(self._extract_water_pressure(wp))
 
             for time, tensor_list in tensors.items():
                 all_tensors.setdefault(time, []).extend(tensor_list)
@@ -58,9 +67,10 @@ class ResultCollector:
 
         all_excess_pore_pressure = []
         if self.drainage_type == "undrained":
-            all_excess_pore_pressure = self._calculate_excess_pore_pressure(
-                self.output_file_paths
-            )
+            initial_pressure = all_water_pressures[0]
+            all_excess_pore_pressure = [
+                p - initial_pressure for p in all_water_pressures
+            ]
 
         sigma_1, sigma_3 = self._calculate_principal_stresses(all_tensors)
 
@@ -265,33 +275,9 @@ class ResultCollector:
 
         return combined
 
-    def _calculate_excess_pore_pressure(self, result_paths: List[str]) -> List[float]:
-        all_water_pressures = []
-        for path in result_paths:
-            _, _, _, _, _, wp, _ = self._read_results(path)
-            water_pressure_values = self._extract_water_pressure(wp)
-            all_water_pressures.extend(water_pressure_values)
-
-        if not all_water_pressures:
-            return []
-
-        initial_pressure = all_water_pressures[0]
-        return [p - initial_pressure for p in all_water_pressures]
-
-    @staticmethod
-    def _calculate_principal_stresses(
-        tensors: Dict[float, List[np.ndarray]],
-    ) -> Tuple[List[float], List[float]]:
-        sigma_1, sigma_3 = [], []
-        for time in sorted(tensors.keys()):
-            for sigma in tensors[time]:
-                eigenvalues, _ = np.linalg.eigh(sigma)
-                sigma_1.append(float(np.min(eigenvalues)))
-                sigma_3.append(float(np.max(eigenvalues)))
-        return sigma_1, sigma_3
-
-    @staticmethod
-    def _extract_water_pressure(water_pressure_results: list[dict]) -> list[float]:
+    def _extract_water_pressure(
+        self, water_pressure_results: list[dict]
+    ) -> list[float]:
         pressure_values = []
         for result in water_pressure_results:
             values = result["values"]
@@ -306,3 +292,15 @@ class ResultCollector:
                 pressure_values.append(val_container)
 
         return pressure_values
+
+    @staticmethod
+    def _calculate_principal_stresses(
+        tensors: Dict[float, List[np.ndarray]],
+    ) -> Tuple[List[float], List[float]]:
+        sigma_1, sigma_3 = [], []
+        for time in sorted(tensors.keys()):
+            for sigma in tensors[time]:
+                eigenvalues, _ = np.linalg.eigh(sigma)
+                sigma_1.append(float(np.min(eigenvalues)))
+                sigma_3.append(float(np.max(eigenvalues)))
+        return sigma_1, sigma_3
