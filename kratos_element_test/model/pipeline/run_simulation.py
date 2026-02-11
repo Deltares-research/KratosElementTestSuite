@@ -98,8 +98,6 @@ class RunSimulation:
         if self.test_type == "crs":
             self._prepare_crs_stages()
 
-        self._set_material_undrained()
-        self._unfix_water_pressure_for_undrained()
         self._set_material_constitutive_law()
         self._set_project_parameters()
         self._set_mdpa()
@@ -116,7 +114,9 @@ class RunSimulation:
 
             output_file_strings = [str(p) for p in self._output_file_paths()]
             cohesion, phi = get_cohesion_and_phi(self.material_inputs)
-            collector = ResultCollector(output_file_strings, cohesion, phi, drainage_type=self.drainage)
+            collector = ResultCollector(
+                output_file_strings, cohesion, phi, drainage_type=self.drainage
+            )
             results = collector.collect_results()
             self.log("Rendering complete.", "info")
             return results
@@ -191,16 +191,8 @@ class RunSimulation:
         editor = MaterialEditor(str(self.material_json_path))
         editor.update_material_properties(self.material_inputs.get_kratos_inputs())
         editor.set_constitutive_law(self.material_inputs.kratos_law_name)
-
-    def _set_material_undrained(self) -> None:
         if self.drainage and self.drainage == "undrained":
-            editor = MaterialEditor(str(self.material_json_path))
             editor.set_undrained_flag(False)
-
-    def _unfix_water_pressure_for_undrained(self) -> None:
-        if self.drainage and self.drainage == "undrained":
-            editor = ProjectParameterEditor(str(self.project_json_path))
-            editor.set_water_pressure_constraint_unfixed()
 
     def _set_project_parameters(self) -> None:
         with open(self.project_json_path, "r") as f:
@@ -241,6 +233,8 @@ class RunSimulation:
         editor.update_nested_value(
             "apply_initial_uniform_stress_field", "value", stress_vector
         )
+        if self.drainage and self.drainage == "undrained":
+            editor.set_water_pressure_constraint_unfixed()
 
     def _set_mdpa(self) -> None:
         editor = MdpaEditor(str(self.mdpa_path))
