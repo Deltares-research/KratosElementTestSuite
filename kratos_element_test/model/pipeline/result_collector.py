@@ -66,7 +66,7 @@ class ResultCollector:
         all_yy_strain = self._apply_cumulative_strain_offset(yy_strain_stages)
 
         all_excess_pore_pressure = []
-        if self.drainage_type == "undrained":
+        if self.drainage_type == "undrained" and all_water_pressures:
             initial_pressure = all_water_pressures[0]
             all_excess_pore_pressure = [
                 p - initial_pressure for p in all_water_pressures
