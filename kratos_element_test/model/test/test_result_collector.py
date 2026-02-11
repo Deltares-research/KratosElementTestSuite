@@ -108,7 +108,9 @@ class ResultCollectorTest(unittest.TestCase):
         ]
     )
     def test_collected_values_undrained(self, variable_name, expected_values):
-        undrained_test_path = Path(os.path.dirname(__file__)) / "output_undrained.post.res"
+        undrained_test_path = (
+            Path(os.path.dirname(__file__)) / "output_undrained.post.res"
+        )
 
         collector = ResultCollector(
             [undrained_test_path],
