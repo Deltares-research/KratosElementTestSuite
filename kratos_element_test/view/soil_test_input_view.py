@@ -91,15 +91,17 @@ class SoilTestInputView(ttk.Frame):
 
         self._soil_test_input_controller.set_current_test_type(test_name)
         if test_name == TRIAXIAL:
-            self.update_plots_callback(num_plots=5)
+            inputs = self._soil_test_input_controller.get_triaxial_inputs()
+            is_undrained = getattr(inputs, "drainage", "drained") == "undrained"
+            num_plots = 6 if is_undrained else 5
+            self.update_plots_callback(num_plots=num_plots)
+
             ttk.Label(
                 self.test_input_frame,
                 text="Triaxial Input Data",
                 font=(INPUT_SECTION_FONT, 12, "bold"),
             ).pack(anchor="w", padx=5, pady=(5, 0))
             self._add_test_type_dropdown(self.test_input_frame)
-
-            inputs = self._soil_test_input_controller.get_triaxial_inputs()
 
             input_values = {
                 INIT_PRESSURE_LABEL: inputs.initial_effective_cell_pressure,
@@ -218,17 +220,34 @@ class SoilTestInputView(ttk.Frame):
             parent, text="Type of Test:", font=(INPUT_SECTION_FONT, 10, "bold")
         ).pack(anchor="w", padx=5, pady=(5, 2))
 
-        self.test_type_var = tk.StringVar(value="Drained")
+        inputs = self._soil_test_input_controller.get_current_test_inputs()
+        drainage = getattr(inputs, "drainage", "drained")
+        initial_label = "Undrained" if str(drainage).strip().lower() == "undrained" else "Drained"
+
+        self.test_type_var = tk.StringVar(value=initial_label)
         self.test_type_menu = ttk.Combobox(
             parent,
             textvariable=self.test_type_var,
-            values=["Drained"],
+            values=["Drained", "Undrained"],
             state="readonly",
             width=12,
         )
         self.test_type_menu.pack(anchor="w", padx=10, pady=(0, 10))
 
         self._soil_test_input_controller.bind_drainage_combo_box(self.test_type_menu)
+        self.test_type_menu.bind("<<ComboboxSelected>>", self._on_drainage_change, add="+")
+
+    def _on_drainage_change(self, event=None):
+        current_test = self._soil_test_input_controller.get_current_test_type()
+        val = self.test_type_var.get().strip().lower()
+        is_undrained = val == "undrained"
+
+        if current_test == DIRECT_SHEAR:
+            num_plots = 5 if is_undrained else 4
+            self.update_plots_callback(num_plots=num_plots)
+        elif current_test == TRIAXIAL:
+            num_plots = 6 if is_undrained else 5
+            self.update_plots_callback(num_plots=num_plots)
 
     def _add_crs_row(self, duration_in_hours=1.0, strain_inc=0.0, steps=100):
         row = {}

@@ -64,31 +64,43 @@ class RunSimulation:
         )
 
         is_crs_test = isinstance(test_inputs, CRSSimulationInputs)
-        self.stage_durations = (
-            [
+        is_undrained_triaxial = (
+                self.test_type == "triaxial"
+                and self.drainage == "undrained"
+        )
+
+        if is_crs_test:
+            self.stage_durations = [
                 hours_to_seconds(inc.duration_in_hours)
                 for inc in test_inputs.strain_increments
             ]
-            if is_crs_test
-            else None
-        )
-        self.step_counts = (
-            [inc.steps for inc in test_inputs.strain_increments]
-            if is_crs_test
-            else None
-        )
-        self.strain_incs = (
-            [inc.strain_increment for inc in test_inputs.strain_increments]
-            if is_crs_test
-            else None
-        )
 
-        self.keep_tmp = keep_tmp
+            self.step_counts = (
+                [inc.steps for inc in test_inputs.strain_increments]
+                if is_crs_test
+                else None
+            )
+            self.strain_incs = (
+                [inc.strain_increment for inc in test_inputs.strain_increments]
+                if is_crs_test
+                else None
+            )
 
-        self.tmp_dir = Path(tempfile.mkdtemp(prefix=f"{self.test_type}_"))
-        self.material_json_path: Optional[Path] = None
-        self.project_json_path: Optional[Path] = None
-        self.mdpa_path: Optional[Path] = None
+        elif is_undrained_triaxial:
+             self.stage_durations = [1.0, self.end_time]
+             self.step_counts = [None, self.num_steps]
+             self.strain_incs = None
+        else:
+            self.stage_durations = None
+            self.step_counts = None
+            self.strain_incs = None
+
+            self.keep_tmp = keep_tmp
+
+            self.tmp_dir = Path(tempfile.mkdtemp(prefix=f"{self.test_type}_"))
+            self.material_json_path: Optional[Path] = None
+            self.project_json_path: Optional[Path] = None
+            self.mdpa_path: Optional[Path] = None
 
     def run(self) -> None:
         self.log(f"Starting {self.test_type} simulation...", "info")
@@ -130,40 +142,70 @@ class RunSimulation:
                     self.log(f"Failed to clean tmp dir: {e}", "warn")
 
     @staticmethod
-    def _template_dir(test_type: str) -> Path:
+    def _template_dir(test_type: str, drainage: Optional[str] = None) -> Path:
         here = Path(__file__).resolve()
-        return here.parents[1] / "simulation_assets" / "templates" / f"test_{test_type}"
+        base = here.parents[1] / "simulation_assets" / "templates" / f"test_{test_type}"
+        if drainage and str(drainage).strip().lower() == "undrained":
+            return base / "undrained"
+        return base
 
     @classmethod
-    def _find_template_dir(cls, test_type: str) -> Path:
-        template_dir = cls._template_dir(test_type)
+    def _find_template_dir(cls, test_type: str, drainage: Optional[str] = None) -> Path:
+        template_dir = cls._template_dir(test_type, drainage=drainage)
         if template_dir.is_dir():
             return template_dir
         raise FileNotFoundError(
-            f"Could not locate templates for '{test_type}'. Expected directory:\n"
+            f"Could not locate templates for '{test_type}'. "
+            + (f" ({drainage})" if drainage else "")
+            + ". Expected directory:\n"
             f"  - {template_dir}"
         )
 
     def _copy_simulation_files(self) -> None:
-        src_dir = self._find_template_dir(self.test_type)
+        base_dir = self._find_template_dir(self.test_type, drainage=None)
+
+        overlay_dir = None
+        if self.drainage and str(self.drainage).strip().lower() == "undrained":
+            overlay_dir = self._template_dir(self.test_type, drainage="undrained")
+            if not overlay_dir.is_dir():
+                raise FileNotFoundError(
+                    f"Could not locate UNDRAINED templates for '{self.test_type}'. Expected directory:\n"
+                    f"  - {overlay_dir}"
+                )
         copied = {}
-        for filename in REQUIRED_FILES:
-            src_file = src_dir / filename
-            dst_file = self.tmp_dir / filename
-            if src_file.exists():
-                shutil.copy(src_file, dst_file)
-                copied[filename] = dst_file
+
+        def _copy_from(src_dir: Path) -> None:
+            for filename in REQUIRED_FILES:
+                src_file = src_dir / filename
+                if src_file.exists():
+                    dst_file = self.tmp_dir / filename
+                    shutil.copy(src_file, dst_file)
+                    copied[filename] = dst_file
+
+        _copy_from(base_dir)
+        if overlay_dir:
+            _copy_from(overlay_dir)
 
         if "ProjectParametersOrchestrator.json" in copied:
             self.project_json_path = copied["ProjectParametersOrchestrator.json"]
+            legacy_param_file = self.tmp_dir / "ProjectParameters.json"
+            if legacy_param_file.exists():
+                legacy_param_file.unlink()
         elif "ProjectParameters.json" in copied:
             self.project_json_path = copied["ProjectParameters.json"]
         else:
             raise FileNotFoundError(
-                "Neither ProjectParametersOrchestrator.json nor ProjectParameters.json found in template."
+                f"Checked base: {base_dir}"
+                + (f"\nChecked undrained overlay: {overlay_dir}" if overlay_dir else "")
             )
 
         self.material_json_path = copied.get("MaterialParameters.json")
+        if self.material_json_path is None:
+            raise FileNotFoundError(
+                "MaterialParameters.json missing in templates.\n"
+                f"Checked base: {base_dir}"
+                + (f"\nChecked undrained overlay: {overlay_dir}" if overlay_dir else "")
+            )
         self.mdpa_path = copied.get("mesh.mdpa")
         if self.mdpa_path is None:
             raise FileNotFoundError("mesh.mdpa missing in template set.")
@@ -236,10 +278,12 @@ class RunSimulation:
         editor.update_end_time(self.end_time)
 
         if self.stage_durations:
-            first_timestep = self.stage_durations[0] / self.step_counts[0]
+            if self.step_counts[0] is not None:
+                first_timestep = self.stage_durations[0] / self.step_counts[0]
+                editor.update_first_timestep(first_timestep)
         else:
             first_timestep = self.end_time / self.num_steps
-        editor.update_first_timestep(first_timestep)
+            editor.update_first_timestep(first_timestep)
 
         if self.test_type == "triaxial":
             editor.update_initial_effective_cell_pressure(
