@@ -4,6 +4,7 @@ from kratos_element_test.model.models import (
     CRSSimulationInputs,
 )
 from kratos_element_test.model.soil_test_input_manager import SoilTestInputManager
+from kratos_element_test.view.ui_logger import log_message
 from kratos_element_test.view.ui_constants import (
     TRIAXIAL,
     DIRECT_SHEAR,
@@ -109,6 +110,8 @@ class SoilTestInputController:
             ):
                 num_plots = 5 if val == "undrained" else 4
                 on_drainage_changed(num_plots=num_plots)
+
+                log_message(f"{val} test type selected.", "info")
 
         combo_box.bind("<<ComboboxSelected>>", _sync_drainage_from_combobox)
 
