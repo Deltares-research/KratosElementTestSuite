@@ -76,6 +76,8 @@ class PlotViewer(ttk.Frame):
                 results["von_mises"],
                 results["cohesion"],
                 results["phi"],
+                results.get("excess_pore_pressure"),
+                results.get("epsilon_1"),
             )
         elif test_type == "crs":
             self._plotter.crs(
