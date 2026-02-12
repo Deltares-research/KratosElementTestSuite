@@ -402,3 +402,17 @@ class MatplotlibPlotter:
         ax.grid(True)
         ax.locator_params(nbins=8)
         ax.minorticks_on()
+
+    def plot_excess_pore_pressure_vs_epsilon_1_triaxial(self, ax, epsilon_1, excess_pore_pressure):
+        min_len = min(len(epsilon_1), len(excess_pore_pressure))
+        epsilon_1 = epsilon_1[:min_len]
+        excess_pore_pressure = excess_pore_pressure[:min_len]
+
+        ax.plot(epsilon_1, excess_pore_pressure, '-', color='blue', label=TITLE_EPP_VS_EPS1)
+        ax.set_title(TITLE_EPP_VS_EPS1)
+        ax.set_xlabel(EPSILON_1_LABEL)
+        ax.set_ylabel(EXCESS_PORE_PRESSURE_LABEL)
+        ax.grid(True)
+        ax.locator_params(nbins=8)
+        ax.minorticks_on()
+
