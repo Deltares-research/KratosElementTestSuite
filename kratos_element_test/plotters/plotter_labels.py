@@ -11,6 +11,7 @@ SIGMA1_SIGMA3_DIFF_LABEL = "|σ₁ - σ₃| [kN/m²]"
 HORIZONTAL_STRESS_LABEL = "σ'ₓₓ (Horizontal Effective Stress) [kN/m²]"
 VERTICAL_STRESS_LABEL = "σ'ᵧᵧ (Vertical Effective Stress) [kN/m²]"
 VERTICAL_STRAIN_LABEL = "εᵧᵧ (Vertical Strain) [-]"
+EPSILON_1_LABEL = "ε₁ (First Principal Strain 1) [-]"
 VOLUMETRIC_STRAIN_LABEL = "εᵥ (Volumetric Strain) [-]"
 SHEAR_STRAIN_LABEL = "γₓᵧ (Shear Strain) [-]"
 SHEAR_STRESS_LABEL = "τₓᵧ (Shear Stress) [kN/m²]"
@@ -18,6 +19,7 @@ EFFECTIVE_STRESS_LABEL = "σ' (Effective Stress) [kN/m²]"
 MOBILIZED_SHEAR_STRESS_LABEL = "τ (Mobilized Shear Stress) [kN/m²]"
 P_STRESS_LABEL = "p' (Mean Effective Stress) [kN/m²]"
 Q_STRESS_LABEL = "q (Deviatoric Stress) [kN/m²]"
+EXCESS_PORE_PRESSURE_LABEL = "uₑ (Excess Pore Pressure) [kN/m²]"
 TIME_HOURS_LABEL = "time [hours]"
 
 # Plot titles
@@ -30,6 +32,7 @@ TITLE_SHEAR_VS_STRAIN = "τₓᵧ vs εₓᵧ"
 TITLE_VERTICAL_STRAIN_VS_TIME = "εᵧᵧ vs time"
 TITLE_VERTICAL_STRESS_VS_VERTICAL_STRAIN = "σ'ᵧᵧ vs εᵧᵧ"
 TITLE_VERTICAL_STRESS_VS_HORIZONTAL_STRESS = "σ'ᵧᵧ vs σ'ₓₓ"
+TITLE_EPP_VS_EPS1 = "uₑ vs ε₁"
 
 
 # Legends
