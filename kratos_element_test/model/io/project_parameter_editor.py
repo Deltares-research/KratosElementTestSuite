@@ -181,3 +181,47 @@ class ProjectParameterEditor:
         except Exception as e:
             self._log(f"[ERROR] Exception: {e}", "error")
             raise
+
+    def set_water_pressure_constraint_unfixed(self) -> bool:
+        """
+        Unfixes the water pressure by removing the constraint process that fixes water pressure in soil.
+        Sets "WATER_PRESSURE" scalar constraint 'is_fixed' to False for legacy ProjectParameters.json:
+            - process_name: ApplyScalarConstraintTableProcess
+            - python_module: apply_scalar_constraint_table_process
+            - Parameters.model_part_name == "PorousDomain.Soil"
+            - Parameters.variable_name   == "WATER_PRESSURE"
+
+
+        """
+        data = self._load_json()
+        processes = data.get("processes", {})
+        if not isinstance(processes, dict):
+            return False
+
+        proc_list = processes.get("constraints_process_list", [])
+        if not isinstance(proc_list, list):
+            return False
+
+        for proc in proc_list:
+            if not isinstance(proc, dict):
+                continue
+
+            if proc.get("python_module") != "apply_scalar_constraint_table_process":
+                continue
+            if proc.get("process_name") != "ApplyScalarConstraintTableProcess":
+                continue
+
+            params = proc.get("Parameters", {})
+            if not isinstance(params, dict):
+                continue
+
+            if params.get("model_part_name") != "PorousDomain.Soil":
+                continue
+            if params.get("variable_name") != "WATER_PRESSURE":
+                continue
+
+            if params.get("is_fixed") is not False:
+                params["is_fixed"] = False
+
+        self.raw_text = json.dumps(data, indent=4)
+        self._write_back()

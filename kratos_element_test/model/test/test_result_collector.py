@@ -102,6 +102,39 @@ class ResultCollectorTest(unittest.TestCase):
         ]
         np.testing.assert_array_almost_equal(results["yy_strain"], expected_yy_strain)
 
+    @parameterized.expand(
+        [
+            ["excess_pore_pressure", [0.0, -33.25, -33.25, -33.25, -33.25]],
+        ]
+    )
+    def test_collected_values_undrained(self, variable_name, expected_values):
+        undrained_test_path = (
+            Path(os.path.dirname(__file__)) / "output_undrained.post.res"
+        )
+
+        collector = ResultCollector(
+            [undrained_test_path],
+            cohesion=3.0,
+            phi=4.0,
+            drainage_type="undrained",
+        )
+        results = collector.collect_results()
+        np.testing.assert_array_almost_equal(results[variable_name], expected_values)
+
+    def test_collector_does_not_throw_when_undrained_result_file_does_not_exist(self):
+        collector = ResultCollector(
+            [Path("non_existent_file_undrained.res")],
+            cohesion=3.0,
+            phi=4.0,
+            drainage_type="undrained",
+        )
+        try:
+            results = collector.collect_results()
+            self.assertIsInstance(results, dict)
+            self.assertEqual(results["excess_pore_pressure"], [])
+        except Exception as e:
+            self.fail(f"collect_results raised an exception unexpectedly: {e}")
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -18,6 +18,7 @@ EFFECTIVE_STRESS_LABEL = "σ' (Effective Stress) [kN/m²]"
 MOBILIZED_SHEAR_STRESS_LABEL = "τ (Mobilized Shear Stress) [kN/m²]"
 P_STRESS_LABEL = "p' (Mean Effective Stress) [kN/m²]"
 Q_STRESS_LABEL = "q (Deviatoric Stress) [kN/m²]"
+EXCESS_PORE_PRESSURE_LABEL = r"$P_{\mathrm{excess}}$ (Excess Pore Pressure) [kN/m²]"
 TIME_HOURS_LABEL = "time [hours]"
 
 # Plot titles
@@ -30,6 +31,7 @@ TITLE_SHEAR_VS_STRAIN = "τₓᵧ vs εₓᵧ"
 TITLE_VERTICAL_STRAIN_VS_TIME = "εᵧᵧ vs time"
 TITLE_VERTICAL_STRESS_VS_VERTICAL_STRAIN = "σ'ᵧᵧ vs εᵧᵧ"
 TITLE_VERTICAL_STRESS_VS_HORIZONTAL_STRESS = "σ'ᵧᵧ vs σ'ₓₓ"
+TITLE_EPP_VS_STRAIN = r"$P_{\mathrm{excess}}$ vs γₓᵧ"
 
 
 # Legends

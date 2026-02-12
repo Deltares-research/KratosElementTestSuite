@@ -97,7 +97,7 @@ class SoilTestInputView(ttk.Frame):
                 text="Triaxial Input Data",
                 font=(INPUT_SECTION_FONT, 12, "bold"),
             ).pack(anchor="w", padx=5, pady=(5, 0))
-            self._add_test_type_dropdown(self.test_input_frame)
+            self._add_test_type_dropdown(self.test_input_frame, allow_undrained=False)
 
             inputs = self._soil_test_input_controller.get_triaxial_inputs()
 
@@ -130,15 +130,17 @@ class SoilTestInputView(ttk.Frame):
             )
 
         elif test_name == DIRECT_SHEAR:
-            self.update_plots_callback(num_plots=4)
+            inputs = self._soil_test_input_controller.get_shear_inputs()
+            is_undrained = getattr(inputs, "drainage", "drained") == "undrained"
+            num_plots = 5 if is_undrained else 4
+            self.update_plots_callback(num_plots=num_plots)
+
             ttk.Label(
                 self.test_input_frame,
                 text="Direct Simple Shear Input Data",
                 font=(INPUT_SECTION_FONT, 12, "bold"),
             ).pack(anchor="w", padx=5, pady=(5, 0))
-            self._add_test_type_dropdown(self.test_input_frame)
-
-            inputs = self._soil_test_input_controller.get_shear_inputs()
+            self._add_test_type_dropdown(self.test_input_frame, allow_undrained=True)
 
             input_values = {
                 INIT_PRESSURE_LABEL: inputs.initial_effective_cell_pressure,
@@ -213,22 +215,39 @@ class SoilTestInputView(ttk.Frame):
 
         log_message(f"{test_name} test selected.", "info")
 
-    def _add_test_type_dropdown(self, parent):
+    def _add_test_type_dropdown(self, parent, allow_undrained: bool = True):
         ttk.Label(
             parent, text="Type of Test:", font=(INPUT_SECTION_FONT, 10, "bold")
         ).pack(anchor="w", padx=5, pady=(5, 2))
 
-        self.test_type_var = tk.StringVar(value="Drained")
+        inputs = self._soil_test_input_controller.get_current_test_inputs()
+        drainage = getattr(inputs, "drainage", "drained")
+        options = ["Drained", "Undrained"] if allow_undrained else ["Drained"]
+        if not allow_undrained:
+            initial_label = "Drained"
+            if str(drainage).strip().lower() == "undrained":
+                self._soil_test_input_controller.update_drainage("drained")
+        else:
+            initial_label = (
+                "Undrained"
+                if str(drainage).strip().lower() == "undrained"
+                else "Drained"
+            )
+
+        self.test_type_var = tk.StringVar(value=initial_label)
         self.test_type_menu = ttk.Combobox(
             parent,
             textvariable=self.test_type_var,
-            values=["Drained"],
+            values=options,
             state="readonly",
             width=12,
         )
         self.test_type_menu.pack(anchor="w", padx=10, pady=(0, 10))
 
-        self._soil_test_input_controller.bind_drainage_combo_box(self.test_type_menu)
+        self._soil_test_input_controller.bind_drainage_combo_box(
+            self.test_type_menu,
+            on_drainage_changed=self.update_plots_callback,
+        )
 
     def _add_crs_row(self, duration_in_hours=1.0, strain_inc=0.0, steps=100):
         row = {}

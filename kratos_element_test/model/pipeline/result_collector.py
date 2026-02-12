@@ -11,11 +11,19 @@ from kratos_element_test.view.ui_logger import log_message as fallback_log
 
 
 class ResultCollector:
-    def __init__(self, output_file_paths, cohesion=None, phi=None, logger=None):
+    def __init__(
+        self,
+        output_file_paths,
+        cohesion=None,
+        phi=None,
+        drainage_type="drained",
+        logger=None,
+    ):
         self.output_file_paths = output_file_paths
         self._log = logger or fallback_log
         self.cohesion = cohesion
         self.phi = phi
+        self.drainage_type = drainage_type
 
     def collect_results(self):
         all_tensors = {}
@@ -28,9 +36,10 @@ class ResultCollector:
         all_sigma_xx = []
         all_sigma_yy = []
         all_time_steps = []
+        all_water_pressures = []
 
         for result_path in self.output_file_paths:
-            s, ms, vm, d, e, t = self._read_results(result_path)
+            s, ms, vm, d, e, wp, t = self._read_results(result_path)
 
             tensors = self._extract_stress_tensors(s)
             shear_stress_xy = self._extract_shear_stress_xy(s)
@@ -39,6 +48,7 @@ class ResultCollector:
             mean_stress_values = self._compute_scalar_stresses(ms)
             sigma_xx, sigma_yy = self._extract_sigma_xx_yy(s)
             time_steps = t
+            all_water_pressures.extend(self._extract_water_pressure(wp))
 
             for time, tensor_list in tensors.items():
                 all_tensors.setdefault(time, []).extend(tensor_list)
@@ -54,6 +64,13 @@ class ResultCollector:
             all_time_steps.extend([seconds_to_hours(t) for t in time_steps])
 
         all_yy_strain = self._apply_cumulative_strain_offset(yy_strain_stages)
+
+        all_excess_pore_pressure = []
+        if self.drainage_type == "undrained" and all_water_pressures:
+            initial_pressure = all_water_pressures[0]
+            all_excess_pore_pressure = [
+                p - initial_pressure for p in all_water_pressures
+            ]
 
         sigma_1, sigma_3 = self._calculate_principal_stresses(all_tensors)
 
@@ -71,6 +88,7 @@ class ResultCollector:
             "sigma_xx": all_sigma_xx,
             "sigma_yy": all_sigma_yy,
             "time_steps": all_time_steps,
+            "excess_pore_pressure": all_excess_pore_pressure,
         }
 
     def _read_output(self, result_path: Path) -> dict:
@@ -78,7 +96,16 @@ class ResultCollector:
 
     def _read_results(self, result_path: Path):
         result_path = Path(result_path)
-        stress, mean_stress, von_mises, displacement, strain, time_steps = (
+        (
+            stress,
+            mean_stress,
+            von_mises,
+            displacement,
+            strain,
+            water_pressure,
+            time_steps,
+        ) = (
+            [],
             [],
             [],
             [],
@@ -89,7 +116,15 @@ class ResultCollector:
 
         if not result_path.exists():
             self._log(f"Missing result file: {result_path}", "warn")
-            return stress, mean_stress, von_mises, displacement, strain, time_steps
+            return (
+                stress,
+                mean_stress,
+                von_mises,
+                displacement,
+                strain,
+                water_pressure,
+                time_steps,
+            )
 
         output = self._read_output(result_path)
 
@@ -103,15 +138,35 @@ class ResultCollector:
                     von_mises,
                     displacement,
                     strain,
+                    water_pressure=water_pressure,
                 )
 
         time_steps = GiDOutputFileReader.get_time_steps_from_first_valid_result(output)
 
-        return stress, mean_stress, von_mises, displacement, strain, time_steps
+        return (
+            stress,
+            mean_stress,
+            von_mises,
+            displacement,
+            strain,
+            water_pressure,
+            time_steps,
+        )
 
     def _categorize_result(
-        self, result_name, item, stress, mean_stress, von_mises, displacement, strain
+        self,
+        result_name,
+        item,
+        stress,
+        mean_stress,
+        von_mises,
+        displacement,
+        strain,
+        water_pressure=None,
     ):
+        if water_pressure is None:
+            water_pressure = []
+
         values = item["values"]
         if result_name == "CAUCHY_STRESS_TENSOR":
             stress.append(item)
@@ -125,6 +180,8 @@ class ResultCollector:
             displacement.append(item)
         elif result_name == "ENGINEERING_STRAIN_TENSOR":
             strain.append(item)
+        elif result_name == "WATER_PRESSURE":
+            water_pressure.append(item)
 
     def _is_tri3_element_gp(self, values: list) -> bool:
         return isinstance(values, list) and all(
@@ -217,6 +274,24 @@ class ResultCollector:
             combined.extend(adjusted)
 
         return combined
+
+    def _extract_water_pressure(
+        self, water_pressure_results: list[dict]
+    ) -> list[float]:
+        pressure_values = []
+        for result in water_pressure_results:
+            values = result["values"]
+            if not values:
+                continue
+
+            val_container = values[0]["value"]
+            if isinstance(val_container, list):
+                if len(val_container) >= 1:
+                    pressure_values.append(val_container[0])
+            else:
+                pressure_values.append(val_container)
+
+        return pressure_values
 
     @staticmethod
     def _calculate_principal_stresses(

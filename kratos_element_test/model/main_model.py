@@ -10,8 +10,13 @@ from kratos_element_test.model.soil_test_input_manager import SoilTestInputManag
 class MainModel:
     def __init__(self, logger: Callable[[str, str], None]):
         self._logger = logger
+        self._result_manager = ResultManager(
+            lambda: self._soil_test_input_manager.get_current_test_type()
+        )
         self._material_input_manager = MaterialInputManager()
-        self._soil_test_input_manager = SoilTestInputManager()
+        self._soil_test_input_manager = SoilTestInputManager(
+            on_inputs_changed=self.clear_results
+        )
         self._result_manager = ResultManager(
             self._soil_test_input_manager.get_current_test_type
         )
