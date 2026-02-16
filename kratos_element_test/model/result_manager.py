@@ -11,6 +11,7 @@ class ResultManager:
         :param active_test_getter: callable which returns the currently active test
         """
         self._simulation_results: Dict[str, Dict[str, List[float]]] = {}
+        self._experimental_results: Dict[str, Dict[str, List[float]]] = {}
         self._active_test_getter = active_test_getter
 
     def get_results_of_active_test_type(self) -> Optional[Dict[str, List[float]]]:
@@ -24,3 +25,9 @@ class ResultManager:
 
     def clear_results(self) -> None:
         self._simulation_results.clear()
+
+    def get_experimental_results(self) -> Dict[str, List[float]]:
+        return self._experimental_results.get(self.get_current_test(), {})
+
+    def set_experimental_results(self, results: Dict[str, List[float]]) -> None:
+        self._experimental_results[self.get_current_test()] = results

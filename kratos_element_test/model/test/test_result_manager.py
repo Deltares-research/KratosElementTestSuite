@@ -68,6 +68,29 @@ class ResultManagerTest(unittest.TestCase):
         # Assert
         self.assertIsNone(result_manager.get_results_of_active_test_type())
 
+    def test_resul_manager_has_empty_experimental_results(self) -> bool:
+        current_test_getter = lambda: TRIAXIAL
+        result_manager = ResultManager(current_test_getter)
+
+        experimental = result_manager.get_experimental_results()
+
+        self.assertIsInstance(experimental, dict)
+
+    def test_experimental_results_can_be_set_and_retrieved(self):
+        current_test_getter = lambda: TRIAXIAL
+        result_manager = ResultManager(current_test_getter)
+
+        expected_experimental_results = {
+            "shear_strain_xy": [0.0, 0.1],
+            "shear_stress_xy": [0.0, 10.0],
+        }
+
+        result_manager.set_experimental_results(expected_experimental_results)
+
+        self.assertDictEqual(
+            result_manager.get_experimental_results(), expected_experimental_results
+        )
+
 
 if __name__ == "__main__":
     unittest.main()
