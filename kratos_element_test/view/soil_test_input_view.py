@@ -91,7 +91,7 @@ class SoilTestInputView(ttk.Frame):
 
         self._soil_test_input_controller.set_current_test_type(test_name)
         if test_name == TRIAXIAL:
-            self.update_plots_callback(num_plots=5)
+            self.update_plots_callback()
             ttk.Label(
                 self.test_input_frame,
                 text="Triaxial Input Data",
@@ -130,7 +130,7 @@ class SoilTestInputView(ttk.Frame):
             )
 
         elif test_name == DIRECT_SHEAR:
-            self.update_plots_callback(num_plots=4)
+            self.update_plots_callback()
             ttk.Label(
                 self.test_input_frame,
                 text="Direct Simple Shear Input Data",
@@ -169,7 +169,7 @@ class SoilTestInputView(ttk.Frame):
             )
 
         elif test_name == CRS:
-            self.update_plots_callback(num_plots=5)
+            self.update_plots_callback()
             ttk.Label(
                 self.test_input_frame,
                 text="Constant Rate of Strain Input Data",

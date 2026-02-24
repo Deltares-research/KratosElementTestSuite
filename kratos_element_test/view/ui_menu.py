@@ -242,18 +242,21 @@ class MainUI:
                 return
             last_model_source = SELECT_UDSM
             if self.main_frame: self.main_frame.refresh_material_inputs()
+            if self.main_frame: self.main_frame.refresh_results()
 
         def load_linear_elastic():
             self._controller.set_material_type("linear_elastic")
             nonlocal last_model_source
             last_model_source = LINEAR_ELASTIC
             if self.main_frame: self.main_frame.refresh_material_inputs()
+            if self.main_frame: self.main_frame.refresh_results()
 
         def load_mohr_coulomb():
             self._controller.set_material_type("mohr_coulomb")
             nonlocal last_model_source
             last_model_source = MOHR_COULOMB
             if self.main_frame: self.main_frame.refresh_material_inputs()
+            if self.main_frame: self.main_frame.refresh_results()
 
         def handle_model_source_selection(event):
             choice = model_source_var.get()
