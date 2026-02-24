@@ -285,6 +285,7 @@ class MainUI:
             controller=self._controller,
             external_widgets=[model_source_menu],
         )
+
         def on_close():
             root.quit()
             root.destroy()

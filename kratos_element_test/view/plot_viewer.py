@@ -8,6 +8,7 @@ from matplotlib.gridspec import GridSpec
 from kratos_element_test.plotters.matplotlib_plotter import MatplotlibPlotter
 from kratos_element_test.view.ui_constants import TEST_NAME_TO_TYPE, TRIAXIAL, CRS
 
+
 class PlotViewer(ttk.Frame):
     def __init__(self, result_controller, root, padding, width, height):
         super().__init__(root, padding=padding, width=width, height=height)
@@ -21,7 +22,10 @@ class PlotViewer(ttk.Frame):
     def refresh(self):
         self.clear()
 
-        if self._result_controller.get_current_test() == TRIAXIAL or self._result_controller.get_current_test() == CRS:
+        if (
+            self._result_controller.get_current_test() == TRIAXIAL
+            or self._result_controller.get_current_test() == CRS
+        ):
             num_plots = 5
         else:
             num_plots = 4
