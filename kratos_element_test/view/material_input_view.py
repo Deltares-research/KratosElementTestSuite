@@ -24,7 +24,6 @@ class MaterialInputView(ttk.Frame):
 
     def refresh(self):
         for w in self.winfo_children():
-            print(w)
             w.destroy()
 
         self.dropdown_frame = ttk.Frame(self)

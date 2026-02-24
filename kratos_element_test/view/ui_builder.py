@@ -91,7 +91,7 @@ class GeotechTestUI(ttk.Frame):
         self._init_log_section()
 
     def _init_plot_canvas(self):
-        self.plot_frame.initialize()
+        self.plot_frame.refresh()
 
     def _create_input_fields(self):
         for w in self.button_frame.winfo_children():
@@ -196,4 +196,4 @@ class GeotechTestUI(ttk.Frame):
         self.material_input_view.refresh()
 
     def refresh_results(self):
-        self.plot_frame.initialize()
+        self.plot_frame.refresh()

@@ -18,7 +18,7 @@ class PlotViewer(ttk.Frame):
         self._grid_spec = None
         self._figure = None
 
-    def initialize(self):
+    def refresh(self):
         self.clear()
 
         if self._result_controller.get_current_test() == TRIAXIAL or self._result_controller.get_current_test() == CRS:
