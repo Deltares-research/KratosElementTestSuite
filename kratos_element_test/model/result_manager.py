@@ -29,5 +29,5 @@ class ResultManager:
     def get_experimental_results(self) -> Dict[str, List[float]]:
         return self._experimental_results.get(self.get_current_test(), {})
 
-    def set_experimental_results(self, results: Dict[str, List[float]]) -> None:
-        self._experimental_results[self.get_current_test()] = results
+    def set_experimental_results_for_test_type(self, test_type: str, results: Dict[str, List[float]]) -> None:
+        self._experimental_results[test_type] = results

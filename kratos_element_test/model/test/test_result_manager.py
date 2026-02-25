@@ -85,7 +85,7 @@ class ResultManagerTest(unittest.TestCase):
             "shear_stress_xy": [0.0, 10.0],
         }
 
-        result_manager.set_experimental_results(expected_experimental_results)
+        result_manager.set_experimental_results_for_test_type(expected_experimental_results)
 
         self.assertDictEqual(
             result_manager.get_experimental_results(), expected_experimental_results
