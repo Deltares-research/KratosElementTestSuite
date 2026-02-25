@@ -270,7 +270,7 @@ class MainUI:
             elif choice == MOHR_COULOMB:
                 load_mohr_coulomb()
 
-        model_source_var = tk.StringVar(value="Select Model Source")
+        model_source_var = tk.StringVar(value=LINEAR_ELASTIC)
         model_source_menu = ttk.Combobox(
             top_frame,
             textvariable=model_source_var,
