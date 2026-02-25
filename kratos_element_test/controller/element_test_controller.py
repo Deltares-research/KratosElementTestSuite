@@ -65,12 +65,25 @@ class ElementTestController:
         module = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(module)
 
-        experimental = getattr(module, "experimental", None)
-        if not isinstance(experimental, dict) or not experimental:
-            raise ValueError("No 'experimental' dict found in lab results file")
+        experimental_by_test = getattr(module, "experimental_by_test", None)
 
-        # Store for current active test
-        self._result_controller.set_experimental_results(experimental)
+        if experimental_by_test is None:
+            experimental_by_test = getattr(module, "experimental", None)
+
+        if not isinstance(experimental_by_test, dict) or not experimental_by_test:
+            raise ValueError("No 'experimental_by_test' (or 'experimental') dict found in lab results file")
+
+        type_to_name = {v: k for k, v in TEST_NAME_TO_TYPE.items()}
+
+        for test_type, results in experimental_by_test.items():
+            if not isinstance(test_type, str):
+                continue
+            if not isinstance(results, dict) or not results:
+                continue
+
+            storage_key = type_to_name.get(test_type, test_type)
+
+            self._result_controller.set_experimental_results_for_test_type(storage_key, results)
 
     def set_material_type(self, material_type: str) -> None:
         self._main_model.set_material_type(material_type)
