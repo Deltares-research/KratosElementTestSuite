@@ -3,6 +3,7 @@
 # Contact kratos@deltares.nl
 from pathlib import Path
 from typing import Callable
+import importlib.util
 
 from kratos_element_test.controller.material_input_controller import (
     MaterialInputController,
@@ -55,6 +56,21 @@ class ElementTestController:
         if not results:
             raise ValueError("No results available for export")
         export_excel_by_test_type(results, test_type)
+
+    def _import_lab_results(self, py_file: Path) -> None:
+        spec = importlib.util.spec_from_file_location("lab_results_module", str(py_file))
+        if spec is None or spec.loader is None:
+            raise ValueError(f"Cannot load lab results file: {py_file}")
+
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+
+        experimental = getattr(module, "experimental", None)
+        if not isinstance(experimental, dict) or not experimental:
+            raise ValueError("No 'experimental' dict found in lab results file")
+
+        # Store for current active test
+        self._result_controller.set_experimental_results(experimental)
 
     def set_material_type(self, material_type: str) -> None:
         self._main_model.set_material_type(material_type)
