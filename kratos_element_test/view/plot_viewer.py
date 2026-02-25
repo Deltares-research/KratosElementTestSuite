@@ -50,11 +50,19 @@ class PlotViewer(ttk.Frame):
         self._canvas = None
 
     def draw(self):
-        results = self._result_controller.get_latest_results()
-        if not results:
+        test_type = TEST_NAME_TO_TYPE.get(self._result_controller.get_current_test())
+        experimental = self._result_controller.get_experimental_results() or None
+        results = self._result_controller.get_latest_results() or None
+
+        if results is None and experimental is None:
             return
 
-        test_type = TEST_NAME_TO_TYPE.get(self._result_controller.get_current_test())
+        if results is None and experimental is not None:
+            self._plotter.plot_experimental_only(test_type, experimental)
+            if self._canvas is not None:
+                self._canvas.draw()
+            return
+
         if test_type == "triaxial":
             self._plotter.triaxial(
                 results["yy_strain"],
@@ -65,6 +73,7 @@ class PlotViewer(ttk.Frame):
                 results["von_mises"],
                 results["cohesion"],
                 results["phi"],
+                experimental_results=experimental,
             )
         elif test_type == "direct_shear":
             self._plotter.direct_shear(
@@ -90,4 +99,5 @@ class PlotViewer(ttk.Frame):
                 results["cohesion"],
                 results["phi"],
             )
-        self._canvas.draw()
+        if self._canvas is not None:
+            self._canvas.draw()
