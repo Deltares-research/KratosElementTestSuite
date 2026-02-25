@@ -21,15 +21,9 @@ class PlotViewer(ttk.Frame):
 
     def refresh(self):
         self.clear()
+        plt.close()
 
-        if (
-            self._result_controller.get_current_test() == TRIAXIAL
-            or self._result_controller.get_current_test() == CRS
-        ):
-            num_plots = 5
-        else:
-            num_plots = 4
-
+        num_plots = self._result_controller.number_of_plots()
         self._figure = plt.figure(figsize=(12, 8), dpi=100)
         rows = math.ceil(math.sqrt(num_plots))
         cols = math.ceil(num_plots / rows)
