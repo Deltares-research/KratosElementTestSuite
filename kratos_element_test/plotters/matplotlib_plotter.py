@@ -181,6 +181,7 @@ class MatplotlibPlotter:
         sigma3,
         cohesion=None,
         phi=None,
+        experimental_results: Optional[Dict[str, List[float]]] = None,
     ):
         self._clear()
         # 0: σýy vs εyy
@@ -197,6 +198,8 @@ class MatplotlibPlotter:
         self.plot_mohr_circle_crs(self.axes[3], sigma1[-1], sigma3[-1], cohesion, phi)
         # 4: εyy vs time
         self.plot_vertical_strain_vs_time_crs(self.axes[4], yy_strain, time_steps)
+
+        self._apply_experimental_overlays("crs", experimental_results)
 
     def plot_principal_stresses_triaxial(
         self,

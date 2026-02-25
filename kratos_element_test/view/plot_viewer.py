@@ -85,6 +85,7 @@ class PlotViewer(ttk.Frame):
                 results["von_mises"],
                 results["cohesion"],
                 results["phi"],
+                experimental_results=experimental,
             )
         elif test_type == "crs":
             self._plotter.crs(
@@ -98,6 +99,7 @@ class PlotViewer(ttk.Frame):
                 results["sigma3"],
                 results["cohesion"],
                 results["phi"],
+                experimental_results=experimental,
             )
         if self._canvas is not None:
             self._canvas.draw()
