@@ -1,7 +1,14 @@
+# ©Deltares 2026
+# This is a prototype version
+# Contact kratos@deltares.nl
 
 experimental_by_test = {
     "triaxial": {
-        # Plot 0: |sigma1 - sigma3| vs yy_strain
+        # Plot 0: |σ1-σ3| vs εyy (x=yy_strain, y=sigma1_sigma3_diff)
+        # Plot 1: εv vs εyy (x=yy_strain, y=vol_strain)
+        # Plot 2: σ1 vs σ3 (x=sigma_3, y=sigma_1)
+        # Plot 3: p' vs q (x=p', y=q)
+        # Plot 4: Mohr's Circle (x=sigma_3, y=sigma_1)
         "yy_strain": [
             0.0,
             -0.02,
@@ -28,8 +35,6 @@ experimental_by_test = {
             149.5,
             149.5,
         ],
-
-        # Plot 1: vol_strain vs yy_strain
         "vol_strain": [
             0.0,
             -8.724e-3,
@@ -43,8 +48,6 @@ experimental_by_test = {
             -8.723e-3,
             -8.723e-3,
         ],
-
-        # Plot 2: sigma1 vs sigma3 (x=sigma3, y=sigma1)
         "sigma_3": [
             -100.0,
             -100.0,
@@ -71,8 +74,6 @@ experimental_by_test = {
             -249.5,
             -249.5,
         ],
-
-        # Plot 3: p vs q
         "p": [
             -100.0,
             -149.8,
@@ -99,38 +100,13 @@ experimental_by_test = {
             149.5,
             149.5,
         ],
-
-        # Plot 4 (Mohr circle points) - not used by overlay registry yet, but preserved here
-        "sigma_3": [
-            -100.0,
-            -100.0,
-            -100.0,
-            -100.0,
-            -100.0,
-            -100.0,
-            -100.0,
-            -100.0,
-            -100.0,
-            -100.0,
-            -100.0,
-        ],
-        "sigma_1": [
-            -100.0,
-            -249.5,
-            -249.5,
-            -249.5,
-            -249.5,
-            -249.5,
-            -249.5,
-            -249.5,
-            -249.5,
-            -249.5,
-            -249.5,
-        ],
     },
     "direct_shear": {
-        # Plot 0: τ vs γ
-        # registry uses x_key="shear_strain_xy" and applies gamma = abs(2*shear_strain_xy)
+        # Plot 0: τ vs γ (registry uses x_key=abs(2*"shear_strain_xy") and y_key=abs"shear_stress_xy")
+        # Plot 1: σ1 vs σ3 (x=sigma_3, y=sigma_1)
+        # Plot 2: p' vs q (x=p', y=q)
+        # Plot 3: Mohr's Circle (registry uses compute_mohr_circle_xy for x=effective_stress and
+        # y=mobilized_shear_stress)
         "shear_strain_xy": [
             0.0,
             0.01,
@@ -157,8 +133,6 @@ experimental_by_test = {
             43.17,
             43.17,
         ],
-
-        # Plot 1: σ1 vs σ3 (x=sigma_3, y=sigma_1)
         "sigma_3": [
             -100.0,
             -56.83,
@@ -185,8 +159,6 @@ experimental_by_test = {
             -143.2,
             -143.2,
         ],
-
-        # Plot 2: p' vs q
         "p": [
             -100.0,
             -100.0,
@@ -213,37 +185,14 @@ experimental_by_test = {
             74.77,
             74.77,
         ],
-
-        # Mohr-circle
-        "sigma_3": [
-            -100.0,
-            -56.83,
-            -56.83,
-            -56.83,
-            -56.83,
-            -56.83,
-            -56.83,
-            -56.83,
-            -56.83,
-            -56.83,
-            -56.83,
-        ],
-        "sigma_1": [
-            -100.0,
-            -143.2,
-            -143.2,
-            -143.2,
-            -143.2,
-            -143.2,
-            -143.2,
-            -143.2,
-            -143.2,
-            -143.2,
-            -143.2,
-        ],
     },
     "crs": {
-        # Plot 0: sigma_yy vs yy_strain
+        # Plot 0: σýy vs εyy (x=yy_strain, y=sigma_yy)
+        # Plot 1: σ'yy vs σ'xx (x=sigma_xx, y=sigma_yy)
+        # Plot 2: p' vs q (x=p', y=q)
+        # Plot 3: Mohr's Circle (registry uses compute_mohr_circle_xy for x=effective_stress and
+        # y=mobilized_shear_stress)
+        # Plot 4: εyy vs time (x=time_days, y=yy_strain)
         "yy_strain": [
             0.0,
             -0.1,
@@ -300,8 +249,6 @@ experimental_by_test = {
             -8723.0,
             -9692.0,
         ],
-
-        # Plot 1: sigma_yy vs sigma_xx (x=sigma_xx, y=sigma_yy)
         "sigma_xx": [
             0.0,
             -692.3,
@@ -330,37 +277,6 @@ experimental_by_test = {
             -3738.0,
             -4154.0,
         ],
-        # (same y-series as above, repeated in that table)
-        "sigma_yy": [
-            0.0,
-            -1615.0,
-            -3231.0,
-            -4846.0,
-            -6462.0,
-            -8077.0,
-            -7431.0,
-            -6785.0,
-            -6138.0,
-            -5492.0,
-            -4846.0,
-            -5492.0,
-            -6138.0,
-            -6785.0,
-            -7431.0,
-            -8077.0,
-            -7431.0,
-            -6785.0,
-            -6138.0,
-            -5492.0,
-            -4846.0,
-            -5815.0,
-            -6785.0,
-            -7754.0,
-            -8723.0,
-            -9692.0,
-        ],
-
-        # Plot 2: p' vs q
         "p": [
             0.0,
             -1000.0,
@@ -417,67 +333,6 @@ experimental_by_test = {
             4985.0,
             5538.0,
         ],
-
-        # Plot 4: yy_strain vs time (x=time_days, y=yy_strain)
-        # (Your registry likely expects "time_steps" + "yy_strain")
-        "time_steps": [
-            0.0,
-            0.2,
-            0.4,
-            0.6,
-            0.8,
-            1.0,
-            1.2,
-            1.4,
-            1.6,
-            1.8,
-            2.0,
-            2.2,
-            2.4,
-            2.6,
-            2.8,
-            3.0,
-            3.2,
-            3.4,
-            3.6,
-            3.8,
-            4.0,
-            4.2,
-            4.4,
-            4.6,
-            4.8,
-            5.0,
-        ],
-        "yy_strain": [
-            0.0,
-            -0.1,
-            -0.2,
-            -0.3,
-            -0.4,
-            -0.5,
-            -0.46,
-            -0.42,
-            -0.38,
-            -0.34,
-            -0.3,
-            -0.34,
-            -0.38,
-            -0.42,
-            -0.46,
-            -0.5,
-            -0.46,
-            -0.42,
-            -0.38,
-            -0.34,
-            -0.3,
-            -0.36,
-            -0.42,
-            -0.48,
-            -0.54,
-            -0.6,
-        ],
-
-        # Mohr-circle point list (optional, preserved)
         "sigma_1": [
             0.0,
             -1615.0,
@@ -533,6 +388,34 @@ experimental_by_test = {
             -3323.0,
             -3738.0,
             -4154.0,
+        ],
+        "time_steps": [
+            0.0,
+            0.2,
+            0.4,
+            0.6,
+            0.8,
+            1.0,
+            1.2,
+            1.4,
+            1.6,
+            1.8,
+            2.0,
+            2.2,
+            2.4,
+            2.6,
+            2.8,
+            3.0,
+            3.2,
+            3.4,
+            3.6,
+            3.8,
+            4.0,
+            4.2,
+            4.4,
+            4.6,
+            4.8,
+            5.0,
         ],
     },
 }
