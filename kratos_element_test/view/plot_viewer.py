@@ -37,9 +37,24 @@ class PlotViewer(ttk.Frame):
         self._canvas.draw()
         toolbar = NavigationToolbar2Tk(self._canvas, self)
         toolbar.update()
+        btn = ttk.Button(toolbar, text="Clear Lab Results", command=self._clear_lab_results)
+        btn.pack(side="right", padx=4)
         toolbar.pack(side="bottom", fill="x")
         self._canvas.get_tk_widget().pack(fill="both", expand=True)
         self.draw()
+
+    def _clear_lab_results(self) -> None:
+        self._result_controller.clear_experimental_results()
+
+        results = self._result_controller.get_latest_results() or None
+        if results is not None:
+            self.draw()
+            return
+
+        if self._plotter is not None:
+            self._plotter._clear()
+        if self._canvas is not None:
+            self._canvas.draw()
 
     def clear(self):
         if self.winfo_exists():
