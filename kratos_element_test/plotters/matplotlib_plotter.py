@@ -69,7 +69,9 @@ class MatplotlibPlotter:
                 n = min(len(x), len(y))
                 if n <= 0:
                     continue
-                self.axes[spec.axis_index].plot(x[:n], y[:n], "--", color="black", label=spec.label)
+                self.axes[spec.axis_index].plot(
+                    x[:n], y[:n], "--", color="black", label=spec.label
+                )
                 self._safe_legend(self.axes[spec.axis_index])
                 continue
 
@@ -160,6 +162,7 @@ class MatplotlibPlotter:
         self.plot_mohr_circle_triaxial(
             self.axes[4], sigma1[-1], sigma3[-1], cohesion, phi
         )
+
         self._apply_experimental_overlays("triaxial", experimental_results)
 
     def direct_shear(
@@ -185,6 +188,7 @@ class MatplotlibPlotter:
         self.plot_mohr_circle_direct_shear(
             self.axes[3], sigma1[-1], sigma3[-1], cohesion, phi
         )
+
         self._apply_experimental_overlays("direct_shear", experimental_results)
 
     def crs(
@@ -219,70 +223,22 @@ class MatplotlibPlotter:
 
         self._apply_experimental_overlays("crs", experimental_results)
 
-    def plot_principal_stresses_triaxial(
-        self,
-        ax,
-        sigma_1,
-        sigma_3,
-    ):
-        has_sim = bool(sigma_1) and bool(sigma_3)
-        if has_sim:
-            ax.plot(sigma_3, sigma_1, "-", color="blue", label=TITLE_SIGMA1_VS_SIGMA3)
-
+    def plot_principal_stresses_triaxial(self, ax, sigma_1, sigma_3):
+        ax.plot(sigma_3, sigma_1, "-", color="blue", label=TITLE_SIGMA1_VS_SIGMA3)
         ax.set_title(TITLE_SIGMA1_VS_SIGMA3)
         ax.set_xlabel(SIGMA3_LABEL)
         ax.set_ylabel(SIGMA1_LABEL)
         ax.grid(True)
         ax.locator_params(nbins=8)
+
+        min_val = 0
+        max_val_x = max(sigma_3)
+        max_val_y = min(sigma_1)
+        padding_x = 0.1 * (max_val_x - min_val)
+        padding_y = 0.1 * (max_val_y - min_val)
+        ax.set_xlim(min_val, max_val_x + padding_x)
+        ax.set_ylim(min_val, max_val_y + padding_y)
         ax.minorticks_on()
-
-        if has_sim:
-            min_val = 0
-            max_val_x = max(sigma_3)
-            max_val_y = min(sigma_1)
-            padding_x = 0.1 * (max_val_x - min_val)
-            padding_y = 0.1 * (max_val_y - min_val)
-            ax.set_xlim(min_val, max_val_x + padding_x)
-            ax.set_ylim(min_val, max_val_y + padding_y)
-
-        self._safe_legend(ax)
-
-        # Plot simulation first (keeps existing "home" limits based on sim)
-        # has_sim = bool(sigma_1) and bool(sigma_3)
-        # if has_sim:
-        #     ax.plot(sigma_3, sigma_1, "-", color="blue", label=TITLE_SIGMA1_VS_SIGMA3)
-        #
-        # # Experimental overlay (does NOT touch limits)
-        # if experimental_results is not None:
-        #     exp_s1 = experimental_results.get("sigma_1")
-        #     exp_s3 = experimental_results.get("sigma_3")
-        #     if exp_s1 is not None and exp_s3 is not None:
-        #         n = min(len(exp_s1), len(exp_s3))
-        #         if n > 0:
-        #             ax.plot(exp_s3[:n], exp_s1[:n], "--", color="black", label="Experimental")
-        #
-        # ax.set_title(TITLE_SIGMA1_VS_SIGMA3)
-        # ax.set_xlabel(SIGMA3_LABEL)
-        # ax.set_ylabel(SIGMA1_LABEL)
-        # ax.grid(True)
-        # ax.locator_params(nbins=8)
-        # ax.minorticks_on()
-        #
-        # if has_sim:
-        #     # Keep your existing axis limits logic EXACTLY (simulation-defined)
-        #     min_val = 0
-        #     max_val_x = max(sigma_3)
-        #     max_val_y = min(sigma_1)
-        #     padding_x = 0.1 * (max_val_x - min_val)
-        #     padding_y = 0.1 * (max_val_y - min_val)
-        #     ax.set_xlim(min_val, max_val_x + padding_x)
-        #     ax.set_ylim(min_val, max_val_y + padding_y)
-        # else:
-        #     # Experimental-only: let matplotlib pick limits once (no override)
-        #     ax.relim()
-        #     ax.autoscale_view()
-        #
-        # ax.legend()
 
     def plot_delta_sigma_triaxial(self, ax, vertical_strain, sigma_diff):
         ax.plot(
