@@ -58,7 +58,9 @@ class ElementTestController:
         export_excel_by_test_type(results, test_type)
 
     def _import_lab_results(self, py_file: Path) -> None:
-        spec = importlib.util.spec_from_file_location("lab_results_module", str(py_file))
+        spec = importlib.util.spec_from_file_location(
+            "lab_results_module", str(py_file)
+        )
         if spec is None or spec.loader is None:
             raise ValueError(f"Cannot load lab results file: {py_file}")
 
@@ -71,7 +73,9 @@ class ElementTestController:
             experimental_by_test = getattr(module, "experimental", None)
 
         if not isinstance(experimental_by_test, dict) or not experimental_by_test:
-            raise ValueError("No 'experimental_by_test' (or 'experimental') dict found in lab results file")
+            raise ValueError(
+                "No 'experimental_by_test' (or 'experimental') dict found in lab results file"
+            )
 
         type_to_name = {v: k for k, v in TEST_NAME_TO_TYPE.items()}
 
@@ -82,8 +86,11 @@ class ElementTestController:
                 continue
 
             storage_key = type_to_name.get(test_type, test_type)
+            self._result_controller.set_experimental_results_for_test_type(
+                storage_key, results
+            )
 
-            self._result_controller.set_experimental_results_for_test_type(storage_key, results)
+        self._logger(f"Imported lab results from {py_file}", "info")
 
     def set_material_type(self, material_type: str) -> None:
         self._main_model.set_material_type(material_type)
