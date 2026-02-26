@@ -61,6 +61,18 @@ class MatplotlibPlotter:
             if spec.axis_index >= len(self.axes):
                 continue
 
+            if spec.compute_xy is not None:
+                out = spec.compute_xy(experimental_results)
+                if out is None:
+                    continue
+                x, y = out
+                n = min(len(x), len(y))
+                if n <= 0:
+                    continue
+                self.axes[spec.axis_index].plot(x[:n], y[:n], "--", color="black", label=spec.label)
+                self._safe_legend(self.axes[spec.axis_index])
+                continue
+
             if not spec.x_key or not spec.y_key:
                 continue
             x = experimental_results.get(spec.x_key)
@@ -102,9 +114,15 @@ class MatplotlibPlotter:
                 ax.set_xlabel(spec.x_label)
             if spec.y_label:
                 ax.set_ylabel(spec.y_label)
+
             ax.grid(True)
             ax.locator_params(nbins=8)
             ax.minorticks_on()
+
+            if spec.invert_x:
+                ax.invert_xaxis()
+            if spec.invert_y:
+                ax.invert_yaxis()
 
         self._apply_experimental_overlays(test_type, experimental_results)
 
