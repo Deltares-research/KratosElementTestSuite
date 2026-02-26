@@ -28,6 +28,9 @@ from kratos_element_test.plotters.plotter_labels import (
 )
 
 Transform = Callable[[List[float]], List[float]]
+ComputeXY = Callable[
+    [Dict[str, List[float]]], Optional[Tuple[List[float], List[float]]]
+]
 
 
 @dataclass(frozen=True)
@@ -41,6 +44,9 @@ class OverlaySpec:
     y_label: Optional[str] = None
     x_transform: Optional[Transform] = None
     y_transform: Optional[Transform] = None
+    compute_xy: Optional[ComputeXY] = None
+    invert_x: bool = False
+    invert_y: bool = False
 
 
 def _abs_list(v: List[float]) -> List[float]:
@@ -48,8 +54,36 @@ def _abs_list(v: List[float]) -> List[float]:
 
 
 def _gamma_from_shear_strain_xy(v: List[float]) -> List[float]:
-    # matches your direct shear plot: gamma_xy = 2 * shear_strain_xy, abs
+    # matches direct shear plot: gamma_xy = 2 * shear_strain_xy, abs
     return list(np.abs(2.0 * np.asarray(v, dtype=float)))
+
+
+def _last_float(v: object) -> Optional[float]:
+    if v is None:
+        return None
+    if isinstance(v, (int, float)):
+        return float(v)
+    if isinstance(v, list) and len(v) > 0:
+        return float(v[-1])
+    return None
+
+
+def compute_mohr_circle_xy(
+    exp: Dict[str, List[float]], n_points: int = 200
+) -> Optional[Tuple[List[float], List[float]]]:
+    s1 = _last_float(exp.get("sigma_1"))
+    s3 = _last_float(exp.get("sigma_3"))
+    if s1 is None or s3 is None:
+        return None
+
+    center = (s1 + s3) / 2.0
+    radius = (s1 - s3) / 2.0
+
+    theta = np.linspace(0.0, np.pi, n_points)
+    sigma = center + radius * np.cos(theta)
+    tau = -radius * np.sin(theta)
+
+    return sigma.tolist(), tau.tolist()
 
 
 OVERLAYS_BY_TEST: Dict[str, Tuple[OverlaySpec, ...]] = {
@@ -62,6 +96,7 @@ OVERLAYS_BY_TEST: Dict[str, Tuple[OverlaySpec, ...]] = {
             title=TITLE_DIFF_PRINCIPAL_SIGMA_VS_STRAIN,
             x_label=VERTICAL_STRAIN_LABEL,
             y_label=SIGMA1_SIGMA3_DIFF_LABEL,
+            invert_x=True,
         ),
         # axis 1: vol_strain vs yy_strain
         OverlaySpec(
@@ -71,8 +106,10 @@ OVERLAYS_BY_TEST: Dict[str, Tuple[OverlaySpec, ...]] = {
             title=TITLE_VOL_VS_VERT_STRAIN,
             x_label=VERTICAL_STRAIN_LABEL,
             y_label=VOLUMETRIC_STRAIN_LABEL,
+            invert_x=True,
+            invert_y=True,
         ),
-        # axis 2: sigma1 vs sigma3 (x = sigma3, y = sigma1)
+        # axis 2: sigma1 vs sigma3
         OverlaySpec(
             axis_index=2,
             x_key="sigma_3",
@@ -89,16 +126,19 @@ OVERLAYS_BY_TEST: Dict[str, Tuple[OverlaySpec, ...]] = {
             title=TITLE_P_VS_Q,
             x_label=P_STRESS_LABEL,
             y_label=Q_STRESS_LABEL,
+            invert_x=True,
         ),
-        # axis 4: Mohr circle — prepare only (no XY overlay for now)
+        # axis 4: Mohr circle
         OverlaySpec(
             axis_index=4,
+            label="Experimental (Mohr)",
             title=TITLE_MOHR,
             x_label=EFFECTIVE_STRESS_LABEL,
             y_label=MOBILIZED_SHEAR_STRESS_LABEL,
+            compute_xy=compute_mohr_circle_xy,
+            invert_x=True,
         ),
     ),
-
     "direct_shear": (
         # axis 0: tau vs gamma
         OverlaySpec(
@@ -119,6 +159,8 @@ OVERLAYS_BY_TEST: Dict[str, Tuple[OverlaySpec, ...]] = {
             title=TITLE_SIGMA1_VS_SIGMA3,
             x_label=SIGMA3_LABEL,
             y_label=SIGMA1_LABEL,
+            invert_x=True,
+            invert_y=True,
         ),
         # axis 2: p vs q
         OverlaySpec(
@@ -129,17 +171,19 @@ OVERLAYS_BY_TEST: Dict[str, Tuple[OverlaySpec, ...]] = {
             x_label=P_STRESS_LABEL,
             y_label=Q_STRESS_LABEL,
         ),
-        # axis 3: Mohr circle — prepare only
+        # axis 3: Mohr circle
         OverlaySpec(
             axis_index=3,
+            label="Experimental (Mohr)",
             title=TITLE_MOHR,
             x_label=EFFECTIVE_STRESS_LABEL,
             y_label=MOBILIZED_SHEAR_STRESS_LABEL,
+            compute_xy=compute_mohr_circle_xy,
+            invert_x=True,
         ),
     ),
-
     "crs": (
-        # axis 0: sigma_yy vs yy_strain (note: simulation inserts 0.0 at start; lab needn't)
+        # axis 0: sigma_yy vs yy_strain
         OverlaySpec(
             axis_index=0,
             x_key="yy_strain",
@@ -147,8 +191,10 @@ OVERLAYS_BY_TEST: Dict[str, Tuple[OverlaySpec, ...]] = {
             title=TITLE_VERTICAL_STRESS_VS_VERTICAL_STRAIN,
             x_label=VERTICAL_STRAIN_LABEL,
             y_label=VERTICAL_STRESS_LABEL,
+            invert_x=True,
+            invert_y=True,
         ),
-        # axis 1: sigma_yy vs sigma_xx  (simulation plots x=sigma_xx, y=sigma_yy)
+        # axis 1: sigma_yy vs sigma_xx
         OverlaySpec(
             axis_index=1,
             x_key="sigma_xx",
@@ -156,6 +202,8 @@ OVERLAYS_BY_TEST: Dict[str, Tuple[OverlaySpec, ...]] = {
             title=TITLE_VERTICAL_STRESS_VS_HORIZONTAL_STRESS,
             x_label=HORIZONTAL_STRESS_LABEL,
             y_label=VERTICAL_STRESS_LABEL,
+            invert_x=True,
+            invert_y=True,
         ),
         # axis 2: p vs q
         OverlaySpec(
@@ -165,15 +213,19 @@ OVERLAYS_BY_TEST: Dict[str, Tuple[OverlaySpec, ...]] = {
             title=TITLE_P_VS_Q,
             x_label=P_STRESS_LABEL,
             y_label=Q_STRESS_LABEL,
+            invert_x=True,
         ),
         # axis 3: Mohr circle — prepare only
         OverlaySpec(
             axis_index=3,
+            label="Experimental (Mohr)",
             title=TITLE_MOHR,
             x_label=EFFECTIVE_STRESS_LABEL,
             y_label=MOBILIZED_SHEAR_STRESS_LABEL,
+            compute_xy=compute_mohr_circle_xy,
+            invert_x=True,
         ),
-        # axis 4: yy_strain vs time_steps (simulation plots x=time_steps, y=yy_strain)
+        # axis 4: yy_strain vs time_steps
         OverlaySpec(
             axis_index=4,
             x_key="time_steps",
