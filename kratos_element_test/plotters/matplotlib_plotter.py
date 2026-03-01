@@ -70,7 +70,7 @@ class MatplotlibPlotter:
                 if n <= 0:
                     continue
                 self.axes[spec.axis_index].plot(
-                    x[:n], y[:n], "--", color="black", label=spec.label
+                    x[:n], y[:n], "--", color="magenta", label=spec.label
                 )
                 self._safe_legend(self.axes[spec.axis_index])
                 continue
@@ -92,7 +92,7 @@ class MatplotlibPlotter:
                 continue
 
             self.axes[spec.axis_index].plot(
-                x[:n], y[:n], "--", color="black", label=spec.label
+                x[:n], y[:n], "--", color="magenta", label=spec.label
             )
             self._safe_legend(self.axes[spec.axis_index])
 
