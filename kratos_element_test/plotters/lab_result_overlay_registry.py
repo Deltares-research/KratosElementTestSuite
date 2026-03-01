@@ -1,3 +1,7 @@
+# ©Deltares 2026
+# This is a prototype version
+# Contact kratos@deltares.nl
+
 import numpy as np
 from dataclasses import dataclass
 from typing import Callable, Dict, List, Optional, Tuple
@@ -118,20 +122,20 @@ OVERLAYS_BY_TEST: Dict[str, Tuple[OverlaySpec, ...]] = {
             x_label=SIGMA3_LABEL,
             y_label=SIGMA1_LABEL,
         ),
-        # axis 3: p vs q
+        # axis 3: p' vs q
         OverlaySpec(
             axis_index=3,
-            x_key="p",
+            x_key="p'",
             y_key="q",
             title=TITLE_P_VS_Q,
             x_label=P_STRESS_LABEL,
             y_label=Q_STRESS_LABEL,
             invert_x=True,
         ),
-        # axis 4: Mohr circle
+        # axis 4: Mohr's circle
         OverlaySpec(
             axis_index=4,
-            label="Experimental (Mohr)",
+            label="Experimental",
             title=TITLE_MOHR,
             x_label=EFFECTIVE_STRESS_LABEL,
             y_label=MOBILIZED_SHEAR_STRESS_LABEL,
@@ -162,19 +166,19 @@ OVERLAYS_BY_TEST: Dict[str, Tuple[OverlaySpec, ...]] = {
             invert_x=True,
             invert_y=True,
         ),
-        # axis 2: p vs q
+        # axis 2: p' vs q
         OverlaySpec(
             axis_index=2,
-            x_key="p",
+            x_key="p'",
             y_key="q",
             title=TITLE_P_VS_Q,
             x_label=P_STRESS_LABEL,
             y_label=Q_STRESS_LABEL,
         ),
-        # axis 3: Mohr circle
+        # axis 3: Mohr's circle
         OverlaySpec(
             axis_index=3,
-            label="Experimental (Mohr)",
+            label="Experimental",
             title=TITLE_MOHR,
             x_label=EFFECTIVE_STRESS_LABEL,
             y_label=MOBILIZED_SHEAR_STRESS_LABEL,
@@ -205,20 +209,20 @@ OVERLAYS_BY_TEST: Dict[str, Tuple[OverlaySpec, ...]] = {
             invert_x=True,
             invert_y=True,
         ),
-        # axis 2: p vs q
+        # axis 2: p' vs q
         OverlaySpec(
             axis_index=2,
-            x_key="p",
+            x_key="p'",
             y_key="q",
             title=TITLE_P_VS_Q,
             x_label=P_STRESS_LABEL,
             y_label=Q_STRESS_LABEL,
             invert_x=True,
         ),
-        # axis 3: Mohr circle — prepare only
+        # axis 3: Mohr's circle
         OverlaySpec(
             axis_index=3,
-            label="Experimental (Mohr)",
+            label="Experimental",
             title=TITLE_MOHR,
             x_label=EFFECTIVE_STRESS_LABEL,
             y_label=MOBILIZED_SHEAR_STRESS_LABEL,

@@ -224,7 +224,7 @@ class MatplotlibPlotter:
         self._apply_experimental_overlays("crs", experimental_results)
 
     def plot_principal_stresses_triaxial(self, ax, sigma_1, sigma_3):
-        ax.plot(sigma_3, sigma_1, "-", color="blue", label=TITLE_SIGMA1_VS_SIGMA3)
+        ax.plot(sigma_3, sigma_1, "-", color="blue", label="Simulation")
         ax.set_title(TITLE_SIGMA1_VS_SIGMA3)
         ax.set_xlabel(SIGMA3_LABEL)
         ax.set_ylabel(SIGMA1_LABEL)
@@ -246,7 +246,7 @@ class MatplotlibPlotter:
             sigma_diff,
             "-",
             color="blue",
-            label=SIGMA1_SIGMA3_DIFF_LABEL,
+            label="Simulation",
         )
         ax.set_title(TITLE_DIFF_PRINCIPAL_SIGMA_VS_STRAIN)
         ax.set_xlabel(VERTICAL_STRAIN_LABEL)
@@ -264,7 +264,7 @@ class MatplotlibPlotter:
             volumetric_strain,
             "-",
             color="blue",
-            label=TITLE_VOL_VS_VERT_STRAIN,
+            label="Simulation",
         )
         ax.set_title(TITLE_VOL_VS_VERT_STRAIN)
         ax.set_xlabel(VERTICAL_STRAIN_LABEL)
@@ -286,7 +286,7 @@ class MatplotlibPlotter:
         sigma = center + radius * np.cos(theta)
         tau = -radius * np.sin(theta)
 
-        ax.plot(sigma, tau, label=LEGEND_MC, color="blue")
+        ax.plot(sigma, tau, label="Simulation", color="blue")
 
         if cohesion is not None and friction_angle is not None:
             phi_rad = np.radians(friction_angle)
@@ -305,7 +305,7 @@ class MatplotlibPlotter:
         ax.minorticks_on()
 
     def plot_p_q_triaxial(self, ax, p_list, q_list):
-        ax.plot(p_list, q_list, "-", color="blue", label=TITLE_P_VS_Q)
+        ax.plot(p_list, q_list, "-", color="blue", label="Simulation")
         ax.set_title(TITLE_P_VS_Q)
         ax.set_xlabel(P_STRESS_LABEL)
         ax.set_ylabel(Q_STRESS_LABEL)
@@ -315,7 +315,7 @@ class MatplotlibPlotter:
         ax.minorticks_on()
 
     def plot_principal_stresses_direct_shear(self, ax, sigma_1, sigma_3):
-        ax.plot(sigma_3, sigma_1, "-", color="blue", label=TITLE_SIGMA1_VS_SIGMA3)
+        ax.plot(sigma_3, sigma_1, "-", color="blue", label="Simulation")
         ax.set_title(TITLE_SIGMA1_VS_SIGMA3)
         ax.set_xlabel(SIGMA3_LABEL)
         ax.set_ylabel(SIGMA1_LABEL)
@@ -340,7 +340,7 @@ class MatplotlibPlotter:
             np.abs(shear_stress_xy),
             "-",
             color="blue",
-            label=TITLE_SHEAR_VS_STRAIN,
+            label="Simulation",
         )
         ax.set_title(TITLE_SHEAR_VS_STRAIN)
         ax.set_xlabel(SHEAR_STRAIN_LABEL)
@@ -360,7 +360,7 @@ class MatplotlibPlotter:
         sigma = center + radius * np.cos(theta)
         tau = -radius * np.sin(theta)
 
-        ax.plot(sigma, tau, label=LEGEND_MC, color="blue")
+        ax.plot(sigma, tau, label="Simulation", color="blue")
 
         if cohesion is not None and friction_angle is not None:
             phi_rad = np.radians(friction_angle)
@@ -394,7 +394,7 @@ class MatplotlibPlotter:
         ax.minorticks_on()
 
     def plot_p_q_direct_shear(self, ax, p_list, q_list):
-        ax.plot(p_list, q_list, "-", color="blue", label=TITLE_P_VS_Q)
+        ax.plot(p_list, q_list, "-", color="blue", label="Simulation")
         ax.set_title(TITLE_P_VS_Q)
         ax.set_xlabel(P_STRESS_LABEL)
         ax.set_ylabel(Q_STRESS_LABEL)
@@ -412,7 +412,7 @@ class MatplotlibPlotter:
             sigma_yy,
             "-",
             color="blue",
-            label=TITLE_VERTICAL_STRESS_VS_VERTICAL_STRAIN,
+            label="Simulation",
         )
         ax.set_title(TITLE_VERTICAL_STRESS_VS_VERTICAL_STRAIN)
         ax.set_xlabel(VERTICAL_STRAIN_LABEL)
@@ -430,7 +430,7 @@ class MatplotlibPlotter:
             sigma_yy,
             "-",
             color="blue",
-            label=TITLE_VERTICAL_STRESS_VS_HORIZONTAL_STRESS,
+            label="Simulation",
         )
         ax.set_title(TITLE_VERTICAL_STRESS_VS_HORIZONTAL_STRESS)
         ax.set_xlabel(HORIZONTAL_STRESS_LABEL)
@@ -444,7 +444,7 @@ class MatplotlibPlotter:
     def plot_p_q_crs(self, ax, p_list, q_list):
         p_list.insert(0, 0.0)
         q_list.insert(0, 0.0)
-        ax.plot(p_list, q_list, "-", color="blue", label=TITLE_P_VS_Q)
+        ax.plot(p_list, q_list, "-", color="blue", label="Simulation")
         ax.set_title(TITLE_P_VS_Q)
         ax.set_xlabel(P_STRESS_LABEL)
         ax.set_ylabel(Q_STRESS_LABEL)
@@ -464,7 +464,7 @@ class MatplotlibPlotter:
         sigma = center + radius * np.cos(theta)
         tau = -radius * np.sin(theta)
 
-        ax.plot(sigma, tau, label=LEGEND_MC, color="blue")
+        ax.plot(sigma, tau, label="Simulation", color="blue")
 
         if cohesion is not None and friction_angle is not None:
             phi_rad = np.radians(friction_angle)
@@ -509,7 +509,7 @@ class MatplotlibPlotter:
             yy_strain,
             "-",
             color="blue",
-            label=TITLE_VERTICAL_STRAIN_VS_TIME,
+            label="Simulation",
         )
         ax.set_title(TITLE_VERTICAL_STRAIN_VS_TIME)
         ax.set_xlabel(TIME_HOURS_LABEL)
