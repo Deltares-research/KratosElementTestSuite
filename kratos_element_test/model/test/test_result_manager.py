@@ -81,11 +81,13 @@ class ResultManagerTest(unittest.TestCase):
         result_manager = ResultManager(current_test_getter)
 
         expected_experimental_results = {
-            "shear_strain_xy": [0.0, 0.1],
-            "shear_stress_xy": [0.0, 10.0],
+            "yy_strain": [0.0, -0.02],
+            "vol_strain": [0.0, -8.724e-3],
         }
 
-        result_manager.set_experimental_results_for_test_type(expected_experimental_results)
+        result_manager.set_experimental_results_for_test_type(
+            TRIAXIAL, expected_experimental_results
+        )
 
         self.assertDictEqual(
             result_manager.get_experimental_results(), expected_experimental_results
