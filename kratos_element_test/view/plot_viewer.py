@@ -37,7 +37,9 @@ class PlotViewer(ttk.Frame):
         self._canvas.draw()
         toolbar = NavigationToolbar2Tk(self._canvas, self)
         toolbar.update()
-        btn = ttk.Button(toolbar, text="Clear Lab Results", command=self._clear_lab_results)
+        btn = ttk.Button(
+            toolbar, text="Clear Lab Results", command=self._clear_lab_results
+        )
         btn.pack(side="left", padx=4)
         toolbar.pack(side="bottom", fill="x")
         self._canvas.get_tk_widget().pack(fill="both", expand=True)

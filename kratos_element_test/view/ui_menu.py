@@ -338,7 +338,9 @@ class MainUI:
                 self.main_frame.refresh_plots()
 
         except Exception as e:
-            messagebox.showerror("Import Error", f"Failed to import lab results.\n\n{e}")
+            messagebox.showerror(
+                "Import Error", f"Failed to import lab results.\n\n{e}"
+            )
 
 
 if __name__ == "__main__":

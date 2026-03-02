@@ -16,7 +16,9 @@ class ResultController:
     def get_experimental_results(self) -> Dict[str, List[float]]:
         return self._result_manager.get_experimental_results()
 
-    def set_experimental_results_for_test_type(self, test_type: str, results: Dict[str, List[float]]) -> None:
+    def set_experimental_results_for_test_type(
+        self, test_type: str, results: Dict[str, List[float]]
+    ) -> None:
         self._result_manager.set_experimental_results_for_test_type(test_type, results)
 
     def clear_experimental_results(self) -> None:
