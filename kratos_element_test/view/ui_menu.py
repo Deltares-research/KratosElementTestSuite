@@ -22,6 +22,7 @@ from kratos_element_test.view.ui_constants import (
     MOHR_COULOMB,
     HELP_MENU_FONT,
     DEFAULT_TKINTER_DPI,
+    INPUT_SECTION_FONT,
 )
 from kratos_element_test.view.ui_logger import log_message
 from kratos_element_test.view.ui_utils import asset_path, soil_models_dir
@@ -270,6 +271,11 @@ class MainUI:
             elif choice == MOHR_COULOMB:
                 load_mohr_coulomb()
 
+        ttk.Label(
+            top_frame,
+            text="Select a Model:",
+            font=(INPUT_SECTION_FONT, 12, "bold"),
+        ).pack(anchor="w", padx=5, pady=5)
         model_source_var = tk.StringVar(value=LINEAR_ELASTIC)
         model_source_menu = ttk.Combobox(
             top_frame,
