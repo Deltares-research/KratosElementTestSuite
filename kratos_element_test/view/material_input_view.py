@@ -34,7 +34,7 @@ class MaterialInputView(ttk.Frame):
         if material_type == "udsm" and len(self._controller.get_udsm_model_names()) > 1:
             ttk.Label(
                 self.dropdown_frame,
-                text="Select a Model:",
+                text="Model in dll:",
                 font=(INPUT_SECTION_FONT, 12, "bold"),
             ).pack(anchor="w", padx=5, pady=5)
             self.model_menu = ttk.Combobox(
@@ -44,6 +44,11 @@ class MaterialInputView(ttk.Frame):
                 state="readonly",
             )
             self.model_menu.pack(side="top", fill="x", expand=True, padx=5)
+            self.model_var.set(
+                self._controller.get_udsm_model_names()[0]
+                if self._controller.get_current_material_type() == "udsm"
+                else ""
+            )
             self.model_var.trace("w", lambda *args: self.setup_material_inputs())
             self.model_menu.configure(state="readonly")
 

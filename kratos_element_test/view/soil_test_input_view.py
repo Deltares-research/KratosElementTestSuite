@@ -31,14 +31,14 @@ from kratos_element_test.view.widget_creation_utils import create_entries
 
 class SoilTestInputView(ttk.Frame):
     def __init__(
-        self, soil_test_input_controller, update_plots_callback, master, **kwargs
+        self, soil_test_input_controller, refresh_plots_callback, master, **kwargs
     ):
         super().__init__(master, **kwargs)
         self._soil_test_input_controller = soil_test_input_controller
         self.pack(fill="both", expand=True)
         self.test_selector_frame = ttk.Frame(self, padding="5")
         self.test_selector_frame.pack(fill="x", pady=(10, 5))
-        self.update_plots_callback = update_plots_callback
+        self.refresh_plots_callback = refresh_plots_callback
         self.test_buttons = {}
 
         image_paths = {
@@ -91,7 +91,7 @@ class SoilTestInputView(ttk.Frame):
 
         self._soil_test_input_controller.set_current_test_type(test_name)
         if test_name == TRIAXIAL:
-            self.update_plots_callback(num_plots=5)
+            self.refresh_plots_callback()
             ttk.Label(
                 self.test_input_frame,
                 text="Triaxial Input Data",
@@ -130,7 +130,7 @@ class SoilTestInputView(ttk.Frame):
             )
 
         elif test_name == DIRECT_SHEAR:
-            self.update_plots_callback(num_plots=4)
+            self.refresh_plots_callback()
             ttk.Label(
                 self.test_input_frame,
                 text="Direct Simple Shear Input Data",
@@ -169,7 +169,7 @@ class SoilTestInputView(ttk.Frame):
             )
 
         elif test_name == CRS:
-            self.update_plots_callback(num_plots=5)
+            self.refresh_plots_callback()
             ttk.Label(
                 self.test_input_frame,
                 text="Constant Rate of Strain Input Data",
