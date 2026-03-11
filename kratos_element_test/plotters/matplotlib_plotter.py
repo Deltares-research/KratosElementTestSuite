@@ -53,9 +53,6 @@ class MatplotlibPlotter:
             ax.legend()
 
     def _apply_experimental_overlays(self, test_type: str, experimental_results):
-        if not experimental_results:
-            return
-
         specs = OVERLAYS_BY_TEST.get(test_type, ())
         for spec in specs:
             if spec.axis_index >= len(self.axes):
@@ -163,7 +160,8 @@ class MatplotlibPlotter:
             self.axes[4], sigma1[-1], sigma3[-1], cohesion, phi
         )
 
-        self._apply_experimental_overlays("triaxial", experimental_results)
+        if experimental_results:
+            self._apply_experimental_overlays("triaxial", experimental_results)
 
     def direct_shear(
         self,
@@ -189,7 +187,8 @@ class MatplotlibPlotter:
             self.axes[3], sigma1[-1], sigma3[-1], cohesion, phi
         )
 
-        self._apply_experimental_overlays("direct_shear", experimental_results)
+        if experimental_results:
+            self._apply_experimental_overlays("direct_shear", experimental_results)
 
     def crs(
         self,
@@ -221,7 +220,8 @@ class MatplotlibPlotter:
         # 4: εyy vs time
         self.plot_vertical_strain_vs_time_crs(self.axes[4], yy_strain, time_steps)
 
-        self._apply_experimental_overlays("crs", experimental_results)
+        if experimental_results:
+            self._apply_experimental_overlays("crs", experimental_results)
 
     def plot_principal_stresses_triaxial(self, ax, sigma_1, sigma_3):
         ax.plot(sigma_3, sigma_1, "-", color="blue", label="Simulation")
