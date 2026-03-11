@@ -55,8 +55,7 @@ class PlotViewer(ttk.Frame):
 
         if self._plotter is not None:
             self._plotter._clear()
-        if self._canvas is not None:
-            self._canvas.draw()
+        self._canvas.draw()
 
     def clear(self):
         if self.winfo_exists():
@@ -76,8 +75,7 @@ class PlotViewer(ttk.Frame):
 
         if results is None and experimental is not None:
             self._plotter.plot_experimental_only(test_type, experimental)
-            if self._canvas is not None:
-                self._canvas.draw()
+            self._canvas.draw()
             return
 
         if test_type == "triaxial":
@@ -118,5 +116,4 @@ class PlotViewer(ttk.Frame):
                 results["phi"],
                 experimental_results=experimental,
             )
-        if self._canvas is not None:
-            self._canvas.draw()
+        self._canvas.draw()
