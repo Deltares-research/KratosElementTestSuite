@@ -18,13 +18,14 @@ from kratos_element_test.view.result_exporter import (
 )
 from kratos_element_test.view.ui_constants import (
     TEST_NAME_TO_TYPE,
+    TYPE_TO_TEST_NAME,
 )
 
 
 class ElementTestController:
     def __init__(
-        self,
-        logger: Callable[[str, str], None],
+            self,
+            logger: Callable[[str, str], None],
     ):
         self._logger = logger
         self._main_model = MainModel(logger)
@@ -57,27 +58,22 @@ class ElementTestController:
             raise ValueError("No results available for export")
         export_excel_by_test_type(results, test_type)
 
-    def _import_lab_results(self, py_file: Path) -> None:
-        spec = importlib.util.spec_from_file_location(
+    def import_lab_results(self, py_file: Path) -> None:
+        module_spec = importlib.util.spec_from_file_location(
             "lab_results_module", str(py_file)
         )
-        if spec is None or spec.loader is None:
+        if module_spec is None or module_spec.loader is None:
             raise ValueError(f"Cannot load lab results file: {py_file}")
 
-        module = importlib.util.module_from_spec(spec)
-        spec.loader.exec_module(module)
+        module = importlib.util.module_from_spec(module_spec)
+        module_spec.loader.exec_module(module)
 
         experimental_by_test = getattr(module, "experimental_by_test", None)
 
-        if experimental_by_test is None:
-            experimental_by_test = getattr(module, "experimental", None)
-
         if not isinstance(experimental_by_test, dict) or not experimental_by_test:
             raise ValueError(
-                "No 'experimental_by_test' (or 'experimental') dict found in lab results file"
+                "No 'experimental_by_test' dict found in lab results file"
             )
-
-        type_to_name = {v: k for k, v in TEST_NAME_TO_TYPE.items()}
 
         for test_type, results in experimental_by_test.items():
             if not isinstance(test_type, str):
@@ -85,7 +81,7 @@ class ElementTestController:
             if not isinstance(results, dict) or not results:
                 continue
 
-            storage_key = type_to_name.get(test_type, test_type)
+            storage_key = TYPE_TO_TEST_NAME.get(test_type, test_type)
             self._result_controller.set_experimental_results_for_test_type(
                 storage_key, results
             )

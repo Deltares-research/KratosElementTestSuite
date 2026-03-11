@@ -332,7 +332,7 @@ class MainUI:
             if not py_path:
                 return
 
-            self._controller._import_lab_results(Path(py_path))
+            self._controller.import_lab_results(Path(py_path))
 
             if self.main_frame and hasattr(self.main_frame, "refresh_plots"):
                 self.main_frame.refresh_plots()
