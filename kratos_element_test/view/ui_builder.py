@@ -136,7 +136,7 @@ class GeotechTestUI(ttk.Frame):
             self.root.after(0, self._enable_gui)
             self.is_running = False
 
-    def refresh_plots(self) -> None:
+    def redraw_plots(self) -> None:
         try:
             self.plot_frame.draw()
         except Exception:

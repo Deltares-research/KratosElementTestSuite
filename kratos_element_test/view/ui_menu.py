@@ -189,7 +189,7 @@ class MainUI:
 
         import_menu = Menu(menubar, tearoff=0)
         import_menu.add_command(
-            label="Import Lab Results", command=self._import_lab_results
+            label="Import Lab Results (experimental feature)", command=self._import_lab_results
         )
         menubar.add_cascade(label="Import", menu=import_menu)
 
@@ -333,9 +333,7 @@ class MainUI:
                 return
 
             self._controller.import_lab_results(Path(py_path))
-
-            if self.main_frame and hasattr(self.main_frame, "refresh_plots"):
-                self.main_frame.refresh_plots()
+            self.main_frame.redraw_plots()
 
         except Exception as e:
             messagebox.showerror(
