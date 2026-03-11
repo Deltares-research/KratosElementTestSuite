@@ -63,8 +63,6 @@ def _gamma_from_shear_strain_xy(v: List[float]) -> List[float]:
 
 
 def _last_float(v: object) -> Optional[float]:
-    if v is None:
-        return None
     if isinstance(v, (int, float)):
         return float(v)
     if isinstance(v, list) and len(v) > 0:

@@ -75,6 +75,7 @@ class ElementTestController:
                 "No 'experimental_by_test' dict found in lab results file"
             )
 
+        self._result_controller.clear_experimental_results()
         for test_type, results in experimental_by_test.items():
             if not isinstance(test_type, str):
                 continue
