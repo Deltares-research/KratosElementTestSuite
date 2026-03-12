@@ -90,9 +90,6 @@ class GeotechTestUI(ttk.Frame):
 
         self._init_log_section()
 
-    def _init_plot_canvas(self, num_plots):
-        self.plot_frame.initialize(num_plots)
-
     def _create_input_fields(self):
         for w in self.button_frame.winfo_children():
             w.destroy()
@@ -101,8 +98,8 @@ class GeotechTestUI(ttk.Frame):
 
         self.soil_test_input_view = SoilTestInputView(
             self.controller._soil_test_input_controller,
-            self._init_plot_canvas,
-            self.material_input_view,
+            self.plot_frame.refresh,
+            self.left_frame,
         )
 
         clear_log()
@@ -198,3 +195,9 @@ class GeotechTestUI(ttk.Frame):
     def _init_log_section(self):
         self.log_viewer = LogViewer(self.left_panel, padding="5")
         self.log_viewer.pack(fill="x", padx=10, pady=(0, 10))
+
+    def refresh_material_inputs(self):
+        self.material_input_view.refresh()
+
+    def refresh_results(self):
+        self.plot_frame.refresh()

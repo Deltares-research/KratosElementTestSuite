@@ -68,6 +68,13 @@ class ResultManagerTest(unittest.TestCase):
         # Assert
         self.assertIsNone(result_manager.get_results_of_active_test_type())
 
+    @parameterized.expand([(TRIAXIAL, 5), (DIRECT_SHEAR, 4), (CRS, 5)])
+    def test_number_of_plots(self, test_name, expected_number_of_plots):
+        current_test_getter = lambda: test_name
+        result_manager = ResultManager(current_test_getter)
+
+        self.assertEqual(result_manager.number_of_plots(), expected_number_of_plots)
+
     def test_resul_manager_has_empty_experimental_results(self) -> bool:
         current_test_getter = lambda: TRIAXIAL
         result_manager = ResultManager(current_test_getter)

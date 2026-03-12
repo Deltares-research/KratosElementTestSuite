@@ -6,7 +6,7 @@ from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolb
 from matplotlib.gridspec import GridSpec
 
 from kratos_element_test.plotters.matplotlib_plotter import MatplotlibPlotter
-from kratos_element_test.view.ui_constants import TEST_NAME_TO_TYPE
+from kratos_element_test.view.ui_constants import TEST_NAME_TO_TYPE, TRIAXIAL, CRS
 
 
 class PlotViewer(ttk.Frame):
@@ -19,9 +19,11 @@ class PlotViewer(ttk.Frame):
         self._grid_spec = None
         self._figure = None
 
-    def initialize(self, num_plots):
+    def refresh(self):
         self.clear()
+        plt.close()
 
+        num_plots = self._result_controller.number_of_plots()
         self._figure = plt.figure(figsize=(12, 8), dpi=100)
         rows = math.ceil(math.sqrt(num_plots))
         cols = math.ceil(num_plots / rows)

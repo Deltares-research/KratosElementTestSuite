@@ -13,6 +13,9 @@ class ResultController:
     def get_current_test(self) -> str:
         return self._result_manager.get_current_test()
 
+    def number_of_plots(self) -> int:
+        return self._result_manager.number_of_plots()
+
     def get_experimental_results(self) -> Dict[str, List[float]]:
         return self._result_manager.get_experimental_results()
 
