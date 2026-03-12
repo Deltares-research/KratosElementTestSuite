@@ -126,9 +126,7 @@ class ResultManagerTest(unittest.TestCase):
             CRS, {"sigma_yy": [0.0, -100.0]}
         )
 
-        experimental_by_test = {
-            "crs": {"sigma_yy": [0.0, -200.0]}
-        }
+        experimental_by_test = {"crs": {"sigma_yy": [0.0, -200.0]}}
 
         result_manager.import_lab_results_dict(experimental_by_test)
 
@@ -176,9 +174,7 @@ class ResultManagerTest(unittest.TestCase):
         current_test_getter = lambda: TRIAXIAL
         result_manager = ResultManager(current_test_getter)
 
-        experimental_by_test = {
-            "triaxial": {"yy_strain": [0.0, -0.02]}
-        }
+        experimental_by_test = {"triaxial": {"yy_strain": [0.0, -0.02]}}
 
         result_manager.import_lab_results_dict(experimental_by_test)
 

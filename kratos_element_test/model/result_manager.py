@@ -42,7 +42,7 @@ class ResultManager:
         self._experimental_results.clear()
 
     def import_lab_results_dict(
-            self, experimental_by_test: Dict[str, Dict[str, List[float]]]
+        self, experimental_by_test: Dict[str, Dict[str, List[float]]]
     ) -> None:
         if not isinstance(experimental_by_test, dict) or not experimental_by_test:
             raise ValueError(

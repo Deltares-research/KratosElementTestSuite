@@ -189,7 +189,8 @@ class MainUI:
 
         import_menu = Menu(menubar, tearoff=0)
         import_menu.add_command(
-            label="Import Lab Results (experimental feature)", command=self._import_lab_results
+            label="Import Lab Results (experimental feature)",
+            command=self._import_lab_results,
         )
         menubar.add_cascade(label="Import", menu=import_menu)
 
