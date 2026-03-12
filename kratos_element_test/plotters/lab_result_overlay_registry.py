@@ -2,9 +2,13 @@
 # This is a prototype version
 # Contact kratos@deltares.nl
 
-import numpy as np
 from dataclasses import dataclass
 from typing import Callable, Dict, List, Optional, Tuple
+from kratos_element_test.model.core_utils import (
+    abs_list,
+    gamma_from_shear_strain_xy,
+    compute_mohr_circle_xy,
+)
 from kratos_element_test.plotters.plotter_labels import (
     SIGMA1_LABEL,
     SIGMA3_LABEL,
@@ -53,39 +57,10 @@ class OverlaySpec:
     invert_y: bool = False
 
 
-def _abs_list(v: List[float]) -> List[float]:
-    return list(np.abs(np.asarray(v, dtype=float)))
-
-
-def _gamma_from_shear_strain_xy(v: List[float]) -> List[float]:
-    # matches direct shear plot: gamma_xy = 2 * shear_strain_xy, abs
-    return list(np.abs(2.0 * np.asarray(v, dtype=float)))
-
-
-def _last_float(v: object) -> Optional[float]:
-    if isinstance(v, (int, float)):
-        return float(v)
-    if isinstance(v, list) and len(v) > 0:
-        return float(v[-1])
-    return None
-
-
-def compute_mohr_circle_xy(
-    exp: Dict[str, List[float]], n_points: int = 200
+def compute_mohr_circle_xy_from_results(
+    exp: Dict[str, List[float]],
 ) -> Optional[Tuple[List[float], List[float]]]:
-    s1 = _last_float(exp.get("sigma_1"))
-    s3 = _last_float(exp.get("sigma_3"))
-    if s1 is None or s3 is None:
-        return None
-
-    center = (s1 + s3) / 2.0
-    radius = (s1 - s3) / 2.0
-
-    theta = np.linspace(0.0, np.pi, n_points)
-    sigma = center + radius * np.cos(theta)
-    tau = -radius * np.sin(theta)
-
-    return sigma.tolist(), tau.tolist()
+    return compute_mohr_circle_xy(exp.get("sigma_1"), exp.get("sigma_3"))
 
 
 OVERLAYS_BY_TEST: Dict[str, Tuple[OverlaySpec, ...]] = {
@@ -137,7 +112,7 @@ OVERLAYS_BY_TEST: Dict[str, Tuple[OverlaySpec, ...]] = {
             title=TITLE_MOHR,
             x_label=EFFECTIVE_STRESS_LABEL,
             y_label=MOBILIZED_SHEAR_STRESS_LABEL,
-            compute_xy=compute_mohr_circle_xy,
+            compute_xy=compute_mohr_circle_xy_from_results,
             invert_x=True,
         ),
     ),
@@ -150,8 +125,8 @@ OVERLAYS_BY_TEST: Dict[str, Tuple[OverlaySpec, ...]] = {
             title=TITLE_SHEAR_VS_STRAIN,
             x_label=SHEAR_STRAIN_LABEL,
             y_label=SHEAR_STRESS_LABEL,
-            x_transform=_gamma_from_shear_strain_xy,
-            y_transform=_abs_list,
+            x_transform=gamma_from_shear_strain_xy,
+            y_transform=abs_list,
         ),
         # axis 1: sigma1 vs sigma3
         OverlaySpec(
@@ -180,7 +155,7 @@ OVERLAYS_BY_TEST: Dict[str, Tuple[OverlaySpec, ...]] = {
             title=TITLE_MOHR,
             x_label=EFFECTIVE_STRESS_LABEL,
             y_label=MOBILIZED_SHEAR_STRESS_LABEL,
-            compute_xy=compute_mohr_circle_xy,
+            compute_xy=compute_mohr_circle_xy_from_results,
             invert_x=True,
         ),
     ),
@@ -224,7 +199,7 @@ OVERLAYS_BY_TEST: Dict[str, Tuple[OverlaySpec, ...]] = {
             title=TITLE_MOHR,
             x_label=EFFECTIVE_STRESS_LABEL,
             y_label=MOBILIZED_SHEAR_STRESS_LABEL,
-            compute_xy=compute_mohr_circle_xy,
+            compute_xy=compute_mohr_circle_xy_from_results,
             invert_x=True,
         ),
         # axis 4: yy_strain vs time_steps
