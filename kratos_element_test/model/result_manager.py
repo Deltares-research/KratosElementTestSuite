@@ -41,20 +41,13 @@ class ResultManager:
     def clear_experimental_results(self) -> None:
         self._experimental_results.clear()
 
-    def import_lab_results(self, py_file: Path) -> None:
-        module_spec = importlib.util.spec_from_file_location(
-            "lab_results_module", str(py_file)
-        )
-        if module_spec is None or module_spec.loader is None:
-            raise ValueError(f"Cannot load lab results file: {py_file}")
-
-        module = importlib.util.module_from_spec(module_spec)
-        module_spec.loader.exec_module(module)
-
-        experimental_by_test = getattr(module, "experimental_by_test", None)
-
+    def import_lab_results_dict(
+            self, experimental_by_test: Dict[str, Dict[str, List[float]]]
+    ) -> None:
         if not isinstance(experimental_by_test, dict) or not experimental_by_test:
-            raise ValueError("No 'experimental_by_test' dict found in lab results file")
+            raise ValueError(
+                "No non-empty 'experimental_by_test' dict found in lab results input"
+            )
 
         self.clear_experimental_results()
 
@@ -66,3 +59,16 @@ class ResultManager:
 
             storage_key = TYPE_TO_TEST_NAME.get(test_type, test_type)
             self.set_experimental_results_for_test_type(storage_key, results)
+
+    def import_python_lab_results(self, py_file: Path) -> None:
+        module_spec = importlib.util.spec_from_file_location(
+            "lab_results_module", str(py_file)
+        )
+        if module_spec is None or module_spec.loader is None:
+            raise ValueError(f"Cannot load lab results file: {py_file}")
+
+        module = importlib.util.module_from_spec(module_spec)
+        module_spec.loader.exec_module(module)
+
+        experimental_by_test = getattr(module, "experimental_by_test", None)
+        self.import_lab_results_dict(experimental_by_test)

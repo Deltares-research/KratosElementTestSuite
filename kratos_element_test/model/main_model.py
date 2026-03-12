@@ -62,4 +62,4 @@ class MainModel:
         self._material_input_manager.initialize_udsm(dll_path)
 
     def import_lab_results(self, py_file: Path) -> None:
-        self._result_manager.import_lab_results(py_file)
+        self._result_manager.import_python_lab_results(py_file)
