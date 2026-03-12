@@ -1,4 +1,8 @@
 from typing import Callable, Dict, List, Optional
+from pathlib import Path
+import importlib.util
+
+from kratos_element_test.view.ui_constants import TYPE_TO_TEST_NAME
 
 
 class ResultManager:
@@ -36,3 +40,29 @@ class ResultManager:
 
     def clear_experimental_results(self) -> None:
         self._experimental_results.clear()
+
+    def import_lab_results(self, py_file: Path) -> None:
+        module_spec = importlib.util.spec_from_file_location(
+            "lab_results_module", str(py_file)
+        )
+        if module_spec is None or module_spec.loader is None:
+            raise ValueError(f"Cannot load lab results file: {py_file}")
+
+        module = importlib.util.module_from_spec(module_spec)
+        module_spec.loader.exec_module(module)
+
+        experimental_by_test = getattr(module, "experimental_by_test", None)
+
+        if not isinstance(experimental_by_test, dict) or not experimental_by_test:
+            raise ValueError("No 'experimental_by_test' dict found in lab results file")
+
+        self.clear_experimental_results()
+
+        for test_type, results in experimental_by_test.items():
+            if not isinstance(test_type, str):
+                continue
+            if not isinstance(results, dict) or not results:
+                continue
+
+            storage_key = TYPE_TO_TEST_NAME.get(test_type, test_type)
+            self.set_experimental_results_for_test_type(storage_key, results)

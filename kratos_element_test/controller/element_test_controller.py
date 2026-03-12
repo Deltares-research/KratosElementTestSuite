@@ -1,9 +1,9 @@
 # ©Deltares 2025
 # This is a prototype version
 # Contact kratos@deltares.nl
+
 from pathlib import Path
 from typing import Callable
-import importlib.util
 
 from kratos_element_test.controller.material_input_controller import (
     MaterialInputController,
@@ -18,14 +18,13 @@ from kratos_element_test.view.result_exporter import (
 )
 from kratos_element_test.view.ui_constants import (
     TEST_NAME_TO_TYPE,
-    TYPE_TO_TEST_NAME,
 )
 
 
 class ElementTestController:
     def __init__(
-            self,
-            logger: Callable[[str, str], None],
+        self,
+        logger: Callable[[str, str], None],
     ):
         self._logger = logger
         self._main_model = MainModel(logger)
@@ -59,34 +58,7 @@ class ElementTestController:
         export_excel_by_test_type(results, test_type)
 
     def import_lab_results(self, py_file: Path) -> None:
-        module_spec = importlib.util.spec_from_file_location(
-            "lab_results_module", str(py_file)
-        )
-        if module_spec is None or module_spec.loader is None:
-            raise ValueError(f"Cannot load lab results file: {py_file}")
-
-        module = importlib.util.module_from_spec(module_spec)
-        module_spec.loader.exec_module(module)
-
-        experimental_by_test = getattr(module, "experimental_by_test", None)
-
-        if not isinstance(experimental_by_test, dict) or not experimental_by_test:
-            raise ValueError(
-                "No 'experimental_by_test' dict found in lab results file"
-            )
-
-        self._result_controller.clear_experimental_results()
-        for test_type, results in experimental_by_test.items():
-            if not isinstance(test_type, str):
-                continue
-            if not isinstance(results, dict) or not results:
-                continue
-
-            storage_key = TYPE_TO_TEST_NAME.get(test_type, test_type)
-            self._result_controller.set_experimental_results_for_test_type(
-                storage_key, results
-            )
-
+        self._main_model.import_lab_results(py_file)
         self._logger(f"Imported lab results from {py_file}", "info")
 
     def set_material_type(self, material_type: str) -> None:
