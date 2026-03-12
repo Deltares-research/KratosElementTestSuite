@@ -93,6 +93,100 @@ class ResultManagerTest(unittest.TestCase):
             result_manager.get_experimental_results(), expected_experimental_results
         )
 
+    def test_import_lab_results_dict_sets_results_for_active_test(self):
+        current_test_getter = lambda: TRIAXIAL
+        result_manager = ResultManager(current_test_getter)
+
+        experimental_by_test = {
+            "triaxial": {
+                "yy_strain": [0.0, -0.02],
+                "vol_strain": [0.0, -0.01],
+            }
+        }
+
+        result_manager.import_lab_results_dict(experimental_by_test)
+
+        self.assertDictEqual(
+            result_manager.get_experimental_results(),
+            {
+                "yy_strain": [0.0, -0.02],
+                "vol_strain": [0.0, -0.01],
+            },
+        )
+
+    def test_import_lab_results_dict_removes_stale_results_for_missing_test_types(self):
+        current_test_type = TRIAXIAL
+        current_test_getter = lambda: current_test_type
+        result_manager = ResultManager(current_test_getter)
+
+        result_manager.set_experimental_results_for_test_type(
+            TRIAXIAL, {"yy_strain": [0.0, -0.02]}
+        )
+        result_manager.set_experimental_results_for_test_type(
+            CRS, {"sigma_yy": [0.0, -100.0]}
+        )
+
+        experimental_by_test = {
+            "crs": {"sigma_yy": [0.0, -200.0]}
+        }
+
+        result_manager.import_lab_results_dict(experimental_by_test)
+
+        current_test_type = TRIAXIAL
+        self.assertDictEqual(result_manager.get_experimental_results(), {})
+
+        current_test_type = CRS
+        self.assertDictEqual(
+            result_manager.get_experimental_results(),
+            {"sigma_yy": [0.0, -200.0]},
+        )
+
+    def test_import_lab_results_dict_raises_for_invalid_input(self):
+        current_test_getter = lambda: TRIAXIAL
+        result_manager = ResultManager(current_test_getter)
+
+        with self.assertRaises(ValueError):
+            result_manager.import_lab_results_dict(None)
+
+        with self.assertRaises(ValueError):
+            result_manager.import_lab_results_dict({})
+
+        with self.assertRaises(ValueError):
+            result_manager.import_lab_results_dict("not a dict")
+
+    def test_import_lab_results_dict_ignores_invalid_entries(self):
+        current_test_type = DIRECT_SHEAR
+        current_test_getter = lambda: current_test_type
+        result_manager = ResultManager(current_test_getter)
+
+        experimental_by_test = {
+            123: {"yy_strain": [0.0]},
+            "triaxial": {},
+            "direct_shear": {"shear_strain_xy": [0.0, 0.1]},
+        }
+
+        result_manager.import_lab_results_dict(experimental_by_test)
+
+        self.assertDictEqual(
+            result_manager.get_experimental_results(),
+            {"shear_strain_xy": [0.0, 0.1]},
+        )
+
+    def test_import_experimental_results_maps_type_name_to_storage_key(self):
+        current_test_getter = lambda: TRIAXIAL
+        result_manager = ResultManager(current_test_getter)
+
+        experimental_by_test = {
+            "triaxial": {"yy_strain": [0.0, -0.02]}
+        }
+
+        result_manager.import_lab_results_dict(experimental_by_test)
+
+        self.assertDictEqual(
+            result_manager.get_experimental_results(),
+            {"yy_strain": [0.0, -0.02]},
+        )
+
 
 if __name__ == "__main__":
     unittest.main()
