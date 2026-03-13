@@ -4,6 +4,7 @@ import importlib.util
 
 from kratos_element_test.view.ui_constants import TYPE_TO_TEST_NAME
 
+
 class ResultManager:
     """
     This class manages all results that can be displayed or exported in the GUI.
