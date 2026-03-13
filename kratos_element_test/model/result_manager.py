@@ -1,7 +1,5 @@
 from typing import Callable, Dict, List, Optional
 
-from kratos_element_test.view.ui_constants import TRIAXIAL, CRS
-
 
 class ResultManager:
     """
@@ -26,9 +24,3 @@ class ResultManager:
 
     def clear_results(self) -> None:
         self._simulation_results.clear()
-
-    def number_of_plots(self) -> int:
-        if self.get_current_test() == TRIAXIAL or self.get_current_test() == CRS:
-            return 5
-        else:
-            return 4
