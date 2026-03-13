@@ -12,3 +12,9 @@ class ResultController:
 
     def get_current_test(self) -> str:
         return self._result_manager.get_current_test()
+
+    def get_experimental_results(self) -> Dict[str, List[float]]:
+        return self._result_manager.get_experimental_results()
+
+    def clear_experimental_results(self) -> None:
+        self._result_manager.clear_experimental_results()

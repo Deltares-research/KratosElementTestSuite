@@ -136,6 +136,13 @@ class GeotechTestUI(ttk.Frame):
             self.root.after(0, self._enable_gui)
             self.is_running = False
 
+    def redraw_plots(self) -> None:
+        try:
+            self.plot_frame.draw()
+        except Exception:
+            log_message("Failed to refresh plots:", "error")
+            log_message(traceback.format_exc(), "error")
+
     def _enable_run_button(self):
         self.run_button.config(state="normal")
         self.is_running = False

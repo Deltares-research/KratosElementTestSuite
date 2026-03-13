@@ -3,6 +3,7 @@
 # Contact kratos@deltares.nl
 
 import numpy as np
+from typing import Dict, List, Optional
 from kratos_element_test.model.core_utils import _fallback_log
 from kratos_element_test.plotters.plotter_labels import (
     SIGMA1_LABEL,
@@ -31,6 +32,7 @@ from kratos_element_test.plotters.plotter_labels import (
     LEGEND_MC,
     LEGEND_MC_FAILURE,
 )
+from kratos_element_test.plotters.lab_result_overlay_registry import OVERLAYS_BY_TEST
 
 
 class MatplotlibPlotter:
@@ -45,8 +47,102 @@ class MatplotlibPlotter:
             except Exception:
                 pass
 
+    def _safe_legend(self, ax) -> None:
+        handles, labels = ax.get_legend_handles_labels()
+        if handles and labels:
+            ax.legend()
+
+    def _apply_experimental_overlays(self, test_type: str, experimental_results):
+        specs = OVERLAYS_BY_TEST.get(test_type, ())
+        for spec in specs:
+            if spec.axis_index >= len(self.axes):
+                continue
+
+            if spec.compute_xy is not None:
+                out = spec.compute_xy(experimental_results)
+                if out is None:
+                    continue
+                x, y = out
+                n = min(len(x), len(y))
+                if n <= 0:
+                    continue
+                self.axes[spec.axis_index].plot(
+                    x[:n], y[:n], "--", color="magenta", label=spec.label
+                )
+                self._safe_legend(self.axes[spec.axis_index])
+                continue
+
+            if not spec.x_key or not spec.y_key:
+                continue
+            x = experimental_results.get(spec.x_key)
+            y = experimental_results.get(spec.y_key)
+            if x is None or y is None:
+                continue
+
+            if spec.x_transform is not None:
+                x = spec.x_transform(x)
+            if spec.y_transform is not None:
+                y = spec.y_transform(y)
+
+            n = min(len(x), len(y))
+            if n <= 0:
+                continue
+
+            self.axes[spec.axis_index].plot(
+                x[:n], y[:n], "--", color="magenta", label=spec.label
+            )
+            self._safe_legend(self.axes[spec.axis_index])
+
+    def plot_experimental_only(
+        self, test_type: str, experimental_results: Dict[str, List[float]]
+    ) -> None:
+        self._clear()
+
+        specs = OVERLAYS_BY_TEST.get(test_type, ())
+        if not specs or not experimental_results:
+            return
+
+        for spec in specs:
+            if spec.axis_index >= len(self.axes):
+                continue
+
+            ax = self.axes[spec.axis_index]
+            if spec.title:
+                ax.set_title(spec.title)
+            if spec.x_label:
+                ax.set_xlabel(spec.x_label)
+            if spec.y_label:
+                ax.set_ylabel(spec.y_label)
+
+            ax.grid(True)
+            ax.locator_params(nbins=8)
+            ax.minorticks_on()
+
+            if spec.invert_x:
+                ax.invert_xaxis()
+            if spec.invert_y:
+                ax.invert_yaxis()
+
+        self._apply_experimental_overlays(test_type, experimental_results)
+
+        for spec in specs:
+            if spec.axis_index >= len(self.axes):
+                continue
+            ax = self.axes[spec.axis_index]
+            ax.relim()
+            ax.autoscale_view()
+
     def triaxial(
-        self, yy, vol, sigma1, sigma3, p_list, q_list, cohesion=None, phi=None
+        self,
+        yy,
+        vol,
+        sigma1,
+        sigma3,
+        p_list,
+        q_list,
+        cohesion=None,
+        phi=None,
+        experimental_results: Optional[Dict[str, List[float]]] = None,
     ):
         self._clear()
         # 0: |σ1-σ3| vs εyy
@@ -64,8 +160,20 @@ class MatplotlibPlotter:
             self.axes[4], sigma1[-1], sigma3[-1], cohesion, phi
         )
 
+        if experimental_results:
+            self._apply_experimental_overlays("triaxial", experimental_results)
+
     def direct_shear(
-        self, gamma_xy, tau_xy, sigma1, sigma3, p_list, q_list, cohesion=None, phi=None
+        self,
+        gamma_xy,
+        tau_xy,
+        sigma1,
+        sigma3,
+        p_list,
+        q_list,
+        cohesion=None,
+        phi=None,
+        experimental_results: Optional[Dict[str, List[float]]] = None,
     ):
         self._clear()
         # 0: τ vs γ
@@ -79,6 +187,9 @@ class MatplotlibPlotter:
             self.axes[3], sigma1[-1], sigma3[-1], cohesion, phi
         )
 
+        if experimental_results:
+            self._apply_experimental_overlays("direct_shear", experimental_results)
+
     def crs(
         self,
         yy_strain,
@@ -91,6 +202,7 @@ class MatplotlibPlotter:
         sigma3,
         cohesion=None,
         phi=None,
+        experimental_results: Optional[Dict[str, List[float]]] = None,
     ):
         self._clear()
         # 0: σýy vs εyy
@@ -108,8 +220,11 @@ class MatplotlibPlotter:
         # 4: εyy vs time
         self.plot_vertical_strain_vs_time_crs(self.axes[4], yy_strain, time_steps)
 
+        if experimental_results:
+            self._apply_experimental_overlays("crs", experimental_results)
+
     def plot_principal_stresses_triaxial(self, ax, sigma_1, sigma_3):
-        ax.plot(sigma_3, sigma_1, "-", color="blue", label=TITLE_SIGMA1_VS_SIGMA3)
+        ax.plot(sigma_3, sigma_1, "-", color="blue", label="Kratos Simulation")
         ax.set_title(TITLE_SIGMA1_VS_SIGMA3)
         ax.set_xlabel(SIGMA3_LABEL)
         ax.set_ylabel(SIGMA1_LABEL)
@@ -131,7 +246,7 @@ class MatplotlibPlotter:
             sigma_diff,
             "-",
             color="blue",
-            label=SIGMA1_SIGMA3_DIFF_LABEL,
+            label="Kratos Simulation",
         )
         ax.set_title(TITLE_DIFF_PRINCIPAL_SIGMA_VS_STRAIN)
         ax.set_xlabel(VERTICAL_STRAIN_LABEL)
@@ -149,7 +264,7 @@ class MatplotlibPlotter:
             volumetric_strain,
             "-",
             color="blue",
-            label=TITLE_VOL_VS_VERT_STRAIN,
+            label="Kratos Simulation",
         )
         ax.set_title(TITLE_VOL_VS_VERT_STRAIN)
         ax.set_xlabel(VERTICAL_STRAIN_LABEL)
@@ -171,7 +286,7 @@ class MatplotlibPlotter:
         sigma = center + radius * np.cos(theta)
         tau = -radius * np.sin(theta)
 
-        ax.plot(sigma, tau, label=LEGEND_MC, color="blue")
+        ax.plot(sigma, tau, label="Kratos Simulation", color="blue")
 
         if cohesion is not None and friction_angle is not None:
             phi_rad = np.radians(friction_angle)
@@ -190,7 +305,7 @@ class MatplotlibPlotter:
         ax.minorticks_on()
 
     def plot_p_q_triaxial(self, ax, p_list, q_list):
-        ax.plot(p_list, q_list, "-", color="blue", label=TITLE_P_VS_Q)
+        ax.plot(p_list, q_list, "-", color="blue", label="Kratos Simulation")
         ax.set_title(TITLE_P_VS_Q)
         ax.set_xlabel(P_STRESS_LABEL)
         ax.set_ylabel(Q_STRESS_LABEL)
@@ -200,7 +315,7 @@ class MatplotlibPlotter:
         ax.minorticks_on()
 
     def plot_principal_stresses_direct_shear(self, ax, sigma_1, sigma_3):
-        ax.plot(sigma_3, sigma_1, "-", color="blue", label=TITLE_SIGMA1_VS_SIGMA3)
+        ax.plot(sigma_3, sigma_1, "-", color="blue", label="Kratos Simulation")
         ax.set_title(TITLE_SIGMA1_VS_SIGMA3)
         ax.set_xlabel(SIGMA3_LABEL)
         ax.set_ylabel(SIGMA1_LABEL)
@@ -225,7 +340,7 @@ class MatplotlibPlotter:
             np.abs(shear_stress_xy),
             "-",
             color="blue",
-            label=TITLE_SHEAR_VS_STRAIN,
+            label="Kratos Simulation",
         )
         ax.set_title(TITLE_SHEAR_VS_STRAIN)
         ax.set_xlabel(SHEAR_STRAIN_LABEL)
@@ -245,7 +360,7 @@ class MatplotlibPlotter:
         sigma = center + radius * np.cos(theta)
         tau = -radius * np.sin(theta)
 
-        ax.plot(sigma, tau, label=LEGEND_MC, color="blue")
+        ax.plot(sigma, tau, label="Kratos Simulation", color="blue")
 
         if cohesion is not None and friction_angle is not None:
             phi_rad = np.radians(friction_angle)
@@ -279,7 +394,7 @@ class MatplotlibPlotter:
         ax.minorticks_on()
 
     def plot_p_q_direct_shear(self, ax, p_list, q_list):
-        ax.plot(p_list, q_list, "-", color="blue", label=TITLE_P_VS_Q)
+        ax.plot(p_list, q_list, "-", color="blue", label="Kratos Simulation")
         ax.set_title(TITLE_P_VS_Q)
         ax.set_xlabel(P_STRESS_LABEL)
         ax.set_ylabel(Q_STRESS_LABEL)
@@ -297,7 +412,7 @@ class MatplotlibPlotter:
             sigma_yy,
             "-",
             color="blue",
-            label=TITLE_VERTICAL_STRESS_VS_VERTICAL_STRAIN,
+            label="Kratos Simulation",
         )
         ax.set_title(TITLE_VERTICAL_STRESS_VS_VERTICAL_STRAIN)
         ax.set_xlabel(VERTICAL_STRAIN_LABEL)
@@ -315,7 +430,7 @@ class MatplotlibPlotter:
             sigma_yy,
             "-",
             color="blue",
-            label=TITLE_VERTICAL_STRESS_VS_HORIZONTAL_STRESS,
+            label="Kratos Simulation",
         )
         ax.set_title(TITLE_VERTICAL_STRESS_VS_HORIZONTAL_STRESS)
         ax.set_xlabel(HORIZONTAL_STRESS_LABEL)
@@ -329,7 +444,7 @@ class MatplotlibPlotter:
     def plot_p_q_crs(self, ax, p_list, q_list):
         p_list.insert(0, 0.0)
         q_list.insert(0, 0.0)
-        ax.plot(p_list, q_list, "-", color="blue", label=TITLE_P_VS_Q)
+        ax.plot(p_list, q_list, "-", color="blue", label="Kratos Simulation")
         ax.set_title(TITLE_P_VS_Q)
         ax.set_xlabel(P_STRESS_LABEL)
         ax.set_ylabel(Q_STRESS_LABEL)
@@ -349,7 +464,7 @@ class MatplotlibPlotter:
         sigma = center + radius * np.cos(theta)
         tau = -radius * np.sin(theta)
 
-        ax.plot(sigma, tau, label=LEGEND_MC, color="blue")
+        ax.plot(sigma, tau, label="Kratos Simulation", color="blue")
 
         if cohesion is not None and friction_angle is not None:
             phi_rad = np.radians(friction_angle)
@@ -394,7 +509,7 @@ class MatplotlibPlotter:
             yy_strain,
             "-",
             color="blue",
-            label=TITLE_VERTICAL_STRAIN_VS_TIME,
+            label="Kratos Simulation",
         )
         ax.set_title(TITLE_VERTICAL_STRAIN_VS_TIME)
         ax.set_xlabel(TIME_HOURS_LABEL)

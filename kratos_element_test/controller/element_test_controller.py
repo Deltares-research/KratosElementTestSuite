@@ -1,6 +1,7 @@
 # ©Deltares 2025
 # This is a prototype version
 # Contact kratos@deltares.nl
+
 from pathlib import Path
 from typing import Callable
 
@@ -55,6 +56,10 @@ class ElementTestController:
         if not results:
             raise ValueError("No results available for export")
         export_excel_by_test_type(results, test_type)
+
+    def import_lab_results(self, py_file: Path) -> None:
+        self._main_model.import_lab_results(py_file)
+        self._logger(f"Imported lab results from {py_file}", "info")
 
     def set_material_type(self, material_type: str) -> None:
         self._main_model.set_material_type(material_type)

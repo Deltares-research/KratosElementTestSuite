@@ -187,6 +187,13 @@ class MainUI:
         )
         menubar.add_cascade(label="Export", menu=export_menu)
 
+        import_menu = Menu(menubar, tearoff=0)
+        import_menu.add_command(
+            label="Import Lab Results (experimental feature)",
+            command=self._import_lab_results,
+        )
+        menubar.add_cascade(label="Import", menu=import_menu)
+
         about_menu = Menu(menubar, tearoff=0)
         about_menu.add_command(
             label="License", command=lambda: self.show_license_agreement(readonly=True)
@@ -316,6 +323,23 @@ class MainUI:
             self._controller.export_latest_results()
         except Exception as e:
             messagebox.showerror("Export Error", f"Failed to export Excel file.\n\n{e}")
+
+    def _import_lab_results(self):
+        try:
+            py_path = filedialog.askopenfilename(
+                title="Select lab results Python file",
+                filetypes=[("Python files", "*.py")],
+            )
+            if not py_path:
+                return
+
+            self._controller.import_lab_results(Path(py_path))
+            self.main_frame.redraw_plots()
+
+        except Exception as e:
+            messagebox.showerror(
+                "Import Error", f"Failed to import lab results.\n\n{e}"
+            )
 
 
 if __name__ == "__main__":

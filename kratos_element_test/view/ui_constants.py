@@ -7,7 +7,7 @@
 
 # Application data
 APP_TITLE = "Deltares Soil Element Test Suite"
-APP_VERSION = "Version 0.5.3 ~ Alpha Release"
+APP_VERSION = "Version 0.6.0 ~ Alpha Release"
 APP_NAME = "SoilElementSuite"
 APP_AUTHOR = "Deltares"
 
@@ -61,6 +61,8 @@ KRATOS_NAME_TO_UI_NAME = {
 }
 
 UI_NAME_TO_KRATOS_NAME = {v: k for k, v in KRATOS_NAME_TO_UI_NAME.items()}
+
+TYPE_TO_TEST_NAME = {v: k for k, v in TEST_NAME_TO_TYPE.items()}
 
 # Menu labels
 SELECT_UDSM = "Select UDSM File"

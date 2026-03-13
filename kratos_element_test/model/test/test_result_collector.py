@@ -5,7 +5,9 @@ from pathlib import Path
 import numpy as np
 from parameterized import parameterized
 
-from kratos_element_test.model.core_utils import seconds_list_to_hours_list
+from kratos_element_test.model.core_utils import (
+    seconds_list_to_hours_list,
+)
 from kratos_element_test.model.pipeline.result_collector import ResultCollector
 
 

@@ -37,9 +37,25 @@ class PlotViewer(ttk.Frame):
         self._canvas.draw()
         toolbar = NavigationToolbar2Tk(self._canvas, self)
         toolbar.update()
+        btn = ttk.Button(
+            toolbar, text="Clear Lab Results", command=self._clear_lab_results
+        )
+        btn.pack(side="left", padx=4)
         toolbar.pack(side="bottom", fill="x")
         self._canvas.get_tk_widget().pack(fill="both", expand=True)
         self.draw()
+
+    def _clear_lab_results(self) -> None:
+        self._result_controller.clear_experimental_results()
+
+        results = self._result_controller.get_latest_results() or None
+        if results is not None:
+            self.draw()
+            return
+
+        if self._plotter is not None:
+            self._plotter._clear()
+        self._canvas.draw()
 
     def clear(self):
         if self.winfo_exists():
@@ -50,11 +66,18 @@ class PlotViewer(ttk.Frame):
         self._canvas = None
 
     def draw(self):
-        results = self._result_controller.get_latest_results()
-        if not results:
+        test_type = TEST_NAME_TO_TYPE.get(self._result_controller.get_current_test())
+        experimental = self._result_controller.get_experimental_results() or None
+        results = self._result_controller.get_latest_results() or None
+
+        if results is None and experimental is None:
             return
 
-        test_type = TEST_NAME_TO_TYPE.get(self._result_controller.get_current_test())
+        if results is None and experimental is not None:
+            self._plotter.plot_experimental_only(test_type, experimental)
+            self._canvas.draw()
+            return
+
         if test_type == "triaxial":
             self._plotter.triaxial(
                 results["yy_strain"],
@@ -65,6 +88,7 @@ class PlotViewer(ttk.Frame):
                 results["von_mises"],
                 results["cohesion"],
                 results["phi"],
+                experimental_results=experimental,
             )
         elif test_type == "direct_shear":
             self._plotter.direct_shear(
@@ -76,6 +100,7 @@ class PlotViewer(ttk.Frame):
                 results["von_mises"],
                 results["cohesion"],
                 results["phi"],
+                experimental_results=experimental,
             )
         elif test_type == "crs":
             self._plotter.crs(
@@ -89,5 +114,6 @@ class PlotViewer(ttk.Frame):
                 results["sigma3"],
                 results["cohesion"],
                 results["phi"],
+                experimental_results=experimental,
             )
         self._canvas.draw()
