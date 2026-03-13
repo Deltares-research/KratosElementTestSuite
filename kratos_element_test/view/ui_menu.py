@@ -22,7 +22,6 @@ from kratos_element_test.view.ui_constants import (
     MOHR_COULOMB,
     HELP_MENU_FONT,
     DEFAULT_TKINTER_DPI,
-    INPUT_SECTION_FONT,
 )
 from kratos_element_test.view.ui_logger import log_message
 from kratos_element_test.view.ui_utils import asset_path, soil_models_dir
@@ -249,25 +248,48 @@ class MainUI:
                 model_source_var.set(last_model_source)
                 return
             last_model_source = SELECT_UDSM
+
             if self.main_frame:
-                self.main_frame.refresh_material_inputs()
-                self.main_frame.refresh_results()
+                for widget in self.main_frame.winfo_children():
+                    widget.destroy()
+                self.main_frame.destroy()
+            self.main_frame = GeotechTestUI(
+                root,
+                controller=self._controller,
+                external_widgets=[model_source_menu],
+            )
 
         def load_linear_elastic():
             self._controller.set_material_type("linear_elastic")
             nonlocal last_model_source
             last_model_source = LINEAR_ELASTIC
+
             if self.main_frame:
-                self.main_frame.refresh_material_inputs()
-                self.main_frame.refresh_results()
+                for widget in self.main_frame.winfo_children():
+                    widget.destroy()
+                self.main_frame.destroy()
+
+            self.main_frame = GeotechTestUI(
+                root,
+                controller=self._controller,
+                external_widgets=[model_source_menu],
+            )
 
         def load_mohr_coulomb():
             self._controller.set_material_type("mohr_coulomb")
             nonlocal last_model_source
             last_model_source = MOHR_COULOMB
+
             if self.main_frame:
-                self.main_frame.refresh_material_inputs()
-                self.main_frame.refresh_results()
+                for widget in self.main_frame.winfo_children():
+                    widget.destroy()
+                self.main_frame.destroy()
+
+            self.main_frame = GeotechTestUI(
+                root,
+                controller=self._controller,
+                external_widgets=[model_source_menu],
+            )
 
         def handle_model_source_selection(event):
             choice = model_source_var.get()
@@ -278,12 +300,7 @@ class MainUI:
             elif choice == MOHR_COULOMB:
                 load_mohr_coulomb()
 
-        ttk.Label(
-            top_frame,
-            text="Select a Model:",
-            font=(INPUT_SECTION_FONT, 12, "bold"),
-        ).pack(anchor="w", padx=5, pady=5)
-        model_source_var = tk.StringVar(value=LINEAR_ELASTIC)
+        model_source_var = tk.StringVar(value="Select Model Source")
         model_source_menu = ttk.Combobox(
             top_frame,
             textvariable=model_source_var,
@@ -292,12 +309,6 @@ class MainUI:
         )
         model_source_menu.bind("<<ComboboxSelected>>", handle_model_source_selection)
         model_source_menu.pack(side="left", padx=5)
-        load_linear_elastic()
-        self.main_frame = GeotechTestUI(
-            root,
-            controller=self._controller,
-            external_widgets=[model_source_menu],
-        )
 
         def on_close():
             root.quit()
