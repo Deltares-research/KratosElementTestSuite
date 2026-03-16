@@ -2,6 +2,7 @@ from typing import Callable, Dict, List, Optional
 from pathlib import Path
 import importlib.util
 
+from kratos_element_test.model.io.lab_results_csv_parser import parse_csv_lab_results
 from kratos_element_test.view.ui_constants import TYPE_TO_TEST_NAME
 
 
@@ -71,4 +72,14 @@ class ResultManager:
         module_spec.loader.exec_module(module)
 
         experimental_by_test = getattr(module, "experimental_by_test", None)
+        self.import_lab_results_dict(experimental_by_test)
+
+    def import_csv_lab_results(
+        self, csv_file: Path, column_mapping: Optional[Dict[str, str]] = None
+    ) -> None:
+        experimental_by_test = parse_csv_lab_results(
+            csv_file,
+            default_test_type=self.get_current_test(),
+            column_mapping=column_mapping,
+        )
         self.import_lab_results_dict(experimental_by_test)

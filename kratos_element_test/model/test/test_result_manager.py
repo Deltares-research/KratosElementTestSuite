@@ -1,4 +1,6 @@
 import unittest
+from pathlib import Path
+from tempfile import TemporaryDirectory
 
 from parameterized import parameterized
 
@@ -181,6 +183,194 @@ class ResultManagerTest(unittest.TestCase):
         self.assertDictEqual(
             result_manager.get_experimental_results(),
             {"yy_strain": [0.0, -0.02]},
+        )
+
+    def test_import_csv_lab_results_uses_active_test_type_when_not_provided(self):
+        current_test_getter = lambda: TRIAXIAL
+        result_manager = ResultManager(current_test_getter)
+
+        with TemporaryDirectory() as tmp_dir:
+            csv_file = Path(tmp_dir) / "triaxial_lab.csv"
+            csv_file.write_text(
+                "yy_strain,sigma1,sigma3,vol_strain,p,q\n"
+                "0.0,-100,-100,0.0,-100,0\n"
+                "-0.1,-250,-100,-0.01,-150,150\n",
+                encoding="utf-8",
+            )
+
+            result_manager.import_csv_lab_results(csv_file)
+
+        imported = result_manager.get_experimental_results()
+        self.assertDictEqual(
+            imported,
+            {
+                "yy_strain": [0.0, -0.1],
+                "sigma_1": [-100.0, -250.0],
+                "sigma_3": [-100.0, -100.0],
+                "vol_strain": [0.0, -0.01],
+                "p'": [-100.0, -150.0],
+                "q": [0.0, 150.0],
+                "sigma1_sigma3_diff": [0.0, 150.0],
+            },
+        )
+
+    def test_import_csv_lab_results_with_test_type_column_routes_data_per_test(self):
+        current_test_type = TRIAXIAL
+        current_test_getter = lambda: current_test_type
+        result_manager = ResultManager(current_test_getter)
+
+        with TemporaryDirectory() as tmp_dir:
+            csv_file = Path(tmp_dir) / "multi_test_lab.csv"
+            csv_file.write_text(
+                "test_type,yy_strain,sigma1_sigma3_diff,shear_strain_xy,shear_stress_xy\n"
+                "Triaxial,0.0,0.0,,\n"
+                "Triaxial,-0.1,120.0,,\n"
+                "Direct Simple Shear,,,0.0,0.0\n"
+                "Direct Simple Shear,,,0.05,40.0\n",
+                encoding="utf-8",
+            )
+
+            result_manager.import_csv_lab_results(csv_file)
+
+        current_test_type = TRIAXIAL
+        self.assertDictEqual(
+            result_manager.get_experimental_results(),
+            {
+                "yy_strain": [0.0, -0.1],
+                "sigma1_sigma3_diff": [0.0, 120.0],
+            },
+        )
+
+        current_test_type = DIRECT_SHEAR
+        self.assertDictEqual(
+            result_manager.get_experimental_results(),
+            {
+                "shear_strain_xy": [0.0, 0.05],
+                "shear_stress_xy": [0.0, 40.0],
+            },
+        )
+
+    def test_import_csv_lab_results_supports_cp1252_encoding(self):
+        current_test_getter = lambda: TRIAXIAL
+        result_manager = ResultManager(current_test_getter)
+
+        with TemporaryDirectory() as tmp_dir:
+            csv_file = Path(tmp_dir) / "cp1252_lab.csv"
+            csv_content = (
+                "yy_strain,sigma1,sigma3,comment\n"
+                "0.0,-100,-100,Þ\n"
+                "-0.1,-250,-100,Þ\n"
+            )
+            csv_file.write_bytes(csv_content.encode("cp1252"))
+
+            result_manager.import_csv_lab_results(csv_file)
+
+        self.assertDictEqual(
+            result_manager.get_experimental_results(),
+            {
+                "yy_strain": [0.0, -0.1],
+                "sigma_1": [-100.0, -250.0],
+                "sigma_3": [-100.0, -100.0],
+                "sigma1_sigma3_diff": [0.0, 150.0],
+            },
+        )
+
+    def test_import_csv_lab_results_rejects_excel_workbook_extension(self):
+        current_test_getter = lambda: TRIAXIAL
+        result_manager = ResultManager(current_test_getter)
+
+        with TemporaryDirectory() as tmp_dir:
+            excel_file = Path(tmp_dir) / "lab_results.xlsx"
+            excel_file.write_bytes(b"PK\x03\x04")
+
+            with self.assertRaises(ValueError) as context:
+                result_manager.import_csv_lab_results(excel_file)
+
+        self.assertIn("Excel workbook", str(context.exception))
+
+    def test_import_csv_lab_results_supports_semicolon_delimiter(self):
+        current_test_getter = lambda: TRIAXIAL
+        result_manager = ResultManager(current_test_getter)
+
+        with TemporaryDirectory() as tmp_dir:
+            csv_file = Path(tmp_dir) / "semicolon_delimited.csv"
+            csv_content = (
+                "yy_strain;sigma1;sigma3;vol_strain;p;q\n"
+                "0.0;-100;-100;0.0;-100;0\n"
+                "-0.1;-250;-100;-0.01;-150;150\n"
+            )
+            csv_file.write_text(csv_content, encoding="utf-8")
+
+            result_manager.import_csv_lab_results(csv_file)
+
+        imported = result_manager.get_experimental_results()
+        self.assertDictEqual(
+            imported,
+            {
+                "yy_strain": [0.0, -0.1],
+                "sigma_1": [-100.0, -250.0],
+                "sigma_3": [-100.0, -100.0],
+                "vol_strain": [0.0, -0.01],
+                "p'": [-100.0, -150.0],
+                "q": [0.0, 150.0],
+                "sigma1_sigma3_diff": [0.0, 150.0],
+            },
+        )
+
+    def test_import_csv_lab_results_supports_common_lab_header_labels(self):
+        current_test_getter = lambda: TRIAXIAL
+        result_manager = ResultManager(current_test_getter)
+
+        with TemporaryDirectory() as tmp_dir:
+            csv_file = Path(tmp_dir) / "lab_headers.csv"
+            csv_content = (
+                "Axial Strain (%);Deviator Stress q (kPa);Mean Effective Stress p' (kPa)\n"
+                "0.0;0.0;-100\n"
+                "-0.1;150.0;-150\n"
+            )
+            csv_file.write_text(csv_content, encoding="utf-8")
+
+            result_manager.import_csv_lab_results(csv_file)
+
+        imported = result_manager.get_experimental_results()
+        self.assertDictEqual(
+            imported,
+            {
+                "yy_strain": [0.0, -0.1],
+                "q": [0.0, 150.0],
+                "p'": [-100.0, -150.0],
+                "sigma1_sigma3_diff": [0.0, 150.0],
+            },
+        )
+
+    def test_import_csv_lab_results_supports_user_column_mapping(self):
+        current_test_getter = lambda: TRIAXIAL
+        result_manager = ResultManager(current_test_getter)
+
+        with TemporaryDirectory() as tmp_dir:
+            csv_file = Path(tmp_dir) / "manual_mapping.csv"
+            csv_content = (
+                "sigma;epsilon\n"
+                "0.0;0.0\n"
+                "120.0;-0.1\n"
+            )
+            csv_file.write_text(csv_content, encoding="utf-8")
+
+            result_manager.import_csv_lab_results(
+                csv_file,
+                column_mapping={
+                    "q": "sigma",
+                    "yy_strain": "epsilon",
+                },
+            )
+
+        self.assertDictEqual(
+            result_manager.get_experimental_results(),
+            {
+                "q": [0.0, 120.0],
+                "yy_strain": [0.0, -0.1],
+                "sigma1_sigma3_diff": [0.0, 120.0],
+            },
         )
 
 

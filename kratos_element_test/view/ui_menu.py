@@ -7,10 +7,16 @@ import os
 import tkinter as tk
 from pathlib import Path
 from tkinter import filedialog, messagebox, ttk, scrolledtext, Menu
+from typing import Dict, List, Optional
 
 from platformdirs import user_data_dir
 
 from kratos_element_test.controller.element_test_controller import ElementTestController
+from kratos_element_test.model.io.lab_results_csv_parser import (
+    get_csv_headers,
+    get_expected_columns_for_test_type,
+    suggest_csv_column_mapping,
+)
 from kratos_element_test.view.ui_builder import GeotechTestUI
 from kratos_element_test.view.ui_constants import (
     APP_TITLE,
@@ -42,6 +48,7 @@ class MainUI:
             logger=log_message,
         )
         self.main_frame = None
+        self._root = None
 
     def show_license_agreement(self, readonly=False):
         license_file_path = asset_path("license.txt")
@@ -164,6 +171,7 @@ class MainUI:
 
         last_model_source = LINEAR_ELASTIC
         root = tk.Tk()
+        self._root = root
 
         root.bind_class("TCombobox", "<MouseWheel>", lambda e: "break")
         root.bind_class("TCombobox", "<Shift-MouseWheel>", lambda e: "break")
@@ -191,6 +199,10 @@ class MainUI:
         import_menu.add_command(
             label="Import Lab Results (experimental feature)",
             command=self._import_lab_results,
+        )
+        import_menu.add_command(
+            label="Import CSV data",
+            command=self._import_csv_data,
         )
         menubar.add_cascade(label="Import", menu=import_menu)
 
@@ -340,6 +352,143 @@ class MainUI:
             messagebox.showerror(
                 "Import Error", f"Failed to import lab results.\n\n{e}"
             )
+
+    def _import_csv_data(self):
+        try:
+            csv_path = filedialog.askopenfilename(
+                title="Select CSV data file",
+                filetypes=[("CSV files", "*.csv")],
+            )
+            if not csv_path:
+                return
+
+            selected_file = Path(csv_path)
+            if selected_file.suffix.lower() != ".csv":
+                messagebox.showerror(
+                    "Import Error",
+                    "The selected file is not a CSV file. "
+                    "Please choose a file with .csv extension.",
+                )
+                return
+
+            current_test_type = self._controller.get_current_test_type()
+            file_headers = get_csv_headers(selected_file)
+            expected_headers = get_expected_columns_for_test_type(current_test_type)
+            suggested_mapping = suggest_csv_column_mapping(
+                file_headers, expected_headers
+            )
+
+            column_mapping = self._show_csv_header_mapping_popup(
+                file_headers=file_headers,
+                expected_headers=expected_headers,
+                suggested_mapping=suggested_mapping,
+            )
+            if column_mapping is None:
+                return
+
+            self._controller.import_csv_data(selected_file, column_mapping=column_mapping)
+            if self.main_frame:
+                self.main_frame.redraw_plots()
+
+        except Exception as e:
+            messagebox.showerror("Import Error", f"Failed to import CSV data.\n\n{e}")
+
+    def _show_csv_header_mapping_popup(
+        self,
+        file_headers: List[str],
+        expected_headers: List[str],
+        suggested_mapping: Dict[str, str],
+    ) -> Optional[Dict[str, str]]:
+        if self._root is None:
+            return suggested_mapping
+
+        if not expected_headers:
+            return suggested_mapping
+
+        dialog = tk.Toplevel(self._root)
+        dialog.title("Map CSV headers")
+        dialog.geometry("860x560")
+        dialog.resizable(True, True)
+        dialog.transient(self._root)
+        dialog.grab_set()
+
+        ttk.Label(
+            dialog,
+            text="Map CSV headers to the expected variables for the current test",
+        ).pack(anchor="w", padx=12, pady=(12, 8))
+
+        preview_frame = ttk.Frame(dialog, padding="8")
+        preview_frame.pack(fill="x", padx=8, pady=(0, 8))
+        ttk.Label(preview_frame, text="Headers found in file:").pack(anchor="w")
+
+        preview_text = scrolledtext.ScrolledText(preview_frame, height=5, wrap="word")
+        preview_text.pack(fill="x", expand=False, pady=(4, 0))
+        preview_text.insert("1.0", "\n".join(file_headers))
+        preview_text.config(state="disabled")
+
+        mapping_frame = ttk.Frame(dialog, padding="8")
+        mapping_frame.pack(fill="both", expand=True, padx=8, pady=(0, 8))
+
+        ttk.Label(mapping_frame, text="Expected variable").grid(
+            row=0, column=0, sticky="w", padx=(0, 12), pady=(0, 6)
+        )
+        ttk.Label(mapping_frame, text="CSV header").grid(
+            row=0, column=1, sticky="w", pady=(0, 6)
+        )
+
+        selectable_headers = ["<skip>"] + file_headers
+        vars_by_expected: Dict[str, tk.StringVar] = {}
+
+        for idx, expected_key in enumerate(expected_headers, start=1):
+            ttk.Label(mapping_frame, text=expected_key).grid(
+                row=idx, column=0, sticky="w", padx=(0, 12), pady=3
+            )
+            selected_header = suggested_mapping.get(expected_key, "<skip>")
+            if selected_header not in selectable_headers:
+                selected_header = "<skip>"
+
+            selected_var = tk.StringVar(value=selected_header)
+            vars_by_expected[expected_key] = selected_var
+
+            combobox = ttk.Combobox(
+                mapping_frame,
+                textvariable=selected_var,
+                values=selectable_headers,
+                state="readonly",
+                width=48,
+            )
+            combobox.grid(row=idx, column=1, sticky="ew", pady=3)
+
+        mapping_frame.columnconfigure(1, weight=1)
+
+        action_frame = ttk.Frame(dialog, padding="8")
+        action_frame.pack(fill="x", padx=8, pady=(0, 8))
+
+        result: Dict[str, str] = {}
+        is_confirmed = {"value": False}
+
+        def _on_import():
+            is_confirmed["value"] = True
+            result.clear()
+            for expected_key, selected_var in vars_by_expected.items():
+                selected = selected_var.get()
+                if selected and selected != "<skip>":
+                    result[expected_key] = selected
+            dialog.destroy()
+
+        def _on_cancel():
+            dialog.destroy()
+
+        ttk.Button(action_frame, text="Import", command=_on_import).pack(
+            side="right", padx=(8, 0)
+        )
+        ttk.Button(action_frame, text="Cancel", command=_on_cancel).pack(side="right")
+
+        dialog.wait_window()
+
+        if not is_confirmed["value"]:
+            return None
+        return result
 
 
 if __name__ == "__main__":

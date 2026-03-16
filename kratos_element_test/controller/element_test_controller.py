@@ -3,7 +3,7 @@
 # Contact kratos@deltares.nl
 
 from pathlib import Path
-from typing import Callable
+from typing import Callable, Dict, Optional
 
 from kratos_element_test.controller.material_input_controller import (
     MaterialInputController,
@@ -60,6 +60,12 @@ class ElementTestController:
     def import_lab_results(self, py_file: Path) -> None:
         self._main_model.import_lab_results(py_file)
         self._logger(f"Imported lab results from {py_file}", "info")
+
+    def import_csv_data(
+        self, csv_file: Path, column_mapping: Optional[Dict[str, str]] = None
+    ) -> None:
+        self._main_model.import_csv_data(csv_file, column_mapping)
+        self._logger(f"Imported CSV data from {csv_file}", "info")
 
     def set_material_type(self, material_type: str) -> None:
         self._main_model.set_material_type(material_type)
