@@ -425,7 +425,7 @@ class MainUI:
 
         dialog = tk.Toplevel(self._root)
         dialog.title("Map CSV headers")
-        dialog.geometry("860x560")
+        dialog.geometry("360x600")
         dialog.resizable(True, True)
         dialog.transient(self._root)
         dialog.grab_set()
