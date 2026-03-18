@@ -499,6 +499,43 @@ class ResultManagerTest(unittest.TestCase):
             },
         )
 
+    def test_import_csv_lab_results_shared_columns_available_for_all_compatible_tests(
+        self,
+    ):
+        """Columns shared by all test types (p' and q) must be stored for every
+        compatible test, not collapsed to a single inferred one."""
+        current_test_type = TRIAXIAL
+        current_test_getter = lambda: current_test_type
+        result_manager = ResultManager(current_test_getter)
+
+        with TemporaryDirectory() as tmp_dir:
+            csv_file = Path(tmp_dir) / "pq_only.csv"
+            csv_file.write_text(
+                "p,q\n"
+                "-100,0\n"
+                "-150,150\n",
+                encoding="utf-8",
+            )
+
+            result_manager.import_csv_lab_results(csv_file)
+
+        # _compute_missing_sigma_diff derives sigma1_sigma3_diff from q when
+        # sigma_1 and sigma_3 are absent, so it is present in the stored results.
+        expected = {
+            "p'": [-100.0, -150.0],
+            "q": [0.0, 150.0],
+            "sigma1_sigma3_diff": [0.0, 150.0],
+        }
+
+        current_test_type = TRIAXIAL
+        self.assertDictEqual(result_manager.get_experimental_results(), expected)
+
+        current_test_type = DIRECT_SHEAR
+        self.assertDictEqual(result_manager.get_experimental_results(), expected)
+
+        current_test_type = CRS
+        self.assertDictEqual(result_manager.get_experimental_results(), expected)
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -13,9 +13,6 @@ from kratos_element_test.controller.soil_test_input_controller import (
     SoilTestInputController,
 )
 from kratos_element_test.model.main_model import MainModel
-from kratos_element_test.view.result_exporter import (
-    export_excel_by_test_type,
-)
 from kratos_element_test.view.ui_constants import (
     TEST_NAME_TO_TYPE,
 )
@@ -51,6 +48,8 @@ class ElementTestController:
         return self._main_model.get_current_test_type()
 
     def export_latest_results(self):
+        from kratos_element_test.view.result_exporter import export_excel_by_test_type
+
         results = self._result_controller.get_latest_results()
         test_type = TEST_NAME_TO_TYPE.get(self._result_controller.get_current_test())
         if not results:

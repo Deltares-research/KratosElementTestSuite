@@ -314,12 +314,17 @@ def _candidate_test_types_from_columns(
     if test_types_with_unique_match:
         return test_types_with_unique_match
 
-    inferred = infer_test_type_from_columns(
-        filtered_columns,
-        fallback_test_type=default_test_type,
-    )
-    if inferred is not None:
-        return [inferred]
+    # All mapped columns are shared across multiple tests (e.g. p' and q appear in
+    # every test type).  Return every test that accepts at least one of those columns
+    # so the data is available in all compatible tests instead of collapsing to a
+    # single inferred one.
+    all_matching = [
+        test_type
+        for test_type, expected_columns in _EXPECTED_COLUMNS_BY_TEST.items()
+        if any(column in expected_columns for column in filtered_columns)
+    ]
+    if all_matching:
+        return all_matching
 
     return [default_test_type] if default_test_type is not None else []
 
