@@ -373,6 +373,96 @@ class ResultManagerTest(unittest.TestCase):
             },
         )
 
+    def test_import_csv_lab_results_keeps_multi_model_data_without_test_type_column(self):
+        current_test_type = TRIAXIAL
+        current_test_getter = lambda: current_test_type
+        result_manager = ResultManager(current_test_getter)
+
+        with TemporaryDirectory() as tmp_dir:
+            csv_file = Path(tmp_dir) / "triaxial_crs_combined.csv"
+            csv_content = (
+                "yy_strain,vol_strain,sigma1,sigma3,sigma_xx,sigma_yy,time_hours\n"
+                "0.0,0.0,-100,-100,-80,-100,0\n"
+                "-0.1,-0.02,-250,-100,-120,-180,12\n"
+            )
+            csv_file.write_text(csv_content, encoding="utf-8")
+
+            result_manager.import_csv_lab_results(csv_file)
+
+        current_test_type = TRIAXIAL
+        self.assertDictEqual(
+            result_manager.get_experimental_results(),
+            {
+                "yy_strain": [0.0, -0.1],
+                "vol_strain": [0.0, -0.02],
+                "sigma_1": [-100.0, -250.0],
+                "sigma_3": [-100.0, -100.0],
+                "sigma1_sigma3_diff": [0.0, 150.0],
+            },
+        )
+
+        current_test_type = CRS
+        self.assertDictEqual(
+            result_manager.get_experimental_results(),
+            {
+                "yy_strain": [0.0, -0.1],
+                "sigma_xx": [-80.0, -120.0],
+                "sigma_yy": [-100.0, -180.0],
+                "time_steps": [0.0, 12.0],
+            },
+        )
+
+        current_test_type = DIRECT_SHEAR
+        self.assertDictEqual(result_manager.get_experimental_results(), {})
+
+    def test_import_csv_lab_results_keeps_manual_mapping_for_multiple_test_types(self):
+        current_test_type = TRIAXIAL
+        current_test_getter = lambda: current_test_type
+        result_manager = ResultManager(current_test_getter)
+
+        with TemporaryDirectory() as tmp_dir:
+            csv_file = Path(tmp_dir) / "manual_multi_mapping.csv"
+            csv_content = (
+                "axial,delta_sigma,horizontal,vertical,time\n"
+                "0.0,0.0,-80,-100,0\n"
+                "-0.1,150,-120,-180,10\n"
+            )
+            csv_file.write_text(csv_content, encoding="utf-8")
+
+            result_manager.import_csv_lab_results(
+                csv_file,
+                column_mapping={
+                    "yy_strain": "axial",
+                    "sigma1_sigma3_diff": "delta_sigma",
+                    "sigma_xx": "horizontal",
+                    "sigma_yy": "vertical",
+                    "time_steps": "time",
+                },
+            )
+
+        current_test_type = TRIAXIAL
+        self.assertDictEqual(
+            result_manager.get_experimental_results(),
+            {
+                "yy_strain": [0.0, -0.1],
+                "sigma1_sigma3_diff": [0.0, 150.0],
+            },
+        )
+
+        current_test_type = CRS
+        self.assertDictEqual(
+            result_manager.get_experimental_results(),
+            {
+                "yy_strain": [0.0, -0.1],
+                "sigma_xx": [-80.0, -120.0],
+                "sigma_yy": [-100.0, -180.0],
+                "time_steps": [0.0, 10.0],
+            },
+        )
+
+        current_test_type = DIRECT_SHEAR
+        self.assertDictEqual(result_manager.get_experimental_results(), {})
+
     def test_import_csv_lab_results_infers_crs_target_from_sigma_xx_sigma_yy(self):
         current_test_type = TRIAXIAL
         current_test_getter = lambda: current_test_type
