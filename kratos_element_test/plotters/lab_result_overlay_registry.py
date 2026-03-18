@@ -46,7 +46,7 @@ class OverlaySpec:
     axis_index: int
     x_key: Optional[str] = None
     y_key: Optional[str] = None
-    label: str = "Lab results"
+    label: str = "Experimental"
     title: Optional[str] = None
     x_label: Optional[str] = None
     y_label: Optional[str] = None
