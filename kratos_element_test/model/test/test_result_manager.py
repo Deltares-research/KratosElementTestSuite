@@ -373,6 +373,42 @@ class ResultManagerTest(unittest.TestCase):
             },
         )
 
+    def test_import_csv_lab_results_infers_crs_target_from_sigma_xx_sigma_yy(self):
+        current_test_type = TRIAXIAL
+        current_test_getter = lambda: current_test_type
+        result_manager = ResultManager(current_test_getter)
+
+        with TemporaryDirectory() as tmp_dir:
+            csv_file = Path(tmp_dir) / "crs_mapping.csv"
+            csv_content = (
+                "sigma;epsilon\n"
+                "100.0;200.0\n"
+                "110.0;220.0\n"
+            )
+            csv_file.write_text(csv_content, encoding="utf-8")
+
+            imported_test_type = result_manager.import_csv_lab_results(
+                csv_file,
+                column_mapping={
+                    "sigma_xx": "sigma",
+                    "sigma_yy": "epsilon",
+                },
+            )
+
+        self.assertEqual(imported_test_type, "crs")
+
+        current_test_type = TRIAXIAL
+        self.assertDictEqual(result_manager.get_experimental_results(), {})
+
+        current_test_type = CRS
+        self.assertDictEqual(
+            result_manager.get_experimental_results(),
+            {
+                "sigma_xx": [100.0, 110.0],
+                "sigma_yy": [200.0, 220.0],
+            },
+        )
+
 
 if __name__ == "__main__":
     unittest.main()

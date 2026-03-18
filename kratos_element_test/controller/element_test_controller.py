@@ -62,10 +62,18 @@ class ElementTestController:
         self._logger(f"Imported lab results from {py_file}", "info")
 
     def import_csv_data(
-        self, csv_file: Path, column_mapping: Optional[Dict[str, str]] = None
-    ) -> None:
-        self._main_model.import_csv_data(csv_file, column_mapping)
+        self,
+        csv_file: Path,
+        column_mapping: Optional[Dict[str, str]] = None,
+        target_test_type: Optional[str] = None,
+    ) -> str:
+        test_type_used = self._main_model.import_csv_data(
+            csv_file,
+            column_mapping,
+            target_test_type=target_test_type,
+        )
         self._logger(f"Imported CSV data from {csv_file}", "info")
+        return test_type_used
 
     def set_material_type(self, material_type: str) -> None:
         self._main_model.set_material_type(material_type)

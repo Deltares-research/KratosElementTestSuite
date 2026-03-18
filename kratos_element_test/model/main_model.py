@@ -65,6 +65,13 @@ class MainModel:
         self._result_manager.import_python_lab_results(py_file)
 
     def import_csv_data(
-        self, csv_file: Path, column_mapping: Dict[str, str] | None = None
-    ) -> None:
-        self._result_manager.import_csv_lab_results(csv_file, column_mapping)
+        self,
+        csv_file: Path,
+        column_mapping: Dict[str, str] | None = None,
+        target_test_type: str | None = None,
+    ) -> str:
+        return self._result_manager.import_csv_lab_results(
+            csv_file,
+            column_mapping,
+            target_test_type=target_test_type,
+        )

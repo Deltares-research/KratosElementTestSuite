@@ -2,7 +2,10 @@ from typing import Callable, Dict, List, Optional
 from pathlib import Path
 import importlib.util
 
-from kratos_element_test.model.io.lab_results_csv_parser import parse_csv_lab_results
+from kratos_element_test.model.io.lab_results_csv_parser import (
+    infer_test_type_from_columns,
+    parse_csv_lab_results,
+)
 from kratos_element_test.view.ui_constants import TYPE_TO_TEST_NAME
 
 
@@ -75,11 +78,22 @@ class ResultManager:
         self.import_lab_results_dict(experimental_by_test)
 
     def import_csv_lab_results(
-        self, csv_file: Path, column_mapping: Optional[Dict[str, str]] = None
-    ) -> None:
+        self,
+        csv_file: Path,
+        column_mapping: Optional[Dict[str, str]] = None,
+        target_test_type: Optional[str] = None,
+    ) -> str:
+        effective_target_test_type = target_test_type
+        if effective_target_test_type is None:
+            effective_target_test_type = infer_test_type_from_columns(
+                list((column_mapping or {}).keys()),
+                fallback_test_type=self.get_current_test(),
+            )
+
         experimental_by_test = parse_csv_lab_results(
             csv_file,
-            default_test_type=self.get_current_test(),
+            default_test_type=effective_target_test_type or self.get_current_test(),
             column_mapping=column_mapping,
         )
         self.import_lab_results_dict(experimental_by_test)
+        return effective_target_test_type or self.get_current_test()

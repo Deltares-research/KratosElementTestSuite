@@ -58,6 +58,81 @@ class MatplotlibPlotter:
             return specs[0].axis_index
         return 0
 
+    def _key_kind(self, key: str) -> str:
+        normalized = (key or "").lower()
+        if "time" in normalized:
+            return "time"
+        if "strain" in normalized or normalized in {"yy_strain", "vol_strain"}:
+            return "strain"
+        if (
+            "sigma" in normalized
+            or "stress" in normalized
+            or normalized in {"p'", "q", "sigma1_sigma3_diff", "tau_xy"}
+        ):
+            return "stress"
+        return "other"
+
+    def _key_similarity(self, left: str, right: str) -> int:
+        if left == right:
+            return 8
+
+        score = 0
+        left_kind = self._key_kind(left)
+        right_kind = self._key_kind(right)
+        if left_kind == right_kind and left_kind != "other":
+            score += 3
+
+        if left in {"p'", "q"} and right in {"p'", "q"}:
+            score += 4
+
+        if "sigma" in left and "sigma" in right:
+            score += 2
+        if "strain" in left and "strain" in right:
+            score += 2
+        if "time" in left and "time" in right:
+            score += 2
+
+        return score
+
+    def _axis_index_for_overlay_pair(self, test_type: str, x_key: str, y_key: str) -> int:
+        specs = OVERLAYS_BY_TEST.get(test_type, ())
+
+        for spec in specs:
+            if spec.compute_xy is not None:
+                continue
+            if spec.x_key == x_key and spec.y_key == y_key:
+                return spec.axis_index
+
+        # Also support reversed x/y mapping and still place it on the intended axis.
+        for spec in specs:
+            if spec.compute_xy is not None:
+                continue
+            if spec.x_key == y_key and spec.y_key == x_key:
+                return spec.axis_index
+
+        best_axis = None
+        best_score = -1
+        for spec in specs:
+            if spec.compute_xy is not None or not spec.x_key or not spec.y_key:
+                continue
+
+            direct_score = self._key_similarity(x_key, spec.x_key) + self._key_similarity(
+                y_key, spec.y_key
+            )
+            reverse_score = self._key_similarity(
+                x_key, spec.y_key
+            ) + self._key_similarity(y_key, spec.x_key)
+            score = max(direct_score, reverse_score)
+
+            if score > best_score:
+                best_score = score
+                best_axis = spec.axis_index
+
+        if best_axis is not None and best_score > 0:
+            return best_axis
+
+        return self._first_generic_axis_index(test_type)
+
     def _find_generic_overlay_pair(
         self, test_type: str, experimental_results: Dict[str, List[float]]
     ) -> Optional[Tuple[str, List[float], str, List[float]]]:
@@ -118,12 +193,12 @@ class MatplotlibPlotter:
             return False
 
         x_key, x, y_key, y = out
-        axis_index = self._first_generic_axis_index(test_type)
+        axis_index = self._axis_index_for_overlay_pair(test_type, x_key, y_key)
         if axis_index >= len(self.axes):
             return False
 
         ax = self.axes[axis_index]
-        ax.plot(x, y, "--", color="magenta", label="Experimental")
+        ax.plot(x, y, "--", color="magenta", label=f"Experimental ({y_key} vs {x_key})")
         self._safe_legend(ax)
 
         # Set a readable label pair only when the axis has not been labeled yet.

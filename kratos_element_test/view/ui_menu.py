@@ -14,7 +14,8 @@ from platformdirs import user_data_dir
 from kratos_element_test.controller.element_test_controller import ElementTestController
 from kratos_element_test.model.io.lab_results_csv_parser import (
     get_csv_headers,
-    get_expected_columns_for_test_type,
+    get_expected_columns_for_all_models,
+    infer_test_type_from_columns,
     suggest_csv_column_mapping,
 )
 from kratos_element_test.view.ui_builder import GeotechTestUI
@@ -28,6 +29,7 @@ from kratos_element_test.view.ui_constants import (
     MOHR_COULOMB,
     HELP_MENU_FONT,
     DEFAULT_TKINTER_DPI,
+    TYPE_TO_TEST_NAME,
 )
 from kratos_element_test.view.ui_logger import log_message
 from kratos_element_test.view.ui_utils import asset_path, soil_models_dir
@@ -371,9 +373,8 @@ class MainUI:
                 )
                 return
 
-            current_test_type = self._controller.get_current_test_type()
             file_headers = get_csv_headers(selected_file)
-            expected_headers = get_expected_columns_for_test_type(current_test_type)
+            expected_headers = get_expected_columns_for_all_models()
             suggested_mapping = suggest_csv_column_mapping(
                 file_headers, expected_headers
             )
@@ -386,7 +387,24 @@ class MainUI:
             if column_mapping is None:
                 return
 
-            self._controller.import_csv_data(selected_file, column_mapping=column_mapping)
+            current_test_type = self._controller.get_current_test_type()
+            inferred_test_type = infer_test_type_from_columns(
+                list(column_mapping.keys()),
+                fallback_test_type=current_test_type,
+            )
+
+            imported_test_type = self._controller.import_csv_data(
+                selected_file,
+                column_mapping=column_mapping,
+                target_test_type=inferred_test_type,
+            )
+
+            imported_display_test = TYPE_TO_TEST_NAME.get(
+                imported_test_type, imported_test_type
+            )
+            if self.main_frame and imported_display_test != current_test_type:
+                self.main_frame.select_test(imported_display_test)
+
             if self.main_frame:
                 self.main_frame.redraw_plots()
 
@@ -414,7 +432,7 @@ class MainUI:
 
         ttk.Label(
             dialog,
-            text="Map CSV headers to the expected variables for the current test",
+            text="Map CSV headers to the expected variables across all test models",
         ).pack(anchor="w", padx=12, pady=(12, 8))
 
         preview_frame = ttk.Frame(dialog, padding="8")
