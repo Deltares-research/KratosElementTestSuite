@@ -54,6 +54,8 @@ class ElementTestController:
         test_type = TEST_NAME_TO_TYPE.get(self._result_controller.get_current_test())
         if not results:
             raise ValueError("No results available for export")
+        if test_type is None:
+            raise ValueError("No active test selected for export")
         export_excel_by_test_type(results, test_type)
 
     def import_lab_results(self, py_file: Path) -> None:

@@ -1,6 +1,7 @@
 import unittest
 from pathlib import Path
 from tempfile import TemporaryDirectory
+from typing import Any, cast
 
 from parameterized import parameterized
 
@@ -22,45 +23,45 @@ class ResultManagerTest(unittest.TestCase):
         current_test_getter = lambda: TRIAXIAL
         result_manager = ResultManager(current_test_getter)
         expected_results = {
-            "values_variable_1": [1, 2, 3],
-            "values_variable_2": [4, 5, 6],
+            "values_variable_1": [1.0, 2.0, 3.0],
+            "values_variable_2": [4.0, 5.0, 6.0],
         }
 
         result_manager.set_results_of_active_test_type(expected_results)
 
-        self.assertDictEqual(
-            result_manager.get_results_of_active_test_type(), expected_results
-        )
+        results = result_manager.get_results_of_active_test_type()
+        assert results is not None
+        self.assertDictEqual(results, expected_results)
 
     def test_workflow_with_results_for_multiple_test_types(self):
         current_test_type = TRIAXIAL
         current_test_getter = lambda: current_test_type
         result_manager = ResultManager(current_test_getter)
         expected_triaxial_results = {
-            "values_variable_1": [1, 2, 3],
-            "values_variable_2": [4, 5, 6],
+            "values_variable_1": [1.0, 2.0, 3.0],
+            "values_variable_2": [4.0, 5.0, 6.0],
         }
         result_manager.set_results_of_active_test_type(expected_triaxial_results)
 
         current_test_type = CRS
-        expected_crs_data = {"some_other_data": [7, 8, 9]}
+        expected_crs_data = {"some_other_data": [7.0, 8.0, 9.0]}
         result_manager.set_results_of_active_test_type(expected_crs_data)
-        self.assertDictEqual(
-            result_manager.get_results_of_active_test_type(), expected_crs_data
-        )
+        results = result_manager.get_results_of_active_test_type()
+        assert results is not None
+        self.assertDictEqual(results, expected_crs_data)
 
         current_test_type = TRIAXIAL
-        self.assertDictEqual(
-            result_manager.get_results_of_active_test_type(), expected_triaxial_results
-        )
+        results = result_manager.get_results_of_active_test_type()
+        assert results is not None
+        self.assertDictEqual(results, expected_triaxial_results)
 
     def test_clear_results(self):
         # Arrange
         current_test_getter = lambda: TRIAXIAL
         result_manager = ResultManager(current_test_getter)
         expected_results = {
-            "values_variable_1": [1, 2, 3],
-            "values_variable_2": [4, 5, 6],
+            "values_variable_1": [1.0, 2.0, 3.0],
+            "values_variable_2": [4.0, 5.0, 6.0],
         }
         result_manager.set_results_of_active_test_type(expected_results)
 
@@ -70,7 +71,7 @@ class ResultManagerTest(unittest.TestCase):
         # Assert
         self.assertIsNone(result_manager.get_results_of_active_test_type())
 
-    def test_result_manager_has_empty_experimental_results(self) -> bool:
+    def test_result_manager_has_empty_experimental_results(self):
         current_test_getter = lambda: TRIAXIAL
         result_manager = ResultManager(current_test_getter)
 
@@ -146,13 +147,13 @@ class ResultManagerTest(unittest.TestCase):
         result_manager = ResultManager(current_test_getter)
 
         with self.assertRaises(ValueError):
-            result_manager.import_lab_results_dict(None)
+            result_manager.import_lab_results_dict(cast(Any, None))
 
         with self.assertRaises(ValueError):
             result_manager.import_lab_results_dict({})
 
         with self.assertRaises(ValueError):
-            result_manager.import_lab_results_dict("not a dict")
+            result_manager.import_lab_results_dict(cast(Any, "not a dict"))
 
     def test_import_lab_results_dict_ignores_invalid_entries(self):
         current_test_type = DIRECT_SHEAR

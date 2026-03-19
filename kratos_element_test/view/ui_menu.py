@@ -4,6 +4,7 @@
 
 import ctypes
 import importlib
+import importlib.util
 import os
 import sys
 import tkinter as tk
@@ -70,8 +71,9 @@ class MainUI:
         self._controller = ElementTestController(
             logger=log_message,
         )
-        self.main_frame = None
-        self._root = None
+        self.main_frame: Optional[GeotechTestUI] = None
+        self._root: Optional[tk.Tk] = None
+        self._about_images: List[tk.PhotoImage] = []
 
     def show_license_agreement(self, readonly=False):
         license_file_path = asset_path("license.txt")
@@ -171,13 +173,12 @@ class MainUI:
 
             photo1 = tk.PhotoImage(file=path1)
             photo2 = tk.PhotoImage(file=path2)
+            self._about_images = [photo1, photo2]
 
             label1 = tk.Label(image_frame, image=photo1)
-            label1.image = photo1
             label1.pack(pady=2)
 
             label2 = tk.Label(image_frame, image=photo2)
-            label2.image = photo2
             label2.pack(pady=15)
 
         except Exception:
@@ -369,7 +370,8 @@ class MainUI:
                 return
 
             self._controller.import_lab_results(Path(py_path))
-            self.main_frame.redraw_plots()
+            if self.main_frame:
+                self.main_frame.redraw_plots()
 
         except Exception as e:
             messagebox.showerror(

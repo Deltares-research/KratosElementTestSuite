@@ -413,7 +413,7 @@ def _compute_missing_sigma_diff(results: Dict[str, List[float]]) -> None:
 
 def _detect_csv_dialect(
     sample: str,
-) -> csv.Dialect:
+) -> type[csv.Dialect] | csv.Dialect:
     if not sample or len(sample.strip()) == 0:
         return csv.excel
 
@@ -435,7 +435,7 @@ def _detect_csv_dialect(
         "|": first_line.count("|"),
     }
 
-    best_delimiter = max(delimiter_counts, key=delimiter_counts.get)
+    best_delimiter = max(delimiter_counts, key=lambda delimiter: delimiter_counts[delimiter])
     if delimiter_counts[best_delimiter] == 0:
         return csv.excel
 
