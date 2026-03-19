@@ -526,10 +526,33 @@ class MainUI:
         def _on_import():
             is_confirmed["value"] = True
             result.clear()
+            selected_header_to_expected_keys: Dict[str, List[str]] = {}
+
             for expected_key, selected_var in vars_by_expected.items():
                 selected = selected_var.get()
                 if selected and selected != "<skip>":
                     result[expected_key] = selected
+
+                    expected_keys = selected_header_to_expected_keys.setdefault(
+                        selected, []
+                    )
+                    expected_keys.append(expected_key)
+
+            # The parser keeps only the last mapping when one CSV header is assigned
+            # to multiple expected variables. Warn users explicitly in the log output.
+            for selected_header, expected_keys in selected_header_to_expected_keys.items():
+                if len(expected_keys) <= 1:
+                    continue
+
+                kept_expected_key = expected_keys[-1]
+                for ignored_expected_key in expected_keys[:-1]:
+                    log_message(
+                        f"Ignored mapping for '{ignored_expected_key}': CSV header "
+                        f"'{selected_header}' is used more than once. "
+                        f"Keeping '{kept_expected_key}'.",
+                        "warn",
+                    )
+
             dialog.destroy()
 
         def _on_cancel():

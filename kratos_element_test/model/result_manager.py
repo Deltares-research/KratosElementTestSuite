@@ -5,7 +5,7 @@ import importlib.util
 from kratos_element_test.model.io.lab_results_csv_parser import (
     parse_csv_lab_results,
 )
-from kratos_element_test.view.ui_constants import TYPE_TO_TEST_NAME
+from kratos_element_test.view.ui_constants import TYPE_TO_TEST_NAME, TEST_NAME_TO_TYPE
 
 
 class ResultManager:
@@ -96,7 +96,12 @@ class ResultManager:
                 "before importing CSV data."
             )
 
-        effective_target_test_type = target_test_type or current_test
+        current_test_internal = TEST_NAME_TO_TYPE.get(current_test, current_test)
+
+        selected_target_test_type = target_test_type or current_test_internal
+        effective_target_test_type = TEST_NAME_TO_TYPE.get(
+            selected_target_test_type, selected_target_test_type
+        )
 
         experimental_by_test = parse_csv_lab_results(
             csv_file,
@@ -106,8 +111,11 @@ class ResultManager:
 
         selected_test_results = experimental_by_test.get(effective_target_test_type, {})
         if not selected_test_results:
+            selected_display_name = TYPE_TO_TEST_NAME.get(
+                effective_target_test_type, effective_target_test_type
+            )
             raise ValueError(
-                f"CSV does not contain data for the selected test '{effective_target_test_type}'."
+                f"CSV does not contain data for the selected test '{selected_display_name}'."
             )
 
         # Keep previously imported data for other tests; only replace imported tests.
