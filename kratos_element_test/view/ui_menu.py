@@ -50,7 +50,6 @@ from kratos_element_test.view.ui_constants import (
     MOHR_COULOMB,
     HELP_MENU_FONT,
     DEFAULT_TKINTER_DPI,
-    TYPE_TO_TEST_NAME,
     TEST_NAME_TO_TYPE,
 )
 from kratos_element_test.view.ui_logger import log_message
@@ -429,17 +428,11 @@ class MainUI:
             if column_mapping is None:
                 return
 
-            imported_test_type = self._controller.import_csv_data(
+            self._controller.import_csv_data(
                 selected_file,
                 column_mapping=column_mapping,
                 target_test_type=current_test_internal_name,
             )
-
-            imported_display_test = TYPE_TO_TEST_NAME.get(
-                imported_test_type, imported_test_type
-            )
-            if self.main_frame and imported_display_test != current_test_display_name:
-                self.main_frame.select_test(imported_display_test)
 
             if self.main_frame:
                 self.main_frame.redraw_plots()

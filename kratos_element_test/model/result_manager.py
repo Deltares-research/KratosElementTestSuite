@@ -96,12 +96,8 @@ class ResultManager:
                 "before importing CSV data."
             )
 
-        current_test_internal = TEST_NAME_TO_TYPE.get(current_test, current_test)
-
-        selected_target_test_type = target_test_type or current_test_internal
-        effective_target_test_type = TEST_NAME_TO_TYPE.get(
-            selected_target_test_type, selected_target_test_type
-        )
+        selected_test = target_test_type or current_test
+        effective_target_test_type = TEST_NAME_TO_TYPE.get(selected_test, selected_test)
 
         experimental_by_test = parse_csv_lab_results(
             csv_file,
