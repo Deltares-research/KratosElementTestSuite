@@ -185,6 +185,24 @@ class ResultManagerTest(unittest.TestCase):
             {"yy_strain": [0.0, -0.02]},
         )
 
+    def test_import_csv_lab_results_requires_active_test_selection(self):
+        current_test_getter = lambda: ""
+        result_manager = ResultManager(current_test_getter)
+
+        with TemporaryDirectory() as tmp_dir:
+            csv_file = Path(tmp_dir) / "triaxial_lab.csv"
+            csv_file.write_text(
+                "yy_strain,sigma1,sigma3,vol_strain,p,q\n"
+                "0.0,-100,-100,0.0,-100,0\n"
+                "-0.1,-250,-100,-0.01,-150,150\n",
+                encoding="utf-8",
+            )
+
+            with self.assertRaises(ValueError) as context:
+                result_manager.import_csv_lab_results(csv_file)
+            
+            self.assertIn("No active test selected", str(context.exception))
+
     def test_import_csv_lab_results_uses_active_test_type_when_not_provided(self):
         current_test_getter = lambda: TRIAXIAL
         result_manager = ResultManager(current_test_getter)
@@ -231,6 +249,45 @@ class ResultManagerTest(unittest.TestCase):
             )
 
             result_manager.import_csv_lab_results(csv_file)
+
+        current_test_type = TRIAXIAL
+        self.assertDictEqual(
+            result_manager.get_experimental_results(),
+            {
+                "yy_strain": [0.0, -0.1],
+                "sigma1_sigma3_diff": [0.0, 120.0],
+            },
+        )
+
+        current_test_type = DIRECT_SHEAR
+        self.assertDictEqual(result_manager.get_experimental_results(), {})
+
+    def test_import_csv_lab_results_preserves_other_tests_data(self):
+        current_test_type = TRIAXIAL
+        current_test_getter = lambda: current_test_type
+        result_manager = ResultManager(current_test_getter)
+
+        with TemporaryDirectory() as tmp_dir:
+            triaxial_csv = Path(tmp_dir) / "triaxial_lab.csv"
+            triaxial_csv.write_text(
+                "yy_strain,sigma1_sigma3_diff\n"
+                "0.0,0.0\n"
+                "-0.1,120.0\n",
+                encoding="utf-8",
+            )
+
+            dss_csv = Path(tmp_dir) / "dss_lab.csv"
+            dss_csv.write_text(
+                "shear_strain_xy,shear_stress_xy\n"
+                "0.0,0.0\n"
+                "0.05,40.0\n",
+                encoding="utf-8",
+            )
+
+            result_manager.import_csv_lab_results(triaxial_csv)
+
+            current_test_type = DIRECT_SHEAR
+            result_manager.import_csv_lab_results(dss_csv)
 
         current_test_type = TRIAXIAL
         self.assertDictEqual(
@@ -374,6 +431,7 @@ class ResultManagerTest(unittest.TestCase):
         )
 
     def test_import_csv_lab_results_keeps_multi_model_data_without_test_type_column(self):
+        # When importing without a test_type column, data is only imported to the active test
         current_test_type = TRIAXIAL
         current_test_getter = lambda: current_test_type
         result_manager = ResultManager(current_test_getter)
@@ -389,6 +447,7 @@ class ResultManagerTest(unittest.TestCase):
 
             result_manager.import_csv_lab_results(csv_file)
 
+        # Data is only imported to the active test (TRIAXIAL)
         current_test_type = TRIAXIAL
         self.assertDictEqual(
             result_manager.get_experimental_results(),
@@ -401,21 +460,19 @@ class ResultManagerTest(unittest.TestCase):
             },
         )
 
+        # CRS should not have any data since it wasn't the active test
         current_test_type = CRS
         self.assertDictEqual(
             result_manager.get_experimental_results(),
-            {
-                "yy_strain": [0.0, -0.1],
-                "sigma_xx": [-80.0, -120.0],
-                "sigma_yy": [-100.0, -180.0],
-                "time_steps": [0.0, 12.0],
-            },
+            {},
         )
+
 
         current_test_type = DIRECT_SHEAR
         self.assertDictEqual(result_manager.get_experimental_results(), {})
 
     def test_import_csv_lab_results_keeps_manual_mapping_for_multiple_test_types(self):
+        # When mapping columns manually, data is only imported to the active test
         current_test_type = TRIAXIAL
         current_test_getter = lambda: current_test_type
         result_manager = ResultManager(current_test_getter)
@@ -440,6 +497,7 @@ class ResultManagerTest(unittest.TestCase):
                 },
             )
 
+        # Data is only imported to the active test (TRIAXIAL)
         current_test_type = TRIAXIAL
         self.assertDictEqual(
             result_manager.get_experimental_results(),
@@ -449,21 +507,17 @@ class ResultManagerTest(unittest.TestCase):
             },
         )
 
+        # CRS should not have any data since it wasn't the active test
         current_test_type = CRS
         self.assertDictEqual(
             result_manager.get_experimental_results(),
-            {
-                "yy_strain": [0.0, -0.1],
-                "sigma_xx": [-80.0, -120.0],
-                "sigma_yy": [-100.0, -180.0],
-                "time_steps": [0.0, 10.0],
-            },
+            {},
         )
 
         current_test_type = DIRECT_SHEAR
         self.assertDictEqual(result_manager.get_experimental_results(), {})
 
-    def test_import_csv_lab_results_infers_crs_target_from_sigma_xx_sigma_yy(self):
+    def test_import_csv_lab_results_imports_to_explicit_crs_target(self):
         current_test_type = TRIAXIAL
         current_test_getter = lambda: current_test_type
         result_manager = ResultManager(current_test_getter)
@@ -483,6 +537,7 @@ class ResultManagerTest(unittest.TestCase):
                     "sigma_xx": "sigma",
                     "sigma_yy": "epsilon",
                 },
+                target_test_type="crs",
             )
 
         self.assertEqual(imported_test_type, "crs")
@@ -499,11 +554,9 @@ class ResultManagerTest(unittest.TestCase):
             },
         )
 
-    def test_import_csv_lab_results_shared_columns_available_for_all_compatible_tests(
-        self,
-    ):
-        """Columns shared by all test types (p' and q) must be stored for every
-        compatible test, not collapsed to a single inferred one."""
+    def test_import_csv_lab_results_shared_columns_only_in_active_test(self):
+        """Shared columns (p' and q) are only imported to the active test,
+        not to all compatible test types."""
         current_test_type = TRIAXIAL
         current_test_getter = lambda: current_test_type
         result_manager = ResultManager(current_test_getter)
@@ -527,14 +580,16 @@ class ResultManagerTest(unittest.TestCase):
             "sigma1_sigma3_diff": [0.0, 150.0],
         }
 
+        # Data is only in the active test (TRIAXIAL)
         current_test_type = TRIAXIAL
         self.assertDictEqual(result_manager.get_experimental_results(), expected)
 
+        # Other test types should not have the data
         current_test_type = DIRECT_SHEAR
-        self.assertDictEqual(result_manager.get_experimental_results(), expected)
+        self.assertDictEqual(result_manager.get_experimental_results(), {})
 
         current_test_type = CRS
-        self.assertDictEqual(result_manager.get_experimental_results(), expected)
+        self.assertDictEqual(result_manager.get_experimental_results(), {})
 
 
 if __name__ == "__main__":

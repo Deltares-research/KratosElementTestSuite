@@ -610,29 +610,33 @@ def parse_csv_lab_results(
             f"Detected headers: {discovered_headers}."
         )
 
-    candidate_test_types = _candidate_test_types_from_columns(
-        list(mapped_columns.values()),
-        default_test_type_internal,
-    )
-
-    if test_type_column is None and not candidate_test_types:
+    if test_type_column is None and default_test_type_internal is None:
         raise ValueError(
             "CSV must include a test_type column when no active test type is available"
         )
 
     source_column_targets: Dict[str, List[str]] = {}
     if test_type_column is None:
+        expected_columns_for_selected_test = set(
+            _EXPECTED_COLUMNS_BY_TEST.get(default_test_type_internal or "", [])
+        )
+        if not any(
+            canonical_key in expected_columns_for_selected_test
+            for canonical_key in mapped_columns.values()
+        ):
+            raise ValueError(
+                "CSV does not contain recognized columns for the selected test type"
+            )
+
+        # Without test_type in CSV, only keep columns expected by the selected test.
         for source_column, canonical_key in mapped_columns.items():
-            target_test_types = [
-                test_type
-                for test_type in candidate_test_types
-                if canonical_key in _EXPECTED_COLUMNS_BY_TEST.get(test_type, [])
-            ]
-
-            if not target_test_types and default_test_type_internal is not None:
-                target_test_types = [default_test_type_internal]
-
-            source_column_targets[source_column] = target_test_types
+            if (
+                default_test_type_internal is not None
+                and canonical_key in expected_columns_for_selected_test
+            ):
+                source_column_targets[source_column] = [default_test_type_internal]
+            else:
+                source_column_targets[source_column] = []
 
     experimental_by_test: Dict[str, Dict[str, List[float]]] = {}
     imported_any_value = False
