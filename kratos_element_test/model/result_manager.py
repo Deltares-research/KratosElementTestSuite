@@ -2,7 +2,10 @@ from typing import Callable, Dict, List, Optional
 from pathlib import Path
 import importlib.util
 
-from kratos_element_test.view.ui_constants import TYPE_TO_TEST_NAME
+from kratos_element_test.model.io.lab_results_csv_parser import (
+    parse_csv_lab_results,
+)
+from kratos_element_test.view.ui_constants import TYPE_TO_TEST_NAME, TEST_NAME_TO_TYPE
 
 
 class ResultManager:
@@ -42,14 +45,17 @@ class ResultManager:
         self._experimental_results.clear()
 
     def import_lab_results_dict(
-        self, experimental_by_test: Dict[str, Dict[str, List[float]]]
+        self,
+        experimental_by_test: Dict[str, Dict[str, List[float]]],
+        clear_existing: bool = True,
     ) -> None:
         if not isinstance(experimental_by_test, dict) or not experimental_by_test:
             raise ValueError(
                 "No non-empty 'experimental_by_test' dict found in lab results input"
             )
 
-        self.clear_experimental_results()
+        if clear_existing:
+            self.clear_experimental_results()
 
         for test_type, results in experimental_by_test.items():
             if not isinstance(test_type, str):
@@ -71,4 +77,46 @@ class ResultManager:
         module_spec.loader.exec_module(module)
 
         experimental_by_test = getattr(module, "experimental_by_test", None)
+        if not isinstance(experimental_by_test, dict):
+            raise ValueError(
+                "No non-empty 'experimental_by_test' dict found in lab results input"
+            )
         self.import_lab_results_dict(experimental_by_test)
+
+    def import_csv_lab_results(
+        self,
+        csv_file: Path,
+        column_mapping: Optional[Dict[str, str]] = None,
+        target_test_type: Optional[str] = None,
+    ) -> str:
+        current_test = self.get_current_test()
+        if not current_test or current_test.strip() == "":
+            raise ValueError(
+                "No active test selected. Please select a test (Triaxial, Direct Simple Shear, or CRS) "
+                "before importing CSV data."
+            )
+
+        selected_test = target_test_type or current_test
+        effective_target_test_type = TEST_NAME_TO_TYPE.get(selected_test, selected_test)
+
+        experimental_by_test = parse_csv_lab_results(
+            csv_file,
+            default_test_type=effective_target_test_type,
+            column_mapping=column_mapping,
+        )
+
+        selected_test_results = experimental_by_test.get(effective_target_test_type, {})
+        if not selected_test_results:
+            selected_display_name = TYPE_TO_TEST_NAME.get(
+                effective_target_test_type, effective_target_test_type
+            )
+            raise ValueError(
+                f"CSV does not contain data for the selected test '{selected_display_name}'."
+            )
+
+        # Keep previously imported data for other tests; only replace imported tests.
+        self.import_lab_results_dict(
+            {effective_target_test_type: selected_test_results},
+            clear_existing=False,
+        )
+        return effective_target_test_type

@@ -3,7 +3,7 @@
 # Contact kratos@deltares.nl
 
 import numpy as np
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Tuple
 from kratos_element_test.model.core_utils import _fallback_log
 from kratos_element_test.plotters.plotter_labels import (
     SIGMA1_LABEL,
@@ -34,6 +34,27 @@ from kratos_element_test.plotters.plotter_labels import (
 )
 from kratos_element_test.plotters.lab_result_overlay_registry import OVERLAYS_BY_TEST
 
+_PREFERRED_GENERIC_PAIRS_BY_TEST: Dict[str, Tuple[Tuple[str, str], ...]] = {
+    "triaxial": (
+        ("yy_strain", "sigma1_sigma3_diff"),
+        ("yy_strain", "q"),
+        ("sigma_3", "sigma_1"),
+        ("p'", "q"),
+    ),
+    "direct_shear": (
+        ("shear_strain_xy", "shear_stress_xy"),
+        ("sigma_3", "sigma_1"),
+        ("p'", "q"),
+        ("yy_strain", "sigma1_sigma3_diff"),
+    ),
+    "crs": (
+        ("yy_strain", "sigma_yy"),
+        ("sigma_xx", "sigma_yy"),
+        ("p'", "q"),
+        ("time_steps", "yy_strain"),
+    ),
+}
+
 
 class MatplotlibPlotter:
     def __init__(self, axes, logger=None):
@@ -52,8 +73,171 @@ class MatplotlibPlotter:
         if handles and labels:
             ax.legend()
 
-    def _apply_experimental_overlays(self, test_type: str, experimental_results):
+    def _first_generic_axis_index(self, test_type: str) -> int:
         specs = OVERLAYS_BY_TEST.get(test_type, ())
+        return specs[0].axis_index if specs else 0
+
+    def _key_kind(self, key: str) -> str:
+        normalized_key = (key or "").lower()
+        if "time" in normalized_key:
+            return "time"
+        if "strain" in normalized_key or normalized_key in {"yy_strain", "vol_strain"}:
+            return "strain"
+        if (
+            "sigma" in normalized_key
+            or "stress" in normalized_key
+            or normalized_key in {"p'", "q", "sigma1_sigma3_diff", "tau_xy"}
+        ):
+            return "stress"
+        return "other"
+
+    def _key_similarity(self, left: str, right: str) -> int:
+        left_key = (left or "").lower()
+        right_key = (right or "").lower()
+
+        if left_key == right_key:
+            return 8
+
+        score = 0
+        left_kind = self._key_kind(left_key)
+        right_kind = self._key_kind(right_key)
+        if left_kind == right_kind and left_kind != "other":
+            score += 3
+
+        if left_key in {"p'", "q"} and right_key in {"p'", "q"}:
+            score += 4
+
+        if "sigma" in left_key and "sigma" in right_key:
+            score += 2
+        if "strain" in left_key and "strain" in right_key:
+            score += 2
+        if "time" in left_key and "time" in right_key:
+            score += 2
+
+        return score
+
+    def _axis_index_for_overlay_pair(
+        self, test_type: str, x_key: str, y_key: str
+    ) -> int:
+        pair_specs = [
+            spec
+            for spec in OVERLAYS_BY_TEST.get(test_type, ())
+            if spec.compute_xy is None
+        ]
+
+        for spec in pair_specs:
+            x_candidate = spec.x_key
+            y_candidate = spec.y_key
+            if not x_candidate or not y_candidate:
+                continue
+
+            if x_candidate == x_key and y_candidate == y_key:
+                return spec.axis_index
+
+        # Also support reversed x/y mapping and still place it on the intended axis.
+        for spec in pair_specs:
+            x_candidate = spec.x_key
+            y_candidate = spec.y_key
+            if not x_candidate or not y_candidate:
+                continue
+
+            if x_candidate == y_key and y_candidate == x_key:
+                return spec.axis_index
+
+        best_axis = None
+        best_score = -1
+        for spec in pair_specs:
+            x_candidate = spec.x_key
+            y_candidate = spec.y_key
+            if not x_candidate or not y_candidate:
+                continue
+
+            direct_score = self._key_similarity(
+                x_key, x_candidate
+            ) + self._key_similarity(y_key, y_candidate)
+            reverse_score = self._key_similarity(
+                x_key, y_candidate
+            ) + self._key_similarity(y_key, x_candidate)
+            score = max(direct_score, reverse_score)
+
+            if score > best_score:
+                best_score = score
+                best_axis = spec.axis_index
+
+        if best_axis is not None and best_score > 0:
+            return best_axis
+
+        return self._first_generic_axis_index(test_type)
+
+    def _find_generic_overlay_pair(
+        self, test_type: str, experimental_results: Dict[str, List[float]]
+    ) -> Optional[Tuple[str, List[float], str, List[float]]]:
+        def _trim_pair(
+            x_key: str,
+            x_values: List[float],
+            y_key: str,
+            y_values: List[float],
+        ) -> Optional[Tuple[str, List[float], str, List[float]]]:
+            n = min(len(x_values), len(y_values))
+            if n <= 0:
+                return None
+            return x_key, list(x_values)[:n], y_key, list(y_values)[:n]
+
+        for x_key, y_key in _PREFERRED_GENERIC_PAIRS_BY_TEST.get(test_type, ()):
+            x_values = experimental_results.get(x_key)
+            y_values = experimental_results.get(y_key)
+            if x_values is None or y_values is None:
+                continue
+            pair = _trim_pair(x_key, x_values, y_key, y_values)
+            if pair is not None:
+                return pair
+
+        series_items: List[Tuple[str, List[float]]] = []
+        for key, values in experimental_results.items():
+            if not isinstance(values, (list, tuple, np.ndarray)):
+                continue
+            if len(values) <= 0:
+                continue
+            series_items.append((key, list(values)))
+
+        if len(series_items) < 2:
+            return None
+
+        x_key, x_values = series_items[0]
+        y_key, y_values = series_items[1]
+        return _trim_pair(x_key, x_values, y_key, y_values)
+
+    def _apply_generic_experimental_overlay(
+        self, test_type: str, experimental_results: Dict[str, List[float]]
+    ) -> bool:
+        out = self._find_generic_overlay_pair(test_type, experimental_results)
+        if out is None:
+            return False
+
+        x_key, x, y_key, y = out
+        axis_index = self._axis_index_for_overlay_pair(test_type, x_key, y_key)
+        if axis_index >= len(self.axes):
+            return False
+
+        ax = self.axes[axis_index]
+        ax.plot(x, y, "--", color="magenta", label=f"Experimental ({y_key} vs {x_key})")
+        self._safe_legend(ax)
+
+        # Set a readable label pair only when the axis has not been labeled yet.
+        if not ax.get_xlabel():
+            ax.set_xlabel(x_key)
+        if not ax.get_ylabel():
+            ax.set_ylabel(y_key)
+
+        self._log(
+            f"Applied generic experimental overlay using '{x_key}' vs '{y_key}'.",
+            "info",
+        )
+        return True
+
+    def _apply_experimental_overlays(self, test_type: str, experimental_results) -> int:
+        specs = OVERLAYS_BY_TEST.get(test_type, ())
+        plotted_count = 0
         for spec in specs:
             if spec.axis_index >= len(self.axes):
                 continue
@@ -70,6 +254,7 @@ class MatplotlibPlotter:
                     x[:n], y[:n], "--", color="magenta", label=spec.label
                 )
                 self._safe_legend(self.axes[spec.axis_index])
+                plotted_count += 1
                 continue
 
             if not spec.x_key or not spec.y_key:
@@ -92,6 +277,9 @@ class MatplotlibPlotter:
                 x[:n], y[:n], "--", color="magenta", label=spec.label
             )
             self._safe_legend(self.axes[spec.axis_index])
+            plotted_count += 1
+
+        return plotted_count
 
     def plot_experimental_only(
         self, test_type: str, experimental_results: Dict[str, List[float]]
@@ -123,7 +311,11 @@ class MatplotlibPlotter:
             if spec.invert_y:
                 ax.invert_yaxis()
 
-        self._apply_experimental_overlays(test_type, experimental_results)
+        plotted_count = self._apply_experimental_overlays(
+            test_type, experimental_results
+        )
+        if plotted_count == 0:
+            self._apply_generic_experimental_overlay(test_type, experimental_results)
 
         for spec in specs:
             if spec.axis_index >= len(self.axes):
@@ -161,7 +353,13 @@ class MatplotlibPlotter:
         )
 
         if experimental_results:
-            self._apply_experimental_overlays("triaxial", experimental_results)
+            plotted_count = self._apply_experimental_overlays(
+                "triaxial", experimental_results
+            )
+            if plotted_count == 0:
+                self._apply_generic_experimental_overlay(
+                    "triaxial", experimental_results
+                )
 
     def direct_shear(
         self,
@@ -188,7 +386,13 @@ class MatplotlibPlotter:
         )
 
         if experimental_results:
-            self._apply_experimental_overlays("direct_shear", experimental_results)
+            plotted_count = self._apply_experimental_overlays(
+                "direct_shear", experimental_results
+            )
+            if plotted_count == 0:
+                self._apply_generic_experimental_overlay(
+                    "direct_shear", experimental_results
+                )
 
     def crs(
         self,
@@ -221,7 +425,11 @@ class MatplotlibPlotter:
         self.plot_vertical_strain_vs_time_crs(self.axes[4], yy_strain, time_steps)
 
         if experimental_results:
-            self._apply_experimental_overlays("crs", experimental_results)
+            plotted_count = self._apply_experimental_overlays(
+                "crs", experimental_results
+            )
+            if plotted_count == 0:
+                self._apply_generic_experimental_overlay("crs", experimental_results)
 
     def plot_principal_stresses_triaxial(self, ax, sigma_1, sigma_3):
         ax.plot(sigma_3, sigma_1, "-", color="blue", label="Kratos Simulation")

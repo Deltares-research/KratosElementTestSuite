@@ -2,9 +2,9 @@ from pathlib import Path
 from typing import Callable, Dict, List
 
 from kratos_element_test.model.material_input_manager import MaterialInputManager
-from kratos_element_test.model.pipeline.run_simulation import RunSimulation
 from kratos_element_test.model.result_manager import ResultManager
 from kratos_element_test.model.soil_test_input_manager import SoilTestInputManager
+from kratos_element_test.view.ui_constants import TRIAXIAL
 
 
 class MainModel:
@@ -20,6 +20,13 @@ class MainModel:
         return self._soil_test_input_manager.get_current_test_type()
 
     def run_simulation(self) -> None:
+
+        from kratos_element_test.model.pipeline.run_simulation import RunSimulation
+
+        # Keep startup state with no selected test for UI/CSV import flow, but
+        # allow programmatic simulation calls (e.g. unit tests) to run.
+        if not self._soil_test_input_manager.get_current_test_type():
+            self._soil_test_input_manager.set_current_test_type(TRIAXIAL)
 
         inputs = self._soil_test_input_manager.get_current_test_inputs()
         try:
@@ -63,3 +70,15 @@ class MainModel:
 
     def import_lab_results(self, py_file: Path) -> None:
         self._result_manager.import_python_lab_results(py_file)
+
+    def import_csv_data(
+        self,
+        csv_file: Path,
+        column_mapping: Dict[str, str] | None = None,
+        target_test_type: str | None = None,
+    ) -> str:
+        return self._result_manager.import_csv_lab_results(
+            csv_file,
+            column_mapping,
+            target_test_type=target_test_type,
+        )

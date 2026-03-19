@@ -1,6 +1,5 @@
 from pathlib import Path
 
-from kratos_element_test.model.io.udsm_parser import udsm_parser
 from kratos_element_test.model.material_input_data_models import (
     LinearElasticMaterialInputs,
     MohrCoulombMaterialInputs,
@@ -54,6 +53,13 @@ class MaterialInputManager:
         current_material_inputs[key].value = value
 
     def initialize_udsm(self, dll_path: Path):
+        try:
+            from kratos_element_test.model.io.udsm_parser import udsm_parser
+        except ModuleNotFoundError as error:
+            raise ModuleNotFoundError(
+                "UDSM support requires the 'pefile' package in the active Python environment."
+            ) from error
+
         self.set_current_material_type("udsm")
         self._material_inputs["udsm"].clear()
         self._current_udsm_index = 0

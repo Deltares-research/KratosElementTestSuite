@@ -24,7 +24,7 @@ class SoilTestInputManager:
             CRS: CRSSimulationInputs(test_type=TEST_NAME_TO_TYPE.get(CRS)),
         }
         self.update_crs_totals()
-        self._current_test_type = TRIAXIAL
+        self._current_test_type: str | None = None
 
     def update_crs_totals(self):
         crs_inputs = self.input_data.get(CRS)
@@ -85,7 +85,7 @@ class SoilTestInputManager:
             self.input_data[CRS].strain_increments.pop()
 
     def get_current_test_type(self) -> str:
-        return self._current_test_type
+        return self._current_test_type or ""
 
     def set_current_test_type(self, test_type: str) -> None:
         if test_type not in [TRIAXIAL, DIRECT_SHEAR, CRS]:
@@ -95,4 +95,6 @@ class SoilTestInputManager:
     def get_current_test_inputs(
         self,
     ) -> TriaxialAndShearSimulationInputs | CRSSimulationInputs:
+        if self._current_test_type is None:
+            raise ValueError("No test type has been selected yet")
         return self.input_data[self._current_test_type]

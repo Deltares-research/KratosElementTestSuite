@@ -3,7 +3,7 @@
 # Contact kratos@deltares.nl
 
 from pathlib import Path
-from typing import Callable
+from typing import Callable, Dict, Optional
 
 from kratos_element_test.controller.material_input_controller import (
     MaterialInputController,
@@ -13,9 +13,6 @@ from kratos_element_test.controller.soil_test_input_controller import (
     SoilTestInputController,
 )
 from kratos_element_test.model.main_model import MainModel
-from kratos_element_test.view.result_exporter import (
-    export_excel_by_test_type,
-)
 from kratos_element_test.view.ui_constants import (
     TEST_NAME_TO_TYPE,
 )
@@ -51,15 +48,33 @@ class ElementTestController:
         return self._main_model.get_current_test_type()
 
     def export_latest_results(self):
+        from kratos_element_test.view.result_exporter import export_excel_by_test_type
+
         results = self._result_controller.get_latest_results()
         test_type = TEST_NAME_TO_TYPE.get(self._result_controller.get_current_test())
         if not results:
             raise ValueError("No results available for export")
+        if test_type is None:
+            raise ValueError("No active test selected for export")
         export_excel_by_test_type(results, test_type)
 
     def import_lab_results(self, py_file: Path) -> None:
         self._main_model.import_lab_results(py_file)
         self._logger(f"Imported lab results from {py_file}", "info")
+
+    def import_csv_data(
+        self,
+        csv_file: Path,
+        column_mapping: Optional[Dict[str, str]] = None,
+        target_test_type: Optional[str] = None,
+    ) -> str:
+        test_type_used = self._main_model.import_csv_data(
+            csv_file,
+            column_mapping,
+            target_test_type=target_test_type,
+        )
+        self._logger(f"Imported CSV data from {csv_file}", "info")
+        return test_type_used
 
     def set_material_type(self, material_type: str) -> None:
         self._main_model.set_material_type(material_type)
