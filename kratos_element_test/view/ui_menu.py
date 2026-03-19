@@ -16,6 +16,7 @@ platformdirs_spec = importlib.util.find_spec("platformdirs")
 if platformdirs_spec is not None:
     user_data_dir = importlib.import_module("platformdirs").user_data_dir
 else:
+
     def user_data_dir(appname: str, appauthor: Optional[str] = None) -> str:
         if sys.platform == "win32":
             base_dir = Path(
@@ -30,8 +31,11 @@ else:
             return str(Path.home() / "Library" / "Application Support" / appname)
 
         xdg_data_home = os.environ.get("XDG_DATA_HOME")
-        base_dir = Path(xdg_data_home) if xdg_data_home else Path.home() / ".local" / "share"
+        base_dir = (
+            Path(xdg_data_home) if xdg_data_home else Path.home() / ".local" / "share"
+        )
         return str(base_dir / appname)
+
 
 from kratos_element_test.controller.element_test_controller import ElementTestController
 from kratos_element_test.model.io.lab_results_csv_parser import (
@@ -405,16 +409,20 @@ class MainUI:
                 return
 
             file_headers = get_csv_headers(selected_file)
-            
-            current_test_internal_name = TEST_NAME_TO_TYPE.get(current_test_display_name)
+
+            current_test_internal_name = TEST_NAME_TO_TYPE.get(
+                current_test_display_name
+            )
             if not current_test_internal_name:
                 messagebox.showerror(
                     "Import Error",
                     f"Unknown test type '{current_test_display_name}'.",
                 )
                 return
-            
-            expected_headers = get_expected_columns_for_test_type(current_test_internal_name)
+
+            expected_headers = get_expected_columns_for_test_type(
+                current_test_internal_name
+            )
             suggested_mapping = suggest_csv_column_mapping(
                 file_headers, expected_headers
             )
@@ -535,7 +543,10 @@ class MainUI:
 
             # The parser keeps only the last mapping when one CSV header is assigned
             # to multiple expected variables. Warn users explicitly in the log output.
-            for selected_header, expected_keys in selected_header_to_expected_keys.items():
+            for (
+                selected_header,
+                expected_keys,
+            ) in selected_header_to_expected_keys.items():
                 if len(expected_keys) <= 1:
                     continue
 

@@ -109,7 +109,7 @@ class SoilTestInputManagerTest(unittest.TestCase):
         with self.assertRaises(ValueError) as context:
             self.input_manager.get_current_test_inputs()
         self.assertIn("No test type has been selected", str(context.exception))
-        
+
         # After setting a test type, get_current_test_inputs() should work
         self.input_manager.set_current_test_type(TRIAXIAL)
         inputs = self.input_manager.get_current_test_inputs()

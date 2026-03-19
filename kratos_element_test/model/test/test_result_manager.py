@@ -201,7 +201,7 @@ class ResultManagerTest(unittest.TestCase):
 
             with self.assertRaises(ValueError) as context:
                 result_manager.import_csv_lab_results(csv_file)
-            
+
             self.assertIn("No active test selected", str(context.exception))
 
     def test_import_csv_lab_results_uses_active_test_type_when_not_provided(self):
@@ -271,17 +271,13 @@ class ResultManagerTest(unittest.TestCase):
         with TemporaryDirectory() as tmp_dir:
             triaxial_csv = Path(tmp_dir) / "triaxial_lab.csv"
             triaxial_csv.write_text(
-                "yy_strain,sigma1_sigma3_diff\n"
-                "0.0,0.0\n"
-                "-0.1,120.0\n",
+                "yy_strain,sigma1_sigma3_diff\n" "0.0,0.0\n" "-0.1,120.0\n",
                 encoding="utf-8",
             )
 
             dss_csv = Path(tmp_dir) / "dss_lab.csv"
             dss_csv.write_text(
-                "shear_strain_xy,shear_stress_xy\n"
-                "0.0,0.0\n"
-                "0.05,40.0\n",
+                "shear_strain_xy,shear_stress_xy\n" "0.0,0.0\n" "0.05,40.0\n",
                 encoding="utf-8",
             )
 
@@ -407,11 +403,7 @@ class ResultManagerTest(unittest.TestCase):
 
         with TemporaryDirectory() as tmp_dir:
             csv_file = Path(tmp_dir) / "manual_mapping.csv"
-            csv_content = (
-                "sigma;epsilon\n"
-                "0.0;0.0\n"
-                "120.0;-0.1\n"
-            )
+            csv_content = "sigma;epsilon\n" "0.0;0.0\n" "120.0;-0.1\n"
             csv_file.write_text(csv_content, encoding="utf-8")
 
             result_manager.import_csv_lab_results(
@@ -431,7 +423,9 @@ class ResultManagerTest(unittest.TestCase):
             },
         )
 
-    def test_import_csv_lab_results_keeps_multi_model_data_without_test_type_column(self):
+    def test_import_csv_lab_results_keeps_multi_model_data_without_test_type_column(
+        self,
+    ):
         # When importing without a test_type column, data is only imported to the active test
         current_test_type = TRIAXIAL
         current_test_getter = lambda: current_test_type
@@ -467,7 +461,6 @@ class ResultManagerTest(unittest.TestCase):
             result_manager.get_experimental_results(),
             {},
         )
-
 
         current_test_type = DIRECT_SHEAR
         self.assertDictEqual(result_manager.get_experimental_results(), {})
@@ -525,11 +518,7 @@ class ResultManagerTest(unittest.TestCase):
 
         with TemporaryDirectory() as tmp_dir:
             csv_file = Path(tmp_dir) / "crs_mapping.csv"
-            csv_content = (
-                "sigma;epsilon\n"
-                "100.0;200.0\n"
-                "110.0;220.0\n"
-            )
+            csv_content = "sigma;epsilon\n" "100.0;200.0\n" "110.0;220.0\n"
             csv_file.write_text(csv_content, encoding="utf-8")
 
             imported_test_type = result_manager.import_csv_lab_results(
@@ -565,9 +554,7 @@ class ResultManagerTest(unittest.TestCase):
         with TemporaryDirectory() as tmp_dir:
             csv_file = Path(tmp_dir) / "pq_only.csv"
             csv_file.write_text(
-                "p,q\n"
-                "-100,0\n"
-                "-150,150\n",
+                "p,q\n" "-100,0\n" "-150,150\n",
                 encoding="utf-8",
             )
 

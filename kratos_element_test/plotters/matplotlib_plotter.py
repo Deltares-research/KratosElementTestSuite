@@ -94,7 +94,9 @@ class MatplotlibPlotter:
 
         return score
 
-    def _axis_index_for_overlay_pair(self, test_type: str, x_key: str, y_key: str) -> int:
+    def _axis_index_for_overlay_pair(
+        self, test_type: str, x_key: str, y_key: str
+    ) -> int:
         specs = OVERLAYS_BY_TEST.get(test_type, ())
 
         for spec in specs:
@@ -116,9 +118,9 @@ class MatplotlibPlotter:
             if spec.compute_xy is not None or not spec.x_key or not spec.y_key:
                 continue
 
-            direct_score = self._key_similarity(x_key, spec.x_key) + self._key_similarity(
-                y_key, spec.y_key
-            )
+            direct_score = self._key_similarity(
+                x_key, spec.x_key
+            ) + self._key_similarity(y_key, spec.y_key)
             reverse_score = self._key_similarity(
                 x_key, spec.y_key
             ) + self._key_similarity(y_key, spec.x_key)
@@ -289,7 +291,9 @@ class MatplotlibPlotter:
             if spec.invert_y:
                 ax.invert_yaxis()
 
-        plotted_count = self._apply_experimental_overlays(test_type, experimental_results)
+        plotted_count = self._apply_experimental_overlays(
+            test_type, experimental_results
+        )
         if plotted_count == 0:
             self._apply_generic_experimental_overlay(test_type, experimental_results)
 
@@ -333,7 +337,9 @@ class MatplotlibPlotter:
                 "triaxial", experimental_results
             )
             if plotted_count == 0:
-                self._apply_generic_experimental_overlay("triaxial", experimental_results)
+                self._apply_generic_experimental_overlay(
+                    "triaxial", experimental_results
+                )
 
     def direct_shear(
         self,
@@ -399,7 +405,9 @@ class MatplotlibPlotter:
         self.plot_vertical_strain_vs_time_crs(self.axes[4], yy_strain, time_steps)
 
         if experimental_results:
-            plotted_count = self._apply_experimental_overlays("crs", experimental_results)
+            plotted_count = self._apply_experimental_overlays(
+                "crs", experimental_results
+            )
             if plotted_count == 0:
                 self._apply_generic_experimental_overlay("crs", experimental_results)
 

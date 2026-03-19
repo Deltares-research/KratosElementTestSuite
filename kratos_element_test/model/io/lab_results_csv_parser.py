@@ -5,7 +5,6 @@ from typing import Dict, List, Optional
 
 from kratos_element_test.view.ui_constants import TEST_NAME_TO_TYPE, VALID_TEST_TYPES
 
-
 _SYMBOL_REPLACEMENTS = {
     "σ": "sigma",
     "ε": "epsilon",
@@ -340,7 +339,9 @@ def _detect_csv_dialect(
         "|": first_line.count("|"),
     }
 
-    best_delimiter = max(delimiter_counts, key=lambda delimiter: delimiter_counts[delimiter])
+    best_delimiter = max(
+        delimiter_counts, key=lambda delimiter: delimiter_counts[delimiter]
+    )
     if delimiter_counts[best_delimiter] == 0:
         return csv.excel
 
@@ -380,7 +381,9 @@ def _decode_csv_bytes(csv_bytes: bytes, csv_file: Path) -> str:
 
         return decoded
 
-    details = "; ".join(decode_errors[:3]) if decode_errors else "unknown decoding error"
+    details = (
+        "; ".join(decode_errors[:3]) if decode_errors else "unknown decoding error"
+    )
     raise ValueError(
         f"Could not decode CSV file '{csv_file}'. "
         "Supported encodings include UTF-8, UTF-16 and Windows-1252. "
