@@ -217,7 +217,9 @@ class ResultManagerTest(unittest.TestCase):
                 encoding="utf-8",
             )
 
-            result_manager.import_csv_lab_results(csv_file)
+            imported_test_type = result_manager.import_csv_lab_results(csv_file)
+
+        self.assertEqual(imported_test_type, "triaxial")
 
         imported = result_manager.get_experimental_results()
         self.assertDictEqual(

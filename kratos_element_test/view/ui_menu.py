@@ -495,16 +495,17 @@ class MainUI:
             row=0, column=1, sticky="w", pady=(0, 6)
         )
 
-        selectable_headers = ["<skip>"] + file_headers
+        skip_option = "<skip>"
+        selectable_headers = [skip_option] + file_headers
         vars_by_expected: Dict[str, tk.StringVar] = {}
 
         for idx, expected_key in enumerate(expected_headers, start=1):
             ttk.Label(mapping_frame, text=expected_key).grid(
                 row=idx, column=0, sticky="w", padx=(0, 12), pady=3
             )
-            selected_header = suggested_mapping.get(expected_key, "<skip>")
+            selected_header = suggested_mapping.get(expected_key, skip_option)
             if selected_header not in selectable_headers:
-                selected_header = "<skip>"
+                selected_header = skip_option
 
             selected_var = tk.StringVar(value=selected_header)
             vars_by_expected[expected_key] = selected_var
@@ -524,33 +525,30 @@ class MainUI:
         action_frame.pack(fill="x", padx=8, pady=(0, 8))
 
         result: Dict[str, str] = {}
-        is_confirmed = {"value": False}
+        is_confirmed = False
 
-        def _on_import():
-            is_confirmed["value"] = True
-            result.clear()
+        def _collect_mapping_with_duplicate_warnings() -> Dict[str, str]:
+            selected_by_expected: Dict[str, str] = {}
             selected_header_to_expected_keys: Dict[str, List[str]] = {}
 
             for expected_key, selected_var in vars_by_expected.items():
-                selected = selected_var.get()
-                if selected and selected != "<skip>":
-                    result[expected_key] = selected
-
-                    expected_keys = selected_header_to_expected_keys.setdefault(
-                        selected, []
-                    )
-                    expected_keys.append(expected_key)
-
-            # The parser keeps only the last mapping when one CSV header is assigned
-            # to multiple expected variables. Warn users explicitly in the log output.
-            for (
-                selected_header,
-                expected_keys,
-            ) in selected_header_to_expected_keys.items():
-                if len(expected_keys) <= 1:
+                selected_header = selected_var.get()
+                if not selected_header or selected_header == skip_option:
                     continue
 
+                selected_by_expected[expected_key] = selected_header
+                expected_keys = selected_header_to_expected_keys.setdefault(
+                    selected_header, []
+                )
+                expected_keys.append(expected_key)
+
+            # One CSV header can effectively map to one expected variable.
+            # Keep the last selected expected key and warn for the ignored ones.
+            kept_expected_by_header: Dict[str, str] = {}
+            for selected_header, expected_keys in selected_header_to_expected_keys.items():
                 kept_expected_key = expected_keys[-1]
+                kept_expected_by_header[selected_header] = kept_expected_key
+
                 for ignored_expected_key in expected_keys[:-1]:
                     log_message(
                         f"Ignored mapping for '{ignored_expected_key}': CSV header "
@@ -558,6 +556,19 @@ class MainUI:
                         f"Keeping '{kept_expected_key}'.",
                         "warn",
                     )
+
+            resolved_mapping: Dict[str, str] = {}
+            for expected_key, selected_header in selected_by_expected.items():
+                if kept_expected_by_header.get(selected_header) == expected_key:
+                    resolved_mapping[expected_key] = selected_header
+
+            return resolved_mapping
+
+        def _on_import():
+            nonlocal is_confirmed
+            is_confirmed = True
+            result.clear()
+            result.update(_collect_mapping_with_duplicate_warnings())
 
             dialog.destroy()
 
@@ -571,7 +582,7 @@ class MainUI:
 
         dialog.wait_window()
 
-        if not is_confirmed["value"]:
+        if not is_confirmed:
             return None
         return result
 
