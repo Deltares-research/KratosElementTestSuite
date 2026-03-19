@@ -34,7 +34,6 @@ from kratos_element_test.plotters.plotter_labels import (
 )
 from kratos_element_test.plotters.lab_result_overlay_registry import OVERLAYS_BY_TEST
 
-
 _PREFERRED_GENERIC_PAIRS_BY_TEST: Dict[str, Tuple[Tuple[str, str], ...]] = {
     "triaxial": (
         ("yy_strain", "sigma1_sigma3_diff"),
@@ -121,7 +120,9 @@ class MatplotlibPlotter:
         self, test_type: str, x_key: str, y_key: str
     ) -> int:
         pair_specs = [
-            spec for spec in OVERLAYS_BY_TEST.get(test_type, ()) if spec.compute_xy is None
+            spec
+            for spec in OVERLAYS_BY_TEST.get(test_type, ())
+            if spec.compute_xy is None
         ]
 
         for spec in pair_specs:

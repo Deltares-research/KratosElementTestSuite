@@ -545,7 +545,10 @@ class MainUI:
             # One CSV header can effectively map to one expected variable.
             # Keep the last selected expected key and warn for the ignored ones.
             kept_expected_by_header: Dict[str, str] = {}
-            for selected_header, expected_keys in selected_header_to_expected_keys.items():
+            for (
+                selected_header,
+                expected_keys,
+            ) in selected_header_to_expected_keys.items():
                 kept_expected_key = expected_keys[-1]
                 kept_expected_by_header[selected_header] = kept_expected_key
 
