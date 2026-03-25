@@ -11,32 +11,6 @@ import tkinter as tk
 from pathlib import Path
 from tkinter import filedialog, messagebox, ttk, scrolledtext, Menu
 from typing import Dict, List, Optional
-
-platformdirs_spec = importlib.util.find_spec("platformdirs")
-if platformdirs_spec is not None:
-    user_data_dir = importlib.import_module("platformdirs").user_data_dir
-else:
-
-    def user_data_dir(appname: str, appauthor: Optional[str] = None) -> str:
-        if sys.platform == "win32":
-            base_dir = Path(
-                os.environ.get("APPDATA", Path.home() / "AppData" / "Roaming")
-            )
-            app_dir = base_dir / appname
-            if appauthor:
-                app_dir = base_dir / appauthor / appname
-            return str(app_dir)
-
-        if sys.platform == "darwin":
-            return str(Path.home() / "Library" / "Application Support" / appname)
-
-        xdg_data_home = os.environ.get("XDG_DATA_HOME")
-        base_dir = (
-            Path(xdg_data_home) if xdg_data_home else Path.home() / ".local" / "share"
-        )
-        return str(base_dir / appname)
-
-
 from kratos_element_test.controller.element_test_controller import ElementTestController
 from kratos_element_test.view.ui_builder import GeotechTestUI
 from kratos_element_test.view.ui_constants import (
@@ -63,6 +37,29 @@ data_dir.mkdir(parents=True, exist_ok=True)
 
 LICENSE_FLAG_PATH = data_dir / "license_accepted.flag"
 
+platformdirs_spec = importlib.util.find_spec("platformdirs")
+if platformdirs_spec is not None:
+    user_data_dir = importlib.import_module("platformdirs").user_data_dir
+else:
+
+    def user_data_dir(appname: str, appauthor: Optional[str] = None) -> str:
+        if sys.platform == "win32":
+            base_dir = Path(
+                os.environ.get("APPDATA", Path.home() / "AppData" / "Roaming")
+            )
+            app_dir = base_dir / appname
+            if appauthor:
+                app_dir = base_dir / appauthor / appname
+            return str(app_dir)
+
+        if sys.platform == "darwin":
+            return str(Path.home() / "Library" / "Application Support" / appname)
+
+        xdg_data_home = os.environ.get("XDG_DATA_HOME")
+        base_dir = (
+            Path(xdg_data_home) if xdg_data_home else Path.home() / ".local" / "share"
+        )
+        return str(base_dir / appname)
 
 class MainUI:
     def __init__(self):
