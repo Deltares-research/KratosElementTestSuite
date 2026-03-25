@@ -143,9 +143,6 @@ class GeotechTestUI(ttk.Frame):
             log_message("Failed to refresh plots:", "error")
             log_message(traceback.format_exc(), "error")
 
-    def select_test(self, test_name: str) -> None:
-        self.soil_test_input_view._switch_test(test_name)
-
     def _enable_run_button(self):
         self.run_button.config(state="normal")
         self.is_running = False
