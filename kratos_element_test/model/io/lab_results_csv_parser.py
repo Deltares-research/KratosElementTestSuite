@@ -43,21 +43,20 @@ def _build_alias_map(
 
 
 _RAW_COLUMN_ALIASES = {
-    "yy_strain": (
+    "Vertical Strain": (
         "yy_strain",
         "vertical_strain",
+        "vertical strain",
         "axial_strain",
         "axial strain",
-        "axial deformation",
         "strain_yy",
         "epsilon_yy",
         "eps_yy",
         "eyy",
-        "epsilon_yy_percent",
         "strain",
         "vertical strain eyy",
     ),
-    "vol_strain": (
+    "Volumetric Strain": (
         "vol_strain",
         "volumetric_strain",
         "volumetric strain",
@@ -75,7 +74,9 @@ _RAW_COLUMN_ALIASES = {
         "principal_stress_1",
         "major_principal_stress",
         "axial_stress",
-        "sigma1effective",
+        "first_principal_stress",
+        "first principal stress",
+        "major principal stress",
     ),
     "sigma_3": (
         "sigma_3",
@@ -86,7 +87,9 @@ _RAW_COLUMN_ALIASES = {
         "confining_stress",
         "confining_pressure",
         "cell_pressure",
-        "sigma3effective",
+        "third_principal_stress",
+        "third principal stress",
+        "minor principal stress",
     ),
     "sigma1_sigma3_diff": (
         "sigma1_sigma3_diff",
@@ -182,6 +185,8 @@ _EXPECTED_COLUMNS_BY_TEST: Dict[str, List[str]] = {
         "yy_strain",
         "sigma_yy",
         "sigma_xx",
+        "sigma_3",
+        "sigma_1",
         "p'",
         "q",
         "time_steps",
