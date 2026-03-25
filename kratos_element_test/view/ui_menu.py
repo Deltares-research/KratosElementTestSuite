@@ -38,11 +38,6 @@ else:
 
 
 from kratos_element_test.controller.element_test_controller import ElementTestController
-from kratos_element_test.model.io.lab_results_csv_parser import (
-    get_csv_headers,
-    get_expected_columns_for_test_type,
-    suggest_csv_column_mapping,
-)
 from kratos_element_test.view.ui_builder import GeotechTestUI
 from kratos_element_test.view.ui_constants import (
     APP_TITLE,
@@ -399,16 +394,14 @@ class MainUI:
             if not csv_path:
                 return
 
-            selected_file = Path(csv_path)
-            if selected_file.suffix.lower() != ".csv":
+            result = self._controller.prepare_csv_import(csv_path, current_test_display_name)
+            if result is None:
                 messagebox.showerror(
                     "Import Error",
                     "The selected file is not a CSV file. "
                     "Please choose a file with .csv extension.",
                 )
                 return
-
-            file_headers = get_csv_headers(selected_file)
 
             current_test_internal_name = TEST_NAME_TO_TYPE.get(
                 current_test_display_name
@@ -420,26 +413,19 @@ class MainUI:
                 )
                 return
 
-            expected_headers = get_expected_columns_for_test_type(
-                current_test_internal_name
-            )
-            suggested_mapping = suggest_csv_column_mapping(
-                file_headers, expected_headers
-            )
-
             column_mapping = self._show_csv_header_mapping_popup(
-                file_headers=file_headers,
-                expected_headers=expected_headers,
-                suggested_mapping=suggested_mapping,
-                test_display_name=current_test_display_name,
+                file_headers=result["file_headers"],
+                expected_headers=result["expected_headers"],
+                suggested_mapping=result["suggested_mapping"],
+                test_display_name=result["internal_test_name"],
             )
             if column_mapping is None:
                 return
 
             self._controller.import_csv_data(
-                selected_file,
+                csv_file=result["file_path"],
                 column_mapping=column_mapping,
-                target_test_type=current_test_internal_name,
+                target_test_type=result["internal_test_name"],
             )
 
             if self.main_frame:

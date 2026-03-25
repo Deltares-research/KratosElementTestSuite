@@ -71,6 +71,9 @@ class MainModel:
     def import_lab_results(self, py_file: Path) -> None:
         self._result_manager.import_python_lab_results(py_file)
 
+    def prepare_csv_import(self, csv_file: Path, test_display_name):
+        return self._result_manager.prepare_csv_import(csv_file, test_display_name)
+
     def import_csv_data(
         self,
         csv_file: Path,

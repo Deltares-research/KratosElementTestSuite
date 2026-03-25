@@ -62,6 +62,10 @@ class ElementTestController:
         self._main_model.import_lab_results(py_file)
         self._logger(f"Imported lab results from {py_file}", "info")
 
+    def prepare_csv_import(self, csv_file: Path, test_display_name):
+        return self._main_model.prepare_csv_import(csv_file, test_display_name)
+        self._logger(f"Imported lab results from {csv_file}", "info")
+
     def import_csv_data(
         self,
         csv_file: Path,

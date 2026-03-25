@@ -4,6 +4,9 @@ import importlib.util
 
 from kratos_element_test.model.io.lab_results_csv_parser import (
     parse_csv_lab_results,
+    get_csv_headers,
+    get_expected_columns_for_test_type,
+    suggest_csv_column_mapping,
 )
 from kratos_element_test.view.ui_constants import TYPE_TO_TEST_NAME, TEST_NAME_TO_TYPE
 
@@ -82,6 +85,32 @@ class ResultManager:
                 "No non-empty 'experimental_by_test' dict found in lab results input"
             )
         self.import_lab_results_dict(experimental_by_test)
+
+    def prepare_csv_import(self, file_path, test_display_name):
+        selected_file = Path(file_path)
+
+        if selected_file.suffix.lower() != ".csv":
+            return None
+
+        file_headers = get_csv_headers(selected_file)
+
+        internal_name = TEST_NAME_TO_TYPE.get(test_display_name)
+        if not internal_name:
+            raise ValueError(f"Unknown test type '{test_display_name}'")
+
+        expected_headers = get_expected_columns_for_test_type(internal_name)
+
+        suggested_mapping = suggest_csv_column_mapping(
+            file_headers, expected_headers
+        )
+
+        return {
+            "file_path": selected_file,
+            "file_headers": file_headers,
+            "expected_headers": expected_headers,
+            "suggested_mapping": suggested_mapping,
+            "internal_test_name": internal_name,
+        }
 
     def import_csv_lab_results(
         self,
