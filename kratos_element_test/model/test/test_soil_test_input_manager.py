@@ -103,15 +103,9 @@ class SoilTestInputManagerTest(unittest.TestCase):
         self.assertEqual(updated, 250.0)
 
     def test_get_current_default_inputs(self):
-        # No test is selected by default, so get_current_test_type() returns empty string
-        self.assertEqual(self.input_manager.get_current_test_type(), "")
-        # Trying to get inputs when no test is selected should raise an error
-        with self.assertRaises(ValueError) as context:
-            self.input_manager.get_current_test_inputs()
-        self.assertIn("No test type has been selected", str(context.exception))
-
-        # After setting a test type, get_current_test_inputs() should work
-        self.input_manager.set_current_test_type(TRIAXIAL)
+        # By default, TRIAXIAL is selected
+        self.assertEqual(self.input_manager.get_current_test_type(), TRIAXIAL)
+        # Should return default Triaxial inputs without error
         inputs = self.input_manager.get_current_test_inputs()
         self.assertIsNotNone(inputs)
         self.assertEqual(inputs.maximum_strain, 20.0)
