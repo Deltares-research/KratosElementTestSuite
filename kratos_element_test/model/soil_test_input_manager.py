@@ -24,7 +24,7 @@ class SoilTestInputManager:
             CRS: CRSSimulationInputs(test_type=TEST_NAME_TO_TYPE.get(CRS)),
         }
         self.update_crs_totals()
-        self._current_test_type: str | None = None
+        self._current_test_type = TRIAXIAL
 
     def update_crs_totals(self):
         crs_inputs = self.input_data.get(CRS)
