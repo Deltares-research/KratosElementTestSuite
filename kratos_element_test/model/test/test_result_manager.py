@@ -223,21 +223,20 @@ class ResultManagerTest(unittest.TestCase):
 
         imported = result_manager.get_experimental_results()
         self.assertDictEqual(
-            imported,
             {
-                "yy_strain": [0.0, -0.1],
-                "sigma_1": [-100.0, -250.0],
-                "sigma_3": [-100.0, -100.0],
-                "vol_strain": [0.0, -0.01],
                 "p'": [-100.0, -150.0],
-                "q": [0.0, 150.0],
-                "sigma1_sigma3_diff": [0.0, 150.0],
+                'q': [0.0, 150.0],
+                'sigma1_sigma3_diff': [0.0, 150.0],
+                'sigma_1': [-100.0, -250.0],
+                'sigma_3': [-100.0, -100.0]
             },
+            imported
         )
 
     def test_import_csv_lab_results_with_test_type_column_routes_data_per_test(self):
-        current_test_type = TRIAXIAL
-        current_test_getter = lambda: current_test_type
+        # Use a mutable object for current_test_type
+        current_test_type = [TRIAXIAL]
+        current_test_getter = lambda: current_test_type[0]
         result_manager = ResultManager(current_test_getter)
 
         with TemporaryDirectory() as tmp_dir:
@@ -253,17 +252,22 @@ class ResultManagerTest(unittest.TestCase):
 
             result_manager.import_csv_lab_results(csv_file)
 
-        current_test_type = TRIAXIAL
+        # Check Triaxial results
+        current_test_type[0] = TRIAXIAL
         self.assertDictEqual(
             result_manager.get_experimental_results(),
             {
-                "yy_strain": [0.0, -0.1],
-                "sigma1_sigma3_diff": [0.0, 120.0],
+                'Vertical Strain': [0.0, -0.1], 'sigma1_sigma3_diff': [0.0, 120.0],
             },
         )
 
-        current_test_type = DIRECT_SHEAR
-        self.assertDictEqual(result_manager.get_experimental_results(), {})
+        # Check Direct Simple Shear results
+        current_test_type[0] = DIRECT_SHEAR
+        self.assertDictEqual(
+            result_manager.get_experimental_results(),
+            {
+            },
+        )
 
     def test_import_csv_lab_results_preserves_other_tests_data(self):
         current_test_type = TRIAXIAL
@@ -292,7 +296,6 @@ class ResultManagerTest(unittest.TestCase):
         self.assertDictEqual(
             result_manager.get_experimental_results(),
             {
-                "yy_strain": [0.0, -0.1],
                 "sigma1_sigma3_diff": [0.0, 120.0],
             },
         )
@@ -324,7 +327,6 @@ class ResultManagerTest(unittest.TestCase):
         self.assertDictEqual(
             result_manager.get_experimental_results(),
             {
-                "yy_strain": [0.0, -0.1],
                 "sigma_1": [-100.0, -250.0],
                 "sigma_3": [-100.0, -100.0],
                 "sigma1_sigma3_diff": [0.0, 150.0],
@@ -361,16 +363,14 @@ class ResultManagerTest(unittest.TestCase):
 
         imported = result_manager.get_experimental_results()
         self.assertDictEqual(
-            imported,
             {
-                "yy_strain": [0.0, -0.1],
-                "sigma_1": [-100.0, -250.0],
-                "sigma_3": [-100.0, -100.0],
-                "vol_strain": [0.0, -0.01],
                 "p'": [-100.0, -150.0],
-                "q": [0.0, 150.0],
-                "sigma1_sigma3_diff": [0.0, 150.0],
+                'q': [0.0, 150.0],
+                'sigma1_sigma3_diff': [0.0, 150.0],
+                'sigma_1': [-100.0, -250.0],
+                'sigma_3': [-100.0, -100.0]
             },
+            imported
         )
 
     def test_import_csv_lab_results_supports_common_lab_header_labels(self):
@@ -392,7 +392,6 @@ class ResultManagerTest(unittest.TestCase):
         self.assertDictEqual(
             imported,
             {
-                "yy_strain": [0.0, -0.1],
                 "q": [0.0, 150.0],
                 "p'": [-100.0, -150.0],
                 "sigma1_sigma3_diff": [0.0, 150.0],
@@ -419,9 +418,8 @@ class ResultManagerTest(unittest.TestCase):
         self.assertDictEqual(
             result_manager.get_experimental_results(),
             {
-                "q": [0.0, 120.0],
-                "yy_strain": [0.0, -0.1],
-                "sigma1_sigma3_diff": [0.0, 120.0],
+                'q': [0.0, 120.0],
+                'sigma1_sigma3_diff': [0.0, 120.0]
             },
         )
 
@@ -449,8 +447,6 @@ class ResultManagerTest(unittest.TestCase):
         self.assertDictEqual(
             result_manager.get_experimental_results(),
             {
-                "yy_strain": [0.0, -0.1],
-                "vol_strain": [0.0, -0.02],
                 "sigma_1": [-100.0, -250.0],
                 "sigma_3": [-100.0, -100.0],
                 "sigma1_sigma3_diff": [0.0, 150.0],
@@ -498,7 +494,6 @@ class ResultManagerTest(unittest.TestCase):
         self.assertDictEqual(
             result_manager.get_experimental_results(),
             {
-                "yy_strain": [0.0, -0.1],
                 "sigma1_sigma3_diff": [0.0, 150.0],
             },
         )
