@@ -28,15 +28,6 @@ from kratos_element_test.view.ui_constants import (
 from kratos_element_test.view.ui_logger import log_message
 from kratos_element_test.view.ui_utils import asset_path, soil_models_dir
 
-ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(
-    "deltares.ElementTestSuite.ui"
-)
-
-data_dir = Path(user_data_dir(APP_NAME, APP_AUTHOR))
-data_dir.mkdir(parents=True, exist_ok=True)
-
-LICENSE_FLAG_PATH = data_dir / "license_accepted.flag"
-
 platformdirs_spec = importlib.util.find_spec("platformdirs")
 if platformdirs_spec is not None:
     user_data_dir = importlib.import_module("platformdirs").user_data_dir
@@ -60,6 +51,15 @@ else:
             Path(xdg_data_home) if xdg_data_home else Path.home() / ".local" / "share"
         )
         return str(base_dir / appname)
+
+ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(
+    "deltares.ElementTestSuite.ui"
+)
+
+data_dir = Path(user_data_dir(APP_NAME, APP_AUTHOR))
+data_dir.mkdir(parents=True, exist_ok=True)
+
+LICENSE_FLAG_PATH = data_dir / "license_accepted.flag"
 
 class MainUI:
     def __init__(self):
