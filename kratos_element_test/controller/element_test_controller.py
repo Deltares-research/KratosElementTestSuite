@@ -16,6 +16,7 @@ from kratos_element_test.model.main_model import MainModel
 from kratos_element_test.view.ui_constants import (
     TEST_NAME_TO_TYPE,
 )
+from kratos_element_test.view.result_exporter import export_excel_by_test_type
 
 
 class ElementTestController:
@@ -48,14 +49,10 @@ class ElementTestController:
         return self._main_model.get_current_test_type()
 
     def export_latest_results(self):
-        from kratos_element_test.view.result_exporter import export_excel_by_test_type
-
         results = self._result_controller.get_latest_results()
         test_type = TEST_NAME_TO_TYPE.get(self._result_controller.get_current_test())
         if not results:
             raise ValueError("No results available for export")
-        if test_type is None:
-            raise ValueError("No active test selected for export")
         export_excel_by_test_type(results, test_type)
 
     def import_lab_results(self, py_file: Path) -> None:
@@ -64,7 +61,6 @@ class ElementTestController:
 
     def prepare_csv_import(self, csv_file: Path, test_display_name):
         return self._main_model.prepare_csv_import(csv_file, test_display_name)
-        self._logger(f"Imported lab results from {csv_file}", "info")
 
     def import_csv_data(
         self,
