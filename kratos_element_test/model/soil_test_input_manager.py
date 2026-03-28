@@ -95,6 +95,4 @@ class SoilTestInputManager:
     def get_current_test_inputs(
         self,
     ) -> TriaxialAndShearSimulationInputs | CRSSimulationInputs:
-        if self._current_test_type is None:
-            raise ValueError("No test type has been selected yet")
         return self.input_data[self._current_test_type]

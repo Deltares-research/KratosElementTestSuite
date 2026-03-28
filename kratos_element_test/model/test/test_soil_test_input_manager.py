@@ -103,9 +103,7 @@ class SoilTestInputManagerTest(unittest.TestCase):
         self.assertEqual(updated, 250.0)
 
     def test_get_current_default_inputs(self):
-        # By default, TRIAXIAL is selected
         self.assertEqual(self.input_manager.get_current_test_type(), TRIAXIAL)
-        # Should return default Triaxial inputs without error
         inputs = self.input_manager.get_current_test_inputs()
         self.assertIsNotNone(inputs)
         self.assertEqual(inputs.maximum_strain, 20.0)
