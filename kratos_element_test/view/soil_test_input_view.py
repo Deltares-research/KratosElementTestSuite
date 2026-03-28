@@ -73,12 +73,6 @@ class SoilTestInputView(ttk.Frame):
         self.test_input_frame = ttk.Frame(self, padding="10")
         self.test_input_frame.pack(fill="both", expand=True)
 
-        # Add placeholder label
-        ttk.Label(
-            self.test_input_frame,
-            text="Please select a test (Triaxial, Direct Simple Shear, or CRS) to get started.",
-            font=(HELP_MENU_FONT, 11),
-        ).pack(anchor="center", pady=(50, 0))
 
     def disable_test_type_menu(self):
         if hasattr(self, "test_type_menu") and self.test_type_menu.winfo_exists():
