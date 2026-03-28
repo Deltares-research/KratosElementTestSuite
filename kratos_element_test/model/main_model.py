@@ -73,7 +73,7 @@ class MainModel:
         column_mapping: Dict[str, str] | None = None,
         target_test_type: str | None = None,
     ) -> str:
-        return self._result_manager.import_csv_lab_results(
+        self._result_manager.import_csv_lab_results(
             csv_file,
             column_mapping,
             target_test_type=target_test_type,

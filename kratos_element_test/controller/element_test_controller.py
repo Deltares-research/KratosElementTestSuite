@@ -74,7 +74,6 @@ class ElementTestController:
             target_test_type=target_test_type,
         )
         self._logger(f"Imported CSV data from {csv_file}", "info")
-        return test_type_used
 
     def set_material_type(self, material_type: str) -> None:
         self._main_model.set_material_type(material_type)
