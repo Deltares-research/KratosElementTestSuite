@@ -46,7 +46,7 @@ class OverlaySpec:
     axis_index: int
     x_key: Optional[str] = None
     y_key: Optional[str] = None
-    label: str = "Experimental"
+    label: str = "Lab results"
     title: Optional[str] = None
     x_label: Optional[str] = None
     y_label: Optional[str] = None
@@ -108,7 +108,7 @@ OVERLAYS_BY_TEST: Dict[str, Tuple[OverlaySpec, ...]] = {
         # axis 4: Mohr's circle
         OverlaySpec(
             axis_index=4,
-            label="Experimental",
+            label="Lab results",
             title=TITLE_MOHR,
             x_label=EFFECTIVE_STRESS_LABEL,
             y_label=MOBILIZED_SHEAR_STRESS_LABEL,
@@ -151,7 +151,7 @@ OVERLAYS_BY_TEST: Dict[str, Tuple[OverlaySpec, ...]] = {
         # axis 3: Mohr's circle
         OverlaySpec(
             axis_index=3,
-            label="Experimental",
+            label="Lab results",
             title=TITLE_MOHR,
             x_label=EFFECTIVE_STRESS_LABEL,
             y_label=MOBILIZED_SHEAR_STRESS_LABEL,
@@ -195,7 +195,7 @@ OVERLAYS_BY_TEST: Dict[str, Tuple[OverlaySpec, ...]] = {
         # axis 3: Mohr's circle
         OverlaySpec(
             axis_index=3,
-            label="Experimental",
+            label="Lab results",
             title=TITLE_MOHR,
             x_label=EFFECTIVE_STRESS_LABEL,
             y_label=MOBILIZED_SHEAR_STRESS_LABEL,

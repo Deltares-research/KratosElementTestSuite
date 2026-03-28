@@ -220,7 +220,7 @@ class MatplotlibPlotter:
             return False
 
         ax = self.axes[axis_index]
-        ax.plot(x, y, "--", color="magenta", label=f"Experimental ({y_key} vs {x_key})")
+        ax.plot(x, y, "--", color="magenta", label=f"Lab results ({y_key} vs {x_key})")
         self._safe_legend(ax)
 
         # Set a readable label pair only when the axis has not been labeled yet.
