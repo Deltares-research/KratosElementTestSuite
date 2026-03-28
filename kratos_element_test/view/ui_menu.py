@@ -400,16 +400,6 @@ class MainUI:
                 )
                 return
 
-            current_test_internal_name = TEST_NAME_TO_TYPE.get(
-                current_test_display_name
-            )
-            if not current_test_internal_name:
-                messagebox.showerror(
-                    "Import Error",
-                    f"Unknown test type '{current_test_display_name}'.",
-                )
-                return
-
             column_mapping = self._show_csv_header_mapping_popup(
                 file_headers=result["file_headers"],
                 expected_headers=result["expected_headers"],

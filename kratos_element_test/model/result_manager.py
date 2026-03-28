@@ -104,6 +104,10 @@ class ResultManager:
             file_headers, expected_headers
         )
 
+        current_test_internal_name = TEST_NAME_TO_TYPE.get(test_display_name)
+        if not current_test_internal_name:
+            raise ValueError(f"Unknown test type '{test_display_name}'")
+
         return {
             "file_path": selected_file,
             "file_headers": file_headers,
