@@ -400,7 +400,7 @@ class MainUI:
                 )
                 return
 
-            column_mapping = self._show_csv_header_mapping_popup(
+            column_mapping = self._show_csv_header_mapping_selection_popup(
                 file_headers=result["file_headers"],
                 expected_headers=result["expected_headers"],
                 suggested_mapping=result["suggested_mapping"],
@@ -421,7 +421,7 @@ class MainUI:
         except Exception as e:
             messagebox.showerror("Import Error", f"Failed to import CSV data.\n\n{e}")
 
-    def _show_csv_header_mapping_popup(
+    def _show_csv_header_mapping_selection_popup(
         self,
         file_headers: List[str],
         expected_headers: List[str],
