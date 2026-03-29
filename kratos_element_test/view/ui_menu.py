@@ -27,6 +27,7 @@ from kratos_element_test.view.ui_constants import (
 )
 from kratos_element_test.view.ui_logger import log_message
 from kratos_element_test.view.ui_utils import asset_path, soil_models_dir
+from typing import Any
 
 platformdirs_spec = importlib.util.find_spec("platformdirs")
 if platformdirs_spec is not None:
@@ -421,17 +422,84 @@ class MainUI:
         except Exception as e:
             messagebox.showerror("Import Error", f"Failed to import CSV data.\n\n{e}")
 
-    def _show_csv_header_mapping_selection_popup(
-        self,
-        file_headers: List[str],
-        expected_headers: List[str],
-        suggested_mapping: Dict[str, str],
-        test_display_name: str = "",
-    ) -> Optional[Dict[str, str]]:
-        if self._root is None:
-            return suggested_mapping
+    def _build_preview_frame(self, parent: Any, file_headers: List[str]) -> None:
+        frame = ttk.Frame(parent, padding="8")
+        frame.pack(fill="x", padx=8, pady=(0, 8))
+        ttk.Label(frame, text="Headers found in file:").pack(anchor="w")
 
-        if not expected_headers:
+        preview_text = scrolledtext.ScrolledText(frame, height=5, wrap="word")
+        preview_text.pack(fill="x", expand=False, pady=(4, 0))
+        preview_text.insert("1.0", "\n".join(file_headers))
+        preview_text.config(state="disabled")
+        return frame
+
+    def _build_mapping_frame(
+        self,
+        parent: Any,
+        expected_headers: List[str],
+        file_headers: List[str],
+        suggested_mapping: Dict[str, str],
+    ) -> Dict[str, tk.StringVar]:
+        frame = ttk.Frame(parent, padding="8")
+        frame.pack(fill="both", expand=True, padx=8, pady=(0, 8))
+
+        ttk.Label(frame, text="Expected variable").grid(
+            row=0, column=0, sticky="w", padx=(0, 12), pady=(0, 6)
+        )
+        ttk.Label(frame, text="CSV header").grid(row=0, column=1, sticky="w", pady=(0, 6))
+
+        skip_option = "<skip>"
+        selectable_headers = [skip_option] + file_headers
+        vars_by_expected: Dict[str, tk.StringVar] = {}
+
+        for idx, expected_key in enumerate(expected_headers, start=1):
+            ttk.Label(frame, text=expected_key).grid(
+                row=idx, column=0, sticky="w", padx=(0, 12), pady=3
+            )
+            selected_header = suggested_mapping.get(expected_key, skip_option)
+            if selected_header not in selectable_headers:
+                selected_header = skip_option
+
+            selected_var = tk.StringVar(value=selected_header)
+            vars_by_expected[expected_key] = selected_var
+
+            combobox = ttk.Combobox(
+                frame,
+                textvariable=selected_var,
+                values=selectable_headers,
+                state="readonly",
+                width=48,
+            )
+            combobox.grid(row=idx, column=1, sticky="ew", pady=3)
+
+        frame.columnconfigure(1, weight=1)
+        return vars_by_expected
+
+    def _build_action_frame(self, dialog: tk.Toplevel) -> tk.BooleanVar:
+        is_confirmed = tk.BooleanVar(value=False)
+        action_frame = ttk.Frame(dialog, padding="8")
+        action_frame.pack(fill="x", padx=8, pady=(0, 8))
+
+        def on_ok():
+            is_confirmed.set(True)
+            dialog.destroy()
+
+        def on_cancel():
+            dialog.destroy()
+
+        ttk.Button(action_frame, text="OK", command=on_ok).pack(side="right", padx=4)
+        ttk.Button(action_frame, text="Cancel", command=on_cancel).pack(side="right", padx=4)
+        return is_confirmed
+
+    def _show_csv_header_mapping_selection_popup(
+            self,
+            file_headers: List[str],
+            expected_headers: List[str],
+            suggested_mapping: Dict[str, str],
+            test_display_name: str = "",
+        ) -> Optional[Dict[str, str]]:
+
+        if self._root is None or not expected_headers:
             return suggested_mapping
 
         dialog = tk.Toplevel(self._root)
@@ -444,124 +512,22 @@ class MainUI:
         label_text = "Map CSV headers to the expected variables"
         if test_display_name:
             label_text += f" for {test_display_name}"
-        ttk.Label(
-            dialog,
-            text=label_text,
-        ).pack(anchor="w", padx=12, pady=(12, 8))
+        ttk.Label(dialog, text=label_text).pack(anchor="w", padx=12, pady=(12, 8))
 
-        preview_frame = ttk.Frame(dialog, padding="8")
-        preview_frame.pack(fill="x", padx=8, pady=(0, 8))
-        ttk.Label(preview_frame, text="Headers found in file:").pack(anchor="w")
+        self._build_preview_frame(dialog, file_headers)
+        vars_by_expected = self._build_mapping_frame(dialog, expected_headers, file_headers, suggested_mapping)
+        is_confirmed = self._build_action_frame(dialog)
 
-        preview_text = scrolledtext.ScrolledText(preview_frame, height=5, wrap="word")
-        preview_text.pack(fill="x", expand=False, pady=(4, 0))
-        preview_text.insert("1.0", "\n".join(file_headers))
-        preview_text.config(state="disabled")
+        dialog.wait_window()  # wait until the dialog closes
 
-        mapping_frame = ttk.Frame(dialog, padding="8")
-        mapping_frame.pack(fill="both", expand=True, padx=8, pady=(0, 8))
+        if is_confirmed.get():
+            return {
+                k: v.get()
+                for k, v in vars_by_expected.items()
+                if v.get() != "<skip>"
+           }
 
-        ttk.Label(mapping_frame, text="Expected variable").grid(
-            row=0, column=0, sticky="w", padx=(0, 12), pady=(0, 6)
-        )
-        ttk.Label(mapping_frame, text="CSV header").grid(
-            row=0, column=1, sticky="w", pady=(0, 6)
-        )
-
-        skip_option = "<skip>"
-        selectable_headers = [skip_option] + file_headers
-        vars_by_expected: Dict[str, tk.StringVar] = {}
-
-        for idx, expected_key in enumerate(expected_headers, start=1):
-            ttk.Label(mapping_frame, text=expected_key).grid(
-                row=idx, column=0, sticky="w", padx=(0, 12), pady=3
-            )
-            selected_header = suggested_mapping.get(expected_key, skip_option)
-            if selected_header not in selectable_headers:
-                selected_header = skip_option
-
-            selected_var = tk.StringVar(value=selected_header)
-            vars_by_expected[expected_key] = selected_var
-
-            combobox = ttk.Combobox(
-                mapping_frame,
-                textvariable=selected_var,
-                values=selectable_headers,
-                state="readonly",
-                width=48,
-            )
-            combobox.grid(row=idx, column=1, sticky="ew", pady=3)
-
-        mapping_frame.columnconfigure(1, weight=1)
-
-        action_frame = ttk.Frame(dialog, padding="8")
-        action_frame.pack(fill="x", padx=8, pady=(0, 8))
-
-        result: Dict[str, str] = {}
-        is_confirmed = False
-
-        def _collect_mapping_with_duplicate_warnings() -> Dict[str, str]:
-            selected_by_expected: Dict[str, str] = {}
-            selected_header_to_expected_keys: Dict[str, List[str]] = {}
-
-            for expected_key, selected_var in vars_by_expected.items():
-                selected_header = selected_var.get()
-                if not selected_header or selected_header == skip_option:
-                    continue
-
-                selected_by_expected[expected_key] = selected_header
-                expected_keys = selected_header_to_expected_keys.setdefault(
-                    selected_header, []
-                )
-                expected_keys.append(expected_key)
-
-            # One CSV header can effectively map to one expected variable.
-            # Keep the last selected expected key and warn for the ignored ones.
-            kept_expected_by_header: Dict[str, str] = {}
-            for (
-                selected_header,
-                expected_keys,
-            ) in selected_header_to_expected_keys.items():
-                kept_expected_key = expected_keys[-1]
-                kept_expected_by_header[selected_header] = kept_expected_key
-
-                for ignored_expected_key in expected_keys[:-1]:
-                    log_message(
-                        f"Ignored mapping for '{ignored_expected_key}': CSV header "
-                        f"'{selected_header}' is used more than once. "
-                        f"Keeping '{kept_expected_key}'.",
-                        "warn",
-                    )
-
-            resolved_mapping: Dict[str, str] = {}
-            for expected_key, selected_header in selected_by_expected.items():
-                if kept_expected_by_header.get(selected_header) == expected_key:
-                    resolved_mapping[expected_key] = selected_header
-
-            return resolved_mapping
-
-        def _on_import():
-            nonlocal is_confirmed
-            is_confirmed = True
-            result.clear()
-            result.update(_collect_mapping_with_duplicate_warnings())
-
-            dialog.destroy()
-
-        def _on_cancel():
-            dialog.destroy()
-
-        ttk.Button(action_frame, text="Import", command=_on_import).pack(
-            side="right", padx=(8, 0)
-        )
-        ttk.Button(action_frame, text="Cancel", command=_on_cancel).pack(side="right")
-
-        dialog.wait_window()
-
-        if not is_confirmed:
-            return None
-        return result
-
+        return suggested_mapping
 
 if __name__ == "__main__":
     ui = MainUI()
