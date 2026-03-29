@@ -156,9 +156,6 @@ _RAW_COLUMN_ALIASES = {
         "time_h",
         "time_hours",
         "time_hour",
-        "time_s",
-        "time_sec",
-        "time_seconds",
         "hours",
     ),
 }
