@@ -140,11 +140,8 @@ class ResultManager:
 
         selected_test_results = experimental_by_test.get(effective_target_test_type, {})
         if not selected_test_results:
-            selected_display_name = TYPE_TO_TEST_NAME.get(
-                effective_target_test_type, effective_target_test_type
-            )
             raise ValueError(
-                f"CSV does not contain data for the selected test '{selected_display_name}'."
+                f"CSV does not contain data for the selected test '{selected_test}'."
             )
 
         # Keep previously imported data for other tests; only replace imported tests.
