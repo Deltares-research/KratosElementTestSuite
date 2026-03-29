@@ -460,7 +460,7 @@ class ResultManagerTest(unittest.TestCase):
         current_test_type = DIRECT_SHEAR
         self.assertDictEqual(result_manager.get_experimental_results(), {})
 
-    def test_import_csv_lab_results_keeps_manual_mapping_for_multiple_test_types(self):
+    def test_import_csv_lab_results_with_manual_mapping_imports_only_to_active_test_type(self):
         # When mapping columns manually, data is only imported to the active test
         current_test_type = TRIAXIAL
         current_test_getter = lambda: current_test_type
