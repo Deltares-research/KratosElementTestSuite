@@ -53,6 +53,7 @@ else:
         )
         return str(base_dir / appname)
 
+
 ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(
     "deltares.ElementTestSuite.ui"
 )
@@ -61,6 +62,7 @@ data_dir = Path(user_data_dir(APP_NAME, APP_AUTHOR))
 data_dir.mkdir(parents=True, exist_ok=True)
 
 LICENSE_FLAG_PATH = data_dir / "license_accepted.flag"
+
 
 class MainUI:
     def __init__(self):
@@ -392,7 +394,9 @@ class MainUI:
             if not csv_path:
                 return
 
-            result = self._controller.prepare_csv_import(csv_path, current_test_display_name)
+            result = self._controller.prepare_csv_import(
+                csv_path, current_test_display_name
+            )
             if result is None:
                 messagebox.showerror(
                     "Import Error",
@@ -446,7 +450,9 @@ class MainUI:
         ttk.Label(frame, text="Expected variable").grid(
             row=0, column=0, sticky="w", padx=(0, 12), pady=(0, 6)
         )
-        ttk.Label(frame, text="CSV header").grid(row=0, column=1, sticky="w", pady=(0, 6))
+        ttk.Label(frame, text="CSV header").grid(
+            row=0, column=1, sticky="w", pady=(0, 6)
+        )
 
         skip_option = "<skip>"
         selectable_headers = [skip_option] + file_headers
@@ -488,16 +494,18 @@ class MainUI:
             dialog.destroy()
 
         ttk.Button(action_frame, text="OK", command=on_ok).pack(side="right", padx=4)
-        ttk.Button(action_frame, text="Cancel", command=on_cancel).pack(side="right", padx=4)
+        ttk.Button(action_frame, text="Cancel", command=on_cancel).pack(
+            side="right", padx=4
+        )
         return is_confirmed
 
     def _show_csv_header_mapping_selection_popup(
-            self,
-            file_headers: List[str],
-            expected_headers: List[str],
-            suggested_mapping: Dict[str, str],
-            test_display_name: str = "",
-        ) -> Optional[Dict[str, str]]:
+        self,
+        file_headers: List[str],
+        expected_headers: List[str],
+        suggested_mapping: Dict[str, str],
+        test_display_name: str = "",
+    ) -> Optional[Dict[str, str]]:
 
         if self._root is None or not expected_headers:
             return suggested_mapping
@@ -515,19 +523,20 @@ class MainUI:
         ttk.Label(dialog, text=label_text).pack(anchor="w", padx=12, pady=(12, 8))
 
         self._build_preview_frame(dialog, file_headers)
-        vars_by_expected = self._build_mapping_frame(dialog, expected_headers, file_headers, suggested_mapping)
+        vars_by_expected = self._build_mapping_frame(
+            dialog, expected_headers, file_headers, suggested_mapping
+        )
         is_confirmed = self._build_action_frame(dialog)
 
         dialog.wait_window()  # wait until the dialog closes
 
         if is_confirmed.get():
             return {
-                k: v.get()
-                for k, v in vars_by_expected.items()
-                if v.get() != "<skip>"
-           }
+                k: v.get() for k, v in vars_by_expected.items() if v.get() != "<skip>"
+            }
 
         return suggested_mapping
+
 
 if __name__ == "__main__":
     ui = MainUI()

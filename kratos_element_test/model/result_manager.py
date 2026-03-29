@@ -100,9 +100,7 @@ class ResultManager:
 
         expected_headers = get_expected_columns_for_test_type(internal_name)
 
-        suggested_mapping = suggest_csv_column_mapping(
-            file_headers, expected_headers
-        )
+        suggested_mapping = suggest_csv_column_mapping(file_headers, expected_headers)
 
         current_test_internal_name = TEST_NAME_TO_TYPE.get(test_display_name)
         if not current_test_internal_name:
