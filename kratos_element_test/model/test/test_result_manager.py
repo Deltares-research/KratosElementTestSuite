@@ -252,7 +252,6 @@ class ResultManagerTest(unittest.TestCase):
 
             result_manager.import_csv_lab_results(csv_file)
 
-        # Check Triaxial results
         current_test_type[0] = TRIAXIAL
         self.assertDictEqual(
             result_manager.get_experimental_results(),
@@ -262,7 +261,6 @@ class ResultManagerTest(unittest.TestCase):
             },
         )
 
-        # Check Direct Simple Shear results
         current_test_type[0] = DIRECT_SHEAR
         self.assertDictEqual(
             result_manager.get_experimental_results(),
@@ -439,7 +437,6 @@ class ResultManagerTest(unittest.TestCase):
 
             result_manager.import_csv_lab_results(csv_file)
 
-        # Data is only imported to the active test (TRIAXIAL)
         current_test_type = TRIAXIAL
         self.assertDictEqual(
             result_manager.get_experimental_results(),
@@ -450,7 +447,6 @@ class ResultManagerTest(unittest.TestCase):
             },
         )
 
-        # CRS should not have any data since it wasn't the active test
         current_test_type = CRS
         self.assertDictEqual(
             result_manager.get_experimental_results(),
@@ -460,7 +456,9 @@ class ResultManagerTest(unittest.TestCase):
         current_test_type = DIRECT_SHEAR
         self.assertDictEqual(result_manager.get_experimental_results(), {})
 
-    def test_import_csv_lab_results_with_manual_mapping_imports_only_to_active_test_type(self):
+    def test_import_csv_lab_results_with_manual_mapping_imports_only_to_active_test_type(
+        self,
+    ):
         # When mapping columns manually, data is only imported to the active test
         current_test_type = TRIAXIAL
         current_test_getter = lambda: current_test_type
@@ -486,7 +484,6 @@ class ResultManagerTest(unittest.TestCase):
                 },
             )
 
-        # Data is only imported to the active test (TRIAXIAL)
         current_test_type = TRIAXIAL
         self.assertDictEqual(
             result_manager.get_experimental_results(),
@@ -495,7 +492,6 @@ class ResultManagerTest(unittest.TestCase):
             },
         )
 
-        # CRS should not have any data since it wasn't the active test
         current_test_type = CRS
         self.assertDictEqual(
             result_manager.get_experimental_results(),
@@ -562,11 +558,9 @@ class ResultManagerTest(unittest.TestCase):
             "sigma1_sigma3_diff": [0.0, 150.0],
         }
 
-        # Data is only in the active test (TRIAXIAL)
         current_test_type = TRIAXIAL
         self.assertDictEqual(result_manager.get_experimental_results(), expected)
 
-        # Other test types should not have the data
         current_test_type = DIRECT_SHEAR
         self.assertDictEqual(result_manager.get_experimental_results(), {})
 

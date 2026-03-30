@@ -134,7 +134,6 @@ class MatplotlibPlotter:
             if x_candidate == x_key and y_candidate == y_key:
                 return spec.axis_index
 
-        # Also support reversed x/y mapping and still place it on the intended axis.
         for spec in pair_specs:
             x_candidate = spec.x_key
             y_candidate = spec.y_key
@@ -223,7 +222,6 @@ class MatplotlibPlotter:
         ax.plot(x, y, "--", color="magenta", label=f"Lab results ({y_key} vs {x_key})")
         self._safe_legend(ax)
 
-        # Set a readable label pair only when the axis has not been labeled yet.
         if not ax.get_xlabel():
             ax.set_xlabel(x_key)
         if not ax.get_ylabel():

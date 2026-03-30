@@ -99,56 +99,58 @@ _RAW_COLUMN_ALIASES = {
         "q_diff",
         "deviator_sigma",
     ),
-    "p'": (
+    "Mean Effective Stress": (
         "p'",
         "pprime",
         "p_prime",
-        "p",
         "mean_stress",
         "meanstress",
         "mean_effective_stress",
+        "mean effective stress",
         "mean_effective_pressure",
         "effective_stress_mean",
         "effective_mean_stress",
         "p_eff",
     ),
-    "q": (
+    "Deviatoric Stress": (
         "q",
         "q_stress",
         "deviator_stress",
         "von_mises",
         "deviatoric_stress",
         "deviatoricstress",
+        "deviatoric stress",
     ),
-    "shear_strain_xy": (
+    "Tensor Shear Strain": (
         "shear_strain_xy",
         "strain_xy",
-        "gamma_xy",
         "epsilon_xy",
         "exy",
     ),
-    "shear_stress_xy": (
+    "Shear Stress": (
         "shear_stress_xy",
         "shear_xy",
-        "gamma_tau",
         "tau_xy",
         "shear_stress",
     ),
-    "sigma_yy": (
+    "Vertical Effective Stress": (
         "sigma_yy",
         "sigmayy",
         "sigma_prime_yy",
         "vertical_effective_stress",
         "vertical_stress",
         "effective_vertical_stress",
+        "effective vertical stress",
+        "vertical effective stress",
     ),
-    "sigma_xx": (
+    "Horizontal Effective Stress": (
         "sigma_xx",
         "sigmaxx",
         "sigma_prime_xx",
         "horizontal_effective_stress",
         "horizontal_stress",
         "effective_horizontal_stress",
+        "horizontal effective stress",
     ),
     "time_steps": (
         "time_steps",
@@ -377,7 +379,6 @@ def _decode_csv_bytes(csv_bytes: bytes, csv_file: Path) -> str:
             decode_errors.append(f"{encoding}: {exc}")
             continue
 
-        # Reject clearly wrong decodes (typically UTF-16 bytes decoded as single-byte).
         if decoded.count("\x00") > max(1, len(decoded) // 20):
             continue
 
@@ -506,7 +507,6 @@ def parse_csv_lab_results(
                     f"Mapped source column '{selected_source}' was not found in CSV headers"
                 )
 
-            # Replace any existing source mapped to this canonical key.
             for existing_source, existing_canonical in list(mapped_columns.items()):
                 if existing_canonical == canonical_key:
                     mapped_columns.pop(existing_source, None)
@@ -538,7 +538,6 @@ def parse_csv_lab_results(
                 "CSV does not contain recognized columns for the selected test type"
             )
 
-        # Without test_type in CSV, only keep columns expected by the selected test.
         for source_column, canonical_key in mapped_columns.items():
             if (
                 default_test_type_internal is not None

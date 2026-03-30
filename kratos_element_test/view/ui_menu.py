@@ -528,7 +528,7 @@ class MainUI:
         )
         is_confirmed = self._build_action_frame(dialog)
 
-        dialog.wait_window()  # wait until the dialog closes
+        dialog.wait_window()
 
         if is_confirmed.get():
             return {

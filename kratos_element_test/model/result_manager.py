@@ -142,7 +142,6 @@ class ResultManager:
                 f"CSV does not contain data for the selected test '{selected_test}'."
             )
 
-        # Keep previously imported data for other tests; only replace imported tests.
         self.import_lab_results_dict(
             {effective_target_test_type: selected_test_results},
             clear_existing=False,
