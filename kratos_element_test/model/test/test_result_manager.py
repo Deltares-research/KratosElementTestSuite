@@ -224,6 +224,7 @@ class ResultManagerTest(unittest.TestCase):
         imported = result_manager.get_experimental_results()
         self.assertDictEqual(
             {
+                "q": [0.0, 150.0],
                 "sigma_1": [-100.0, -250.0],
                 "sigma_3": [-100.0, -100.0],
                 "sigma1_sigma3_diff": [0.0, 150.0],
@@ -360,6 +361,7 @@ class ResultManagerTest(unittest.TestCase):
         imported = result_manager.get_experimental_results()
         self.assertDictEqual(
             {
+                "q": [0.0, 150.0],
                 "sigma1_sigma3_diff": [0.0, 150.0],
                 "sigma_1": [-100.0, -250.0],
                 "sigma_3": [-100.0, -100.0],
@@ -540,7 +542,7 @@ class ResultManagerTest(unittest.TestCase):
         with TemporaryDirectory() as tmp_dir:
             csv_file = Path(tmp_dir) / "pq_only.csv"
             csv_file.write_text(
-                "p,q\n" "-100,0\n" "-150,150\n",
+                "pprime,q\n" "-100,0\n" "-150,150\n",
                 encoding="utf-8",
             )
 

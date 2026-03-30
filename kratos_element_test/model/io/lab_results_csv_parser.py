@@ -99,7 +99,7 @@ _RAW_COLUMN_ALIASES = {
         "q_diff",
         "deviator_sigma",
     ),
-    "Mean Effective Stress": (
+    "p'": (
         "p'",
         "pprime",
         "p_prime",
@@ -112,7 +112,7 @@ _RAW_COLUMN_ALIASES = {
         "effective_mean_stress",
         "p_eff",
     ),
-    "Deviatoric Stress": (
+    "q": (
         "q",
         "q_stress",
         "deviator_stress",
@@ -121,19 +121,20 @@ _RAW_COLUMN_ALIASES = {
         "deviatoricstress",
         "deviatoric stress",
     ),
-    "Tensor Shear Strain": (
+    "shear_strain_xy": (
         "shear_strain_xy",
         "strain_xy",
+        "gamma_xy",
         "epsilon_xy",
         "exy",
     ),
-    "Shear Stress": (
+    "shear_stress_xy": (
         "shear_stress_xy",
         "shear_xy",
         "tau_xy",
         "shear_stress",
     ),
-    "Vertical Effective Stress": (
+    "sigma_yy": (
         "sigma_yy",
         "sigmayy",
         "sigma_prime_yy",
@@ -143,7 +144,7 @@ _RAW_COLUMN_ALIASES = {
         "effective vertical stress",
         "vertical effective stress",
     ),
-    "Horizontal Effective Stress": (
+    "sigma_xx": (
         "sigma_xx",
         "sigmaxx",
         "sigma_prime_xx",
