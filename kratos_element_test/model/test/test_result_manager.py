@@ -224,11 +224,9 @@ class ResultManagerTest(unittest.TestCase):
         imported = result_manager.get_experimental_results()
         self.assertDictEqual(
             {
-                "p'": [-100.0, -150.0],
-                "q": [0.0, 150.0],
-                "sigma1_sigma3_diff": [0.0, 150.0],
                 "sigma_1": [-100.0, -250.0],
                 "sigma_3": [-100.0, -100.0],
+                "sigma1_sigma3_diff": [0.0, 150.0],
             },
             imported,
         )
@@ -362,8 +360,6 @@ class ResultManagerTest(unittest.TestCase):
         imported = result_manager.get_experimental_results()
         self.assertDictEqual(
             {
-                "p'": [-100.0, -150.0],
-                "q": [0.0, 150.0],
                 "sigma1_sigma3_diff": [0.0, 150.0],
                 "sigma_1": [-100.0, -250.0],
                 "sigma_3": [-100.0, -100.0],
