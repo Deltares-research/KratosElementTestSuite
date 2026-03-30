@@ -68,7 +68,7 @@ class ElementTestController:
         column_mapping: Optional[Dict[str, str]] = None,
         target_test_type: Optional[str] = None,
     ) -> str:
-        test_type_used = self._main_model.import_csv_data(
+        self._main_model.import_csv_data(
             csv_file,
             column_mapping,
             target_test_type=target_test_type,
