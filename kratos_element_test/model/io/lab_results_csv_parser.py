@@ -131,7 +131,8 @@ _RAW_COLUMN_ALIASES = {
         "epsilon_xy",
         "exy",
     ),
-    "shear_stress_xy": (
+    "Shear Stress": (
+        "Shear Stress",
         "shear_stress_xy",
         "shear_xy",
         "tau_xy",
@@ -178,7 +179,7 @@ _EXPECTED_COLUMNS_BY_TEST: Dict[str, List[str]] = {
     ],
     "direct_shear": [
         "Tensor Shear Strain",
-        "shear_stress_xy",
+        "Shear Stress",
         "sigma_3",
         "sigma_1",
         "Mean Effective Stress",

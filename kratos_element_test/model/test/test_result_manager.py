@@ -302,7 +302,7 @@ class ResultManagerTest(unittest.TestCase):
             result_manager.get_experimental_results(),
             {
                 "Tensor Shear Strain": [0.0, 0.05],
-                "shear_stress_xy": [0.0, 40.0],
+                "Shear Stress": [0.0, 40.0],
             },
         )
 
