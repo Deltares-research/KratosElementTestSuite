@@ -1,7 +1,7 @@
 import csv
 import io
 from pathlib import Path
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Any
 
 from kratos_element_test.view.ui_constants import TEST_NAME_TO_TYPE, VALID_TEST_TYPES
 
@@ -390,7 +390,7 @@ def _decode_csv_bytes(csv_bytes: bytes, csv_file: Path) -> str:
     )
     raise ValueError(
         f"Could not decode CSV file '{csv_file}'. "
-        "Supported encodings include UTF-8, UTF-16 and Windows-1252. "
+        "Supported encodings include UTF-8, UTF-16, Windows-1252, and latin-1."
         f"Details: {details}"
     )
 
@@ -452,6 +452,138 @@ def suggest_csv_column_mapping(
     return mapping
 
 
+def _build_mapped_columns(
+    file_headers: List[str], column_mapping: Optional[Dict[str, str]] = None
+) -> tuple[Optional[str], Dict[str, str]]:
+    test_type_column: Optional[str] = None
+    mapped_columns: Dict[str, str] = {}
+
+    for column_name in file_headers:
+        normalized = _normalize_token(column_name)
+        if normalized in _TEST_TYPE_HEADER_ALIASES and test_type_column is None:
+            test_type_column = column_name
+            continue
+
+        canonical_key = _map_column_name_to_canonical_key(column_name)
+        if canonical_key is None:
+            continue
+        if canonical_key in mapped_columns.values():
+            continue
+        mapped_columns[column_name] = canonical_key
+
+    if column_mapping:
+        header_set = set(file_headers)
+        for canonical_key, source_column in column_mapping.items():
+            if canonical_key not in _RAW_COLUMN_ALIASES:
+                continue
+            selected_source = (source_column or "").strip()
+            if not selected_source:
+                continue
+            if selected_source not in header_set:
+                raise ValueError(
+                    f"Mapped source column '{selected_source}' was not found in CSV headers"
+                )
+            for existing_source, existing_canonical in list(mapped_columns.items()):
+                if existing_canonical == canonical_key:
+                    mapped_columns.pop(existing_source, None)
+            mapped_columns[selected_source] = canonical_key
+
+    if not mapped_columns:
+        discovered_headers = ", ".join(str(h) for h in file_headers)
+        raise ValueError(
+            "CSV does not contain recognized columns for lab result import. "
+            f"Detected headers: {discovered_headers}."
+        )
+
+    return test_type_column, mapped_columns
+
+
+def _build_source_column_targets_for_unspecified_test_type(
+    mapped_columns: Dict[str, str],
+    default_test_type_internal: Optional[str],
+) -> Dict[str, List[str]]:
+    source_column_targets: Dict[str, List[str]] = {}
+    expected_columns_for_selected_test = set(
+        _EXPECTED_COLUMNS_BY_TEST.get(default_test_type_internal or "", [])
+    )
+    if not any(
+        canonical_key in expected_columns_for_selected_test
+        for canonical_key in mapped_columns.values()
+    ):
+        raise ValueError(
+            "CSV does not contain recognized columns for the selected test type"
+        )
+
+    for source_column, canonical_key in mapped_columns.items():
+        if (
+            default_test_type_internal is not None
+            and canonical_key in expected_columns_for_selected_test
+        ):
+            source_column_targets[source_column] = [default_test_type_internal]
+        else:
+            source_column_targets[source_column] = []
+
+    return source_column_targets
+
+
+def _get_row_test_type(
+    row: Dict[str, Any],
+    test_type_column: Optional[str],
+    default_test_type_internal: Optional[str],
+    line_number: int,
+) -> Optional[str]:
+    if test_type_column is not None:
+        raw_test_type = (row.get(test_type_column) or "").strip()
+        if raw_test_type:
+            row_test_type = _canonical_test_type(raw_test_type)
+            if row_test_type is None:
+                raise ValueError(
+                    f"Unknown test type '{raw_test_type}' at line {line_number}"
+                )
+            return row_test_type
+
+    return default_test_type_internal
+
+
+def _import_row_values_to_results(
+    reader: csv.DictReader,
+    mapped_columns: Dict[str, str],
+    default_test_type_internal: Optional[str],
+    test_type_column: Optional[str],
+    source_column_targets: Dict[str, List[str]],
+    experimental_by_test: Dict[str, Dict[str, List[float]]],
+) -> bool:
+    imported_any_value = False
+
+    for line_number, row in enumerate(reader, start=2):
+        row_test_type = _get_row_test_type(
+            row, test_type_column, default_test_type_internal, line_number
+        )
+        if row_test_type is None:
+            continue
+
+        for source_column, canonical_key in mapped_columns.items():
+            numeric_value = _parse_float(
+                row.get(source_column, ""), line_number, source_column
+            )
+            if numeric_value is None:
+                continue
+
+            target_test_types = [row_test_type]
+            if test_type_column is None:
+                target_test_types = source_column_targets.get(source_column, [])
+
+            if not target_test_types:
+                continue
+
+            imported_any_value = True
+            for target_test_type in target_test_types:
+                per_test_results = experimental_by_test.setdefault(target_test_type, {})
+                per_test_results.setdefault(canonical_key, []).append(numeric_value)
+
+    return imported_any_value
+
+
 def parse_csv_lab_results(
     csv_file: Path,
     default_test_type: Optional[str] = None,
@@ -474,116 +606,30 @@ def parse_csv_lab_results(
         raise ValueError("CSV file has no header row")
 
     file_headers = [h for h in reader.fieldnames if h is not None]
-
-    test_type_column: Optional[str] = None
-    mapped_columns: Dict[str, str] = {}
-
-    for column_name in file_headers:
-        normalized = _normalize_token(column_name)
-
-        if normalized in _TEST_TYPE_HEADER_ALIASES and test_type_column is None:
-            test_type_column = column_name
-            continue
-
-        canonical_key = _map_column_name_to_canonical_key(column_name)
-        if canonical_key is None:
-            continue
-
-        if canonical_key in mapped_columns.values():
-            continue
-        mapped_columns[column_name] = canonical_key
-
-    if column_mapping:
-        header_set = set(file_headers)
-        for canonical_key, source_column in column_mapping.items():
-            if canonical_key not in _RAW_COLUMN_ALIASES:
-                continue
-
-            selected_source = (source_column or "").strip()
-            if not selected_source:
-                continue
-
-            if selected_source not in header_set:
-                raise ValueError(
-                    f"Mapped source column '{selected_source}' was not found in CSV headers"
-                )
-
-            for existing_source, existing_canonical in list(mapped_columns.items()):
-                if existing_canonical == canonical_key:
-                    mapped_columns.pop(existing_source, None)
-
-            mapped_columns[selected_source] = canonical_key
-
-    if not mapped_columns:
-        discovered_headers = ", ".join(str(h) for h in file_headers)
-        raise ValueError(
-            "CSV does not contain recognized columns for lab result import. "
-            f"Detected headers: {discovered_headers}."
-        )
+    test_type_column, mapped_columns = _build_mapped_columns(
+        file_headers, column_mapping
+    )
 
     if test_type_column is None and default_test_type_internal is None:
         raise ValueError(
             "CSV must include a test_type column when no active test type is available"
         )
 
-    source_column_targets: Dict[str, List[str]] = {}
+    source_column_targets = {}
     if test_type_column is None:
-        expected_columns_for_selected_test = set(
-            _EXPECTED_COLUMNS_BY_TEST.get(default_test_type_internal or "", [])
+        source_column_targets = _build_source_column_targets_for_unspecified_test_type(
+            mapped_columns, default_test_type_internal
         )
-        if not any(
-            canonical_key in expected_columns_for_selected_test
-            for canonical_key in mapped_columns.values()
-        ):
-            raise ValueError(
-                "CSV does not contain recognized columns for the selected test type"
-            )
-
-        for source_column, canonical_key in mapped_columns.items():
-            if (
-                default_test_type_internal is not None
-                and canonical_key in expected_columns_for_selected_test
-            ):
-                source_column_targets[source_column] = [default_test_type_internal]
-            else:
-                source_column_targets[source_column] = []
 
     experimental_by_test: Dict[str, Dict[str, List[float]]] = {}
-    imported_any_value = False
-
-    for line_number, row in enumerate(reader, start=2):
-        row_test_type = default_test_type_internal
-
-        if test_type_column is not None:
-            raw_test_type = (row.get(test_type_column) or "").strip()
-            if raw_test_type:
-                row_test_type = _canonical_test_type(raw_test_type)
-                if row_test_type is None:
-                    raise ValueError(
-                        f"Unknown test type '{raw_test_type}' at line {line_number}"
-                    )
-
-        if row_test_type is None:
-            continue
-
-        for source_column, canonical_key in mapped_columns.items():
-            numeric_value = _parse_float(
-                row.get(source_column, ""), line_number, source_column
-            )
-            if numeric_value is None:
-                continue
-
-            target_test_types = [row_test_type]
-            if test_type_column is None:
-                target_test_types = source_column_targets.get(source_column, [])
-
-            if not target_test_types:
-                continue
-
-            imported_any_value = True
-            for target_test_type in target_test_types:
-                per_test_results = experimental_by_test.setdefault(target_test_type, {})
-                per_test_results.setdefault(canonical_key, []).append(numeric_value)
+    imported_any_value = _import_row_values_to_results(
+        reader,
+        mapped_columns,
+        default_test_type_internal,
+        test_type_column,
+        source_column_targets,
+        experimental_by_test,
+    )
 
     if not imported_any_value:
         raise ValueError("CSV does not contain any numeric values to import")
