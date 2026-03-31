@@ -224,7 +224,7 @@ class ResultManagerTest(unittest.TestCase):
         imported = result_manager.get_experimental_results()
         self.assertDictEqual(
             {
-                "q": [0.0, 150.0],
+                "Deviatoric Stress": [0.0, 150.0],
                 "sigma_1": [-100.0, -250.0],
                 "sigma_3": [-100.0, -100.0],
                 "sigma1_sigma3_diff": [0.0, 150.0],
@@ -361,7 +361,7 @@ class ResultManagerTest(unittest.TestCase):
         imported = result_manager.get_experimental_results()
         self.assertDictEqual(
             {
-                "q": [0.0, 150.0],
+                "Deviatoric Stress": [0.0, 150.0],
                 "sigma1_sigma3_diff": [0.0, 150.0],
                 "sigma_1": [-100.0, -250.0],
                 "sigma_3": [-100.0, -100.0],
@@ -388,7 +388,7 @@ class ResultManagerTest(unittest.TestCase):
         self.assertDictEqual(
             imported,
             {
-                "q": [0.0, 150.0],
+                "Deviatoric Stress": [0.0, 150.0],
                 "Mean Effective Stress": [-100.0, -150.0],
                 "sigma1_sigma3_diff": [0.0, 150.0],
             },
@@ -406,14 +406,14 @@ class ResultManagerTest(unittest.TestCase):
             result_manager.import_csv_lab_results(
                 csv_file,
                 column_mapping={
-                    "q": "sigma",
+                    "Deviatoric Stress": "sigma",
                     "yy_strain": "epsilon",
                 },
             )
 
         self.assertDictEqual(
             result_manager.get_experimental_results(),
-            {"q": [0.0, 120.0], "sigma1_sigma3_diff": [0.0, 120.0]},
+            {"Deviatoric Stress": [0.0, 120.0], "sigma1_sigma3_diff": [0.0, 120.0]},
         )
 
     def test_import_csv_lab_results_keeps_multi_model_data_without_test_type_column(
@@ -552,7 +552,7 @@ class ResultManagerTest(unittest.TestCase):
         # sigma_1 and sigma_3 are absent, so it is present in the stored results.
         expected = {
             "Mean Effective Stress": [-100.0, -150.0],
-            "q": [0.0, 150.0],
+            "Deviatoric Stress": [0.0, 150.0],
             "sigma1_sigma3_diff": [0.0, 150.0],
         }
 

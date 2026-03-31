@@ -113,7 +113,8 @@ _RAW_COLUMN_ALIASES = {
         "effective_mean_stress",
         "p_eff",
     ),
-    "q": (
+    "Deviatoric Stress": (
+        "Deviatoric Stress",
         "q",
         "q_stress",
         "deviator_stress",
@@ -172,7 +173,7 @@ _EXPECTED_COLUMNS_BY_TEST: Dict[str, List[str]] = {
         "sigma_3",
         "sigma_1",
         "Mean Effective Stress",
-        "q",
+        "Deviatoric Stress",
     ],
     "direct_shear": [
         "shear_strain_xy",
@@ -180,7 +181,7 @@ _EXPECTED_COLUMNS_BY_TEST: Dict[str, List[str]] = {
         "sigma_3",
         "sigma_1",
         "Mean Effective Stress",
-        "q",
+        "Deviatoric Stress",
     ],
     "crs": [
         "yy_strain",
@@ -189,7 +190,7 @@ _EXPECTED_COLUMNS_BY_TEST: Dict[str, List[str]] = {
         "sigma_3",
         "sigma_1",
         "Mean Effective Stress",
-        "q",
+        "Deviatoric Stress",
         "time_steps",
     ],
 }
@@ -307,7 +308,7 @@ def _compute_missing_sigma_diff(results: Dict[str, List[float]]) -> None:
     sigma_1 = results.get("sigma_1")
     sigma_3 = results.get("sigma_3")
     if not sigma_1 or not sigma_3:
-        q_values = results.get("q")
+        q_values = results.get("Deviatoric Stress")
         if q_values:
             results["sigma1_sigma3_diff"] = [abs(v) for v in q_values]
         return
