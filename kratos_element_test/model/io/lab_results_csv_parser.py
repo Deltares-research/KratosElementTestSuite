@@ -44,6 +44,7 @@ def _build_alias_map(
 
 _RAW_COLUMN_ALIASES = {
     "Vertical Strain": (
+        "Vertical Strain",
         "yy_strain",
         "vertical_strain",
         "vertical strain",
@@ -172,7 +173,7 @@ _RAW_COLUMN_ALIASES = {
 
 _EXPECTED_COLUMNS_BY_TEST: Dict[str, List[str]] = {
     "triaxial": [
-        "yy_strain",
+        "Vertical Strain",
         "sigma1_sigma3_diff",
         "Volumetric Strain",
         "sigma_3",
@@ -189,7 +190,7 @@ _EXPECTED_COLUMNS_BY_TEST: Dict[str, List[str]] = {
         "Deviatoric Stress",
     ],
     "crs": [
-        "yy_strain",
+        "Vertical Strain",
         "Vertical Effective Stress",
         "Horizontal Effective Stress",
         "sigma_3",

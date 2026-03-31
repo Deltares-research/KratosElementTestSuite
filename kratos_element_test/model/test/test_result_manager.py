@@ -225,6 +225,7 @@ class ResultManagerTest(unittest.TestCase):
         self.assertDictEqual(
             {
                 "Deviatoric Stress": [0.0, 150.0],
+                "Vertical Strain": [0.0, -0.1],
                 "Volumetric Strain": [0.0, -0.01],
                 "sigma_1": [-100.0, -250.0],
                 "sigma_3": [-100.0, -100.0],
@@ -293,7 +294,7 @@ class ResultManagerTest(unittest.TestCase):
         current_test_type = TRIAXIAL
         self.assertDictEqual(
             result_manager.get_experimental_results(),
-            {
+            {"Vertical Strain": [0.0, -0.1],
                 "sigma1_sigma3_diff": [0.0, 120.0],
             },
         )
@@ -325,6 +326,7 @@ class ResultManagerTest(unittest.TestCase):
         self.assertDictEqual(
             result_manager.get_experimental_results(),
             {
+                "Vertical Strain": [0.0, -0.1],
                 "sigma_1": [-100.0, -250.0],
                 "sigma_3": [-100.0, -100.0],
                 "sigma1_sigma3_diff": [0.0, 150.0],
@@ -363,6 +365,7 @@ class ResultManagerTest(unittest.TestCase):
         self.assertDictEqual(
             {
                 "Deviatoric Stress": [0.0, 150.0],
+                "Vertical Strain": [0.0, -0.1],
                 "Volumetric Strain": [0.0, -0.01],
                 "sigma1_sigma3_diff": [0.0, 150.0],
                 "sigma_1": [-100.0, -250.0],
@@ -393,6 +396,7 @@ class ResultManagerTest(unittest.TestCase):
                 "Deviatoric Stress": [0.0, 150.0],
                 "Mean Effective Stress": [-100.0, -150.0],
                 "sigma1_sigma3_diff": [0.0, 150.0],
+                "Vertical Strain": [0.0, -0.1],
             },
         )
 
@@ -409,13 +413,13 @@ class ResultManagerTest(unittest.TestCase):
                 csv_file,
                 column_mapping={
                     "Deviatoric Stress": "sigma",
-                    "yy_strain": "epsilon",
+                    "Vertical Strain": "epsilon",
                 },
             )
 
         self.assertDictEqual(
             result_manager.get_experimental_results(),
-            {"Deviatoric Stress": [0.0, 120.0], "sigma1_sigma3_diff": [0.0, 120.0]},
+            {"Deviatoric Stress": [0.0, 120.0], "Vertical Strain": [0.0, -0.1], "sigma1_sigma3_diff": [0.0, 120.0]},
         )
 
     def test_import_csv_lab_results_keeps_multi_model_data_without_test_type_column(
@@ -440,7 +444,8 @@ class ResultManagerTest(unittest.TestCase):
         current_test_type = TRIAXIAL
         self.assertDictEqual(
             result_manager.get_experimental_results(),
-            {"Volumetric Strain": [0.0, -0.02],
+            {"Vertical Strain": [0.0, -0.1],
+             "Volumetric Strain": [0.0, -0.02],
                 "sigma_1": [-100.0, -250.0],
                 "sigma_3": [-100.0, -100.0],
                 "sigma1_sigma3_diff": [0.0, 150.0],
@@ -476,7 +481,7 @@ class ResultManagerTest(unittest.TestCase):
             result_manager.import_csv_lab_results(
                 csv_file,
                 column_mapping={
-                    "yy_strain": "axial",
+                    "Vertical Strain": "axial",
                     "sigma1_sigma3_diff": "delta_sigma",
                     "Horizontal Effective Stress": "horizontal",
                     "Vertical Effective Stress": "vertical",
@@ -488,6 +493,7 @@ class ResultManagerTest(unittest.TestCase):
         self.assertDictEqual(
             result_manager.get_experimental_results(),
             {
+                "Vertical Strain": [0.0, -0.1],
                 "sigma1_sigma3_diff": [0.0, 150.0],
             },
         )
