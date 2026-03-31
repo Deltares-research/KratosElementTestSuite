@@ -69,7 +69,7 @@ OVERLAYS_BY_TEST: Dict[str, Tuple[OverlaySpec, ...]] = {
         OverlaySpec(
             axis_index=0,
             x_key="Vertical Strain",
-            y_key="sigma1_sigma3_diff",
+            y_key="sigma_1 - sigma_3",
             title=TITLE_DIFF_PRINCIPAL_SIGMA_VS_STRAIN,
             x_label=VERTICAL_STRAIN_LABEL,
             y_label=SIGMA1_SIGMA3_DIFF_LABEL,

@@ -93,7 +93,8 @@ _RAW_COLUMN_ALIASES = {
         "third principal stress",
         "minor principal stress",
     ),
-    "sigma1_sigma3_diff": (
+    "sigma_1 - sigma_3": (
+        "sigma_1 - sigma_3",
         "sigma1_sigma3_diff",
         "delta_sigma",
         "deltasigma",
@@ -175,7 +176,7 @@ _RAW_COLUMN_ALIASES = {
 _EXPECTED_COLUMNS_BY_TEST: Dict[str, List[str]] = {
     "triaxial": [
         "Vertical Strain",
-        "sigma1_sigma3_diff",
+        "sigma_1 - sigma_3",
         "Volumetric Strain",
         "sigma_3",
         "sigma_1",
@@ -309,7 +310,7 @@ def _parse_float(value: str, line_number: int, column_name: str) -> Optional[flo
 
 
 def _compute_missing_sigma_diff(results: Dict[str, List[float]]) -> None:
-    if "sigma1_sigma3_diff" in results:
+    if "sigma_1 - sigma_3" in results:
         return
 
     sigma_1 = results.get("sigma_1")
@@ -317,14 +318,14 @@ def _compute_missing_sigma_diff(results: Dict[str, List[float]]) -> None:
     if not sigma_1 or not sigma_3:
         q_values = results.get("Deviatoric Stress")
         if q_values:
-            results["sigma1_sigma3_diff"] = [abs(v) for v in q_values]
+            results["sigma_1 - sigma_3"] = [abs(v) for v in q_values]
         return
 
     n = min(len(sigma_1), len(sigma_3))
     if n <= 0:
         return
 
-    results["sigma1_sigma3_diff"] = [
+    results["sigma_1 - sigma_3"] = [
         abs(sigma_1[index] - sigma_3[index]) for index in range(n)
     ]
 

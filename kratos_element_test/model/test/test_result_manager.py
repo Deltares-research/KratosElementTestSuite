@@ -229,7 +229,7 @@ class ResultManagerTest(unittest.TestCase):
                 "Volumetric Strain": [0.0, -0.01],
                 "sigma_1": [-100.0, -250.0],
                 "sigma_3": [-100.0, -100.0],
-                "sigma1_sigma3_diff": [0.0, 150.0],
+                "sigma_1 - sigma_3": [0.0, 150.0],
             },
             imported,
         )
@@ -258,7 +258,7 @@ class ResultManagerTest(unittest.TestCase):
             result_manager.get_experimental_results(),
             {
                 "Vertical Strain": [0.0, -0.1],
-                "sigma1_sigma3_diff": [0.0, 120.0],
+                "sigma_1 - sigma_3": [0.0, 120.0],
             },
         )
 
@@ -295,7 +295,7 @@ class ResultManagerTest(unittest.TestCase):
         self.assertDictEqual(
             result_manager.get_experimental_results(),
             {"Vertical Strain": [0.0, -0.1],
-                "sigma1_sigma3_diff": [0.0, 120.0],
+                "sigma_1 - sigma_3": [0.0, 120.0],
             },
         )
 
@@ -329,7 +329,7 @@ class ResultManagerTest(unittest.TestCase):
                 "Vertical Strain": [0.0, -0.1],
                 "sigma_1": [-100.0, -250.0],
                 "sigma_3": [-100.0, -100.0],
-                "sigma1_sigma3_diff": [0.0, 150.0],
+                "sigma_1 - sigma_3": [0.0, 150.0],
             },
         )
 
@@ -367,7 +367,7 @@ class ResultManagerTest(unittest.TestCase):
                 "Deviatoric Stress": [0.0, 150.0],
                 "Vertical Strain": [0.0, -0.1],
                 "Volumetric Strain": [0.0, -0.01],
-                "sigma1_sigma3_diff": [0.0, 150.0],
+                "sigma_1 - sigma_3": [0.0, 150.0],
                 "sigma_1": [-100.0, -250.0],
                 "sigma_3": [-100.0, -100.0],
             },
@@ -395,7 +395,7 @@ class ResultManagerTest(unittest.TestCase):
             {
                 "Deviatoric Stress": [0.0, 150.0],
                 "Mean Effective Stress": [-100.0, -150.0],
-                "sigma1_sigma3_diff": [0.0, 150.0],
+                "sigma_1 - sigma_3": [0.0, 150.0],
                 "Vertical Strain": [0.0, -0.1],
             },
         )
@@ -419,7 +419,7 @@ class ResultManagerTest(unittest.TestCase):
 
         self.assertDictEqual(
             result_manager.get_experimental_results(),
-            {"Deviatoric Stress": [0.0, 120.0], "Vertical Strain": [0.0, -0.1], "sigma1_sigma3_diff": [0.0, 120.0]},
+            {"Deviatoric Stress": [0.0, 120.0], "Vertical Strain": [0.0, -0.1], "sigma_1 - sigma_3": [0.0, 120.0]},
         )
 
     def test_import_csv_lab_results_keeps_multi_model_data_without_test_type_column(
@@ -448,7 +448,7 @@ class ResultManagerTest(unittest.TestCase):
              "Volumetric Strain": [0.0, -0.02],
                 "sigma_1": [-100.0, -250.0],
                 "sigma_3": [-100.0, -100.0],
-                "sigma1_sigma3_diff": [0.0, 150.0],
+                "sigma_1 - sigma_3": [0.0, 150.0],
             },
         )
 
@@ -482,7 +482,7 @@ class ResultManagerTest(unittest.TestCase):
                 csv_file,
                 column_mapping={
                     "Vertical Strain": "axial",
-                    "sigma1_sigma3_diff": "delta_sigma",
+                    "sigma_1 - sigma_3": "delta_sigma",
                     "Horizontal Effective Stress": "horizontal",
                     "Vertical Effective Stress": "vertical",
                     "Time steps": "time",
@@ -494,7 +494,7 @@ class ResultManagerTest(unittest.TestCase):
             result_manager.get_experimental_results(),
             {
                 "Vertical Strain": [0.0, -0.1],
-                "sigma1_sigma3_diff": [0.0, 150.0],
+                "sigma_1 - sigma_3": [0.0, 150.0],
             },
         )
 
@@ -556,12 +556,12 @@ class ResultManagerTest(unittest.TestCase):
 
             result_manager.import_csv_lab_results(csv_file)
 
-        # _compute_missing_sigma_diff derives sigma1_sigma3_diff from q when
+        # _compute_missing_sigma_diff derives sigma_1 - sigma_3 from q when
         # sigma_1 and sigma_3 are absent, so it is present in the stored results.
         expected = {
             "Mean Effective Stress": [-100.0, -150.0],
             "Deviatoric Stress": [0.0, 150.0],
-            "sigma1_sigma3_diff": [0.0, 150.0],
+            "sigma_1 - sigma_3": [0.0, 150.0],
         }
 
         current_test_type = TRIAXIAL
