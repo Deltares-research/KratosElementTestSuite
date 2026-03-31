@@ -161,7 +161,8 @@ _RAW_COLUMN_ALIASES = {
         "effective_horizontal_stress",
         "horizontal effective stress",
     ),
-    "time_steps": (
+    "Time steps": (
+        "Time steps",
         "time_steps",
         "time",
         "time_h",
@@ -197,7 +198,7 @@ _EXPECTED_COLUMNS_BY_TEST: Dict[str, List[str]] = {
         "sigma_1",
         "Mean Effective Stress",
         "Deviatoric Stress",
-        "time_steps",
+        "Time steps",
     ],
 }
 

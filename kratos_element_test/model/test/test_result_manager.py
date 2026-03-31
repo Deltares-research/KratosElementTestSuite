@@ -485,7 +485,7 @@ class ResultManagerTest(unittest.TestCase):
                     "sigma1_sigma3_diff": "delta_sigma",
                     "Horizontal Effective Stress": "horizontal",
                     "Vertical Effective Stress": "vertical",
-                    "time_steps": "time",
+                    "Time steps": "time",
                 },
             )
 

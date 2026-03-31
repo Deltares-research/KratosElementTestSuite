@@ -79,7 +79,7 @@ OVERLAYS_BY_TEST: Dict[str, Tuple[OverlaySpec, ...]] = {
         OverlaySpec(
             axis_index=1,
             x_key="Vertical Strain",
-            y_key="vol_strain",
+            y_key="Volumetric Strain",
             title=TITLE_VOL_VS_VERT_STRAIN,
             x_label=VERTICAL_STRAIN_LABEL,
             y_label=VOLUMETRIC_STRAIN_LABEL,
@@ -120,8 +120,8 @@ OVERLAYS_BY_TEST: Dict[str, Tuple[OverlaySpec, ...]] = {
         # axis 0: tau vs gamma
         OverlaySpec(
             axis_index=0,
-            x_key="shear_strain_xy",
-            y_key="shear_stress_xy",
+            x_key="Tensor Shear Strain",
+            y_key="Shear Stress",
             title=TITLE_SHEAR_VS_STRAIN,
             x_label=SHEAR_STRAIN_LABEL,
             y_label=SHEAR_STRESS_LABEL,
@@ -163,7 +163,7 @@ OVERLAYS_BY_TEST: Dict[str, Tuple[OverlaySpec, ...]] = {
         # axis 0: sigma_yy vs yy_strain
         OverlaySpec(
             axis_index=0,
-            x_key="yy_strain",
+            x_key="Vertical Strain",
             y_key="Vertical Effective Stress",
             title=TITLE_VERTICAL_STRESS_VS_VERTICAL_STRAIN,
             x_label=VERTICAL_STRAIN_LABEL,
@@ -174,7 +174,7 @@ OVERLAYS_BY_TEST: Dict[str, Tuple[OverlaySpec, ...]] = {
         # axis 1: sigma_yy vs sigma_xx
         OverlaySpec(
             axis_index=1,
-            x_key="sigma_xx",
+            x_key="Horizontal Effective Stress",
             y_key="Vertical Effective Stress",
             title=TITLE_VERTICAL_STRESS_VS_HORIZONTAL_STRESS,
             x_label=HORIZONTAL_STRESS_LABEL,
@@ -205,8 +205,8 @@ OVERLAYS_BY_TEST: Dict[str, Tuple[OverlaySpec, ...]] = {
         # axis 4: yy_strain vs time_steps
         OverlaySpec(
             axis_index=4,
-            x_key="time_steps",
-            y_key="yy_strain",
+            x_key="Time steps",
+            y_key="Vertical Strain",
             title=TITLE_VERTICAL_STRAIN_VS_TIME,
             x_label=TIME_HOURS_LABEL,
             y_label=VERTICAL_STRAIN_LABEL,
