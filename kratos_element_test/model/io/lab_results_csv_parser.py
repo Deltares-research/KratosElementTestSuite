@@ -123,7 +123,8 @@ _RAW_COLUMN_ALIASES = {
         "deviatoricstress",
         "deviatoric stress",
     ),
-    "shear_strain_xy": (
+    "Tensor Shear Strain": (
+        "Tensor Shear Strain",
         "shear_strain_xy",
         "strain_xy",
         "gamma_xy",
@@ -176,7 +177,7 @@ _EXPECTED_COLUMNS_BY_TEST: Dict[str, List[str]] = {
         "Deviatoric Stress",
     ],
     "direct_shear": [
-        "shear_strain_xy",
+        "Tensor Shear Strain",
         "shear_stress_xy",
         "sigma_3",
         "sigma_1",

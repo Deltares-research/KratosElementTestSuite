@@ -301,7 +301,7 @@ class ResultManagerTest(unittest.TestCase):
         self.assertDictEqual(
             result_manager.get_experimental_results(),
             {
-                "shear_strain_xy": [0.0, 0.05],
+                "Tensor Shear Strain": [0.0, 0.05],
                 "shear_stress_xy": [0.0, 40.0],
             },
         )
