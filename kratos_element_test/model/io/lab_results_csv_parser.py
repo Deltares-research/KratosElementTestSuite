@@ -149,7 +149,8 @@ _RAW_COLUMN_ALIASES = {
         "effective vertical stress",
         "vertical effective stress",
     ),
-    "sigma_xx": (
+    "Horizontal Effective Stress": (
+        "Horizontal Effective Stress",
         "sigma_xx",
         "sigmaxx",
         "sigma_prime_xx",
@@ -189,7 +190,7 @@ _EXPECTED_COLUMNS_BY_TEST: Dict[str, List[str]] = {
     "crs": [
         "yy_strain",
         "Vertical Effective Stress",
-        "sigma_xx",
+        "Horizontal Effective Stress",
         "sigma_3",
         "sigma_1",
         "Mean Effective Stress",

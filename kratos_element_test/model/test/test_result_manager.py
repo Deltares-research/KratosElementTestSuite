@@ -476,7 +476,7 @@ class ResultManagerTest(unittest.TestCase):
                 column_mapping={
                     "yy_strain": "axial",
                     "sigma1_sigma3_diff": "delta_sigma",
-                    "sigma_xx": "horizontal",
+                    "Horizontal Effective Stress": "horizontal",
                     "Vertical Effective Stress": "vertical",
                     "time_steps": "time",
                 },
@@ -512,7 +512,7 @@ class ResultManagerTest(unittest.TestCase):
             imported_test_type = result_manager.import_csv_lab_results(
                 csv_file,
                 column_mapping={
-                    "sigma_xx": "sigma",
+                    "Horizontal Effective Stress": "sigma",
                     "Vertical Effective Stress": "epsilon",
                 },
                 target_test_type="crs",
@@ -527,7 +527,7 @@ class ResultManagerTest(unittest.TestCase):
         self.assertDictEqual(
             result_manager.get_experimental_results(),
             {
-                "sigma_xx": [100.0, 110.0],
+                "Horizontal Effective Stress": [100.0, 110.0],
                 "Vertical Effective Stress": [200.0, 220.0],
             },
         )
