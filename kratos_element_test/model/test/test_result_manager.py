@@ -389,7 +389,7 @@ class ResultManagerTest(unittest.TestCase):
             imported,
             {
                 "q": [0.0, 150.0],
-                "p'": [-100.0, -150.0],
+                "Mean Effective Stress": [-100.0, -150.0],
                 "sigma1_sigma3_diff": [0.0, 150.0],
             },
         )
@@ -551,7 +551,7 @@ class ResultManagerTest(unittest.TestCase):
         # _compute_missing_sigma_diff derives sigma1_sigma3_diff from q when
         # sigma_1 and sigma_3 are absent, so it is present in the stored results.
         expected = {
-            "p'": [-100.0, -150.0],
+            "Mean Effective Stress": [-100.0, -150.0],
             "q": [0.0, 150.0],
             "sigma1_sigma3_diff": [0.0, 150.0],
         }

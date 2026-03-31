@@ -99,7 +99,8 @@ _RAW_COLUMN_ALIASES = {
         "q_diff",
         "deviator_sigma",
     ),
-    "p'": (
+    "Mean Effective Stress": (
+        "Mean Effective Stress",
         "p'",
         "pprime",
         "p_prime",
@@ -170,7 +171,7 @@ _EXPECTED_COLUMNS_BY_TEST: Dict[str, List[str]] = {
         "vol_strain",
         "sigma_3",
         "sigma_1",
-        "p'",
+        "Mean Effective Stress",
         "q",
     ],
     "direct_shear": [
@@ -178,7 +179,7 @@ _EXPECTED_COLUMNS_BY_TEST: Dict[str, List[str]] = {
         "shear_stress_xy",
         "sigma_3",
         "sigma_1",
-        "p'",
+        "Mean Effective Stress",
         "q",
     ],
     "crs": [
@@ -187,7 +188,7 @@ _EXPECTED_COLUMNS_BY_TEST: Dict[str, List[str]] = {
         "sigma_xx",
         "sigma_3",
         "sigma_1",
-        "p'",
+        "Mean Effective Stress",
         "q",
         "time_steps",
     ],
