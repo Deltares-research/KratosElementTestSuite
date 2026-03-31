@@ -68,7 +68,7 @@ OVERLAYS_BY_TEST: Dict[str, Tuple[OverlaySpec, ...]] = {
         # axis 0: |sigma1 - sigma3| vs yy_strain
         OverlaySpec(
             axis_index=0,
-            x_key="yy_strain",
+            x_key="Vertical Strain",
             y_key="sigma1_sigma3_diff",
             title=TITLE_DIFF_PRINCIPAL_SIGMA_VS_STRAIN,
             x_label=VERTICAL_STRAIN_LABEL,
@@ -78,7 +78,7 @@ OVERLAYS_BY_TEST: Dict[str, Tuple[OverlaySpec, ...]] = {
         # axis 1: vol_strain vs yy_strain
         OverlaySpec(
             axis_index=1,
-            x_key="yy_strain",
+            x_key="Vertical Strain",
             y_key="vol_strain",
             title=TITLE_VOL_VS_VERT_STRAIN,
             x_label=VERTICAL_STRAIN_LABEL,
@@ -98,8 +98,8 @@ OVERLAYS_BY_TEST: Dict[str, Tuple[OverlaySpec, ...]] = {
         # axis 3: p' vs q
         OverlaySpec(
             axis_index=3,
-            x_key="p'",
-            y_key="q",
+            x_key="Mean Effective Stress",
+            y_key="Deviatoric Stress",
             title=TITLE_P_VS_Q,
             x_label=P_STRESS_LABEL,
             y_label=Q_STRESS_LABEL,
@@ -142,8 +142,8 @@ OVERLAYS_BY_TEST: Dict[str, Tuple[OverlaySpec, ...]] = {
         # axis 2: p' vs q
         OverlaySpec(
             axis_index=2,
-            x_key="p'",
-            y_key="q",
+            x_key="Mean Effective Stress",
+            y_key="Deviatoric Stress",
             title=TITLE_P_VS_Q,
             x_label=P_STRESS_LABEL,
             y_label=Q_STRESS_LABEL,
@@ -164,7 +164,7 @@ OVERLAYS_BY_TEST: Dict[str, Tuple[OverlaySpec, ...]] = {
         OverlaySpec(
             axis_index=0,
             x_key="yy_strain",
-            y_key="sigma_yy",
+            y_key="Vertical Effective Stress",
             title=TITLE_VERTICAL_STRESS_VS_VERTICAL_STRAIN,
             x_label=VERTICAL_STRAIN_LABEL,
             y_label=VERTICAL_STRESS_LABEL,
@@ -175,7 +175,7 @@ OVERLAYS_BY_TEST: Dict[str, Tuple[OverlaySpec, ...]] = {
         OverlaySpec(
             axis_index=1,
             x_key="sigma_xx",
-            y_key="sigma_yy",
+            y_key="Vertical Effective Stress",
             title=TITLE_VERTICAL_STRESS_VS_HORIZONTAL_STRESS,
             x_label=HORIZONTAL_STRESS_LABEL,
             y_label=VERTICAL_STRESS_LABEL,
@@ -185,8 +185,8 @@ OVERLAYS_BY_TEST: Dict[str, Tuple[OverlaySpec, ...]] = {
         # axis 2: p' vs q
         OverlaySpec(
             axis_index=2,
-            x_key="p'",
-            y_key="q",
+            x_key="Mean Effective Stress",
+            y_key="Deviatoric Stress",
             title=TITLE_P_VS_Q,
             x_label=P_STRESS_LABEL,
             y_label=Q_STRESS_LABEL,

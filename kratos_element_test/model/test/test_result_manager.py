@@ -477,7 +477,7 @@ class ResultManagerTest(unittest.TestCase):
                     "yy_strain": "axial",
                     "sigma1_sigma3_diff": "delta_sigma",
                     "sigma_xx": "horizontal",
-                    "sigma_yy": "vertical",
+                    "Vertical Effective Stress": "vertical",
                     "time_steps": "time",
                 },
             )
@@ -513,7 +513,7 @@ class ResultManagerTest(unittest.TestCase):
                 csv_file,
                 column_mapping={
                     "sigma_xx": "sigma",
-                    "sigma_yy": "epsilon",
+                    "Vertical Effective Stress": "epsilon",
                 },
                 target_test_type="crs",
             )
@@ -528,7 +528,7 @@ class ResultManagerTest(unittest.TestCase):
             result_manager.get_experimental_results(),
             {
                 "sigma_xx": [100.0, 110.0],
-                "sigma_yy": [200.0, 220.0],
+                "Vertical Effective Stress": [200.0, 220.0],
             },
         )
 

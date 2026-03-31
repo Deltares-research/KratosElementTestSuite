@@ -138,7 +138,8 @@ _RAW_COLUMN_ALIASES = {
         "tau_xy",
         "shear_stress",
     ),
-    "sigma_yy": (
+    "Vertical Effective Stress": (
+        "Vertical Effective Stress",
         "sigma_yy",
         "sigmayy",
         "sigma_prime_yy",
@@ -187,7 +188,7 @@ _EXPECTED_COLUMNS_BY_TEST: Dict[str, List[str]] = {
     ],
     "crs": [
         "yy_strain",
-        "sigma_yy",
+        "Vertical Effective Stress",
         "sigma_xx",
         "sigma_3",
         "sigma_1",
