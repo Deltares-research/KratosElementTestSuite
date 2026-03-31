@@ -57,6 +57,7 @@ _RAW_COLUMN_ALIASES = {
         "vertical strain eyy",
     ),
     "Volumetric Strain": (
+        "Volumetric Strain",
         "vol_strain",
         "volumetric_strain",
         "volumetric strain",
@@ -173,7 +174,7 @@ _EXPECTED_COLUMNS_BY_TEST: Dict[str, List[str]] = {
     "triaxial": [
         "yy_strain",
         "sigma1_sigma3_diff",
-        "vol_strain",
+        "Volumetric Strain",
         "sigma_3",
         "sigma_1",
         "Mean Effective Stress",

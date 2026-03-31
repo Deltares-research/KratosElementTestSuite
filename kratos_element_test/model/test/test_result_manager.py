@@ -225,6 +225,7 @@ class ResultManagerTest(unittest.TestCase):
         self.assertDictEqual(
             {
                 "Deviatoric Stress": [0.0, 150.0],
+                "Volumetric Strain": [0.0, -0.01],
                 "sigma_1": [-100.0, -250.0],
                 "sigma_3": [-100.0, -100.0],
                 "sigma1_sigma3_diff": [0.0, 150.0],
@@ -362,6 +363,7 @@ class ResultManagerTest(unittest.TestCase):
         self.assertDictEqual(
             {
                 "Deviatoric Stress": [0.0, 150.0],
+                "Volumetric Strain": [0.0, -0.01],
                 "sigma1_sigma3_diff": [0.0, 150.0],
                 "sigma_1": [-100.0, -250.0],
                 "sigma_3": [-100.0, -100.0],
@@ -438,7 +440,7 @@ class ResultManagerTest(unittest.TestCase):
         current_test_type = TRIAXIAL
         self.assertDictEqual(
             result_manager.get_experimental_results(),
-            {
+            {"Volumetric Strain": [0.0, -0.02],
                 "sigma_1": [-100.0, -250.0],
                 "sigma_3": [-100.0, -100.0],
                 "sigma1_sigma3_diff": [0.0, 150.0],
