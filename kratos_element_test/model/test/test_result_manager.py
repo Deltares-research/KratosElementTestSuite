@@ -250,6 +250,22 @@ class ResultManagerTest(unittest.TestCase):
 
         self.assertIn("first row contains only numeric values", str(context.exception))
 
+    def test_import_csv_lab_results_rejects_numeric_first_row_with_decimal_point(self):
+        current_test_getter = lambda: TRIAXIAL
+        result_manager = ResultManager(current_test_getter)
+
+        with TemporaryDirectory() as tmp_dir:
+            csv_file = Path(tmp_dir) / "numeric_header_lab.csv"
+            csv_file.write_text(
+                "0.00E+00,0.00E+00\n" "1.00E-01,2.00E-01\n",
+                encoding="utf-8",
+            )
+
+            with self.assertRaises(ValueError) as context:
+                result_manager.import_csv_lab_results(csv_file)
+
+        self.assertIn("first row contains only numeric values", str(context.exception))
+
     def test_import_csv_lab_results_with_test_type_column_routes_data_per_test(self):
         # Use a mutable object for current_test_type
         current_test_type = [TRIAXIAL]
