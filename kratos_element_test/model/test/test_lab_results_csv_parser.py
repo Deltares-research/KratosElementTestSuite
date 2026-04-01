@@ -1,9 +1,33 @@
+import csv
 import unittest
+from unittest.mock import patch
 
-from kratos_element_test.model.io.lab_results_csv_parser import _parse_float
+from kratos_element_test.model.io.lab_results_csv_parser import (
+    _detect_csv_dialect,
+    _parse_float,
+)
 
 
 class LabResultsCsvParserTest(unittest.TestCase):
+
+    def test_detect_csv_dialect_returns_excel_for_empty_sample(self):
+        self.assertIs(_detect_csv_dialect("   \n\t  "), csv.excel)
+
+    def test_detect_csv_dialect_detects_semicolon_delimiter(self):
+        dialect = _detect_csv_dialect("yy_strain;sigma1;sigma3\n0.0;-100;-100\n")
+
+        self.assertEqual(dialect.delimiter, ";")
+
+    def test_detect_csv_dialect_detects_tab_delimiter(self):
+        dialect = _detect_csv_dialect("yy_strain\tsigma1\tsigma3\n0.0\t-100\t-100\n")
+
+        self.assertEqual(dialect.delimiter, "\t")
+
+    def test_detect_csv_dialect_falls_back_to_first_line_counts(self):
+        with patch("csv.Sniffer.sniff", side_effect=csv.Error("ambiguous sample")):
+            dialect = _detect_csv_dialect("yy_strain|sigma1|sigma3\n0.0|-100|-100\n")
+
+        self.assertEqual(dialect.delimiter, "|")
 
     def test_parse_float_returns_none_for_blank_values(self):
         self.assertIsNone(_parse_float("", 2, "test_column"))
