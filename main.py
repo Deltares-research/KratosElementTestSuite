@@ -4,15 +4,6 @@
 
 import os
 import sys
-from pathlib import Path
-
-# Allow running this file directly without requiring python -m.
-if __package__ in (None, ""):
-    package_parent = Path(__file__).resolve().parents[2]
-    package_parent_str = str(package_parent)
-    if package_parent_str not in sys.path:
-        sys.path.insert(0, package_parent_str)
-
 from kratos_element_test.view.ui_menu import MainUI
 
 

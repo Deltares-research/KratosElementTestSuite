@@ -73,8 +73,6 @@ class SoilTestInputView(ttk.Frame):
         self.test_input_frame = ttk.Frame(self, padding="10")
         self.test_input_frame.pack(fill="both", expand=True)
 
-        self._switch_test(TRIAXIAL)
-
     def disable_test_type_menu(self):
         if hasattr(self, "test_type_menu") and self.test_type_menu.winfo_exists():
             self.test_type_menu.config(state="disabled")
@@ -295,6 +293,9 @@ class SoilTestInputView(ttk.Frame):
         self.prevent_removal_last_crs_row()
 
     def validate(self, current_test_type):
+        if not current_test_type or current_test_type.strip() == "":
+            raise ValueError("Please select a test type before running a simulation.")
+
         widget_dicts = []
         if current_test_type == TRIAXIAL:
             widget_dicts = [self.triaxial_widgets]

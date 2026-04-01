@@ -3,13 +3,14 @@
 # Contact kratos@deltares.nl
 
 import ctypes
+import importlib
+import importlib.util
 import os
+import sys
 import tkinter as tk
 from pathlib import Path
 from tkinter import filedialog, messagebox, ttk, scrolledtext, Menu
-
-from platformdirs import user_data_dir
-
+from typing import Dict, List, Optional
 from kratos_element_test.controller.element_test_controller import ElementTestController
 from kratos_element_test.view.ui_builder import GeotechTestUI
 from kratos_element_test.view.ui_constants import (
@@ -22,9 +23,36 @@ from kratos_element_test.view.ui_constants import (
     MOHR_COULOMB,
     HELP_MENU_FONT,
     DEFAULT_TKINTER_DPI,
+    TEST_NAME_TO_TYPE,
 )
 from kratos_element_test.view.ui_logger import log_message
 from kratos_element_test.view.ui_utils import asset_path, soil_models_dir
+from typing import Any
+
+platformdirs_spec = importlib.util.find_spec("platformdirs")
+if platformdirs_spec is not None:
+    user_data_dir = importlib.import_module("platformdirs").user_data_dir
+else:
+
+    def user_data_dir(appname: str, appauthor: Optional[str] = None) -> str:
+        if sys.platform == "win32":
+            base_dir = Path(
+                os.environ.get("APPDATA", Path.home() / "AppData" / "Roaming")
+            )
+            app_dir = base_dir / appname
+            if appauthor:
+                app_dir = base_dir / appauthor / appname
+            return str(app_dir)
+
+        if sys.platform == "darwin":
+            return str(Path.home() / "Library" / "Application Support" / appname)
+
+        xdg_data_home = os.environ.get("XDG_DATA_HOME")
+        base_dir = (
+            Path(xdg_data_home) if xdg_data_home else Path.home() / ".local" / "share"
+        )
+        return str(base_dir / appname)
+
 
 ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(
     "deltares.ElementTestSuite.ui"
@@ -41,7 +69,9 @@ class MainUI:
         self._controller = ElementTestController(
             logger=log_message,
         )
-        self.main_frame = None
+        self.main_frame: Optional[GeotechTestUI] = None
+        self._root: Optional[tk.Tk] = None
+        self._about_images: List[tk.PhotoImage] = []
 
     def show_license_agreement(self, readonly=False):
         license_file_path = asset_path("license.txt")
@@ -141,13 +171,12 @@ class MainUI:
 
             photo1 = tk.PhotoImage(file=path1)
             photo2 = tk.PhotoImage(file=path2)
+            self._about_images = [photo1, photo2]
 
             label1 = tk.Label(image_frame, image=photo1)
-            label1.image = photo1
             label1.pack(pady=2)
 
             label2 = tk.Label(image_frame, image=photo2)
-            label2.image = photo2
             label2.pack(pady=15)
 
         except Exception:
@@ -164,6 +193,7 @@ class MainUI:
 
         last_model_source = LINEAR_ELASTIC
         root = tk.Tk()
+        self._root = root
 
         root.bind_class("TCombobox", "<MouseWheel>", lambda e: "break")
         root.bind_class("TCombobox", "<Shift-MouseWheel>", lambda e: "break")
@@ -191,6 +221,10 @@ class MainUI:
         import_menu.add_command(
             label="Import Lab Results (experimental feature)",
             command=self._import_lab_results,
+        )
+        import_menu.add_command(
+            label="Import CSV data",
+            command=self._import_csv_data,
         )
         menubar.add_cascade(label="Import", menu=import_menu)
 
@@ -334,12 +368,174 @@ class MainUI:
                 return
 
             self._controller.import_lab_results(Path(py_path))
-            self.main_frame.redraw_plots()
+            if self.main_frame:
+                self.main_frame.redraw_plots()
 
         except Exception as e:
             messagebox.showerror(
                 "Import Error", f"Failed to import lab results.\n\n{e}"
             )
+
+    def _import_csv_data(self):
+        try:
+            current_test_display_name = self._controller.get_current_test_type()
+            if not current_test_display_name or current_test_display_name.strip() == "":
+                messagebox.showerror(
+                    "Import Error",
+                    "No active test selected. Please select a test (Triaxial, Direct Simple Shear, or CRS) "
+                    "before importing CSV data.",
+                )
+                return
+
+            csv_path = filedialog.askopenfilename(
+                title="Select CSV data file",
+                filetypes=[("CSV files", "*.csv")],
+            )
+            if not csv_path:
+                return
+
+            result = self._controller.prepare_csv_import(
+                csv_path, current_test_display_name
+            )
+            if result is None:
+                messagebox.showerror(
+                    "Import Error",
+                    "The selected file is not a CSV file. "
+                    "Please choose a file with .csv extension.",
+                )
+                return
+
+            column_mapping = self._show_csv_header_mapping_selection_popup(
+                file_headers=result["file_headers"],
+                expected_headers=result["expected_headers"],
+                suggested_mapping=result["suggested_mapping"],
+                test_display_name=result["internal_test_name"],
+            )
+            if column_mapping is None:
+                return
+
+            self._controller.import_csv_data(
+                csv_file=result["file_path"],
+                column_mapping=column_mapping,
+                target_test_type=result["internal_test_name"],
+            )
+
+            if self.main_frame:
+                self.main_frame.redraw_plots()
+
+        except Exception as e:
+            messagebox.showerror("Import Error", f"Failed to import CSV data.\n\n{e}")
+
+    def _build_preview_frame(self, parent: Any, file_headers: List[str]) -> None:
+        frame = ttk.Frame(parent, padding="8")
+        frame.pack(fill="x", padx=8, pady=(0, 8))
+        ttk.Label(frame, text="Headers found in file:").pack(anchor="w")
+
+        preview_text = scrolledtext.ScrolledText(frame, height=5, wrap="word")
+        preview_text.pack(fill="x", expand=False, pady=(4, 0))
+        preview_text.insert("1.0", "\n".join(file_headers))
+        preview_text.config(state="disabled")
+        return frame
+
+    def _build_mapping_frame(
+        self,
+        parent: Any,
+        expected_headers: List[str],
+        file_headers: List[str],
+        suggested_mapping: Dict[str, str],
+    ) -> Dict[str, tk.StringVar]:
+        frame = ttk.Frame(parent, padding="8")
+        frame.pack(fill="both", expand=True, padx=8, pady=(0, 8))
+
+        ttk.Label(frame, text="Expected variable").grid(
+            row=0, column=0, sticky="w", padx=(0, 12), pady=(0, 6)
+        )
+        ttk.Label(frame, text="CSV header").grid(
+            row=0, column=1, sticky="w", pady=(0, 6)
+        )
+
+        skip_option = "<skip>"
+        selectable_headers = [skip_option] + file_headers
+        vars_by_expected: Dict[str, tk.StringVar] = {}
+
+        for idx, expected_key in enumerate(expected_headers, start=1):
+            ttk.Label(frame, text=expected_key).grid(
+                row=idx, column=0, sticky="w", padx=(0, 12), pady=3
+            )
+            selected_header = suggested_mapping.get(expected_key, skip_option)
+            if selected_header not in selectable_headers:
+                selected_header = skip_option
+
+            selected_var = tk.StringVar(value=selected_header)
+            vars_by_expected[expected_key] = selected_var
+
+            combobox = ttk.Combobox(
+                frame,
+                textvariable=selected_var,
+                values=selectable_headers,
+                state="readonly",
+                width=48,
+            )
+            combobox.grid(row=idx, column=1, sticky="ew", pady=3)
+
+        frame.columnconfigure(1, weight=1)
+        return vars_by_expected
+
+    def _build_action_frame(self, dialog: tk.Toplevel) -> tk.BooleanVar:
+        is_confirmed = tk.BooleanVar(value=False)
+        action_frame = ttk.Frame(dialog, padding="8")
+        action_frame.pack(fill="x", padx=8, pady=(0, 8))
+
+        def on_ok():
+            is_confirmed.set(True)
+            dialog.destroy()
+
+        def on_cancel():
+            dialog.destroy()
+
+        ttk.Button(action_frame, text="OK", command=on_ok).pack(side="right", padx=4)
+        ttk.Button(action_frame, text="Cancel", command=on_cancel).pack(
+            side="right", padx=4
+        )
+        return is_confirmed
+
+    def _show_csv_header_mapping_selection_popup(
+        self,
+        file_headers: List[str],
+        expected_headers: List[str],
+        suggested_mapping: Dict[str, str],
+        test_display_name: str = "",
+    ) -> Optional[Dict[str, str]]:
+
+        if self._root is None or not expected_headers:
+            return suggested_mapping
+
+        dialog = tk.Toplevel(self._root)
+        dialog.title("Map CSV headers")
+        dialog.geometry("360x600")
+        dialog.resizable(True, True)
+        dialog.transient(self._root)
+        dialog.grab_set()
+
+        label_text = "Map CSV headers to the expected variables"
+        if test_display_name:
+            label_text += f" for {test_display_name}"
+        ttk.Label(dialog, text=label_text).pack(anchor="w", padx=12, pady=(12, 8))
+
+        self._build_preview_frame(dialog, file_headers)
+        vars_by_expected = self._build_mapping_frame(
+            dialog, expected_headers, file_headers, suggested_mapping
+        )
+        is_confirmed = self._build_action_frame(dialog)
+
+        dialog.wait_window()
+
+        if is_confirmed.get():
+            return {
+                k: v.get() for k, v in vars_by_expected.items() if v.get() != "<skip>"
+            }
+
+        return suggested_mapping
 
 
 if __name__ == "__main__":
