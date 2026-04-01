@@ -1,7 +1,7 @@
 import csv
 import io
 from pathlib import Path
-from typing import Dict, List, Optional, Any
+from typing import Any, Dict, List, Optional, Sequence
 
 from kratos_element_test.view.ui_constants import TEST_NAME_TO_TYPE, VALID_TEST_TYPES
 
@@ -421,10 +421,97 @@ def _validate_csv_file(csv_file: Path) -> None:
         )
 
 
+def _require_csv_header_row(fieldnames: Optional[Sequence[Optional[str]]]) -> List[str]:
+    if not fieldnames:
+        raise ValueError(
+            "CSV file has no header row. Please provide column names in the first row."
+        )
+
+    headers = [header for header in fieldnames if header is not None]
+    if not any((header or "").strip() for header in headers):
+        raise ValueError(
+            "CSV file has no header row. Please provide column names in the first row."
+        )
+
+    if all(_is_numeric_header_value(header) for header in headers):
+        raise ValueError(
+            "CSV file header row is missing or invalid because the first row contains only numeric values. "
+            "Please provide column names in the first row."
+        )
+
+    return headers
+
+
+def _is_numeric_header_value(value: Optional[str]) -> bool:
+    if value is None:
+        return True
+
+    stripped = value.strip()
+    if not stripped:
+        return True
+
+    compact = stripped.replace(" ", "")
+    if "," in compact and "." not in compact:
+        compact = compact.replace(",", ".")
+    elif "," in compact and "." in compact:
+        compact = compact.replace(",", "")
+
+    try:
+        float(compact)
+        return True
+    except ValueError:
+        return False
+
+
+def _get_first_non_empty_csv_line(csv_text: str) -> str:
+    for line in csv_text.splitlines():
+        if line.strip():
+            return line
+    return ""
+
+
+def _is_numeric_csv_header_line(line: str) -> bool:
+    stripped_line = line.strip()
+    if not stripped_line:
+        return False
+
+    delimiter = next(
+        (candidate for candidate in (";", "\t", "|") if candidate in stripped_line),
+        None,
+    )
+    if delimiter is None and "," in stripped_line:
+        delimiter = ","
+
+    cells = [stripped_line]
+    if delimiter is not None:
+        cells = [cell.strip().strip('"') for cell in stripped_line.split(delimiter)]
+
+    non_empty_cells = [cell for cell in cells if cell]
+    if not non_empty_cells:
+        return False
+
+    return all(_is_numeric_header_value(cell) for cell in non_empty_cells)
+
+
+def _validate_raw_csv_header_line(csv_text: str) -> None:
+    first_line = _get_first_non_empty_csv_line(csv_text)
+    if not first_line:
+        raise ValueError(
+            "CSV file has no header row. Please provide column names in the first row."
+        )
+
+    if _is_numeric_csv_header_line(first_line):
+        raise ValueError(
+            "CSV file header row is missing or invalid because the first row contains only numeric values. "
+            "Please provide column names in the first row."
+        )
+
+
 def _read_csv_fieldnames(csv_file: Path) -> List[str]:
     _validate_csv_file(csv_file)
 
     csv_text = _decode_csv_bytes(csv_file.read_bytes(), csv_file)
+    _validate_raw_csv_header_line(csv_text)
     csv_stream = io.StringIO(csv_text, newline="")
 
     sample = csv_stream.read(2048)
@@ -433,10 +520,7 @@ def _read_csv_fieldnames(csv_file: Path) -> List[str]:
     dialect = _detect_csv_dialect(sample)
     reader = csv.DictReader(csv_stream, dialect=dialect)
 
-    if not reader.fieldnames:
-        raise ValueError("CSV file has no header row")
-
-    return [h for h in reader.fieldnames if h is not None]
+    return _require_csv_header_row(reader.fieldnames)
 
 
 def get_csv_headers(csv_file: Path) -> List[str]:
@@ -604,6 +688,7 @@ def parse_csv_lab_results(
     default_test_type_internal = _canonical_test_type(default_test_type)
 
     csv_text = _decode_csv_bytes(csv_file.read_bytes(), csv_file)
+    _validate_raw_csv_header_line(csv_text)
     csv_stream = io.StringIO(csv_text, newline="")
 
     sample = csv_stream.read(2048)
@@ -612,10 +697,7 @@ def parse_csv_lab_results(
     dialect = _detect_csv_dialect(sample)
 
     reader = csv.DictReader(csv_stream, dialect=dialect)
-    if not reader.fieldnames:
-        raise ValueError("CSV file has no header row")
-
-    file_headers = [h for h in reader.fieldnames if h is not None]
+    file_headers = _require_csv_header_row(reader.fieldnames)
     test_type_column, mapped_columns = _build_mapped_columns(
         file_headers, column_mapping
     )
