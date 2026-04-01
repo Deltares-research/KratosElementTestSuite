@@ -2,13 +2,13 @@ from typing import Callable, Dict, List, Optional
 from pathlib import Path
 import importlib.util
 
+from kratos_element_test.view.ui_constants import TYPE_TO_TEST_NAME, TEST_NAME_TO_TYPE
 from kratos_element_test.model.io.lab_results_csv_parser import (
     parse_csv_lab_results,
     get_csv_headers,
     get_expected_columns_for_test_type,
     suggest_csv_column_mapping,
 )
-from kratos_element_test.view.ui_constants import TYPE_TO_TEST_NAME, TEST_NAME_TO_TYPE
 
 
 class ResultManager:

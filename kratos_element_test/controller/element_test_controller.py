@@ -13,10 +13,12 @@ from kratos_element_test.controller.soil_test_input_controller import (
     SoilTestInputController,
 )
 from kratos_element_test.model.main_model import MainModel
+from kratos_element_test.view.result_exporter import (
+    export_excel_by_test_type,
+)
 from kratos_element_test.view.ui_constants import (
     TEST_NAME_TO_TYPE,
 )
-from kratos_element_test.view.result_exporter import export_excel_by_test_type
 
 
 class ElementTestController:
