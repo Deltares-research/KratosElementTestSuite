@@ -573,7 +573,7 @@ class MainUI:
         if is_confirmed.get():
             return self._collect_mapping_with_duplicate_warnings(vars_by_expected)
 
-        return suggested_mapping
+        return None
 
 
 if __name__ == "__main__":
