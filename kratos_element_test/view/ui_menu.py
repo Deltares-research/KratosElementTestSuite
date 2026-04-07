@@ -499,6 +499,46 @@ class MainUI:
         )
         return is_confirmed
 
+    @staticmethod
+    def _collect_mapping_with_duplicate_warnings(
+        vars_by_expected: Dict[str, tk.StringVar], skip_option: str = "<skip>"
+    ) -> Dict[str, str]:
+        selected_by_expected: Dict[str, str] = {}
+        selected_header_to_expected_keys: Dict[str, List[str]] = {}
+
+        for expected_key, selected_var in vars_by_expected.items():
+            selected_header = selected_var.get()
+            if not selected_header or selected_header == skip_option:
+                continue
+
+            selected_by_expected[expected_key] = selected_header
+            expected_keys = selected_header_to_expected_keys.setdefault(
+                selected_header, []
+            )
+            expected_keys.append(expected_key)
+
+        # One CSV header can map to only one expected variable.
+        # Keep the last selected expected key and warn for ignored ones.
+        kept_expected_by_header: Dict[str, str] = {}
+        for selected_header, expected_keys in selected_header_to_expected_keys.items():
+            kept_expected_key = expected_keys[-1]
+            kept_expected_by_header[selected_header] = kept_expected_key
+
+            for ignored_expected_key in expected_keys[:-1]:
+                log_message(
+                    f"Ignored mapping for '{ignored_expected_key}': CSV header "
+                    f"'{selected_header}' is used more than once. "
+                    f"Keeping '{kept_expected_key}'.",
+                    "warn",
+                )
+
+        resolved_mapping: Dict[str, str] = {}
+        for expected_key, selected_header in selected_by_expected.items():
+            if kept_expected_by_header.get(selected_header) == expected_key:
+                resolved_mapping[expected_key] = selected_header
+
+        return resolved_mapping
+
     def _show_csv_header_mapping_selection_popup(
         self,
         file_headers: List[str],
@@ -531,9 +571,7 @@ class MainUI:
         dialog.wait_window()
 
         if is_confirmed.get():
-            return {
-                k: v.get() for k, v in vars_by_expected.items() if v.get() != "<skip>"
-            }
+            return self._collect_mapping_with_duplicate_warnings(vars_by_expected)
 
         return suggested_mapping
 
