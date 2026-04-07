@@ -394,10 +394,10 @@ class MainUI:
             if not csv_path:
                 return
 
-            result = self._controller.prepare_csv_import(
+            csv_import_info = self._controller.prepare_csv_import(
                 csv_path, current_test_display_name
             )
-            if result is None:
+            if csv_import_info is None:
                 messagebox.showerror(
                     "Import Error",
                     "The selected file is not a CSV file. "
@@ -406,18 +406,18 @@ class MainUI:
                 return
 
             column_mapping = self._show_csv_header_mapping_selection_popup(
-                file_headers=result["file_headers"],
-                expected_headers=result["expected_headers"],
-                suggested_mapping=result["suggested_mapping"],
-                test_display_name=result["internal_test_name"],
+                file_headers=csv_import_info["file_headers"],
+                expected_headers=csv_import_info["expected_headers"],
+                suggested_mapping=csv_import_info["suggested_mapping"],
+                test_display_name=csv_import_info["internal_test_name"],
             )
             if column_mapping is None:
                 return
 
             self._controller.import_csv_data(
-                csv_file=result["file_path"],
+                csv_file=csv_import_info["file_path"],
                 column_mapping=column_mapping,
-                target_test_type=result["internal_test_name"],
+                target_test_type=csv_import_info["internal_test_name"],
             )
 
             if self.main_frame:
