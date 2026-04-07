@@ -73,6 +73,8 @@ class SoilTestInputView(ttk.Frame):
         self.test_input_frame = ttk.Frame(self, padding="10")
         self.test_input_frame.pack(fill="both", expand=True)
 
+        self._switch_test(TRIAXIAL)
+
     def disable_test_type_menu(self):
         if hasattr(self, "test_type_menu") and self.test_type_menu.winfo_exists():
             self.test_type_menu.config(state="disabled")
