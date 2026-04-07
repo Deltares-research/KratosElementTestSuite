@@ -268,8 +268,8 @@ class ResultManagerTest(unittest.TestCase):
 
     def test_import_csv_lab_results_with_test_type_column_routes_data_per_test(self):
         # Use a mutable object for current_test_type
-        current_test_type = [TRIAXIAL]
-        current_test_getter = lambda: current_test_type[0]
+        current_test_type = TRIAXIAL
+        current_test_getter = lambda: current_test_type
         result_manager = ResultManager(current_test_getter)
 
         with TemporaryDirectory() as tmp_dir:
@@ -285,7 +285,6 @@ class ResultManagerTest(unittest.TestCase):
 
             result_manager.import_csv_lab_results(csv_file)
 
-        current_test_type[0] = TRIAXIAL
         self.assertDictEqual(
             result_manager.get_experimental_results(),
             {
@@ -294,7 +293,7 @@ class ResultManagerTest(unittest.TestCase):
             },
         )
 
-        current_test_type[0] = DIRECT_SHEAR
+        current_test_type = DIRECT_SHEAR
         self.assertDictEqual(
             result_manager.get_experimental_results(),
             {},
