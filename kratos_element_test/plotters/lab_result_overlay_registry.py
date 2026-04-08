@@ -68,8 +68,8 @@ OVERLAYS_BY_TEST: Dict[str, Tuple[OverlaySpec, ...]] = {
         # axis 0: |sigma1 - sigma3| vs yy_strain
         OverlaySpec(
             axis_index=0,
-            x_key="yy_strain",
-            y_key="sigma1_sigma3_diff",
+            x_key="Vertical Strain",
+            y_key="sigma_1 - sigma_3",
             title=TITLE_DIFF_PRINCIPAL_SIGMA_VS_STRAIN,
             x_label=VERTICAL_STRAIN_LABEL,
             y_label=SIGMA1_SIGMA3_DIFF_LABEL,
@@ -78,8 +78,8 @@ OVERLAYS_BY_TEST: Dict[str, Tuple[OverlaySpec, ...]] = {
         # axis 1: vol_strain vs yy_strain
         OverlaySpec(
             axis_index=1,
-            x_key="yy_strain",
-            y_key="vol_strain",
+            x_key="Vertical Strain",
+            y_key="Volumetric Strain",
             title=TITLE_VOL_VS_VERT_STRAIN,
             x_label=VERTICAL_STRAIN_LABEL,
             y_label=VOLUMETRIC_STRAIN_LABEL,
@@ -98,8 +98,8 @@ OVERLAYS_BY_TEST: Dict[str, Tuple[OverlaySpec, ...]] = {
         # axis 3: p' vs q
         OverlaySpec(
             axis_index=3,
-            x_key="p'",
-            y_key="q",
+            x_key="Mean Effective Stress",
+            y_key="Deviatoric Stress",
             title=TITLE_P_VS_Q,
             x_label=P_STRESS_LABEL,
             y_label=Q_STRESS_LABEL,
@@ -108,7 +108,7 @@ OVERLAYS_BY_TEST: Dict[str, Tuple[OverlaySpec, ...]] = {
         # axis 4: Mohr's circle
         OverlaySpec(
             axis_index=4,
-            label="Experimental",
+            label="Lab results",
             title=TITLE_MOHR,
             x_label=EFFECTIVE_STRESS_LABEL,
             y_label=MOBILIZED_SHEAR_STRESS_LABEL,
@@ -120,8 +120,8 @@ OVERLAYS_BY_TEST: Dict[str, Tuple[OverlaySpec, ...]] = {
         # axis 0: tau vs gamma
         OverlaySpec(
             axis_index=0,
-            x_key="shear_strain_xy",
-            y_key="shear_stress_xy",
+            x_key="Tensor Shear Strain",
+            y_key="Shear Stress",
             title=TITLE_SHEAR_VS_STRAIN,
             x_label=SHEAR_STRAIN_LABEL,
             y_label=SHEAR_STRESS_LABEL,
@@ -142,8 +142,8 @@ OVERLAYS_BY_TEST: Dict[str, Tuple[OverlaySpec, ...]] = {
         # axis 2: p' vs q
         OverlaySpec(
             axis_index=2,
-            x_key="p'",
-            y_key="q",
+            x_key="Mean Effective Stress",
+            y_key="Deviatoric Stress",
             title=TITLE_P_VS_Q,
             x_label=P_STRESS_LABEL,
             y_label=Q_STRESS_LABEL,
@@ -151,7 +151,7 @@ OVERLAYS_BY_TEST: Dict[str, Tuple[OverlaySpec, ...]] = {
         # axis 3: Mohr's circle
         OverlaySpec(
             axis_index=3,
-            label="Experimental",
+            label="Lab results",
             title=TITLE_MOHR,
             x_label=EFFECTIVE_STRESS_LABEL,
             y_label=MOBILIZED_SHEAR_STRESS_LABEL,
@@ -163,8 +163,8 @@ OVERLAYS_BY_TEST: Dict[str, Tuple[OverlaySpec, ...]] = {
         # axis 0: sigma_yy vs yy_strain
         OverlaySpec(
             axis_index=0,
-            x_key="yy_strain",
-            y_key="sigma_yy",
+            x_key="Vertical Strain",
+            y_key="Vertical Effective Stress",
             title=TITLE_VERTICAL_STRESS_VS_VERTICAL_STRAIN,
             x_label=VERTICAL_STRAIN_LABEL,
             y_label=VERTICAL_STRESS_LABEL,
@@ -174,8 +174,8 @@ OVERLAYS_BY_TEST: Dict[str, Tuple[OverlaySpec, ...]] = {
         # axis 1: sigma_yy vs sigma_xx
         OverlaySpec(
             axis_index=1,
-            x_key="sigma_xx",
-            y_key="sigma_yy",
+            x_key="Horizontal Effective Stress",
+            y_key="Vertical Effective Stress",
             title=TITLE_VERTICAL_STRESS_VS_HORIZONTAL_STRESS,
             x_label=HORIZONTAL_STRESS_LABEL,
             y_label=VERTICAL_STRESS_LABEL,
@@ -185,8 +185,8 @@ OVERLAYS_BY_TEST: Dict[str, Tuple[OverlaySpec, ...]] = {
         # axis 2: p' vs q
         OverlaySpec(
             axis_index=2,
-            x_key="p'",
-            y_key="q",
+            x_key="Mean Effective Stress",
+            y_key="Deviatoric Stress",
             title=TITLE_P_VS_Q,
             x_label=P_STRESS_LABEL,
             y_label=Q_STRESS_LABEL,
@@ -195,7 +195,7 @@ OVERLAYS_BY_TEST: Dict[str, Tuple[OverlaySpec, ...]] = {
         # axis 3: Mohr's circle
         OverlaySpec(
             axis_index=3,
-            label="Experimental",
+            label="Lab results",
             title=TITLE_MOHR,
             x_label=EFFECTIVE_STRESS_LABEL,
             y_label=MOBILIZED_SHEAR_STRESS_LABEL,
@@ -205,8 +205,8 @@ OVERLAYS_BY_TEST: Dict[str, Tuple[OverlaySpec, ...]] = {
         # axis 4: yy_strain vs time_steps
         OverlaySpec(
             axis_index=4,
-            x_key="time_steps",
-            y_key="yy_strain",
+            x_key="Time steps",
+            y_key="Vertical Strain",
             title=TITLE_VERTICAL_STRAIN_VS_TIME,
             x_label=TIME_HOURS_LABEL,
             y_label=VERTICAL_STRAIN_LABEL,
