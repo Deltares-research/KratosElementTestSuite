@@ -85,7 +85,7 @@ class SoilTestInputManager:
             self.input_data[CRS].strain_increments.pop()
 
     def get_current_test_type(self) -> str:
-        return self._current_test_type
+        return self._current_test_type or ""
 
     def set_current_test_type(self, test_type: str) -> None:
         if test_type not in [TRIAXIAL, DIRECT_SHEAR, CRS]:

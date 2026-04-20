@@ -295,6 +295,9 @@ class SoilTestInputView(ttk.Frame):
         self.prevent_removal_last_crs_row()
 
     def validate(self, current_test_type):
+        if not current_test_type or current_test_type.strip() == "":
+            raise ValueError("Please select a test type before running a simulation.")
+
         widget_dicts = []
         if current_test_type == TRIAXIAL:
             widget_dicts = [self.triaxial_widgets]
