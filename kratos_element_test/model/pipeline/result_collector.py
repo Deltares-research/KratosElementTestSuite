@@ -46,8 +46,7 @@ class ResultCollector:
 
             tensors = self._extract_stress_tensors(s)
             shear_stress_xy = self._extract_shear_stress_xy(s)
-            yy_strain, vol_strain, shear_strain_xy = self._compute_strains(e)
-            xx, yy, zz, xy, vol, shear_xy_strain = self._compute_strains(e)
+            xx, yy, zz, xy, vol_strain, shear_strain_xy = self._compute_strains(e)
             von_mises_values = self._compute_scalar_stresses(vm)
             mean_stress_values = self._compute_scalar_stresses(ms)
             sigma_xx, sigma_yy = self._extract_sigma_xx_yy(s)
@@ -74,6 +73,9 @@ class ResultCollector:
         all_yy_strain = self._apply_cumulative_strain_offset(yy_strain_stages)
         all_zz_strain = self._apply_cumulative_strain_offset(zz_strain_stages)
         all_xy_strain = self._apply_cumulative_strain_offset(xy_strain_stages)
+        epsilon_1 = self._calculate_principal_strains(
+            all_xx_strain, all_yy_strain, all_zz_strain, all_xy_strain
+        )
 
         all_excess_pore_pressure = []
         if self.drainage_type == "undrained" and all_water_pressures:
@@ -270,7 +272,6 @@ class ResultCollector:
             zz.append(eps_zz)
             xy.append(eps_xy)
             vol.append(eps_xx + eps_yy + eps_zz)
-            yy.append(eps_yy)
             shear_xy_util.append(eps_xy)
         return xx, yy, zz, xy, vol, shear_xy_util
 
@@ -335,43 +336,18 @@ class ResultCollector:
 
     @staticmethod
     def _calculate_principal_strains(
-            xx: List[float], yy: List[float], zz: List[float], xy: List[float]
+        xx: List[float], yy: List[float], zz: List[float], xy: List[float]
     ) -> List[float]:
         epsilon_1 = []
-        # Calculate eigenvalues for each step
-        # Tensor is [[xx, xy, 0], [xy, yy, 0], [0, 0, zz]]
-        # Or just 2D eigs of [[xx, xy], [xy, yy]] and compare with zz?
-        # Usually first principal strain is the most positive (tensile) or max?
-        # In soil mechanics compressive is usually positive, but Kratos uses standard mechanics (tensile +).
-        # We want the 'Major' principal strain.
-        # sigma_1 is Min (most compressive) in the code below?
-        # Line 270: sigma_1.append(float(np.min(eigenvalues)))
-        # So sigma_1 is compressive stress (if compressive is negative).
-        # Wait, Soil mechanics: Compressive stress is positive.
-        # But `np.min` suggests negative values are large compression?
-        # Let's stick to standard eigenvalue logic:
-        # We return the "First Principal Strain". Usually implies the largest algebraic value (tension) or largest magnitude?
-        # User definition: "first principal strain or the normal strain (epsilon 1) ... quantifying elongation or contraction"
-        # Standard: e1 > e2 > e3.
-        # The user seems to imply the vertical strain analog. In Triaxial (compression), vertical is epsilon 1 if we talk about magnitude of compression?
-        # Let's assume standard math definition: e1 is max eigenvalue.
-
         for ex, ey, ez, exy in zip(xx, yy, zz, xy):
-            # 3D Tensor approximation for available components
-            tensor = np.array([
-                [ex, exy, 0.0],
-                [exy, ey, 0.0],
-                [0.0, 0.0, ez]
-            ])
+            tensor = np.array(
+                [
+                    [ex, exy, 0.0],
+                    [exy, ey, 0.0],
+                    [0.0, 0.0, ez],
+                ]
+            )
             eigenvalues, _ = np.linalg.eigh(tensor)
-            # Principal strains sort from min to max.
-            # e1 usually max.
-            # But earlier sigma_1 was min?
-            # User wants "First Principal Strain (epsilon 1)".
-            # I will return the Maximum eigenvalue (most positive / least compressive).
-            # Unless they mean Major Principal Strain in terms of Compression?
-            # Given text "elongation or contraction", it sounds generic.
-            # I'll return the standard max eigenvalue.
             epsilon_1.append(float(np.max(eigenvalues)))
 
         return epsilon_1

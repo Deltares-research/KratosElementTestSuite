@@ -49,7 +49,17 @@ class MatplotlibPlotter:
                 pass
 
     def triaxial(
-        self, yy, vol, sigma1, sigma3, p_list, q_list, cohesion=None, phi=None
+        self,
+        yy,
+        vol,
+        sigma1,
+        sigma3,
+        p_list,
+        q_list,
+        cohesion=None,
+        phi=None,
+        excess_pore_pressure=None,
+        epsilon_1=None,
     ):
         self._clear()
         # 0: |σ1-σ3| vs εyy
@@ -66,9 +76,23 @@ class MatplotlibPlotter:
         self.plot_mohr_circle_triaxial(
             self.axes[4], sigma1[-1], sigma3[-1], cohesion, phi
         )
+        if len(self.axes) > 5 and excess_pore_pressure and epsilon_1:
+            self.plot_excess_pore_pressure_vs_epsilon_1_triaxial(
+                self.axes[5], epsilon_1, excess_pore_pressure
+            )
 
     def direct_shear(
-        self, gamma_xy, tau_xy, sigma1, sigma3, p_list, q_list, cohesion=None, phi=None
+        self,
+        gamma_xy,
+        tau_xy,
+        sigma1,
+        sigma3,
+        p_list,
+        q_list,
+        cohesion=None,
+        phi=None,
+        excess_pore_pressure=None,
+        epsilon_1=None,
     ):
         self._clear()
         # 0: τ vs γ
@@ -81,6 +105,10 @@ class MatplotlibPlotter:
         self.plot_mohr_circle_direct_shear(
             self.axes[3], sigma1[-1], sigma3[-1], cohesion, phi
         )
+        if len(self.axes) > 4 and excess_pore_pressure and epsilon_1:
+            self.plot_excess_pore_pressure_vs_epsilon_1_triaxial(
+                self.axes[4], epsilon_1, excess_pore_pressure
+            )
 
     def crs(
         self,

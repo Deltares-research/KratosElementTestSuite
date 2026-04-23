@@ -62,11 +62,16 @@ class RunSimulation:
             if type(test_inputs) is TriaxialAndShearSimulationInputs
             else None
         )
+        self.keep_tmp = keep_tmp
+        self.tmp_dir = Path(tempfile.mkdtemp(prefix=f"{self.test_type}_"))
+        self.material_json_path: Optional[Path] = None
+        self.project_json_path: Optional[Path] = None
+        self.mdpa_path: Optional[Path] = None
 
         is_crs_test = isinstance(test_inputs, CRSSimulationInputs)
         is_undrained_triaxial = (
-                self.test_type == "triaxial"
-                and self.drainage == "undrained"
+            self.test_type == "triaxial"
+            and self.drainage == "undrained"
         )
 
         if is_crs_test:
@@ -87,20 +92,13 @@ class RunSimulation:
             )
 
         elif is_undrained_triaxial:
-             self.stage_durations = [1.0, self.end_time]
-             self.step_counts = [None, self.num_steps]
-             self.strain_incs = None
+            self.stage_durations = [1.0, self.end_time]
+            self.step_counts = [100, self.num_steps]
+            self.strain_incs = None
         else:
             self.stage_durations = None
             self.step_counts = None
             self.strain_incs = None
-
-            self.keep_tmp = keep_tmp
-
-            self.tmp_dir = Path(tempfile.mkdtemp(prefix=f"{self.test_type}_"))
-            self.material_json_path: Optional[Path] = None
-            self.project_json_path: Optional[Path] = None
-            self.mdpa_path: Optional[Path] = None
 
     def run(self) -> None:
         self.log(f"Starting {self.test_type} simulation...", "info")
@@ -126,7 +124,12 @@ class RunSimulation:
 
             output_file_strings = [str(p) for p in self._output_file_paths()]
             cohesion, phi = get_cohesion_and_phi(self.material_inputs)
-            collector = ResultCollector(output_file_strings, cohesion, phi)
+            collector = ResultCollector(
+                output_file_strings,
+                cohesion=cohesion,
+                phi=phi,
+                drainage_type=self.drainage or "drained",
+            )
             results = collector.collect_results()
             self.log("Rendering complete.", "info")
             return results
