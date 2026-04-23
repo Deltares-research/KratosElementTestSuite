@@ -40,15 +40,30 @@ class ProjectParameterEditor:
         try:
             data = json.loads(self.raw_text)
 
-            loads_list = data.get("processes", {}).get("loads_process_list", [])
-            for process in loads_list:
-                if process.get("python_module") == module_name and key in process.get(
-                    "Parameters", {}
-                ):
-                    process["Parameters"][key] = new_list
-                    self.raw_text = json.dumps(data, indent=4)
-                    self._write_back()
-                    return
+            process_blocks = []
+            if isinstance(data.get("processes"), dict):
+                process_blocks.append(data["processes"])
+
+            for stage in data.get("stages", {}).values():
+                stage_processes = (
+                    stage.get("stage_settings", {}).get("processes", {})
+                )
+                if isinstance(stage_processes, dict):
+                    process_blocks.append(stage_processes)
+
+            for processes in process_blocks:
+                for process_list in processes.values():
+                    if not isinstance(process_list, list):
+                        continue
+                    for process in process_list:
+                        if (
+                            process.get("python_module") == module_name
+                            and key in process.get("Parameters", {})
+                        ):
+                            process["Parameters"][key] = new_list
+                            self.raw_text = json.dumps(data, indent=4)
+                            self._write_back()
+                            return
 
             self._log(f"Could not find '{key}' under '{module_name}'.", "warn")
 

@@ -241,7 +241,7 @@ class RunSimulation:
 
         editor = ProjectParameterEditor(str(self.project_json_path))
 
-        if "stages" in data:
+        if self._uses_orchestrator_project_parameters(data):
             if self.stage_durations and self.step_counts:
                 if len(self.stage_durations) != len(self.step_counts):
                     raise ValueError(
@@ -261,11 +261,7 @@ class RunSimulation:
                 if len(cumulative_end_times) > 1:
                     editor.update_top_displacement_table_numbers()
         else:
-            time_step = (
-                (self.stage_durations[0] / self.step_counts[0])
-                if self.stage_durations
-                else (self.end_time / self.num_steps)
-            )
+            time_step = self.end_time / self.num_steps
             editor.update_property("time_step", time_step)
             editor.update_property("end_time", self.end_time)
 
@@ -280,10 +276,9 @@ class RunSimulation:
         editor.update_maximum_strain(self.maximum_strain)
         editor.update_end_time(self.end_time)
 
-        if self.stage_durations:
-            if self.step_counts[0] is not None:
-                first_timestep = self.stage_durations[0] / self.step_counts[0]
-                editor.update_first_timestep(first_timestep)
+        if self._current_project_uses_orchestrator_parameters():
+            first_timestep = self.stage_durations[0] / self.step_counts[0]
+            editor.update_first_timestep(first_timestep)
         else:
             first_timestep = self.end_time / self.num_steps
             editor.update_first_timestep(first_timestep)
@@ -302,9 +297,17 @@ class RunSimulation:
         with open(self.project_json_path, "r") as f:
             project_data = json.load(f)
 
-        if "stages" in project_data:
+        if self._uses_orchestrator_project_parameters(project_data):
             return [
                 self.tmp_dir / "gid_output" / f"output_stage{i + 1}.post.res"
                 for i in range(len(project_data["stages"]))
             ]
         return [self.tmp_dir / "gid_output" / "output.post.res"]
+
+    @staticmethod
+    def _uses_orchestrator_project_parameters(project_data: dict) -> bool:
+        return isinstance(project_data.get("stages"), dict)
+
+    def _current_project_uses_orchestrator_parameters(self) -> bool:
+        with open(self.project_json_path, "r") as f:
+            return self._uses_orchestrator_project_parameters(json.load(f))
